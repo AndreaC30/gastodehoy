@@ -1,0 +1,31 @@
+# Imagen oficial: https://hub.docker.com/_/postgres — `postgres:18-alpine` sigue la rama 18.x actual
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: gastodehoy
+      POSTGRES_PASSWORD: gastodehoy
+      POSTGRES_DB: gastodehoy
+    # Postgres 18+: un solo volumen en el directorio padre (no en …/data)
+    # https://github.com/docker-library/postgres/pull/1259
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gastodehoy -d gastodehoy"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://gastodehoy:gastodehoy@db:5432/gastodehoy
+      TIMEZONE: Europe/Madrid
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
