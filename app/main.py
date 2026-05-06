@@ -4,6 +4,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
@@ -15,6 +16,10 @@ from app.config import settings as app_settings
 from app.database import Base
 from app.models import UserSettings
 from app.routers import fixed_expenses, settings, summary, variable_expenses
+
+ROOT = Path(__file__).resolve().parent.parent
+DIST_DIR = ROOT / "web" / "dist"
+ASSETS_DIR = DIST_DIR / "assets"
 
 
 @asynccontextmanager
@@ -40,14 +45,24 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="GastoDeHoy", lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(summary.router)
 app.include_router(settings.router)
 app.include_router(fixed_expenses.router)
 app.include_router(variable_expenses.router)
 
-_static_dir = Path(__file__).resolve().parent.parent / "static"
-if _static_dir.is_dir():
-    app.mount("/assets", StaticFiles(directory=_static_dir), name="assets")
+if ASSETS_DIR.is_dir():
+    app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="vite-assets")
 
 
 @app.get("/health")
@@ -64,11 +79,13 @@ def health() -> JSONResponse:
 
 
 @app.get("/", response_model=None)
-def index() -> FileResponse | JSONResponse:
-    index_path = _static_dir / "index.html"
+def spa_index() -> FileResponse | JSONResponse:
+    index_path = DIST_DIR / "index.html"
     if not index_path.is_file():
         return JSONResponse(
-            status_code=500,
-            content={"detail": "Falta static/index.html"},
+            status_code=503,
+            content={
+                "detail": "Frontend not built. Run: cd web && npm install && npm run build",
+            },
         )
     return FileResponse(index_path)

@@ -10,6 +10,9 @@ services:
     # https://github.com/docker-library/postgres/pull/1259
     volumes:
       - pgdata:/var/lib/postgresql
+    # Para desarrollo local: uvicorn en el host usa localhost:5432 (copia .env.example).
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U gastodehoy -d gastodehoy"]
       interval: 3s
