@@ -1,7 +1,93 @@
 from datetime import date
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+from app.auth import (
+    NAME_MAX_LEN,
+    NAME_MIN_LEN,
+    PASSWORD_MAX_LEN,
+    PASSWORD_MIN_LEN,
+)
+
+
+def _validate_password(value: str) -> str:
+    if not (PASSWORD_MIN_LEN <= len(value) <= PASSWORD_MAX_LEN):
+        raise ValueError(
+            f"La contraseña debe tener entre {PASSWORD_MIN_LEN} y {PASSWORD_MAX_LEN} caracteres"
+        )
+    return value
+
+
+def _validate_name(value: str) -> str:
+    s = value.strip()
+    if not (NAME_MIN_LEN <= len(s) <= NAME_MAX_LEN):
+        raise ValueError(
+            f"El nombre debe tener entre {NAME_MIN_LEN} y {NAME_MAX_LEN} caracteres"
+        )
+    return s
+
+
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    name: str
+    password: str
+
+    @field_validator("name")
+    @classmethod
+    def _name(cls, v: str) -> str:
+        return _validate_name(v)
+
+    @field_validator("password")
+    @classmethod
+    def _pwd(cls, v: str) -> str:
+        return _validate_password(v)
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+    @field_validator("password")
+    @classmethod
+    def _pwd(cls, v: str) -> str:
+        return _validate_password(v)
+
+
+class UserPublic(BaseModel):
+    id: int
+    email: EmailStr
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UpdateName(BaseModel):
+    name: str
+
+    @field_validator("name")
+    @classmethod
+    def _name(cls, v: str) -> str:
+        return _validate_name(v)
+
+
+class ChangePassword(BaseModel):
+    current_password: str
+    new_password: str
+
+    @field_validator("current_password", "new_password")
+    @classmethod
+    def _pwd(cls, v: str) -> str:
+        return _validate_password(v)
+
+
+class DeleteAccount(BaseModel):
+    password: str
+
+    @field_validator("password")
+    @classmethod
+    def _pwd(cls, v: str) -> str:
+        return _validate_password(v)
 
 
 class BudgetSettings(BaseModel):

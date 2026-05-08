@@ -19,13 +19,16 @@ services:
       timeout: 5s
       retries: 30
 
-  web:
+  app:
     build: .
     ports:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+psycopg2://gastodehoy:gastodehoy@db:5432/gastodehoy
-      TIMEZONE: Europe/Madrid
+      TIMEZONE: ${TIMEZONE:-Europe/Madrid}
+      APP_SECRET: ${APP_SECRET:-change-me-in-prod}
+      SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-30}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
     depends_on:
       db:
         condition: service_healthy

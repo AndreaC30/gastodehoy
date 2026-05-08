@@ -1,0 +1,14 @@
+# Reverse proxy con HTTPS automático (Let's Encrypt).
+# Define SITE_DOMAIN y ACME_EMAIL en .env antes de levantar el perfil prod.
+{
+    email {$ACME_EMAIL}
+}
+
+{$SITE_DOMAIN} {
+    encode zstd gzip
+
+    # HSTS: tras la primera visita, el navegador exige HTTPS durante 1 año.
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    reverse_proxy app:8000
+}

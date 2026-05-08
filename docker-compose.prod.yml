@@ -1,0 +1,45 @@
+# Overlay para producción: HTTPS por Caddy + cookies seguras.
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Requiere en .env:
+#   SITE_DOMAIN=gastos.tudominio.com
+#   ACME_EMAIL=tu-email@ejemplo.com
+#   APP_SECRET=<algo-largo-y-aleatorio>
+#   COOKIE_SECURE=true
+services:
+  db:
+    # No publicamos 5432 en producción.
+    ports: []
+
+  app:
+    # Solo expuesto a la red interna; Caddy hace de puerta.
+    ports: []
+    environment:
+      DATABASE_URL: postgresql+psycopg2://gastodehoy:gastodehoy@db:5432/gastodehoy
+      TIMEZONE: ${TIMEZONE:-Europe/Madrid}
+      APP_SECRET: ${APP_SECRET}
+      SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-30}
+      COOKIE_SECURE: "true"
+      COOKIE_DOMAIN: ${SITE_DOMAIN}
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -28,3 +28,9 @@ export type VariableExpense = {
   occurred_at: string;
   note: string | null;
 };
+
+export type User = {
+  id: number;
+  email: string;
+  name: string;
+};

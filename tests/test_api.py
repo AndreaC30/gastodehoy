@@ -1,16 +1,116 @@
-"""Contrato HTTP (TestClient + misma DB SQLite que conftest)."""
+"""Contrato HTTP con cookie HttpOnly."""
 
 from __future__ import annotations
 
 from decimal import Decimal
 
 
-def test_health(client) -> None:
-    r = client.get("/health")
+def test_health(anon_client) -> None:
+    r = anon_client.get("/health")
     assert r.status_code == 200
     body = r.json()
     assert body.get("status") == "ok"
     assert body.get("database") == "ok"
+
+
+def test_protected_endpoints_require_auth(anon_client) -> None:
+    assert anon_client.get("/api/summary").status_code == 401
+    assert anon_client.get("/api/settings").status_code == 401
+    assert anon_client.get("/api/fixed-expenses").status_code == 401
+    assert anon_client.get("/api/expenses").status_code == 401
+    assert anon_client.get("/api/auth/me").status_code == 401
+
+
+def test_register_sets_cookie_and_me_works(anon_client) -> None:
+    r = anon_client.post(
+        "/api/auth/register",
+        json={
+            "email": "Pablo@Example.com",
+            "name": "Pablo",
+            "password": "supersecret1",
+        },
+    )
+    assert r.status_code == 201
+    body = r.json()
+    assert body["email"] == "pablo@example.com"
+    assert body["name"] == "Pablo"
+
+    me = anon_client.get("/api/auth/me")
+    assert me.status_code == 200
+    assert me.json()["email"] == "pablo@example.com"
+
+
+def test_register_duplicate_email_conflicts(anon_client) -> None:
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "ana@example.com", "name": "Ana", "password": "supersecret1"},
+    )
+    dup = anon_client.post(
+        "/api/auth/register",
+        json={"email": "ANA@EXAMPLE.com", "name": "Ana 2", "password": "supersecret1"},
+    )
+    assert dup.status_code == 409
+
+
+def test_login_and_logout_cycle(anon_client) -> None:
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "u@e.com", "name": "U", "password": "supersecret1"},
+    )
+    anon_client.post("/api/auth/logout")
+    assert anon_client.get("/api/auth/me").status_code == 401
+
+    bad = anon_client.post(
+        "/api/auth/login",
+        json={"email": "u@e.com", "password": "wrong-password"},
+    )
+    assert bad.status_code == 401
+
+    ok = anon_client.post(
+        "/api/auth/login",
+        json={"email": "U@E.com", "password": "supersecret1"},
+    )
+    assert ok.status_code == 200
+    assert anon_client.get("/api/auth/me").status_code == 200
+
+
+def test_login_rate_limit(anon_client) -> None:
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "r@e.com", "name": "R", "password": "supersecret1"},
+    )
+    anon_client.post("/api/auth/logout")
+    for _ in range(5):
+        anon_client.post(
+            "/api/auth/login",
+            json={"email": "r@e.com", "password": "wrong-password"},
+        )
+    blocked = anon_client.post(
+        "/api/auth/login",
+        json={"email": "r@e.com", "password": "supersecret1"},
+    )
+    assert blocked.status_code == 429
+
+
+def test_users_are_isolated(anon_client) -> None:
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "a@e.com", "name": "A", "password": "supersecret1"},
+    )
+    anon_client.put(
+        "/api/settings", json={"monthly_income": "1000.00", "savings_percent": "10"}
+    )
+    anon_client.post("/api/expenses", json={"amount": "50.00"})
+    anon_client.post("/api/auth/logout")
+
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "b@e.com", "name": "B", "password": "supersecret1"},
+    )
+    s = anon_client.get("/api/summary").json()
+    assert Decimal(str(s["monthly_income"])) == Decimal("0")
+    assert Decimal(str(s["variable_spent_month"])) == Decimal("0")
+    assert anon_client.get("/api/expenses").json() == []
 
 
 def test_summary_defaults(client) -> None:
@@ -48,10 +148,7 @@ def test_add_variable_expense_updates_summary(client) -> None:
         "/api/settings",
         json={"monthly_income": "900.00", "savings_percent": "0"},
     )
-    r = client.post(
-        "/api/expenses",
-        json={"amount": "100.00"},
-    )
+    r = client.post("/api/expenses", json={"amount": "100.00"})
     assert r.status_code == 200
 
     s = client.get("/api/summary")
@@ -69,3 +166,25 @@ def test_delete_variable_expense(client) -> None:
 
     s = client.get("/api/summary")
     assert Decimal(str(s.json()["variable_spent_month"])) == Decimal("0")
+
+
+def test_change_password_flow(anon_client) -> None:
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "c@e.com", "name": "C", "password": "supersecret1"},
+    )
+    bad = anon_client.put(
+        "/api/auth/me/password",
+        json={"current_password": "wrong-password", "new_password": "newsecret1"},
+    )
+    assert bad.status_code == 401
+    ok = anon_client.put(
+        "/api/auth/me/password",
+        json={"current_password": "supersecret1", "new_password": "newsecret1"},
+    )
+    assert ok.status_code == 204
+    anon_client.post("/api/auth/logout")
+    relog = anon_client.post(
+        "/api/auth/login", json={"email": "c@e.com", "password": "newsecret1"}
+    )
+    assert relog.status_code == 200

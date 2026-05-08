@@ -13,6 +13,26 @@ class Settings(BaseSettings):
         default="Europe/Madrid",
         validation_alias=AliasChoices("TIMEZONE", "TZ"),
     )
+    app_secret: str = Field(
+        default="change-me-in-prod",
+        validation_alias=AliasChoices("APP_SECRET"),
+        description="Clave para firmar la cookie de sesión. Cámbiala en producción.",
+    )
+    session_ttl_days: int = Field(
+        default=30,
+        ge=1,
+        le=365,
+        validation_alias=AliasChoices("SESSION_TTL_DAYS"),
+    )
+    cookie_secure: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("COOKIE_SECURE"),
+        description="True en producción tras HTTPS (Caddy). False en dev.",
+    )
+    cookie_domain: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("COOKIE_DOMAIN"),
+    )
 
 
 settings = Settings()

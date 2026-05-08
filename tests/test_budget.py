@@ -1,4 +1,4 @@
-"""Lógica de negocio del presupuesto (sin HTTP)."""
+"""Lógica del presupuesto (sin HTTP)."""
 
 from __future__ import annotations
 
@@ -9,15 +9,15 @@ from app.models import FixedExpense, UserSettings, VariableExpense
 from app.services.budget import compute_summary
 
 
-def test_compute_summary_mid_month_no_spending(db_session) -> None:
-    us = db_session.get(UserSettings, 1)
-    assert us is not None
+def test_compute_summary_mid_month_no_spending(db_session, user) -> None:
+    us = user.settings
+    assert isinstance(us, UserSettings)
     us.monthly_income = Decimal("3000.00")
     us.savings_percent = Decimal("10.00")
     db_session.commit()
 
     ref = date(2026, 5, 15)
-    out = compute_summary(db_session, ref)
+    out = compute_summary(db_session, user.id, ref)
 
     assert out["reference_date"] == ref
     assert out["days_remaining_in_month"] == 17
@@ -29,17 +29,24 @@ def test_compute_summary_mid_month_no_spending(db_session) -> None:
     assert out["suggested_spend_today"] == expected_daily
 
 
-def test_compute_summary_with_fixed_and_variable(db_session) -> None:
-    us = db_session.get(UserSettings, 1)
-    assert us is not None
+def test_compute_summary_with_fixed_and_variable(db_session, user) -> None:
+    us = user.settings
     us.monthly_income = Decimal("2000.00")
     us.savings_percent = Decimal("0")
-    db_session.add(FixedExpense(name="Alquiler", amount=Decimal("800.00")))
-    db_session.add(VariableExpense(amount=Decimal("100.00"), occurred_at=date(2026, 5, 10)))
+    db_session.add(
+        FixedExpense(user_id=user.id, name="Alquiler", amount=Decimal("800.00"))
+    )
+    db_session.add(
+        VariableExpense(
+            user_id=user.id,
+            amount=Decimal("100.00"),
+            occurred_at=date(2026, 5, 10),
+        )
+    )
     db_session.commit()
 
     ref = date(2026, 5, 6)
-    out = compute_summary(db_session, ref)
+    out = compute_summary(db_session, user.id, ref)
 
     assert out["monthly_budget_after_fixed_and_savings"] == Decimal("1200.00")
     assert out["variable_spent_month"] == Decimal("100.00")
@@ -47,16 +54,20 @@ def test_compute_summary_with_fixed_and_variable(db_session) -> None:
     assert out["days_remaining_in_month"] == 26
 
 
-def test_compute_summary_over_budget_negative_suggested(db_session) -> None:
-    us = db_session.get(UserSettings, 1)
-    assert us is not None
+def test_compute_summary_over_budget_negative_suggested(db_session, user) -> None:
+    us = user.settings
     us.monthly_income = Decimal("1000.00")
     us.savings_percent = Decimal("0")
-    db_session.commit()
-    db_session.add(VariableExpense(amount=Decimal("1500.00"), occurred_at=date(2026, 3, 1)))
+    db_session.add(
+        VariableExpense(
+            user_id=user.id,
+            amount=Decimal("1500.00"),
+            occurred_at=date(2026, 3, 1),
+        )
+    )
     db_session.commit()
 
-    out = compute_summary(db_session, date(2026, 3, 5))
+    out = compute_summary(db_session, user.id, date(2026, 3, 5))
 
     assert out["remaining_this_month"] < 0
     assert out["suggested_spend_today"] < 0

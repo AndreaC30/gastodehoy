@@ -3,7 +3,6 @@ from datetime import date
 from decimal import Decimal
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import FixedExpense, UserSettings, VariableExpense
@@ -21,34 +20,31 @@ def days_remaining_in_month(reference: date) -> int:
     return (end - reference).days + 1
 
 
-def compute_summary(session: Session, reference: date) -> dict:
-    us = session.get(UserSettings, 1)
+def compute_summary(session: Session, user_id: int, reference: date) -> dict:
+    us = session.scalar(
+        select(UserSettings).where(UserSettings.user_id == user_id)
+    )
     if us is None:
-        session.add(
-            UserSettings(
-                id=1,
-                monthly_income=Decimal("0"),
-                savings_percent=Decimal("0"),
-            )
-        )
-        try:
-            session.commit()
-        except IntegrityError:
-            session.rollback()
-        us = session.get(UserSettings, 1)
-        if us is None:
-            raise RuntimeError("No se pudo inicializar la configuración (id=1)")
+        us = UserSettings(user_id=user_id)
+        session.add(us)
+        session.commit()
+        session.refresh(us)
 
     income = us.monthly_income
     pct = us.savings_percent
     savings_amount = (income * pct / Decimal("100")).quantize(Decimal("0.01"))
 
-    fixed_total = session.scalar(select(func.coalesce(func.sum(FixedExpense.amount), 0))) or Decimal("0")
+    fixed_total = session.scalar(
+        select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(
+            FixedExpense.user_id == user_id
+        )
+    ) or Decimal("0")
     fixed_total = Decimal(fixed_total).quantize(Decimal("0.01"))
 
     month_start, month_end = month_bounds(reference)
     variable_spent = session.scalar(
         select(func.coalesce(func.sum(VariableExpense.amount), 0)).where(
+            VariableExpense.user_id == user_id,
             VariableExpense.occurred_at >= month_start,
             VariableExpense.occurred_at <= month_end,
         )

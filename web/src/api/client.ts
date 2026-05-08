@@ -1,13 +1,30 @@
-/** Same-origin en prod; en dev Vite proxies /api. */
+import { setAnonymous } from "@/auth";
+
+export class UnauthorizedError extends Error {
+  constructor(message = "Sesión caducada") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
+/** Same-origin en prod; en dev Vite proxy /api con la cookie. */
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+
   const res = await fetch(path, {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...init?.headers,
-    },
+    credentials: "include",
     ...init,
+    headers: { ...headers, ...(init?.headers as Record<string, string>) },
   });
+
+  if (res.status === 401) {
+    setAnonymous();
+    throw new UnauthorizedError();
+  }
+
   if (!res.ok) {
     let detail = res.statusText;
     try {

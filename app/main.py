@@ -8,14 +8,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
 from app import database as db
 from app.config import settings as app_settings
 from app.database import Base
-from app.models import UserSettings
-from app.routers import fixed_expenses, settings, summary, variable_expenses
+from app.routers import (
+    auth,
+    fixed_expenses,
+    settings,
+    summary,
+    variable_expenses,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST_DIR = ROOT / "web" / "dist"
@@ -32,14 +35,6 @@ async def lifespan(_: FastAPI):
         ) from e
 
     Base.metadata.create_all(bind=db.engine)
-
-    with Session(db.engine) as session:
-        if session.get(UserSettings, 1) is None:
-            session.add(UserSettings(id=1))
-            try:
-                session.commit()
-            except IntegrityError:
-                session.rollback()
     yield
 
 
@@ -56,6 +51,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(summary.router)
 app.include_router(settings.router)
 app.include_router(fixed_expenses.router)

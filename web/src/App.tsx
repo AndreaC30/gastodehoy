@@ -1,8 +1,26 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useState } from "react";
+import {
+  type FormEvent,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { GravityStarsBackground } from "@/components/animate-ui/backgrounds/gravity-stars";
+import { LoginScreen } from "@/components/login-screen";
+import {
+  setAnonymous,
+  setUser as setAuthUser,
+  snapshot,
+  subscribe,
+} from "@/auth";
 import { api } from "./api/client";
-import type { FixedExpense, Settings, Summary, VariableExpense } from "./api/types";
+import type {
+  FixedExpense,
+  Settings,
+  Summary,
+  User,
+  VariableExpense,
+} from "./api/types";
 import { money, savingsLabel } from "./lib/format";
 
 async function loadSummary() {
@@ -18,7 +36,69 @@ async function loadExpenses() {
   return api<VariableExpense[]>("/api/expenses");
 }
 
+const Background = (
+  <GravityStarsBackground
+    className="pointer-events-none fixed inset-0 z-0 min-h-screen"
+    starsCount={70}
+    glowIntensity={13}
+    starsOpacity={0.5}
+    movementSpeed={0.25}
+  />
+);
+
+async function logout() {
+  try {
+    await api<void>("/api/auth/logout", { method: "POST" });
+  } catch {
+    /* ignore */
+  } finally {
+    setAnonymous();
+  }
+}
+
 export default function App() {
+  const auth = useSyncExternalStore(subscribe, snapshot);
+
+  useEffect(() => {
+    if (auth.status !== "loading") return;
+    let alive = true;
+    (async () => {
+      try {
+        const u = await api<User>("/api/auth/me");
+        if (alive) setAuthUser(u);
+      } catch {
+        if (alive) setAnonymous();
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [auth.status]);
+
+  if (auth.status === "loading") {
+    return (
+      <div className="relative min-h-screen overflow-x-hidden bg-slate-950 text-slate-100">
+        {Background}
+        <div className="relative z-10 flex min-h-screen items-center justify-center text-sm text-slate-500">
+          Cargando…
+        </div>
+      </div>
+    );
+  }
+
+  if (auth.status === "anon" || !auth.user) {
+    return (
+      <div className="relative min-h-screen overflow-x-hidden bg-slate-950 bg-[radial-gradient(ellipse_900px_500px_at_50%_-20%,rgba(94,234,212,0.12),transparent_55%)] text-slate-100">
+        {Background}
+        <LoginScreen />
+      </div>
+    );
+  }
+
+  return <Dashboard profileName={auth.user.name} />;
+}
+
+function Dashboard({ profileName }: { profileName: string }) {
   const qc = useQueryClient();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
@@ -146,21 +226,32 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-slate-950 bg-[radial-gradient(ellipse_900px_500px_at_50%_-20%,rgba(94,234,212,0.12),transparent_55%)] text-slate-100">
-      <GravityStarsBackground
-        className="pointer-events-none fixed inset-0 z-0 min-h-screen"
-        starsCount={70}
-        glowIntensity={13}
-        starsOpacity={0.5}
-        movementSpeed={0.25}
-      />
+      {Background}
       <header className="relative z-10 border-b border-slate-800/80 px-4 py-7">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-            Gasto<span className="font-semibold text-slate-500">De</span>Hoy
-          </h1>
-          <p className="mt-1 max-w-md text-slate-400">
-            Tu margen para hoy, claro y al instante.
-          </p>
+        <div className="mx-auto flex max-w-4xl items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+              Gasto<span className="font-semibold text-slate-500">De</span>Hoy
+            </h1>
+            <p className="mt-1 max-w-md text-slate-400">
+              Tu margen para hoy, claro y al instante.
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs uppercase tracking-widest text-slate-500">
+              Perfil
+            </p>
+            <p className="mt-0.5 text-sm font-semibold text-teal-300">
+              {profileName}
+            </p>
+            <button
+              type="button"
+              onClick={() => void logout()}
+              className="mt-1 text-xs font-medium text-slate-500 underline decoration-slate-700 underline-offset-4 hover:text-slate-300"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </header>
 
