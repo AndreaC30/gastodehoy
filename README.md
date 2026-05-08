@@ -8,7 +8,9 @@ Construido con **FastAPI** (Python), **SQLite** (un archivo en `./data/`), **Rea
 
 ## 1. Probarla en tu ordenador
 
-Solo necesitas **Docker**. Tres comandos:
+Solo necesitas **Docker**.
+
+### Levantarla
 
 ```bash
 git clone <url> gastodehoy
@@ -19,14 +21,27 @@ docker compose up -d --build
 
 Abre **http://localhost:8000** y crea tu cuenta. La pantalla te enseñará **una sola vez** un código de recuperación tipo `gdh-xxxx-xxxx-xxxx-xxxx`. Cópialo a tu gestor de contraseñas; te servirá si algún día olvidas tu contraseña.
 
-Tus datos viven en `./data/gastodehoy.db` (un único archivo SQLite). Si quieres empezar de cero, para los contenedores y bórralo:
+### Bajarla (sin borrar datos)
+
+```bash
+docker compose down
+```
+
+Cuando vuelvas a hacer `docker compose up -d`, tu cuenta y tus gastos siguen ahí.
+
+### Borrar la BBDD y empezar de cero
+
+Tus datos viven en un único archivo SQLite en `./data/gastodehoy.db` (más sus laterales `*-wal` y `*-shm` mientras la app está abierta). Para limpiarlo todo:
 
 ```bash
 docker compose down
 rm -rf data
+docker compose up -d --build
 ```
 
-¿No arranca? Mira los logs:
+> Importante: `docker compose down -v` **no borra** estos datos. Esa opción borra "volúmenes con nombre" de Docker (lo que usaba la versión vieja con Postgres). SQLite vive en una carpeta tuya del host, así que para borrarla hace falta `rm -rf data` explícitamente.
+
+### ¿No arranca?
 
 ```bash
 docker compose logs --tail=200 app
@@ -121,9 +136,12 @@ Los backups se guardan en `./backups/` como `gastodehoy-YYYYMMDDTHHMMSSZ.db.gz`.
 
 ```bash
 docker compose stop app
+rm -f data/gastodehoy.db data/gastodehoy.db-wal data/gastodehoy.db-shm
 gunzip -c backups/gastodehoy-XXXX.db.gz > data/gastodehoy.db
 docker compose start app
 ```
+
+> El borrado de `*-wal` y `*-shm` antes de restaurar es importante: son archivos auxiliares de SQLite y, si quedan de la BBDD vieja, pueden corromper la nueva al arrancar.
 
 ### Actualizar a una versión nueva
 
