@@ -1,3 +1,12 @@
+/**
+ * Top-level React component.
+ *
+ * Decides what to render based on the auth store:
+ *   loading -> a "Cargando…" splash while we ask `/api/auth/me`
+ *   anon    -> the LoginScreen
+ *   auth    -> Authed, which routes to either the OnboardingWizard
+ *              (when monthly_income is still 0) or the Dashboard.
+ */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   type FormEvent,
@@ -7,6 +16,8 @@ import {
 } from "react";
 import { GravityStarsBackground } from "@/components/animate-ui/backgrounds/gravity-stars";
 import { LoginScreen } from "@/components/login-screen";
+import { OnboardingWizard } from "@/components/onboarding-wizard";
+import { SettingsModal } from "@/components/settings-modal";
 import {
   setAnonymous,
   setUser as setAuthUser,
@@ -46,6 +57,7 @@ const Background = (
   />
 );
 
+/** Best-effort logout: hit the API and switch the local auth state. */
 async function logout() {
   try {
     await api<void>("/api/auth/logout", { method: "POST" });
@@ -56,6 +68,7 @@ async function logout() {
   }
 }
 
+/** Root component. See module header for the rendering decision tree. */
 export default function App() {
   const auth = useSyncExternalStore(subscribe, snapshot);
 
@@ -95,12 +108,63 @@ export default function App() {
     );
   }
 
-  return <Dashboard profileName={auth.user.name} />;
+  return <Authed userName={auth.user.name} />;
 }
 
+/**
+ * Authenticated shell. Reads settings once and routes to the wizard or
+ * the dashboard depending on whether the user has set their income.
+ */
+function Authed({ userName }: { userName: string }) {
+  const settingsQ = useQuery({ queryKey: ["settings"], queryFn: loadSettings });
+  // Skip explícito por si el usuario aún no tiene ingreso pero quiere mirar la app.
+  const [skipped, setSkipped] = useState(false);
+  const qc = useQueryClient();
+
+  if (settingsQ.isPending) {
+    return (
+      <div className="relative min-h-screen overflow-x-hidden bg-slate-950 text-slate-100">
+        {Background}
+        <div className="relative z-10 flex min-h-screen items-center justify-center text-sm text-slate-500">
+          Cargando…
+        </div>
+      </div>
+    );
+  }
+
+  const needsOnboarding =
+    !skipped &&
+    settingsQ.data != null &&
+    Number(settingsQ.data.monthly_income) <= 0;
+
+  if (needsOnboarding) {
+    return (
+      <div className="relative min-h-screen overflow-x-hidden bg-slate-950 bg-[radial-gradient(ellipse_900px_500px_at_50%_-20%,rgba(94,234,212,0.12),transparent_55%)] text-slate-100">
+        {Background}
+        <OnboardingWizard
+          userName={userName}
+          onSkip={() => setSkipped(true)}
+          onDone={() => {
+            void qc.invalidateQueries();
+            setSkipped(false);
+          }}
+        />
+      </div>
+    );
+  }
+
+  return <Dashboard profileName={userName} />;
+}
+
+/**
+ * Main app screen. Shows the daily budget hero plus lists of fixed and
+ * variable expenses with their CRUD forms; settings are accessible
+ * through the gear button in the header.
+ */
 function Dashboard({ profileName }: { profileName: string }) {
   const qc = useQueryClient();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     if (!toastMsg) return;
@@ -128,22 +192,6 @@ function Dashboard({ profileName }: { profileName: string }) {
           q.queryKey[0] as string,
         ),
     });
-
-  const saveSettings = useMutation({
-    mutationFn: (body: Settings) =>
-      api<Settings>("/api/settings", {
-        method: "PUT",
-        body: JSON.stringify({
-          monthly_income: body.monthly_income,
-          savings_percent: body.savings_percent,
-        }),
-      }),
-    onSuccess: () => {
-      setToastMsg("Configuración guardada");
-      void invalidateAll();
-    },
-    onError: (e: Error) => setToastMsg(e.message),
-  });
 
   const addFixed = useMutation({
     mutationFn: (body: { name: string; amount: string }) =>
@@ -194,15 +242,6 @@ function Dashboard({ profileName }: { profileName: string }) {
   const summary = summaryQ.data;
   const settings = settingsQ.data;
 
-  function onSettingsSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    saveSettings.mutate({
-      monthly_income: String(fd.get("monthly_income") ?? ""),
-      savings_percent: String(fd.get("savings_percent") ?? ""),
-    });
-  }
-
   function onFixedSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -244,13 +283,22 @@ function Dashboard({ profileName }: { profileName: string }) {
             <p className="mt-0.5 text-sm font-semibold text-teal-300">
               {profileName}
             </p>
-            <button
-              type="button"
-              onClick={() => void logout()}
-              className="mt-1 text-xs font-medium text-slate-500 underline decoration-slate-700 underline-offset-4 hover:text-slate-300"
-            >
-              Cerrar sesión
-            </button>
+            <div className="mt-1 flex items-center justify-end gap-3 text-xs">
+              <button
+                type="button"
+                onClick={() => setShowSettings(true)}
+                className="font-medium text-slate-400 hover:text-teal-300"
+              >
+                ⚙ Ajustes
+              </button>
+              <button
+                type="button"
+                onClick={() => void logout()}
+                className="font-medium text-slate-500 underline decoration-slate-700 underline-offset-4 hover:text-slate-300"
+              >
+                Cerrar sesión
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -294,7 +342,11 @@ function Dashboard({ profileName }: { profileName: string }) {
                 label="Ahorro reservado"
                 value={
                   summary
-                    ? savingsLabel(summary.savings_amount, summary.savings_percent)
+                    ? savingsLabel(
+                        summary.savings_amount,
+                        summary.savings_percent,
+                        summary.savings_mode,
+                      )
                     : "—"
                 }
               />
@@ -327,121 +379,68 @@ function Dashboard({ profileName }: { profileName: string }) {
           </p>
         </section>
 
-        <div className="grid gap-5 lg:grid-cols-2">
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
-            <div className="border-b border-slate-800 px-5 py-4">
-              <h2 className="text-lg font-bold tracking-tight">Configuración</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Base de tu mes: ingreso y % que apartas
-              </p>
-            </div>
-            <form className="space-y-4 p-5" onSubmit={onSettingsSubmit}>
-              <label className="block text-sm font-medium text-slate-400">
-                Ingreso mensual (€)
-                <input
-                  name="monthly_income"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  required
-                  defaultValue={
-                    settings ? String(settings.monthly_income) : ""
-                  }
-                  key={settings ? String(settings.monthly_income) : "i"}
-                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-slate-100 outline-none ring-sky-500/40 focus:border-sky-500/50 focus:ring-2"
-                />
-              </label>
-              <label className="block text-sm font-medium text-slate-400">
-                % destinado al ahorro
-                <input
-                  name="savings_percent"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  max={100}
-                  required
-                  defaultValue={
-                    settings ? String(settings.savings_percent) : ""
-                  }
-                  key={settings ? String(settings.savings_percent) : "s"}
-                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
-                />
-              </label>
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
+          <div className="border-b border-slate-800 px-5 py-4">
+            <h2 className="text-lg font-bold tracking-tight">Gastos fijos</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Lo que pagas igual cada mes
+            </p>
+          </div>
+          <div className="p-5">
+            <p className="mb-4 text-sm text-slate-500">
+              Vivienda, seguros, suscripciones… suman aquí.
+            </p>
+            <form
+              className="flex flex-wrap gap-2"
+              onSubmit={onFixedSubmit}
+            >
+              <input
+                name="name"
+                placeholder="Ej. Alquiler"
+                required
+                className="min-w-[120px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              />
+              <input
+                name="amount"
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min={0}
+                placeholder="€"
+                required
+                className="w-28 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              />
               <button
                 type="submit"
-                disabled={saveSettings.isPending}
-                className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-teal-500/20 hover:brightness-110 disabled:opacity-60"
+                disabled={addFixed.isPending}
+                className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
               >
-                Guardar
+                Añadir
               </button>
             </form>
-          </section>
-
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
-            <div className="border-b border-slate-800 px-5 py-4">
-              <h2 className="text-lg font-bold tracking-tight">Gastos fijos</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Lo que pagas igual cada mes
-              </p>
-            </div>
-            <div className="p-5">
-              <p className="mb-4 text-sm text-slate-500">
-                Vivienda, seguros, suscripciones… suman aquí.
-              </p>
-              <form
-                className="flex flex-wrap gap-2"
-                onSubmit={onFixedSubmit}
-              >
-                <input
-                  name="name"
-                  placeholder="Ej. Alquiler"
-                  required
-                  className="min-w-[120px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
-                />
-                <input
-                  name="amount"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  placeholder="€"
-                  required
-                  className="w-28 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
-                />
-                <button
-                  type="submit"
-                  disabled={addFixed.isPending}
-                  className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+            <ul className="mt-4 space-y-2">
+              {(fixedQ.data ?? []).map((it) => (
+                <li
+                  key={it.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
                 >
-                  Añadir
-                </button>
-              </form>
-              <ul className="mt-4 space-y-2">
-                {(fixedQ.data ?? []).map((it) => (
-                  <li
-                    key={it.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
+                  <div>
+                    <p className="font-semibold text-slate-200">{it.name}</p>
+                    <p className="text-sm text-slate-500">{money(it.amount)}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => delFixed.mutate(it.id)}
+                    disabled={delFixed.isPending}
+                    className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
                   >
-                    <div>
-                      <p className="font-semibold text-slate-200">{it.name}</p>
-                      <p className="text-sm text-slate-500">{money(it.amount)}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => delFixed.mutate(it.id)}
-                      disabled={delFixed.isPending}
-                      className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
-                    >
-                      Quitar
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-        </div>
+                    Quitar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
 
         <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
           <div className="border-b border-slate-800 px-5 py-4">
@@ -527,6 +526,18 @@ function Dashboard({ profileName }: { profileName: string }) {
         </footer>
       </main>
 
+      {showSettings && settings && (
+        <SettingsModal
+          initial={settings}
+          onClose={() => setShowSettings(false)}
+          onSaved={() => {
+            setShowSettings(false);
+            setToastMsg("Ajustes guardados");
+            void invalidateAll();
+          }}
+        />
+      )}
+
       <div
         className={`pointer-events-none fixed bottom-5 left-4 right-4 z-50 mx-auto max-w-md rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-center text-sm text-slate-100 shadow-2xl transition-all duration-200 ${
           toastMsg
@@ -542,6 +553,7 @@ function Dashboard({ profileName }: { profileName: string }) {
   );
 }
 
+/** Compact metric tile used inside the dashboard hero grid. */
 function Metric({
   label,
   value,

@@ -1,8 +1,16 @@
+"""Application settings loaded from the environment / ``.env`` file.
+
+Pydantic-Settings validates and normalises the values, and exposes a
+single module-level ``settings`` instance imported from elsewhere.
+"""
+
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Strongly-typed view of the environment variables we care about."""
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = Field(

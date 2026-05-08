@@ -1,3 +1,10 @@
+/**
+ * React entry point.
+ *
+ * Mounts <App /> inside React Query's provider with a single shared
+ * client. We keep retries low (one extra try) and refetch on focus so
+ * the dashboard auto-syncs when you come back to the tab.
+ */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

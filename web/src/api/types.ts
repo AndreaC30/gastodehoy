@@ -1,7 +1,18 @@
+/**
+ * Wire-format types shared between the API client and components.
+ *
+ * Numeric fields can come back from FastAPI either as numbers or as
+ * strings (Decimal serialisation), hence the `string | number` unions.
+ */
+
+/** How the user wants their savings computed each month. */
+export type SavingsMode = "percent" | "fixed";
+
 export type Summary = {
   reference_date: string;
   days_remaining_in_month: number;
   monthly_income: string | number;
+  savings_mode: SavingsMode;
   savings_percent: string | number;
   savings_amount: string | number;
   fixed_expenses_total: string | number;
@@ -13,7 +24,9 @@ export type Summary = {
 
 export type Settings = {
   monthly_income: string | number;
+  savings_mode: SavingsMode;
   savings_percent: string | number;
+  savings_amount: string | number;
 };
 
 export type FixedExpense = {
@@ -33,4 +46,13 @@ export type User = {
   id: number;
   email: string;
   name: string;
+};
+
+export type RegisterResponse = {
+  user: User;
+  recovery_code: string;
+};
+
+export type RecoverResponse = {
+  recovery_code: string;
 };

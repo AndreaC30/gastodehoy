@@ -1,3 +1,10 @@
+"""SQLAlchemy ORM models.
+
+A single ``User`` owns one ``UserSettings`` row plus N ``FixedExpense``
+and ``VariableExpense`` rows. Every relationship cascades on delete so
+removing a user cleans up everything they own.
+"""
+
 from datetime import date, datetime
 from decimal import Decimal
 
@@ -8,6 +15,8 @@ from app.database import Base
 
 
 class User(Base):
+    """Account: email + bcrypt password + recovery code."""
+
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -27,6 +36,9 @@ class User(Base):
     password_changed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    # Hash bcrypt del código de recuperación de un solo uso. NULL si no hay
+    # código activo (se invalida al usarse hasta generar uno nuevo).
+    recovery_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     settings: Mapped["UserSettings"] = relationship(
         back_populates="user",
@@ -44,6 +56,8 @@ class User(Base):
 
 
 class UserSettings(Base):
+    """Per-user budget configuration (income + savings rule)."""
+
     __tablename__ = "user_settings"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -55,14 +69,24 @@ class UserSettings(Base):
     monthly_income: Mapped[Decimal] = mapped_column(
         Numeric(14, 2), default=Decimal("0"), nullable=False
     )
+    # "percent" => savings = income * savings_percent / 100
+    # "fixed"   => savings = savings_amount (independiente del ingreso)
+    savings_mode: Mapped[str] = mapped_column(
+        String(16), default="percent", nullable=False
+    )
     savings_percent: Mapped[Decimal] = mapped_column(
         Numeric(5, 2), default=Decimal("0"), nullable=False
+    )
+    savings_amount: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2), default=Decimal("0"), nullable=False
     )
 
     user: Mapped[User] = relationship(back_populates="settings")
 
 
 class FixedExpense(Base):
+    """Recurring monthly expense (rent, subscriptions...)."""
+
     __tablename__ = "fixed_expenses"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -78,6 +102,8 @@ class FixedExpense(Base):
 
 
 class VariableExpense(Base):
+    """One-off / day-to-day expense, dated."""
+
     __tablename__ = "variable_expenses"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)

@@ -71,10 +71,22 @@ cd web && npm install && npm run build
 - Login con **email + contraseña**, contraseña con **bcrypt** (sin texto plano en BD).
 - Sesión por cookie firmada **`HttpOnly; SameSite=Lax`**; `Secure` se activa solo en producción (`COOKIE_SECURE=true`).
 - **Refusal-to-start** si `COOKIE_SECURE=true` con `APP_SECRET` por defecto o más corto de 32 caracteres.
-- Rate limit en `/api/auth/login`: 5 intentos por IP cada 5 minutos → `429`.
-- **Cambio de contraseña invalida sesiones previas** (`password_changed_at` + comprobación al decodificar la cookie).
+- Rate limit en `/api/auth/login` y `/api/auth/recover`: 5 intentos por IP cada 5 minutos → `429`.
+- **Cambio o reset de contraseña invalida sesiones previas** (`password_changed_at` + comprobación al decodificar la cookie). Tras cambio o reset el usuario debe volver a entrar.
 - Cada cuenta solo ve sus datos; los IDs de otras cuentas devuelven `404`.
 - Cabeceras de hardening en Caddy: HSTS, CSP, `X-Content-Type-Options`, `X-Frame-Options=DENY`, `Referrer-Policy`, `Permissions-Policy`, sin cabecera `Server`.
+
+### Recuperación de contraseña
+
+- Al registrarte la app te muestra **una sola vez** un código tipo `gdh-xxxx-xxxx-xxxx-xxxx`. Guárdalo en tu gestor de contraseñas o en papel; en BD se almacena solo su hash bcrypt.
+- Si olvidas tu contraseña, en la pantalla de login tienes **He olvidado mi contraseña**: pides email + código y eliges una nueva. El código es de **un solo uso**: al usarlo se te entrega uno nuevo.
+- Si pierdes a la vez la contraseña y el código, el admin puede resetearlo desde el host:
+
+```bash
+./scripts/reset-password.sh user@example.com
+```
+
+El script pide la nueva contraseña por terminal (oculta), invalida sesiones previas y genera un código de recuperación nuevo que se imprime una vez. Si la app corre en docker, el script lo detecta y ejecuta dentro del contenedor.
 
 ### Backups de la base de datos
 

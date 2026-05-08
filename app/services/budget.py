@@ -1,3 +1,10 @@
+"""Budget computation (no HTTP layer).
+
+The single useful entry point is ``compute_summary``, which combines the
+user's settings, fixed expenses and variable expenses for the month into
+the numbers shown on the dashboard.
+"""
+
 import calendar
 from datetime import date
 from decimal import Decimal
@@ -9,6 +16,7 @@ from app.models import FixedExpense, UserSettings, VariableExpense
 
 
 def month_bounds(reference: date) -> tuple[date, date]:
+    """Return (first_day, last_day) of the month containing ``reference``."""
     last_day = calendar.monthrange(reference.year, reference.month)[1]
     start = date(reference.year, reference.month, 1)
     end = date(reference.year, reference.month, last_day)
@@ -16,11 +24,18 @@ def month_bounds(reference: date) -> tuple[date, date]:
 
 
 def days_remaining_in_month(reference: date) -> int:
+    """Number of days from ``reference`` (inclusive) to month end."""
     _, end = month_bounds(reference)
     return (end - reference).days + 1
 
 
 def compute_summary(session: Session, user_id: int, reference: date) -> dict:
+    """Return today's budget snapshot for ``user_id``.
+
+    Resolves savings according to ``UserSettings.savings_mode``,
+    aggregates fixed and variable expenses for the month, and divides
+    the remainder by the days left to suggest a daily ceiling.
+    """
     us = session.scalar(
         select(UserSettings).where(UserSettings.user_id == user_id)
     )
@@ -32,7 +47,16 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
 
     income = us.monthly_income
     pct = us.savings_percent
-    savings_amount = (income * pct / Decimal("100")).quantize(Decimal("0.01"))
+    fixed_savings = us.savings_amount
+
+    # Ahorro efectivo según el modo elegido por el usuario.
+    # Capamos a [0, income] para no generar presupuestos negativos por
+    # un "fijo" mayor que el ingreso (caso accidental).
+    if us.savings_mode == "fixed":
+        savings_amount = max(Decimal("0"), min(fixed_savings, income))
+    else:
+        savings_amount = (income * pct / Decimal("100"))
+    savings_amount = savings_amount.quantize(Decimal("0.01"))
 
     fixed_total = session.scalar(
         select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(
@@ -62,6 +86,7 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
         "reference_date": reference,
         "days_remaining_in_month": days_left,
         "monthly_income": income.quantize(Decimal("0.01")),
+        "savings_mode": us.savings_mode,
         "savings_percent": pct.quantize(Decimal("0.01")),
         "savings_amount": savings_amount,
         "fixed_expenses_total": fixed_total,

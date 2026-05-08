@@ -32,12 +32,99 @@ def test_register_sets_cookie_and_me_works(anon_client) -> None:
     )
     assert r.status_code == 201
     body = r.json()
-    assert body["email"] == "pablo@example.com"
-    assert body["name"] == "Pablo"
+    assert body["user"]["email"] == "pablo@example.com"
+    assert body["user"]["name"] == "Pablo"
+    assert body["recovery_code"].startswith("gdh-")
 
     me = anon_client.get("/api/auth/me")
     assert me.status_code == 200
     assert me.json()["email"] == "pablo@example.com"
+
+
+def test_recover_with_valid_code_sets_new_password_and_rotates_code(
+    anon_client,
+) -> None:
+    reg = anon_client.post(
+        "/api/auth/register",
+        json={"email": "lost@e.com", "name": "L", "password": "supersecret1"},
+    )
+    code = reg.json()["recovery_code"]
+    anon_client.post("/api/auth/logout")
+
+    r = anon_client.post(
+        "/api/auth/recover",
+        json={
+            "email": "lost@e.com",
+            "recovery_code": code,
+            "new_password": "newsecret1",
+        },
+    )
+    assert r.status_code == 200
+    new_code = r.json()["recovery_code"]
+    assert new_code.startswith("gdh-")
+    assert new_code != code
+
+    # Login con la NUEVA contraseña funciona.
+    ok = anon_client.post(
+        "/api/auth/login",
+        json={"email": "lost@e.com", "password": "newsecret1"},
+    )
+    assert ok.status_code == 200
+
+    # El código viejo ya no sirve (uso único).
+    anon_client.post("/api/auth/logout")
+    bad = anon_client.post(
+        "/api/auth/recover",
+        json={
+            "email": "lost@e.com",
+            "recovery_code": code,
+            "new_password": "anothersecret1",
+        },
+    )
+    assert bad.status_code == 401
+
+
+def test_recover_wrong_code_rejected(anon_client) -> None:
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "w@e.com", "name": "W", "password": "supersecret1"},
+    )
+    anon_client.post("/api/auth/logout")
+    r = anon_client.post(
+        "/api/auth/recover",
+        json={
+            "email": "w@e.com",
+            "recovery_code": "gdh-aaaa-bbbb-cccc-dddd",
+            "new_password": "newsecret1",
+        },
+    )
+    assert r.status_code == 401
+
+
+def test_recover_rate_limited(anon_client) -> None:
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "rl@e.com", "name": "RL", "password": "supersecret1"},
+    )
+    anon_client.post("/api/auth/logout")
+    for _ in range(5):
+        anon_client.post(
+            "/api/auth/recover",
+            json={
+                "email": "rl@e.com",
+                "recovery_code": "gdh-zzzz-zzzz-zzzz-zzzz",
+                "new_password": "newsecret1",
+            },
+        )
+    blocked = anon_client.post(
+        "/api/auth/recover",
+        json={
+            "email": "rl@e.com",
+            "recovery_code": "gdh-zzzz-zzzz-zzzz-zzzz",
+            "new_password": "newsecret1",
+        },
+    )
+    assert blocked.status_code == 429
 
 
 def test_register_duplicate_email_conflicts(anon_client) -> None:
@@ -133,6 +220,27 @@ def test_settings_put_and_summary(client) -> None:
     data = r.json()
     assert Decimal(str(data["savings_amount"])) == Decimal("500.00")
     assert Decimal(str(data["monthly_budget_after_fixed_and_savings"])) == Decimal("2000.00")
+
+
+def test_settings_put_fixed_mode(client) -> None:
+    pr = client.put(
+        "/api/settings",
+        json={
+            "monthly_income": "2000.00",
+            "savings_mode": "fixed",
+            "savings_amount": "300.00",
+            "savings_percent": "0",
+        },
+    )
+    assert pr.status_code == 200
+    body = pr.json()
+    assert body["savings_mode"] == "fixed"
+    assert Decimal(str(body["savings_amount"])) == Decimal("300.00")
+
+    s = client.get("/api/summary").json()
+    assert s["savings_mode"] == "fixed"
+    assert Decimal(str(s["savings_amount"])) == Decimal("300.00")
+    assert Decimal(str(s["monthly_budget_after_fixed_and_savings"])) == Decimal("1700.00")
 
 
 def test_fixed_expense_whitespace_name_rejected(client) -> None:

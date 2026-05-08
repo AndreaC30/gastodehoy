@@ -1,5 +1,13 @@
+"""Pydantic request/response schemas.
+
+These are the wire shapes used by the FastAPI routers; database models
+live in ``app.models``. Schemas with ``model_config = ConfigDict(
+from_attributes=True)`` can be built directly from an ORM instance.
+"""
+
 from datetime import date
 from decimal import Decimal
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -62,6 +70,39 @@ class UserPublic(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RegisterResponse(BaseModel):
+    """Sólo se devuelve UNA vez, justo al crear la cuenta. El código de
+    recuperación NO se vuelve a enseñar; el usuario debe guardarlo."""
+
+    user: UserPublic
+    recovery_code: str
+
+
+class RecoverRequest(BaseModel):
+    email: EmailStr
+    recovery_code: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def _pwd(cls, v: str) -> str:
+        return _validate_password(v)
+
+    @field_validator("recovery_code")
+    @classmethod
+    def _code(cls, v: str) -> str:
+        s = v.strip()
+        if len(s) < 8:
+            raise ValueError("Código de recuperación inválido")
+        return s
+
+
+class RecoverResponse(BaseModel):
+    """Tras un reset exitoso devolvemos un código nuevo (uso único)."""
+
+    recovery_code: str
+
+
 class UpdateName(BaseModel):
     name: str
 
@@ -90,11 +131,16 @@ class DeleteAccount(BaseModel):
         return _validate_password(v)
 
 
+SavingsMode = Literal["percent", "fixed"]
+
+
 class BudgetSettings(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     monthly_income: Decimal = Field(ge=0, decimal_places=2)
-    savings_percent: Decimal = Field(ge=0, le=100, decimal_places=2)
+    savings_mode: SavingsMode = "percent"
+    savings_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100, decimal_places=2)
+    savings_amount: Decimal = Field(default=Decimal("0"), ge=0, decimal_places=2)
 
 
 class FixedExpenseCreate(BaseModel):
@@ -152,6 +198,7 @@ class SummaryRead(BaseModel):
     reference_date: date
     days_remaining_in_month: int
     monthly_income: Decimal
+    savings_mode: SavingsMode
     savings_percent: Decimal
     savings_amount: Decimal
     fixed_expenses_total: Decimal

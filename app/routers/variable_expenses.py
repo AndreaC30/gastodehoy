@@ -1,3 +1,5 @@
+"""Endpoints for ad-hoc / day-to-day expenses dated within a given month."""
+
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -21,6 +23,7 @@ def list_expenses(
     year: int | None = Query(default=None, ge=2000, le=3000),
     month: int | None = Query(default=None, ge=1, le=12),
 ) -> list[VariableExpense]:
+    """List expenses for the given (or current) month, newest first."""
     ref = today_in_app_timezone()
     y = year if year is not None else ref.year
     m = month if month is not None else ref.month
@@ -43,6 +46,7 @@ def create_expense(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> VariableExpense:
+    """Register an expense; defaults the date to today in app TZ."""
     day = payload.occurred_at or today_in_app_timezone()
     row = VariableExpense(
         user_id=user.id,
@@ -62,6 +66,7 @@ def delete_expense(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> None:
+    """Delete an expense; 404 if it belongs to another user."""
     row = db.get(VariableExpense, expense_id)
     if row is None or row.user_id != user.id:
         raise HTTPException(status_code=404, detail="Gasto no encontrado")

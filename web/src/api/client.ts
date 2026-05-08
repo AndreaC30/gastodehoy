@@ -1,5 +1,14 @@
+/**
+ * Thin fetch wrapper for the JSON API.
+ *
+ * - Always sends the session cookie (`credentials: "include"`).
+ * - Maps 401 responses to a logged-out auth state and throws.
+ * - Surfaces FastAPI's `detail` (string or pydantic list of errors) as
+ *   the thrown Error message.
+ */
 import { setAnonymous } from "@/auth";
 
+/** Thrown on HTTP 401 so callers can distinguish session loss. */
 export class UnauthorizedError extends Error {
   constructor(message = "Sesión caducada") {
     super(message);
@@ -7,7 +16,11 @@ export class UnauthorizedError extends Error {
   }
 }
 
-/** Same-origin en prod; en dev Vite proxy /api con la cookie. */
+/**
+ * Call the API: same-origin in prod, Vite-proxied `/api` in dev.
+ *
+ * Returns the parsed JSON body typed as `T`, or `undefined as T` for 204.
+ */
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

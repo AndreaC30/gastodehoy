@@ -1,3 +1,10 @@
+"""FastAPI bootstrap.
+
+Wires up the lifespan (timezone validation, secret guard, schema bootstrap),
+CORS for the Vite dev server, the API routers, and the SPA fallback that
+serves the built React app from ``web/dist``.
+"""
+
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -31,6 +38,14 @@ MIN_APP_SECRET_LEN = 32
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    """Startup hook.
+
+    Validates the configured timezone, refuses to start when
+    ``COOKIE_SECURE=true`` and ``APP_SECRET`` is still the default or too
+    short, and creates any missing tables. ``create_all`` does NOT add new
+    columns to existing tables: schema-altering changes still require a
+    manual reset (drop the volume in dev).
+    """
     try:
         ZoneInfo(app_settings.timezone)
     except ZoneInfoNotFoundError as e:
@@ -79,6 +94,7 @@ if ASSETS_DIR.is_dir():
 
 @app.get("/health")
 def health() -> JSONResponse:
+    """Liveness/readiness probe with a trivial DB round-trip."""
     try:
         with db.SessionLocal() as session:
             session.execute(text("SELECT 1"))
@@ -92,6 +108,7 @@ def health() -> JSONResponse:
 
 @app.get("/", response_model=None)
 def spa_index() -> FileResponse | JSONResponse:
+    """Serve the built SPA from ``web/dist`` or hint that it must be built."""
     index_path = DIST_DIR / "index.html"
     if not index_path.is_file():
         return JSONResponse(

@@ -54,6 +54,35 @@ def test_compute_summary_with_fixed_and_variable(db_session, user) -> None:
     assert out["days_remaining_in_month"] == 26
 
 
+def test_compute_summary_fixed_savings_mode(db_session, user) -> None:
+    """En modo 'fixed' el ahorro NO escala con el ingreso."""
+    us = user.settings
+    us.monthly_income = Decimal("3000.00")
+    us.savings_mode = "fixed"
+    us.savings_amount = Decimal("500.00")
+    us.savings_percent = Decimal("99.00")  # ignorado en modo fixed
+    db_session.commit()
+
+    out = compute_summary(db_session, user.id, date(2026, 5, 15))
+
+    assert out["savings_mode"] == "fixed"
+    assert out["savings_amount"] == Decimal("500.00")
+    assert out["monthly_budget_after_fixed_and_savings"] == Decimal("2500.00")
+
+
+def test_compute_summary_fixed_savings_capped_to_income(db_session, user) -> None:
+    """Si el 'fijo' supera el ingreso, capamos a income (no hay ahorro negativo)."""
+    us = user.settings
+    us.monthly_income = Decimal("1000.00")
+    us.savings_mode = "fixed"
+    us.savings_amount = Decimal("9999.00")
+    db_session.commit()
+
+    out = compute_summary(db_session, user.id, date(2026, 5, 15))
+    assert out["savings_amount"] == Decimal("1000.00")
+    assert out["monthly_budget_after_fixed_and_savings"] == Decimal("0.00")
+
+
 def test_compute_summary_over_budget_negative_suggested(db_session, user) -> None:
     us = user.settings
     us.monthly_income = Decimal("1000.00")

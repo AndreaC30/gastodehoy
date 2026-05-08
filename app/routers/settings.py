@@ -1,3 +1,5 @@
+"""Endpoints for the per-user budget configuration (income + savings)."""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -10,6 +12,7 @@ router = APIRouter(prefix="/api", tags=["settings"])
 
 
 def _get_or_create_settings(db: Session, user: User) -> UserSettings:
+    """Return the user's settings row; lazily create defaults on first read."""
     if user.settings is None:
         row = UserSettings(user_id=user.id)
         db.add(row)
@@ -24,6 +27,7 @@ def read_settings(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> BudgetSettings:
+    """Read the authenticated user's budget settings."""
     row = _get_or_create_settings(db, user)
     return BudgetSettings.model_validate(row)
 
@@ -34,9 +38,12 @@ def update_settings(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> BudgetSettings:
+    """Replace the user's budget settings (full upsert)."""
     row = _get_or_create_settings(db, user)
     row.monthly_income = payload.monthly_income
+    row.savings_mode = payload.savings_mode
     row.savings_percent = payload.savings_percent
+    row.savings_amount = payload.savings_amount
     db.commit()
     db.refresh(row)
     return BudgetSettings.model_validate(row)

@@ -1,3 +1,5 @@
+"""Endpoint that returns the per-user budget summary for the current day."""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -16,5 +18,6 @@ def read_summary(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> SummaryRead:
+    """Return today's budget snapshot for the authenticated user."""
     data = compute_summary(db, user.id, today_in_app_timezone())
     return SummaryRead(**data)
