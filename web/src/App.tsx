@@ -381,69 +381,6 @@ function Dashboard({ profileName }: { profileName: string }) {
 
         <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
           <div className="border-b border-slate-800 px-5 py-4">
-            <h2 className="text-lg font-bold tracking-tight">Gastos fijos</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Lo que pagas igual cada mes
-            </p>
-          </div>
-          <div className="p-5">
-            <p className="mb-4 text-sm text-slate-500">
-              Vivienda, seguros, suscripciones… suman aquí.
-            </p>
-            <form
-              className="flex flex-wrap gap-2"
-              onSubmit={onFixedSubmit}
-            >
-              <input
-                name="name"
-                placeholder="Ej. Alquiler"
-                required
-                className="min-w-[120px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
-              />
-              <input
-                name="amount"
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                min={0}
-                placeholder="€"
-                required
-                className="w-28 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
-              />
-              <button
-                type="submit"
-                disabled={addFixed.isPending}
-                className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
-              >
-                Añadir
-              </button>
-            </form>
-            <ul className="mt-4 space-y-2">
-              {(fixedQ.data ?? []).map((it) => (
-                <li
-                  key={it.id}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
-                >
-                  <div>
-                    <p className="font-semibold text-slate-200">{it.name}</p>
-                    <p className="text-sm text-slate-500">{money(it.amount)}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => delFixed.mutate(it.id)}
-                    disabled={delFixed.isPending}
-                    className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
-                  >
-                    Quitar
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
-          <div className="border-b border-slate-800 px-5 py-4">
             <h2 className="text-lg font-bold tracking-tight">
               Gastos del día a día
             </h2>
@@ -454,7 +391,7 @@ function Dashboard({ profileName }: { profileName: string }) {
           <div className="p-5">
             <p className="mb-4 text-sm leading-relaxed text-slate-500">
               Cada registro actualiza cuánto te queda y tu techo diario. Lo recurrente
-              va en <strong className="text-slate-400">Gastos fijos</strong>.
+              va en <strong className="text-slate-400">Gastos fijos</strong> (más abajo).
             </p>
             <form
               className="flex flex-wrap gap-2"
@@ -509,6 +446,69 @@ function Dashboard({ profileName }: { profileName: string }) {
                     className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
                   >
                     Borrar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
+          <div className="border-b border-slate-800 px-5 py-4">
+            <h2 className="text-lg font-bold tracking-tight">Gastos fijos</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Lo que pagas igual cada mes
+            </p>
+          </div>
+          <div className="p-5">
+            <p className="mb-4 text-sm text-slate-500">
+              Vivienda, seguros, suscripciones… suman aquí.
+            </p>
+            <form
+              className="flex flex-wrap gap-2"
+              onSubmit={onFixedSubmit}
+            >
+              <input
+                name="name"
+                placeholder="Ej. Alquiler"
+                required
+                className="min-w-[120px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              />
+              <input
+                name="amount"
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min={0}
+                placeholder="€"
+                required
+                className="w-28 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              />
+              <button
+                type="submit"
+                disabled={addFixed.isPending}
+                className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+              >
+                Añadir
+              </button>
+            </form>
+            <ul className="mt-4 space-y-2">
+              {(fixedQ.data ?? []).map((it) => (
+                <li
+                  key={it.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
+                >
+                  <div>
+                    <p className="font-semibold text-slate-200">{it.name}</p>
+                    <p className="text-sm text-slate-500">{money(it.amount)}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => delFixed.mutate(it.id)}
+                    disabled={delFixed.isPending}
+                    className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                  >
+                    Quitar
                   </button>
                 </li>
               ))}
