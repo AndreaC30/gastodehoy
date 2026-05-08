@@ -182,9 +182,34 @@ def test_change_password_flow(anon_client) -> None:
         "/api/auth/me/password",
         json={"current_password": "supersecret1", "new_password": "newsecret1"},
     )
-    assert ok.status_code == 204
+    assert ok.status_code == 200
     anon_client.post("/api/auth/logout")
     relog = anon_client.post(
         "/api/auth/login", json={"email": "c@e.com", "password": "newsecret1"}
     )
     assert relog.status_code == 200
+
+
+def test_change_password_invalidates_other_sessions(anon_client) -> None:
+    """Otra sesión emitida ANTES de cambiar la clave queda inválida."""
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "x@e.com", "name": "X", "password": "supersecret1"},
+    )
+    old_cookie = anon_client.cookies.get("gdh_session")
+    assert old_cookie
+
+    new_pw = anon_client.put(
+        "/api/auth/me/password",
+        json={"current_password": "supersecret1", "new_password": "newsecret1"},
+    )
+    assert new_pw.status_code == 200
+
+    with TestClient(app) as other:
+        other.cookies.set("gdh_session", old_cookie)
+        r = other.get("/api/auth/me")
+        assert r.status_code == 401

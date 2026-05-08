@@ -6,7 +6,8 @@
 # Requiere en .env:
 #   SITE_DOMAIN=gastos.tudominio.com
 #   ACME_EMAIL=tu-email@ejemplo.com
-#   APP_SECRET=<algo-largo-y-aleatorio>
+#   APP_SECRET=<openssl rand -hex 32>
+#   POSTGRES_PASSWORD=<otra clave fuerte, distinta del default>
 #   COOKIE_SECURE=true
 services:
   db:
@@ -17,7 +18,7 @@ services:
     # Solo expuesto a la red interna; Caddy hace de puerta.
     ports: []
     environment:
-      DATABASE_URL: postgresql+psycopg2://gastodehoy:gastodehoy@db:5432/gastodehoy
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-gastodehoy}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-gastodehoy}
       TIMEZONE: ${TIMEZONE:-Europe/Madrid}
       APP_SECRET: ${APP_SECRET}
       SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-30}

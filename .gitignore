@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 venv/
 .env
+backups/
 .DS_Store
 web/node_modules/
 web/dist/

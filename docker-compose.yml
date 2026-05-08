@@ -3,18 +3,21 @@ services:
   db:
     image: postgres:18-alpine
     environment:
-      POSTGRES_USER: gastodehoy
-      POSTGRES_PASSWORD: gastodehoy
-      POSTGRES_DB: gastodehoy
+      POSTGRES_USER: ${POSTGRES_USER:-gastodehoy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gastodehoy}
+      POSTGRES_DB: ${POSTGRES_DB:-gastodehoy}
     # Postgres 18+: un solo volumen en el directorio padre (no en …/data)
-    # https://github.com/docker-library/postgres/pull/1259
     volumes:
       - pgdata:/var/lib/postgresql
-    # Para desarrollo local: uvicorn en el host usa localhost:5432 (copia .env.example).
+    # Para desarrollo local: uvicorn en el host usa localhost:5432.
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gastodehoy -d gastodehoy"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-gastodehoy} -d ${POSTGRES_DB:-gastodehoy}",
+        ]
       interval: 3s
       timeout: 5s
       retries: 30
@@ -24,7 +27,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+psycopg2://gastodehoy:gastodehoy@db:5432/gastodehoy
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-gastodehoy}:${POSTGRES_PASSWORD:-gastodehoy}@db:5432/${POSTGRES_DB:-gastodehoy}
       TIMEZONE: ${TIMEZONE:-Europe/Madrid}
       APP_SECRET: ${APP_SECRET:-change-me-in-prod}
       SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-30}
