@@ -70,8 +70,31 @@ cd web && npm install && npm run build
 
 - Login con **email + contraseña**, contraseña con **bcrypt** (sin texto plano en BD).
 - Sesión por cookie firmada **`HttpOnly; SameSite=Lax`**; `Secure` se activa solo en producción (`COOKIE_SECURE=true`).
+- **Refusal-to-start** si `COOKIE_SECURE=true` con `APP_SECRET` por defecto o más corto de 32 caracteres.
 - Rate limit en `/api/auth/login`: 5 intentos por IP cada 5 minutos → `429`.
+- **Cambio de contraseña invalida sesiones previas** (`password_changed_at` + comprobación al decodificar la cookie).
 - Cada cuenta solo ve sus datos; los IDs de otras cuentas devuelven `404`.
+- Cabeceras de hardening en Caddy: HSTS, CSP, `X-Content-Type-Options`, `X-Frame-Options=DENY`, `Referrer-Policy`, `Permissions-Policy`, sin cabecera `Server`.
+
+### Backups de la base de datos
+
+```bash
+./scripts/backup.sh             # vuelca a ./backups/, rota a 7 días
+KEEP_DAYS=14 ./scripts/backup.sh
+```
+
+Cron diario a las 3:30 (en el servidor):
+
+```cron
+30 3 * * * cd /opt/gastodehoy && ./scripts/backup.sh >> /var/log/gastodehoy-backup.log 2>&1
+```
+
+Restaurar un dump:
+
+```bash
+gunzip -c backups/gastodehoy-YYYYMMDDTHHMMSSZ.sql.gz \
+  | docker compose exec -T db psql -U gastodehoy -d gastodehoy
+```
 
 ## Pruebas
 

@@ -1,5 +1,5 @@
-# Reverse proxy con HTTPS automático (Let's Encrypt).
-# Define SITE_DOMAIN y ACME_EMAIL en .env antes de levantar el perfil prod.
+# HTTPS automático con Let's Encrypt + cabeceras de hardening.
+# Variables: SITE_DOMAIN y ACME_EMAIL (ver .env y compose.prod.yml).
 {
     email {$ACME_EMAIL}
 }
@@ -7,8 +7,23 @@
 {$SITE_DOMAIN} {
     encode zstd gzip
 
-    # HSTS: tras la primera visita, el navegador exige HTTPS durante 1 año.
-    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    header {
+        # HTTPS forzado durante 1 año (después de la primera visita).
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        # Sin sniffing de tipo MIME.
+        X-Content-Type-Options "nosniff"
+        # No iframes en otra web.
+        X-Frame-Options "DENY"
+        # Referer mínimo cross-site.
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Sin permisos avanzados (cámara, micro, geo, etc.).
+        Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+        # CSP: solo recursos del propio origen; estilos inline permitidos
+        # para que Tailwind/React no se rompan; sin eval ni inline JS.
+        Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+        # No filtrar versión del servidor.
+        -Server
+    }
 
     reverse_proxy app:8000
 }

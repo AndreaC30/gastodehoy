@@ -25,6 +25,10 @@ DIST_DIR = ROOT / "web" / "dist"
 ASSETS_DIR = DIST_DIR / "assets"
 
 
+DEFAULT_APP_SECRET = "change-me-in-prod"
+MIN_APP_SECRET_LEN = 32
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     try:
@@ -33,6 +37,18 @@ async def lifespan(_: FastAPI):
         raise RuntimeError(
             f"TIMEZONE/TZ inválida: {app_settings.timezone!r}. Usa una IANA válida (p. ej. Europe/Madrid)."
         ) from e
+
+    if app_settings.cookie_secure:
+        if app_settings.app_secret == DEFAULT_APP_SECRET:
+            raise RuntimeError(
+                "Refusing to start: COOKIE_SECURE=true pero APP_SECRET sigue con el valor por defecto. "
+                "Genera uno: APP_SECRET=$(openssl rand -hex 32) y vuélvelo a desplegar."
+            )
+        if len(app_settings.app_secret) < MIN_APP_SECRET_LEN:
+            raise RuntimeError(
+                f"APP_SECRET demasiado corto ({len(app_settings.app_secret)} < {MIN_APP_SECRET_LEN}). "
+                "Usa al menos 32 caracteres aleatorios."
+            )
 
     Base.metadata.create_all(bind=db.engine)
     yield

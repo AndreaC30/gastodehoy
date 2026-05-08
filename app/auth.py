@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import deque
+from datetime import datetime, timezone
 from time import monotonic
 from typing import Final
 
@@ -48,10 +49,12 @@ def make_session_token(user_id: int) -> str:
     return _serializer().dumps({"uid": user_id})
 
 
-def decode_session_token(token: str) -> int:
+def decode_session_token(token: str) -> tuple[int, datetime]:
     max_age = settings.session_ttl_days * 24 * 60 * 60
     try:
-        data = _serializer().loads(token, max_age=max_age)
+        data, issued_at = _serializer().loads(
+            token, max_age=max_age, return_timestamp=True
+        )
     except (SignatureExpired, BadSignature) as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -63,7 +66,9 @@ def decode_session_token(token: str) -> int:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Sesión inválida",
         )
-    return uid
+    if issued_at.tzinfo is None:
+        issued_at = issued_at.replace(tzinfo=timezone.utc)
+    return uid, issued_at
 
 
 def set_session_cookie(response: Response, token: str) -> None:
@@ -96,13 +101,22 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No has iniciado sesión",
         )
-    user_id = decode_session_token(session)
+    user_id, issued_at = decode_session_token(session)
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Cuenta no encontrada",
         )
+    if user.password_changed_at:
+        pwd_changed = user.password_changed_at
+        if pwd_changed.tzinfo is None:
+            pwd_changed = pwd_changed.replace(tzinfo=timezone.utc)
+        if issued_at < pwd_changed:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Sesión invalidada por cambio de contraseña",
+            )
     return user
 
 
