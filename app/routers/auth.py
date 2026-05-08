@@ -44,12 +44,10 @@ def register(
     db: Session = Depends(get_db),
 ) -> User:
     email = _normalize_email(payload.email)
-    now = datetime.now(timezone.utc).replace(microsecond=0)
     user = User(
         email=email,
         name=payload.name,
         password_hash=hash_password(payload.password),
-        password_changed_at=now,
     )
     user.settings = UserSettings()
     db.add(user)
@@ -114,24 +112,19 @@ def update_me(
     return user
 
 
-@router.put("/me/password", response_model=UserPublic)
+@router.put("/me/password", status_code=status.HTTP_204_NO_CONTENT)
 def change_password(
     payload: ChangePassword,
-    response: Response,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
-) -> User:
+) -> None:
     if not verify_password(payload.current_password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Contraseña actual incorrecta",
         )
     user.password_hash = hash_password(payload.new_password)
-    user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
     db.commit()
-    db.refresh(user)
-    set_session_cookie(response, make_session_token(user.id))
-    return user
 
 
 @router.post("/me/delete", status_code=status.HTTP_204_NO_CONTENT)
