@@ -1,129 +1,216 @@
 # GastoDeHoy
 
-Web: te dice **cuánto puedes gastar hoy** para no quedarte sin margen a fin de mes.
+Web sencilla que te dice **cuánto puedes gastar hoy** sin salirte del presupuesto del mes. Llevas tu ingreso, tus gastos fijos y los gastos del día a día; la app calcula tu margen diario.
 
-**Stack:** FastAPI + PostgreSQL · React + Vite + Tailwind v4 · TanStack Query · auth con cookie HttpOnly + bcrypt · tests con pytest (SQLite en memoria) · HTTPS opcional con Caddy.
+Construido con **FastAPI** (Python), **PostgreSQL**, **React + Vite + Tailwind**. En producción usa **Caddy** para HTTPS automático.
 
-## Cómo arrancar (Docker, sin HTTPS)
+---
+
+## 1. Probarla en tu ordenador
+
+Solo necesitas **Docker**. Tres comandos:
 
 ```bash
+git clone <url> gastodehoy
+cd gastodehoy
 cp .env.example .env
-docker compose up --build -d
+docker compose up -d --build
 ```
 
-Abre `http://localhost:8000`. Cuentas: **crea una** desde la pantalla inicial (email + nombre + contraseña).
+Abre **http://localhost:8000** y crea tu cuenta. La pantalla te enseñará **una sola vez** un código de recuperación tipo `gdh-xxxx-xxxx-xxxx-xxxx`. Cópialo a tu gestor de contraseñas; te servirá si algún día olvidas tu contraseña.
 
-Salud: `GET /health`.
-
-### Si no arranca
+Para parar todo:
 
 ```bash
-docker compose ps
-docker compose logs --tail=150 app
+docker compose down
+```
+
+Para empezar de cero borrando la base de datos (útil si cambias el esquema en desarrollo):
+
+```bash
+docker compose down -v
+```
+
+¿No arranca? Mira los logs:
+
+```bash
+docker compose logs --tail=200 app
 docker compose logs --tail=50 db
 ```
 
-## Producción con HTTPS (Caddy + Let's Encrypt)
+---
 
-Ten un dominio que apunte a la IP pública del servidor y los puertos `80` y `443` accesibles. En el servidor:
+## 2. Desplegarla en un servidor con HTTPS
+
+Pensado para un VPS (Hetzner, DigitalOcean, OVH…) o una Raspberry Pi expuesta. Necesitas:
+
+- Un **dominio** apuntando a la IP del servidor (registro A/AAAA).
+- Los puertos **80** y **443** abiertos en el firewall.
+- **Docker** instalado en el servidor.
+
+### Paso 1 — Clona el repo en el servidor
 
 ```bash
-git clone … && cd gastodehoy
+git clone <url> /opt/gastodehoy
+cd /opt/gastodehoy
+```
+
+### Paso 2 — Configura el `.env`
+
+```bash
 cp .env.example .env
-# Edita .env y deja al menos:
-#   SITE_DOMAIN=gastos.tudominio.com
-#   ACME_EMAIL=tu-email@ejemplo.com
-#   APP_SECRET=$(openssl rand -hex 32)
-#   COOKIE_SECURE=true
+```
+
+Edita `.env` y rellena al menos estas cinco variables:
+
+```ini
+SITE_DOMAIN=gastos.tudominio.com
+ACME_EMAIL=tu-email@ejemplo.com
+APP_SECRET=<clave secreta de 32+ caracteres>
+POSTGRES_PASSWORD=<otra clave fuerte distinta>
+COOKIE_SECURE=true
+```
+
+Para generar el `APP_SECRET`:
+
+```bash
+openssl rand -hex 32
+```
+
+> La app se **negará a arrancar** si `COOKIE_SECURE=true` y el `APP_SECRET` es el por defecto o tiene menos de 32 caracteres. Es a propósito.
+
+### Paso 3 — Levanta los contenedores
+
+```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-Caddy pide y renueva el certificado solo. La app (`app`) y la base (`db`) no exponen puertos; solo Caddy escucha en 80/443.
+Caddy pide y renueva el certificado de Let's Encrypt automáticamente. Solo Caddy escucha al exterior; la app y la base de datos viven en una red interna.
 
-> Si **cambias `APP_SECRET`** después, todas las sesiones existentes se invalidan y cada cuenta vuelve a iniciar sesión.
+Abre **https://gastos.tudominio.com** y crea tu primera cuenta.
 
-## Desarrollo local
-
-Postgres en Docker; uvicorn y Vite en tu máquina:
+### Paso 4 — Programa backups diarios (recomendado)
 
 ```bash
-docker compose up -d db
-cp .env.example .env
-
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt requirements-dev.txt
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-
-# en otra terminal
-cd web && npm install && npm run dev
+crontab -e
 ```
 
-Abre `http://localhost:5173`. Si tienes el `8000` ocupado por el contenedor `app`, párenlo (`docker compose stop app`) o lanza uvicorn en `--port 8001` y crea `web/.env` con `VITE_API_PROXY_TARGET=http://127.0.0.1:8001`.
-
-Build de producción del front (lo hace también el `Dockerfile`):
-
-```bash
-cd web && npm install && npm run build
-```
-
-## Cuenta y seguridad
-
-- Login con **email + contraseña**, contraseña con **bcrypt** (sin texto plano en BD).
-- Sesión por cookie firmada **`HttpOnly; SameSite=Lax`**; `Secure` se activa solo en producción (`COOKIE_SECURE=true`).
-- **Refusal-to-start** si `COOKIE_SECURE=true` con `APP_SECRET` por defecto o más corto de 32 caracteres.
-- Rate limit en `/api/auth/login` y `/api/auth/recover`: 5 intentos por IP cada 5 minutos → `429`.
-- **Cambio o reset de contraseña invalida sesiones previas** (`password_changed_at` + comprobación al decodificar la cookie). Tras cambio o reset el usuario debe volver a entrar.
-- Cada cuenta solo ve sus datos; los IDs de otras cuentas devuelven `404`.
-- Cabeceras de hardening en Caddy: HSTS, CSP, `X-Content-Type-Options`, `X-Frame-Options=DENY`, `Referrer-Policy`, `Permissions-Policy`, sin cabecera `Server`.
-
-### Recuperación de contraseña
-
-- Al registrarte la app te muestra **una sola vez** un código tipo `gdh-xxxx-xxxx-xxxx-xxxx`. Guárdalo en tu gestor de contraseñas o en papel; en BD se almacena solo su hash bcrypt.
-- Si olvidas tu contraseña, en la pantalla de login tienes **He olvidado mi contraseña**: pides email + código y eliges una nueva. El código es de **un solo uso**: al usarlo se te entrega uno nuevo.
-- Si pierdes a la vez la contraseña y el código, el admin puede resetearlo desde el host:
-
-```bash
-./scripts/reset-password.sh user@example.com
-```
-
-El script pide la nueva contraseña por terminal (oculta), invalida sesiones previas y genera un código de recuperación nuevo que se imprime una vez. Si la app corre en docker, el script lo detecta y ejecuta dentro del contenedor.
-
-### Backups de la base de datos
-
-```bash
-./scripts/backup.sh             # vuelca a ./backups/, rota a 7 días
-KEEP_DAYS=14 ./scripts/backup.sh
-```
-
-Cron diario a las 3:30 (en el servidor):
+Añade esta línea para un dump cada día a las 3:30 con rotación de 7 días:
 
 ```cron
 30 3 * * * cd /opt/gastodehoy && ./scripts/backup.sh >> /var/log/gastodehoy-backup.log 2>&1
 ```
 
-Restaurar un dump:
+---
+
+## 3. Tareas habituales
+
+### Resetear la contraseña de alguien
+
+Si un usuario pierde la contraseña **y** el código de recuperación, desde el servidor:
 
 ```bash
-gunzip -c backups/gastodehoy-YYYYMMDDTHHMMSSZ.sql.gz \
+./scripts/reset-password.sh user@example.com
+```
+
+Te pedirá la nueva contraseña por terminal, invalidará las sesiones del usuario y te imprimirá un nuevo código de recuperación que tendrás que pasarle.
+
+### Hacer un backup manual
+
+```bash
+./scripts/backup.sh                  # rotación de 7 días (por defecto)
+KEEP_DAYS=14 ./scripts/backup.sh     # rotación de 14 días
+```
+
+Los backups se guardan en `./backups/` como `gastodehoy-YYYYMMDDTHHMMSSZ.sql.gz`.
+
+### Restaurar un backup
+
+```bash
+gunzip -c backups/gastodehoy-XXXX.sql.gz \
   | docker compose exec -T db psql -U gastodehoy -d gastodehoy
 ```
 
-## Pruebas
+### Actualizar a una versión nueva
+
+```bash
+cd /opt/gastodehoy
+git pull
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+> Si la nueva versión añade columnas a la BBDD, el README de esa versión te lo dirá. En desarrollo basta con `docker compose down -v`. En producción, restaura un backup compatible o ejecuta la migración manualmente.
+
+---
+
+## 4. Desarrollar el código
+
+Si vas a tocar el código (no solo desplegar), te resultará más cómodo correr **solo Postgres en Docker** y la app y el front en tu máquina con recarga en caliente.
+
+```bash
+# 1. Solo la BBDD
+docker compose up -d db
+cp .env.example .env
+
+# 2. Backend con auto-reload
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+uvicorn app.main:app --reload --port 8000
+
+# 3. Front con auto-reload (en otra terminal)
+cd web && npm install && npm run dev
+```
+
+Abre **http://localhost:5173**.
+
+¿El puerto 8000 está ocupado por el contenedor `app`? Páralo (`docker compose stop app`) o lanza uvicorn en otro puerto:
+
+```bash
+uvicorn app.main:app --reload --port 8001
+```
+
+Y entonces crea `web/.env` con:
+
+```ini
+VITE_API_PROXY_TARGET=http://127.0.0.1:8001
+```
+
+### Tests
 
 ```bash
 pip install -r requirements-dev.txt
 pytest
 ```
 
-Solo API + lógica; el front no se ejecuta.
+23 tests sobre SQLite en memoria, sin tocar la BBDD real. Cubren la API y la lógica del presupuesto. El front se valida con `npm run build`.
+
+---
+
+## Cómo se calcula "Hoy puedes gastar"
+
+```
+techo diario = (ingreso mensual − ahorro − fijos − gastos variables del mes)
+               ÷ días que quedan en el mes
+```
+
+- **Ahorro**: lo apartas antes de cualquier gasto. Puede ser un % del ingreso o una cantidad fija al mes (lo eliges al configurar).
+- **Gastos fijos**: alquiler, suscripciones, lo que se paga igual cada mes.
+- **Gastos variables**: lo que registras en el día a día.
+- **Días que quedan**: hasta el último día del mes, en la zona horaria configurada (`TIMEZONE` en `.env`, por defecto `Europe/Madrid`).
+
+---
+
+## Notas de seguridad
+
+- Contraseñas con **bcrypt**, nunca en texto plano.
+- Sesión por **cookie firmada** (`HttpOnly`, `SameSite=Lax`); `Secure` solo en producción.
+- **Rate limit** en login y recuperación: 5 intentos por IP cada 5 minutos.
+- **Cambiar la contraseña invalida todas las sesiones** y obliga a iniciar sesión otra vez.
+- Cada cuenta solo ve sus propios datos.
+- En producción, Caddy añade HSTS, CSP, `X-Frame-Options=DENY`, `Referrer-Policy`, `Permissions-Policy` y oculta la cabecera `Server`.
+
+---
 
 ## Versiones
 
-- Python 3.13+, Postgres 18, Node 22 (build), Tailwind v4.
-- Volumen de Postgres montado en **`/var/lib/postgresql`** (Postgres 18+).
-
-## Regla de cálculo
-
-`(ingreso mensual − ahorro − gastos fijos − gastos variables del mes) ÷ días que quedan en el mes calendario`
-
-`TIMEZONE` por defecto `Europe/Madrid`.
+Python 3.13 · PostgreSQL 18 · Node 22 · Tailwind v4 · Docker Compose v2.
