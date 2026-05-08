@@ -2,7 +2,7 @@
 
 Web sencilla que te dice **cuánto puedes gastar hoy** sin salirte del presupuesto del mes. Llevas tu ingreso, tus gastos fijos y los gastos del día a día; la app calcula tu margen diario.
 
-Construido con **FastAPI** (Python), **PostgreSQL**, **React + Vite + Tailwind**. En producción usa **Caddy** para HTTPS automático.
+Construido con **FastAPI** (Python), **SQLite** (un archivo en `./data/`), **React + Vite + Tailwind**. En producción usa **Caddy** para HTTPS automático.
 
 ---
 
@@ -19,23 +19,17 @@ docker compose up -d --build
 
 Abre **http://localhost:8000** y crea tu cuenta. La pantalla te enseñará **una sola vez** un código de recuperación tipo `gdh-xxxx-xxxx-xxxx-xxxx`. Cópialo a tu gestor de contraseñas; te servirá si algún día olvidas tu contraseña.
 
-Para parar todo:
+Tus datos viven en `./data/gastodehoy.db` (un único archivo SQLite). Si quieres empezar de cero, para los contenedores y bórralo:
 
 ```bash
 docker compose down
-```
-
-Para empezar de cero borrando la base de datos (útil si cambias el esquema en desarrollo):
-
-```bash
-docker compose down -v
+rm -rf data
 ```
 
 ¿No arranca? Mira los logs:
 
 ```bash
 docker compose logs --tail=200 app
-docker compose logs --tail=50 db
 ```
 
 ---
@@ -61,13 +55,12 @@ cd /opt/gastodehoy
 cp .env.example .env
 ```
 
-Edita `.env` y rellena al menos estas cinco variables:
+Edita `.env` y rellena al menos estas cuatro variables:
 
 ```ini
 SITE_DOMAIN=gastos.tudominio.com
 ACME_EMAIL=tu-email@ejemplo.com
 APP_SECRET=<clave secreta de 32+ caracteres>
-POSTGRES_PASSWORD=<otra clave fuerte distinta>
 COOKIE_SECURE=true
 ```
 
@@ -85,7 +78,7 @@ openssl rand -hex 32
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-Caddy pide y renueva el certificado de Let's Encrypt automáticamente. Solo Caddy escucha al exterior; la app y la base de datos viven en una red interna.
+Caddy pide y renueva el certificado de Let's Encrypt automáticamente. Solo Caddy escucha al exterior; la app vive en una red interna.
 
 Abre **https://gastos.tudominio.com** y crea tu primera cuenta.
 
@@ -122,13 +115,14 @@ Te pedirá la nueva contraseña por terminal, invalidará las sesiones del usuar
 KEEP_DAYS=14 ./scripts/backup.sh     # rotación de 14 días
 ```
 
-Los backups se guardan en `./backups/` como `gastodehoy-YYYYMMDDTHHMMSSZ.sql.gz`.
+Los backups se guardan en `./backups/` como `gastodehoy-YYYYMMDDTHHMMSSZ.db.gz`. Cada uno es una copia atómica del archivo SQLite (segura aunque la app esté escribiendo) ya comprimida.
 
 ### Restaurar un backup
 
 ```bash
-gunzip -c backups/gastodehoy-XXXX.sql.gz \
-  | docker compose exec -T db psql -U gastodehoy -d gastodehoy
+docker compose stop app
+gunzip -c backups/gastodehoy-XXXX.db.gz > data/gastodehoy.db
+docker compose start app
 ```
 
 ### Actualizar a una versión nueva
@@ -139,37 +133,32 @@ git pull
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-> Si la nueva versión añade columnas a la BBDD, el README de esa versión te lo dirá. En desarrollo basta con `docker compose down -v`. En producción, restaura un backup compatible o ejecuta la migración manualmente.
+> Si la nueva versión añade columnas a la BBDD, el README de esa versión te lo dirá. En ese caso, haz un backup antes de actualizar.
 
 ---
 
 ## 4. Desarrollar el código
 
-Si vas a tocar el código (no solo desplegar), te resultará más cómodo correr **solo Postgres en Docker** y la app y el front en tu máquina con recarga en caliente.
+Si vas a tocar el código (no solo desplegar), te resultará más cómodo correr la app y el front en tu máquina con recarga en caliente. SQLite no necesita servicios extra.
 
 ```bash
-# 1. Solo la BBDD
-docker compose up -d db
+# 1. Backend con auto-reload
 cp .env.example .env
-
-# 2. Backend con auto-reload
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt -r requirements-dev.txt
 uvicorn app.main:app --reload --port 8000
 
-# 3. Front con auto-reload (en otra terminal)
+# 2. Front con auto-reload (en otra terminal)
 cd web && npm install && npm run dev
 ```
 
-Abre **http://localhost:5173**.
+Abre **http://localhost:5173**. La BBDD SQLite se crea sola en `./data/gastodehoy.db`.
 
-¿El puerto 8000 está ocupado por el contenedor `app`? Páralo (`docker compose stop app`) o lanza uvicorn en otro puerto:
+¿El puerto 8000 está ocupado? Lanza uvicorn en otro puerto y crea `web/.env`:
 
 ```bash
 uvicorn app.main:app --reload --port 8001
 ```
-
-Y entonces crea `web/.env` con:
 
 ```ini
 VITE_API_PROXY_TARGET=http://127.0.0.1:8001
@@ -182,7 +171,7 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-23 tests sobre SQLite en memoria, sin tocar la BBDD real. Cubren la API y la lógica del presupuesto. El front se valida con `npm run build`.
+Los tests usan SQLite en memoria, sin tocar la BBDD real. Cubren la API y la lógica del presupuesto. El front se valida con `npm run build`.
 
 ---
 
@@ -208,9 +197,10 @@ techo diario = (ingreso mensual − ahorro − fijos − gastos variables del me
 - **Cambiar la contraseña invalida todas las sesiones** y obliga a iniciar sesión otra vez.
 - Cada cuenta solo ve sus propios datos.
 - En producción, Caddy añade HSTS, CSP, `X-Frame-Options=DENY`, `Referrer-Policy`, `Permissions-Policy` y oculta la cabecera `Server`.
+- La BBDD es un único archivo SQLite con permisos de filesystem; sin puerto abierto ni usuario remoto. Para protegerla del robo físico del disco, cifra el filesystem del VPS (LUKS o equivalente).
 
 ---
 
 ## Versiones
 
-Python 3.13 · PostgreSQL 18 · Node 22 · Tailwind v4 · Docker Compose v2.
+Python 3.13 · SQLite (incluido en Python) · Node 22 · Tailwind v4 · Docker Compose v2.

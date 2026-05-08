@@ -16,7 +16,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
 

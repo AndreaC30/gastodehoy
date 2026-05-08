@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pg_dump del contenedor `db` con rotación diaria.
+# Backup atómico del SQLite con rotación diaria.
 #
 # Uso:
 #   scripts/backup.sh                    # vuelca a ./backups/
@@ -8,6 +8,13 @@
 #
 # Cron diario a las 3:30:
 #   30 3 * * * cd /opt/gastodehoy && ./scripts/backup.sh >> /var/log/gastodehoy-backup.log 2>&1
+#
+# Detalles:
+# - Usa la API "online backup" de SQLite (vía app.cli.backup) dentro del
+#   contenedor `app`. Es seguro aunque la app esté escribiendo.
+# - El archivo se transfiere por stdout y se gzip-ea ya en el host, así
+#   no hace falta `sqlite3` en el host ni dejar archivos sueltos en el
+#   volumen.
 
 set -euo pipefail
 
@@ -15,17 +22,23 @@ cd "$(dirname "$0")/.."
 
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 KEEP_DAYS="${KEEP_DAYS:-7}"
-POSTGRES_USER="${POSTGRES_USER:-gastodehoy}"
-POSTGRES_DB="${POSTGRES_DB:-gastodehoy}"
 
 mkdir -p "$BACKUP_DIR"
 
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
-out="$BACKUP_DIR/gastodehoy-$stamp.sql.gz"
+out="$BACKUP_DIR/gastodehoy-$stamp.db.gz"
 
-echo "[backup] dumping $POSTGRES_DB to $out"
-docker compose exec -T db pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-  | gzip -9 > "$out"
+echo "[backup] dumping to $out"
+
+# Backup -> archivo temporal en el contenedor -> stdout -> gzip en host -> archivo.
+# El cleanup del temporal va incluido para no ensuciar el volumen.
+docker compose exec -T app sh -c '
+  set -e
+  tmp="$(mktemp /tmp/gastodehoy-backup.XXXXXX.db)"
+  trap "rm -f \"$tmp\"" EXIT
+  python -m app.cli.backup "$tmp" >/dev/null
+  cat "$tmp"
+' | gzip -9 > "$out"
 
 # Comprueba que el dump no está vacío (>1 KiB) para detectar fallos silenciosos.
 if [ ! -s "$out" ] || [ "$(stat -f%z "$out" 2>/dev/null || stat -c%s "$out")" -lt 1024 ]; then
@@ -37,5 +50,5 @@ fi
 echo "[backup] ok ($(du -h "$out" | cut -f1))"
 
 # Rotación: borra dumps con más de KEEP_DAYS días.
-find "$BACKUP_DIR" -maxdepth 1 -name 'gastodehoy-*.sql.gz' -type f \
+find "$BACKUP_DIR" -maxdepth 1 -name 'gastodehoy-*.db.gz' -type f \
   -mtime +"$KEEP_DAYS" -print -delete

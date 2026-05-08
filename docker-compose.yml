@@ -1,40 +1,15 @@
-# Imagen oficial: https://hub.docker.com/_/postgres — `postgres:18-alpine` sigue la rama 18.x actual
 services:
-  db:
-    image: postgres:18-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-gastodehoy}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gastodehoy}
-      POSTGRES_DB: ${POSTGRES_DB:-gastodehoy}
-    # Postgres 18+: un solo volumen en el directorio padre (no en …/data)
-    volumes:
-      - pgdata:/var/lib/postgresql
-    # Para desarrollo local: uvicorn en el host usa localhost:5432.
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-gastodehoy} -d ${POSTGRES_DB:-gastodehoy}",
-        ]
-      interval: 3s
-      timeout: 5s
-      retries: 30
-
   app:
     build: .
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-gastodehoy}:${POSTGRES_PASSWORD:-gastodehoy}@db:5432/${POSTGRES_DB:-gastodehoy}
+      # Archivo SQLite dentro del volumen montado en /app/data.
+      DATABASE_URL: sqlite:////app/data/gastodehoy.db
       TIMEZONE: ${TIMEZONE:-Europe/Madrid}
       APP_SECRET: ${APP_SECRET:-change-me-in-prod}
       SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-30}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
-    depends_on:
-      db:
-        condition: service_healthy
-
-volumes:
-  pgdata:
+    volumes:
+      # Persistencia: el archivo .db vive en ./data/ del host.
+      - ./data:/app/data

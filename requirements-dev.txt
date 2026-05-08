@@ -1,2 +1,4 @@
 -r requirements.txt
 pytest>=8.3,<9
+# starlette TestClient delega en httpx desde 1.0; sólo se necesita en tests.
+httpx>=0.28,<1

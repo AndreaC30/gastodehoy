@@ -2,17 +2,25 @@
 
 The single useful entry point is ``compute_summary``, which combines the
 user's settings, fixed expenses and variable expenses for the month into
-the numbers shown on the dashboard.
+the numbers shown on the dashboard. ``today_in_app_timezone`` lives here
+too because it is used exclusively from the budget routes.
 """
 
 import calendar
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.models import FixedExpense, UserSettings, VariableExpense
+
+
+def today_in_app_timezone() -> date:
+    """Return today's date in the timezone configured via ``TIMEZONE``."""
+    return datetime.now(ZoneInfo(settings.timezone)).date()
 
 
 def month_bounds(reference: date) -> tuple[date, date]:

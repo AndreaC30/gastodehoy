@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = Field(
-        default="postgresql+psycopg2://gastodehoy:gastodehoy@localhost:5432/gastodehoy",
+        default="sqlite:///./data/gastodehoy.db",
         validation_alias=AliasChoices("DATABASE_URL"),
     )
     timezone: str = Field(
