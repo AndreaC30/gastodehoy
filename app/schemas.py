@@ -7,9 +7,9 @@ from_attributes=True)`` can be built directly from an ORM instance.
 
 from datetime import date
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.auth import (
     NAME_MAX_LEN,
@@ -36,30 +36,19 @@ def _validate_name(value: str) -> str:
     return s
 
 
+PasswordStr = Annotated[str, AfterValidator(_validate_password)]
+NameStr = Annotated[str, AfterValidator(_validate_name)]
+
+
 class RegisterRequest(BaseModel):
     email: EmailStr
-    name: str
-    password: str
-
-    @field_validator("name")
-    @classmethod
-    def _name(cls, v: str) -> str:
-        return _validate_name(v)
-
-    @field_validator("password")
-    @classmethod
-    def _pwd(cls, v: str) -> str:
-        return _validate_password(v)
+    name: NameStr
+    password: PasswordStr
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
-    password: str
-
-    @field_validator("password")
-    @classmethod
-    def _pwd(cls, v: str) -> str:
-        return _validate_password(v)
+    password: PasswordStr
 
 
 class UserPublic(BaseModel):
@@ -81,12 +70,7 @@ class RegisterResponse(BaseModel):
 class RecoverRequest(BaseModel):
     email: EmailStr
     recovery_code: str
-    new_password: str
-
-    @field_validator("new_password")
-    @classmethod
-    def _pwd(cls, v: str) -> str:
-        return _validate_password(v)
+    new_password: PasswordStr
 
     @field_validator("recovery_code")
     @classmethod
@@ -104,31 +88,16 @@ class RecoverResponse(BaseModel):
 
 
 class UpdateName(BaseModel):
-    name: str
-
-    @field_validator("name")
-    @classmethod
-    def _name(cls, v: str) -> str:
-        return _validate_name(v)
+    name: NameStr
 
 
 class ChangePassword(BaseModel):
-    current_password: str
-    new_password: str
-
-    @field_validator("current_password", "new_password")
-    @classmethod
-    def _pwd(cls, v: str) -> str:
-        return _validate_password(v)
+    current_password: PasswordStr
+    new_password: PasswordStr
 
 
 class DeleteAccount(BaseModel):
-    password: str
-
-    @field_validator("password")
-    @classmethod
-    def _pwd(cls, v: str) -> str:
-        return _validate_password(v)
+    password: PasswordStr
 
 
 SavingsMode = Literal["percent", "fixed"]
@@ -194,10 +163,24 @@ class VariableExpenseRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ExtraIncomeCreate(BaseModel):
+    amount: Decimal = Field(gt=0, decimal_places=2)
+    received_at: date | None = None
+
+
+class ExtraIncomeRead(BaseModel):
+    id: int
+    amount: Decimal
+    received_at: date
+
+    model_config = {"from_attributes": True}
+
+
 class SummaryRead(BaseModel):
     reference_date: date
     days_remaining_in_month: int
     monthly_income: Decimal
+    extra_income_month: Decimal
     savings_mode: SavingsMode
     savings_percent: Decimal
     savings_amount: Decimal

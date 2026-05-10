@@ -83,7 +83,7 @@ export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
           Vamos a configurar tu mes
         </h1>
         <p className="mt-2 text-sm text-slate-400">
-          Tres preguntas y listo. Podrás cambiarlo cuando quieras desde Ajustes.
+          Tres preguntas y listo. Podrás cambiarlo cuando quieras desde Tus ingresos.
         </p>
       </header>
 

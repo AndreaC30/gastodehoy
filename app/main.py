@@ -6,6 +6,7 @@ serves the built React app from ``web/dist``.
 """
 
 from contextlib import asynccontextmanager
+import logging
 from pathlib import Path
 
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -29,14 +30,29 @@ ASSETS_DIR = DIST_DIR / "assets"
 DEFAULT_APP_SECRET = "change-me-in-prod"
 MIN_APP_SECRET_LEN = 32
 
+_log = logging.getLogger(__name__)
+
+
+def _require_strong_app_secret(reason: str) -> None:
+    if app_settings.app_secret == DEFAULT_APP_SECRET:
+        raise RuntimeError(
+            f"{reason}: APP_SECRET sigue con el valor por defecto. "
+            "Genera uno: APP_SECRET=$(openssl rand -hex 32) y vuélvelo a desplegar."
+        )
+    if len(app_settings.app_secret) < MIN_APP_SECRET_LEN:
+        raise RuntimeError(
+            f"{reason}: APP_SECRET demasiado corto ({len(app_settings.app_secret)} < {MIN_APP_SECRET_LEN}). "
+            "Usa al menos 32 caracteres aleatorios."
+        )
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     """Startup hook.
 
-    Validates the configured timezone, refuses to start when
-    ``COOKIE_SECURE=true`` and ``APP_SECRET`` is still the default or too
-    short, and creates any missing tables. ``create_all`` does NOT add new
+    Validates the configured timezone, refuses to start when a strong
+    ``APP_SECRET`` is required (``COOKIE_SECURE=true`` or ``ENV=production``),
+    and creates any missing tables. ``create_all`` does NOT add new
     columns to existing tables: schema-altering changes still require a
     manual reset (drop the volume in dev).
     """
@@ -48,15 +64,14 @@ async def lifespan(_: FastAPI):
         ) from e
 
     if app_settings.cookie_secure:
-        if app_settings.app_secret == DEFAULT_APP_SECRET:
-            raise RuntimeError(
-                "Refusing to start: COOKIE_SECURE=true pero APP_SECRET sigue con el valor por defecto. "
-                "Genera uno: APP_SECRET=$(openssl rand -hex 32) y vuélvelo a desplegar."
-            )
-        if len(app_settings.app_secret) < MIN_APP_SECRET_LEN:
-            raise RuntimeError(
-                f"APP_SECRET demasiado corto ({len(app_settings.app_secret)} < {MIN_APP_SECRET_LEN}). "
-                "Usa al menos 32 caracteres aleatorios."
+        _require_strong_app_secret("Refusing to start: COOKIE_SECURE=true")
+
+    if app_settings.environment == "production":
+        _require_strong_app_secret("Refusing to start: ENV=production")
+        if not app_settings.cookie_secure:
+            _log.warning(
+                "ENV=production pero COOKIE_SECURE=false: la cookie de sesión puede enviarse sin "
+                "marcar Secure; usa HTTPS y COOKIE_SECURE=true cuando publiques."
             )
 
     Base.metadata.create_all(bind=db.engine)
@@ -67,10 +82,7 @@ app = FastAPI(title="GastoDeHoy", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5173",
-        "http://localhost:5173",
-    ],
+    allow_origins=app_settings.cors_origins_list(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -81,6 +93,7 @@ app.include_router(budget.settings_router)
 app.include_router(budget.summary_router)
 app.include_router(budget.fixed_router)
 app.include_router(budget.expenses_router)
+app.include_router(budget.extra_income_router)
 
 if ASSETS_DIR.is_dir():
     app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="vite-assets")

@@ -29,6 +29,7 @@ _install_sqlite_engine()
 from app.auth import _login_attempts, hash_password  # noqa: E402
 from app.database import SessionLocal  # noqa: E402
 from app.models import (  # noqa: E402
+    ExtraIncome,
     FixedExpense,
     User,
     UserSettings,
@@ -40,6 +41,7 @@ from app.models import (  # noqa: E402
 def reset_db() -> Generator[None, None, None]:
     with SessionLocal() as s:
         s.execute(delete(VariableExpense))
+        s.execute(delete(ExtraIncome))
         s.execute(delete(FixedExpense))
         s.execute(delete(UserSettings))
         s.execute(delete(User))

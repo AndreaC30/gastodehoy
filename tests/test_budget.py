@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
-from app.models import FixedExpense, UserSettings, VariableExpense
+from app.models import ExtraIncome, FixedExpense, UserSettings, VariableExpense
 from app.services.budget import compute_summary
 
 
@@ -24,6 +24,7 @@ def test_compute_summary_mid_month_no_spending(db_session, user) -> None:
     assert out["savings_amount"] == Decimal("300.00")
     assert out["fixed_expenses_total"] == Decimal("0.00")
     assert out["variable_spent_month"] == Decimal("0.00")
+    assert out["extra_income_month"] == Decimal("0.00")
     assert out["remaining_this_month"] == Decimal("2700.00")
     expected_daily = (Decimal("2700") / Decimal(17)).quantize(Decimal("0.01"))
     assert out["suggested_spend_today"] == expected_daily
@@ -81,6 +82,28 @@ def test_compute_summary_fixed_savings_capped_to_income(db_session, user) -> Non
     out = compute_summary(db_session, user.id, date(2026, 5, 15))
     assert out["savings_amount"] == Decimal("1000.00")
     assert out["monthly_budget_after_fixed_and_savings"] == Decimal("0.00")
+
+
+def test_compute_summary_extra_income_adds_to_budget(db_session, user) -> None:
+    """Los extras del mismo mes suman al margen; el % de ahorro sigue sobre el sueldo base."""
+    us = user.settings
+    us.monthly_income = Decimal("2000.00")
+    us.savings_percent = Decimal("10.00")
+    db_session.add(
+        ExtraIncome(
+            user_id=user.id,
+            amount=Decimal("300.00"),
+            received_at=date(2026, 5, 20),
+        )
+    )
+    db_session.commit()
+
+    ref = date(2026, 5, 15)
+    out = compute_summary(db_session, user.id, ref)
+
+    assert out["extra_income_month"] == Decimal("300.00")
+    assert out["savings_amount"] == Decimal("200.00")
+    assert out["monthly_budget_after_fixed_and_savings"] == Decimal("2100.00")
 
 
 def test_compute_summary_over_budget_negative_suggested(db_session, user) -> None:

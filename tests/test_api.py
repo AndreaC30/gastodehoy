@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from decimal import Decimal
 
 
@@ -18,6 +19,7 @@ def test_protected_endpoints_require_auth(anon_client) -> None:
     assert anon_client.get("/api/settings").status_code == 401
     assert anon_client.get("/api/fixed-expenses").status_code == 401
     assert anon_client.get("/api/expenses").status_code == 401
+    assert anon_client.get("/api/extra-income").status_code == 401
     assert anon_client.get("/api/auth/me").status_code == 401
 
 
@@ -262,6 +264,73 @@ def test_add_variable_expense_updates_summary(client) -> None:
     s = client.get("/api/summary")
     assert s.status_code == 200
     assert Decimal(str(s.json()["variable_spent_month"])) == Decimal("100.00")
+
+
+def test_list_expenses_filtered_by_year_month(client) -> None:
+    client.put(
+        "/api/settings",
+        json={"monthly_income": "1000.00", "savings_percent": "0"},
+    )
+    client.post(
+        "/api/expenses",
+        json={"amount": "10.00", "occurred_at": "2026-01-15"},
+    )
+    client.post(
+        "/api/expenses",
+        json={"amount": "25.00", "occurred_at": "2026-02-10"},
+    )
+    jan = client.get("/api/expenses?year=2026&month=1").json()
+    assert len(jan) == 1
+    assert Decimal(str(jan[0]["amount"])) == Decimal("10.00")
+
+
+def test_list_extra_income_filtered_by_year_month(client) -> None:
+    client.put(
+        "/api/settings",
+        json={"monthly_income": "1000.00", "savings_percent": "0"},
+    )
+    client.post(
+        "/api/extra-income",
+        json={"amount": "50.00", "received_at": "2026-03-05"},
+    )
+    client.post(
+        "/api/extra-income",
+        json={"amount": "75.00", "received_at": "2026-04-01"},
+    )
+    mar = client.get("/api/extra-income?year=2026&month=3").json()
+    assert len(mar) == 1
+    assert Decimal(str(mar[0]["amount"])) == Decimal("50.00")
+
+
+def test_extra_income_list_post_delete_and_summary(client) -> None:
+    client.put(
+        "/api/settings",
+        json={"monthly_income": "1000.00", "savings_percent": "0"},
+    )
+    today = date.today().isoformat()
+    empty = client.get("/api/extra-income").json()
+    assert empty == []
+
+    cr = client.post(
+        "/api/extra-income",
+        json={"amount": "150.00", "received_at": today},
+    )
+    assert cr.status_code == 200
+    row = cr.json()
+    assert Decimal(str(row["amount"])) == Decimal("150.00")
+
+    listed = client.get("/api/extra-income").json()
+    assert len(listed) == 1
+
+    s = client.get("/api/summary").json()
+    assert Decimal(str(s["extra_income_month"])) == Decimal("150.00")
+    assert Decimal(str(s["monthly_budget_after_fixed_and_savings"])) == Decimal("1150.00")
+
+    dr = client.delete(f"/api/extra-income/{row['id']}")
+    assert dr.status_code == 204
+    assert client.get("/api/extra-income").json() == []
+    s2 = client.get("/api/summary").json()
+    assert Decimal(str(s2["extra_income_month"])) == Decimal("0")
 
 
 def test_delete_variable_expense(client) -> None:
