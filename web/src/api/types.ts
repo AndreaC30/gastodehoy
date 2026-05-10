@@ -12,6 +12,7 @@ export type Summary = {
   reference_date: string;
   days_remaining_in_month: number;
   monthly_income: string | number;
+  extra_income_month: string | number;
   savings_mode: SavingsMode;
   savings_percent: string | number;
   savings_amount: string | number;
@@ -40,6 +41,13 @@ export type VariableExpense = {
   amount: string | number;
   occurred_at: string;
   note: string | null;
+};
+
+/** Occasional income received on a specific date (bonus, extra payroll…). */
+export type ExtraIncome = {
+  id: number;
+  amount: string | number;
+  received_at: string;
 };
 
 export type User = {

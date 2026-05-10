@@ -192,10 +192,16 @@ _login_attempts: dict[str, deque[float]] = {}
 
 
 def _client_ip(request: Request) -> str:
-    """Best-effort client IP, honouring ``X-Forwarded-For`` from Caddy."""
-    fwd = request.headers.get("x-forwarded-for")
-    if fwd:
-        return fwd.split(",")[0].strip()
+    """Client IP for rate limiting.
+
+    By default uses the TCP peer (safe on direct uvicorn). Set
+    ``TRUST_FORWARDED_FOR=true`` only behind a reverse proxy that sets
+    ``X-Forwarded-For`` correctly.
+    """
+    if settings.trust_forwarded_for:
+        fwd = request.headers.get("x-forwarded-for")
+        if fwd:
+            return fwd.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
 
 

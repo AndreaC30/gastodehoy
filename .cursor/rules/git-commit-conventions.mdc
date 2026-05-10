@@ -1,0 +1,17 @@
+---
+description: Commit messages in English; agent must not push to remote.
+alwaysApply: true
+---
+
+# Git commits and pushes
+
+## Messages
+
+- Write **commit titles and bodies in English** (clear, imperative mood when possible; Conventional Commits optional, e.g. `feat:`, `fix:`).
+- Spanish is fine for code comments and user-facing copy; **not** for git commit messages unless the user explicitly asks otherwise.
+
+## Agent behaviour
+
+- **Do not run `git push`** or any command that publishes commits to GitHub (including `gh pr create` with implicit push), unless the user explicitly orders a push in that conversation.
+- **Do not assume commits must be created by the agent.** If the user prefers GitHub Desktop, **provide the proposed commit message as plain text** they can paste there.
+- Only run `git commit` when the user clearly asks to create the commit from the agent session.

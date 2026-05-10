@@ -15,7 +15,25 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.models import FixedExpense, UserSettings, VariableExpense
+from app.models import ExtraIncome, FixedExpense, UserSettings, VariableExpense
+
+
+def _sum_amount_in_month(
+    session: Session,
+    model_cls: type,
+    user_id: int,
+    date_column,
+    month_start: date,
+    month_end: date,
+) -> Decimal:
+    raw = session.scalar(
+        select(func.coalesce(func.sum(model_cls.amount), 0)).where(
+            model_cls.user_id == user_id,
+            date_column >= month_start,
+            date_column <= month_end,
+        )
+    ) or Decimal("0")
+    return Decimal(raw).quantize(Decimal("0.01"))
 
 
 def today_in_app_timezone() -> date:
@@ -74,16 +92,28 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
     fixed_total = Decimal(fixed_total).quantize(Decimal("0.01"))
 
     month_start, month_end = month_bounds(reference)
-    variable_spent = session.scalar(
-        select(func.coalesce(func.sum(VariableExpense.amount), 0)).where(
-            VariableExpense.user_id == user_id,
-            VariableExpense.occurred_at >= month_start,
-            VariableExpense.occurred_at <= month_end,
-        )
-    ) or Decimal("0")
-    variable_spent = Decimal(variable_spent).quantize(Decimal("0.01"))
+    variable_spent = _sum_amount_in_month(
+        session,
+        VariableExpense,
+        user_id,
+        VariableExpense.occurred_at,
+        month_start,
+        month_end,
+    )
+    extra_month = _sum_amount_in_month(
+        session,
+        ExtraIncome,
+        user_id,
+        ExtraIncome.received_at,
+        month_start,
+        month_end,
+    )
 
-    monthly_budget = income - savings_amount - fixed_total
+    # Ingreso efectivo del mes: sueldo base + extras recibidos en el mes.
+    # El ahorro (porcentaje o fijo) sigue calculándose solo sobre el sueldo base.
+    effective_income = income + extra_month
+
+    monthly_budget = effective_income - savings_amount - fixed_total
     remaining = monthly_budget - variable_spent
 
     days_left = days_remaining_in_month(reference)
@@ -94,6 +124,7 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
         "reference_date": reference,
         "days_remaining_in_month": days_left,
         "monthly_income": income.quantize(Decimal("0.01")),
+        "extra_income_month": extra_month,
         "savings_mode": us.savings_mode,
         "savings_percent": pct.quantize(Decimal("0.01")),
         "savings_amount": savings_amount,

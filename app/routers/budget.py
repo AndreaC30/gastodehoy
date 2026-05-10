@@ -6,6 +6,7 @@ small and make endpoints easy to find.
 """
 
 from datetime import date
+from typing import TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
@@ -13,9 +14,11 @@ from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
 from app.database import get_db
-from app.models import FixedExpense, User, UserSettings, VariableExpense
+from app.models import ExtraIncome, FixedExpense, User, UserSettings, VariableExpense
 from app.schemas import (
     BudgetSettings,
+    ExtraIncomeCreate,
+    ExtraIncomeRead,
     FixedExpenseCreate,
     FixedExpenseRead,
     FixedExpenseUpdate,
@@ -31,6 +34,29 @@ settings_router = APIRouter(prefix="/api", tags=["settings"])
 summary_router = APIRouter(prefix="/api", tags=["summary"])
 fixed_router = APIRouter(prefix="/api/fixed-expenses", tags=["fixed-expenses"])
 expenses_router = APIRouter(prefix="/api/expenses", tags=["expenses"])
+extra_income_router = APIRouter(prefix="/api/extra-income", tags=["extra-income"])
+
+_Owned = TypeVar("_Owned")
+
+
+def _get_owned_or_404(
+    db: Session,
+    model: type[_Owned],
+    pk: int,
+    user_id: int,
+    detail: str,
+) -> _Owned:
+    row = db.get(model, pk)
+    if row is None or row.user_id != user_id:  # type: ignore[attr-defined, union-attr]
+        raise HTTPException(status_code=404, detail=detail)
+    return row
+
+
+def _calendar_month_bounds(year: int | None, month: int | None) -> tuple[date, date]:
+    ref = today_in_app_timezone()
+    y = year if year is not None else ref.year
+    m = month if month is not None else ref.month
+    return month_bounds(date(y, m, 1))
 
 
 # --- Settings ----------------------------------------------------------------
@@ -126,9 +152,9 @@ def update_fixed(
     user: User = Depends(get_current_user),
 ) -> FixedExpense:
     """Patch ``name`` and/or ``amount``; 404 if the row belongs to another user."""
-    row = db.get(FixedExpense, expense_id)
-    if row is None or row.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Gasto fijo no encontrado")
+    row = _get_owned_or_404(
+        db, FixedExpense, expense_id, user.id, "Gasto fijo no encontrado"
+    )
     if payload.name is None and payload.amount is None:
         raise HTTPException(status_code=400, detail="Nada que actualizar")
     if payload.name is not None:
@@ -147,9 +173,9 @@ def delete_fixed(
     user: User = Depends(get_current_user),
 ) -> None:
     """Delete a fixed expense; 404 if it belongs to another user."""
-    row = db.get(FixedExpense, expense_id)
-    if row is None or row.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Gasto fijo no encontrado")
+    row = _get_owned_or_404(
+        db, FixedExpense, expense_id, user.id, "Gasto fijo no encontrado"
+    )
     db.delete(row)
     db.commit()
 
@@ -165,10 +191,7 @@ def list_expenses(
     month: int | None = Query(default=None, ge=1, le=12),
 ) -> list[VariableExpense]:
     """List expenses for the given (or current) month, newest first."""
-    ref = today_in_app_timezone()
-    y = year if year is not None else ref.year
-    m = month if month is not None else ref.month
-    start, end = month_bounds(date(y, m, 1))
+    start, end = _calendar_month_bounds(year, month)
     stmt = (
         select(VariableExpense)
         .where(
@@ -208,8 +231,61 @@ def delete_expense(
     user: User = Depends(get_current_user),
 ) -> None:
     """Delete an expense; 404 if it belongs to another user."""
-    row = db.get(VariableExpense, expense_id)
-    if row is None or row.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Gasto no encontrado")
+    row = _get_owned_or_404(
+        db, VariableExpense, expense_id, user.id, "Gasto no encontrado"
+    )
+    db.delete(row)
+    db.commit()
+
+
+# --- Extra income (dated bonuses / irregular payroll) -------------------------
+
+
+@extra_income_router.get("", response_model=list[ExtraIncomeRead])
+def list_extra_income(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+    year: int | None = Query(default=None, ge=2000, le=3000),
+    month: int | None = Query(default=None, ge=1, le=12),
+) -> list[ExtraIncome]:
+    """List extra income rows for the given (or current) calendar month."""
+    start, end = _calendar_month_bounds(year, month)
+    stmt = (
+        select(ExtraIncome)
+        .where(
+            ExtraIncome.user_id == user.id,
+            ExtraIncome.received_at >= start,
+            ExtraIncome.received_at <= end,
+        )
+        .order_by(ExtraIncome.received_at.desc(), ExtraIncome.id.desc())
+    )
+    return list(db.scalars(stmt).all())
+
+
+@extra_income_router.post("", response_model=ExtraIncomeRead)
+def create_extra_income(
+    payload: ExtraIncomeCreate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> ExtraIncome:
+    """Register extra income; defaults the date to today in app TZ."""
+    day = payload.received_at or today_in_app_timezone()
+    row = ExtraIncome(user_id=user.id, amount=payload.amount, received_at=day)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+@extra_income_router.delete("/{entry_id}", status_code=204)
+def delete_extra_income(
+    entry_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> None:
+    """Delete an extra-income row; 404 if it belongs to another user."""
+    row = _get_owned_or_404(
+        db, ExtraIncome, entry_id, user.id, "Ingreso extra no encontrado"
+    )
     db.delete(row)
     db.commit()

@@ -53,6 +53,10 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    extra_incomes: Mapped[list["ExtraIncome"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
 
 class UserSettings(Base):
@@ -117,3 +121,20 @@ class VariableExpense(Base):
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     user: Mapped[User] = relationship(back_populates="variable_expenses")
+
+
+class ExtraIncome(Base):
+    """Occasional income in a given month (bonus, extra payroll…), dated."""
+
+    __tablename__ = "extra_incomes"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    received_at: Mapped[date] = mapped_column(Date, nullable=False)
+
+    user: Mapped[User] = relationship(back_populates="extra_incomes")

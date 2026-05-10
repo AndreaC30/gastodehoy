@@ -27,4 +27,6 @@ COPY --from=web-build /web/dist ./web/dist
 
 EXPOSE 8000
 
+# En runtime: define APP_SECRET (≥32 chars), ENV=production, COOKIE_SECURE=true,
+# CORS_ORIGINS, y TRUST_FORWARDED_FOR=true si hay reverse proxy.
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
