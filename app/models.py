@@ -8,7 +8,7 @@ removing a user cleans up everything they own.
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import Date, DateTime, ForeignKey, Numeric, String, Text, func
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -39,6 +39,13 @@ class User(Base):
     # Hash bcrypt del código de recuperación de un solo uso. NULL si no hay
     # código activo (se invalida al usarse hasta generar uno nuevo).
     recovery_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # True tras recuperación por correo con contraseña temporal hasta que elija una nueva.
+    must_change_password: Mapped[bool] = mapped_column(
+        Boolean(),
+        nullable=False,
+        default=False,
+        server_default="0",
+    )
 
     settings: Mapped["UserSettings"] = relationship(
         back_populates="user",

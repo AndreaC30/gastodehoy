@@ -1,12 +1,13 @@
 """HTTP endpoints for authentication.
 
-Register / login / logout use ``HttpOnly`` signed cookies. ``recover``
-swaps a password using the one-shot recovery code generated at register.
-A change of password (or a recovery) clears the cookie and forces re-login.
+Register / login / logout use ``HttpOnly`` signed cookies.
+``forgot-password`` envía una contraseña temporal por correo (requiere SMTP).
+Cambiar contraseña o recuperar invalida sesiones anteriores cuando aplique.
 """
 
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -15,26 +16,27 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth import (
+    PASSWORD_MAX_LEN,
+    PASSWORD_MIN_LEN,
     check_login_rate,
     clear_session_cookie,
-    generate_recovery_code,
     get_current_user,
     hash_password,
-    hash_recovery_code,
     make_session_token,
     reset_login_rate,
     set_session_cookie,
     verify_password,
-    verify_recovery_code,
 )
+from app.config import settings
 from app.database import get_db
+from app.mail import send_forgot_password_email
 from app.models import User, UserSettings
 from app.schemas import (
     ChangePassword,
     DeleteAccount,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
     LoginRequest,
-    RecoverRequest,
-    RecoverResponse,
     RegisterRequest,
     RegisterResponse,
     UpdateName,
@@ -43,10 +45,25 @@ from app.schemas import (
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
+_FORGOT_PASSWORD_MESSAGE = (
+    "Si existe una cuenta con ese correo, te hemos enviado una contraseña temporal. "
+    "Revisa la bandeja de entrada y la carpeta de spam."
+)
+
 
 def _normalize_email(email: str) -> str:
     """Lowercase + trim so logins are case-insensitive."""
     return email.strip().lower()
+
+
+def _random_password() -> str:
+    """Contraseña temporal segura y dentro del rango de validación."""
+    pw = secrets.token_urlsafe(32)
+    while len(pw) < PASSWORD_MIN_LEN:
+        pw += secrets.token_urlsafe(8)
+    if len(pw) > PASSWORD_MAX_LEN:
+        return pw[:PASSWORD_MAX_LEN]
+    return pw
 
 
 @router.post(
@@ -59,17 +76,16 @@ def register(
     response: Response,
     db: Session = Depends(get_db),
 ) -> RegisterResponse:
-    """Create an account, set the session cookie, and return the
-    one-time recovery code (it is shown to the user only once)."""
+    """Crea la cuenta, fija la cookie de sesión y devuelve el usuario."""
     email = _normalize_email(payload.email)
     now = datetime.now(timezone.utc).replace(microsecond=0)
-    recovery_code = generate_recovery_code()
     user = User(
         email=email,
         name=payload.name,
         password_hash=hash_password(payload.password),
         password_changed_at=now,
-        recovery_hash=hash_recovery_code(recovery_code),
+        recovery_hash=None,
+        must_change_password=False,
     )
     user.settings = UserSettings()
     db.add(user)
@@ -86,10 +102,7 @@ def register(
     db.commit()
     db.refresh(user)
     set_session_cookie(response, make_session_token(user.id))
-    return RegisterResponse(
-        user=UserPublic.model_validate(user),
-        recovery_code=recovery_code,
-    )
+    return RegisterResponse(user=UserPublic.model_validate(user))
 
 
 @router.post("/login", response_model=UserPublic)
@@ -98,7 +111,7 @@ def login(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-) -> User:
+) -> UserPublic:
     """Verify credentials, apply IP rate-limit and set the session cookie."""
     check_login_rate(request)
     email = _normalize_email(payload.email)
@@ -113,7 +126,7 @@ def login(
     db.commit()
     db.refresh(user)
     set_session_cookie(response, make_session_token(user.id))
-    return user
+    return UserPublic.model_validate(user)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
@@ -122,45 +135,60 @@ def logout(response: Response) -> None:
     clear_session_cookie(response)
 
 
-@router.post("/recover", response_model=RecoverResponse)
-def recover(
-    payload: RecoverRequest,
+@router.post("/forgot-password", response_model=ForgotPasswordResponse)
+def forgot_password(
+    payload: ForgotPasswordRequest,
     request: Request,
-    response: Response,
     db: Session = Depends(get_db),
-) -> RecoverResponse:
-    """Reset the password using the one-shot recovery code.
+) -> ForgotPasswordResponse:
+    """Genera una contraseña nueva y la envía por correo si el usuario existe.
 
-    The code is invalidated on use and a fresh one is returned. No session
-    is opened: the user must log in again with the new password.
+    Sin SMTP configurado responde 503. Misma respuesta 200 para correo
+    inexistente (no revelar cuentas).
     """
     check_login_rate(request)
+    if not (settings.smtp_host and settings.smtp_host.strip()):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "La recuperación por correo no está disponible: falta configuración SMTP "
+                "en el servidor (SMTP_HOST, remitente, credenciales)."
+            ),
+        )
+
     email = _normalize_email(payload.email)
     user = db.scalar(select(User).where(func.lower(User.email) == email))
-    if user is None or not verify_recovery_code(
-        payload.recovery_code, user.recovery_hash
-    ):
-        # Mensaje genérico para no filtrar si el email existe.
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Email o código de recuperación incorrectos",
-        )
-    reset_login_rate(request)
 
-    new_code = generate_recovery_code()
-    user.password_hash = hash_password(payload.new_password)
-    user.password_changed_at = datetime.now(timezone.utc)
-    user.recovery_hash = hash_recovery_code(new_code)
-    db.commit()
-    # Invalida cualquier sesión previa: el usuario debe hacer login.
-    clear_session_cookie(response)
-    return RecoverResponse(recovery_code=new_code)
+    if user is None:
+        return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)
+
+    temp_pw = _random_password()
+    user.password_hash = hash_password(temp_pw)
+    user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
+    user.recovery_hash = None
+    user.must_change_password = True
+
+    try:
+        db.flush()
+        send_forgot_password_email(email, temp_pw)
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="No se pudo enviar el correo. Inténtalo más tarde o contacta al administrador.",
+        ) from exc
+
+    # No llamamos a reset_login_rate: cada solicitud cuenta para el límite,
+    # igual que intentos fallidos de login (anti-abuso del correo).
+
+    return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)
 
 
 @router.get("/me", response_model=UserPublic)
-def me(user: User = Depends(get_current_user)) -> User:
+def me(user: User = Depends(get_current_user)) -> UserPublic:
     """Return the currently-authenticated user (or 401)."""
-    return user
+    return UserPublic.model_validate(user)
 
 
 @router.patch("/me", response_model=UserPublic)
@@ -168,12 +196,12 @@ def update_me(
     payload: UpdateName,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
-) -> User:
+) -> UserPublic:
     """Rename the authenticated user."""
     user.name = payload.name
     db.commit()
     db.refresh(user)
-    return user
+    return UserPublic.model_validate(user)
 
 
 @router.put("/me/password", response_model=UserPublic)
@@ -182,24 +210,31 @@ def change_password(
     response: Response,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
-) -> User:
-    """Change the password and clear ALL sessions (forces re-login)."""
+) -> UserPublic:
+    """Cambia la contraseña.
+
+    Si venías de una contraseña temporal (recuperación por correo), se
+    emite una cookie nueva y sigues dentro. Si no, se cierra la sesión
+    actual como antes (re-login obligatorio; otras cookies ya eran inválidas).
+    """
     if not verify_password(payload.current_password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Contraseña actual incorrecta",
         )
+    forced = user.must_change_password
     user.password_hash = hash_password(payload.new_password)
-    # Microsegundos sí: garantiza que el `issued_at` de cualquier cookie
-    # previa (segundo-precisión) sea estrictamente menor que este timestamp,
-    # incluso si todo ocurre en el mismo segundo de reloj.
-    user.password_changed_at = datetime.now(timezone.utc)
+    # Sin microsegundos: el `issued_at` de la cookie (precisión ~segundo) debe
+    # quedar alineado con este timestamp para no invalidar la sesión recién emitida.
+    user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
+    user.must_change_password = False
     db.commit()
     db.refresh(user)
-    # Tras cambiar la clave invalidamos TODAS las sesiones, incluida ésta.
-    # El usuario hace login otra vez con la nueva contraseña.
-    clear_session_cookie(response)
-    return user
+    if forced:
+        set_session_cookie(response, make_session_token(user.id))
+    else:
+        clear_session_cookie(response)
+    return UserPublic.model_validate(user)
 
 
 @router.post("/me/delete", status_code=status.HTTP_204_NO_CONTENT)

@@ -1,38 +1,23 @@
 /**
- * Login / register / recover screen.
+ * Login / register / forgot-password screen.
  *
- * Three forms behind a tab-like switch. After register or recover we
- * display the one-time recovery code (RecoveryCodeCard) and only mark
- * the user as authenticated once they confirm having saved it; doing
- * it earlier would unmount this screen before the code can be shown.
+ * La recuperación envía una contraseña temporal por correo (requiere SMTP en el servidor).
  */
 import { type FormEvent, useState } from "react";
 import { api } from "@/api/client";
 import type {
-  RecoverResponse,
+  ForgotPasswordResponse,
   RegisterResponse,
   User,
 } from "@/api/types";
 import { setUser } from "@/auth";
-import { RecoveryCodeCard } from "./recovery-code-card";
 
-type Mode = "login" | "register" | "recover";
+type Mode = "login" | "register" | "forgot";
 
-/** Public entry point: renders the right form (and the recovery card overlay). */
+/** Public entry point: renders the right form. */
 export function LoginScreen() {
   const [mode, setMode] = useState<Mode>("login");
   const [error, setError] = useState<string | null>(null);
-  // Código a mostrar tras registro o tras recuperación. Mientras esté
-  // presente, ocultamos el resto del formulario.
-  // Mientras esté presente, ocultamos el resto del formulario.
-  // Para el flujo de registro guardamos también el `user` y solo llamamos a
-  // `setUser` cuando el usuario confirma haber guardado el código; si no,
-  // App.tsx desmontaría `LoginScreen` antes de poder enseñarlo.
-  const [pendingCode, setPendingCode] = useState<
-    | { code: string; flow: "register"; user: User }
-    | { code: string; flow: "recover" }
-    | null
-  >(null);
 
   return (
     <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
@@ -44,99 +29,56 @@ export function LoginScreen() {
           Cada uno con su cuenta, sin pisarse.
         </p>
 
-        {pendingCode ? (
-          <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-xl shadow-black/30">
-            <RecoveryCodeCard
-              code={pendingCode.code}
-              title={
-                pendingCode.flow === "recover"
-                  ? "Contraseña actualizada"
-                  : "Guarda tu código de recuperación"
-              }
-              intro={
-                pendingCode.flow === "recover"
-                  ? "El código anterior queda invalidado. Aquí tienes uno nuevo: guárdalo y vuelve a entrar con tu nueva contraseña."
-                  : "Si olvidas tu contraseña, este código te dejará entrar y elegir una nueva. No volveremos a mostrarlo."
-              }
-              ctaLabel={
-                pendingCode.flow === "recover" ? "Ir a entrar" : "Empezar a usar la app"
-              }
-              onAcknowledge={() => {
-                if (pendingCode.flow === "register") {
-                  // Ahora sí: log-in efectivo. Esto desmonta LoginScreen
-                  // y App.tsx pasa al wizard / dashboard.
-                  setUser(pendingCode.user);
-                } else {
+        {mode !== "forgot" && (
+          <div className="mt-6 flex rounded-xl border border-slate-800 bg-slate-900/60 p-1 text-sm">
+              <TabButton
+                active={mode === "login"}
+                onClick={() => {
                   setMode("login");
-                }
-                setPendingCode(null);
+                  setError(null);
+                }}
+              >
+                Entrar
+              </TabButton>
+              <TabButton
+                active={mode === "register"}
+                onClick={() => {
+                  setMode("register");
+                  setError(null);
+                }}
+              >
+                Crear cuenta
+              </TabButton>
+            </div>
+        )}
+
+        {error && (
+          <div className="mt-4 rounded-2xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-sm text-rose-200">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-xl shadow-black/30">
+          {mode === "login" && (
+            <LoginForm
+              onError={setError}
+              onForgot={() => {
+                setError(null);
+                setMode("forgot");
               }}
             />
-          </div>
-        ) : (
-          <>
-            {mode !== "recover" && (
-              <div className="mt-6 flex rounded-xl border border-slate-800 bg-slate-900/60 p-1 text-sm">
-                <TabButton
-                  active={mode === "login"}
-                  onClick={() => {
-                    setMode("login");
-                    setError(null);
-                  }}
-                >
-                  Entrar
-                </TabButton>
-                <TabButton
-                  active={mode === "register"}
-                  onClick={() => {
-                    setMode("register");
-                    setError(null);
-                  }}
-                >
-                  Crear cuenta
-                </TabButton>
-              </div>
-            )}
-
-            {error && (
-              <div className="mt-4 rounded-2xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-sm text-rose-200">
-                {error}
-              </div>
-            )}
-
-            <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-xl shadow-black/30">
-              {mode === "login" && (
-                <LoginForm
-                  onError={setError}
-                  onForgot={() => {
-                    setError(null);
-                    setMode("recover");
-                  }}
-                />
-              )}
-              {mode === "register" && (
-                <RegisterForm
-                  onError={setError}
-                  onRegistered={(user, code) =>
-                    setPendingCode({ flow: "register", user, code })
-                  }
-                />
-              )}
-              {mode === "recover" && (
-                <RecoverForm
-                  onError={setError}
-                  onCancel={() => {
-                    setError(null);
-                    setMode("login");
-                  }}
-                  onDone={(code) =>
-                    setPendingCode({ code, flow: "recover" })
-                  }
-                />
-              )}
-            </div>
-          </>
-        )}
+          )}
+          {mode === "register" && <RegisterForm onError={setError} />}
+          {mode === "forgot" && (
+            <ForgotForm
+              onError={setError}
+              onCancel={() => {
+                setError(null);
+                setMode("login");
+              }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -184,11 +126,12 @@ function LoginForm({
     onError(null);
     setBusy(true);
     try {
-      const u = await api<User>("/api/auth/login", {
+      await api<User>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
-      setUser(u);
+      const me = await api<User>("/api/auth/me");
+      setUser(me);
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -231,16 +174,10 @@ function LoginForm({
   );
 }
 
-/**
- * Sign-up form. Bubbles `(user, recoveryCode)` up so the parent can
- * show the recovery-code card before flipping the auth state.
- */
 function RegisterForm({
   onError,
-  onRegistered,
 }: {
   onError: (m: string | null) => void;
-  onRegistered: (user: User, recoveryCode: string) => void;
 }) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -261,14 +198,12 @@ function RegisterForm({
     }
     setBusy(true);
     try {
-      const res = await api<RegisterResponse>("/api/auth/register", {
+      await api<RegisterResponse>("/api/auth/register", {
         method: "POST",
         body: JSON.stringify({ email, name: name.trim(), password }),
       });
-      // Importante: NO llamamos a setUser aquí. Si lo hiciéramos, App.tsx
-      // desmontaría LoginScreen y nunca veríamos la pantalla del código.
-      // El padre (LoginScreen) hará el setUser tras confirmar la lectura.
-      onRegistered(res.user, res.recovery_code);
+      const me = await api<User>("/api/auth/me");
+      setUser(me);
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -319,52 +254,58 @@ function RegisterForm({
   );
 }
 
-/**
- * Password recovery form. Submits email + recovery code + new password
- * and yields the freshly-rotated recovery code to the parent.
- */
-function RecoverForm({
+function ForgotForm({
   onError,
   onCancel,
-  onDone,
 }: {
   onError: (m: string | null) => void;
   onCancel: () => void;
-  onDone: (newCode: string) => void;
 }) {
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
   const [busy, setBusy] = useState(false);
+  const [doneMessage, setDoneMessage] = useState<string | null>(null);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     onError(null);
-    if (password.length < 8) {
-      onError("La contraseña debe tener al menos 8 caracteres");
-      return;
-    }
-    if (password !== password2) {
-      onError("Las contraseñas no coinciden");
-      return;
-    }
     setBusy(true);
     try {
-      const res = await api<RecoverResponse>("/api/auth/recover", {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          recovery_code: code.trim(),
-          new_password: password,
-        }),
-      });
-      onDone(res.recovery_code);
+      const res = await api<ForgotPasswordResponse>(
+        "/api/auth/forgot-password",
+        {
+          method: "POST",
+          body: JSON.stringify({ email }),
+        },
+      );
+      setDoneMessage(res.detail);
     } catch (e) {
       onError((e as Error).message);
     } finally {
       setBusy(false);
     }
+  }
+
+  if (doneMessage) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">
+            Revisa tu correo
+          </h2>
+          <p className="mt-2 text-sm text-teal-200/90">{doneMessage}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setDoneMessage(null);
+            onCancel();
+          }}
+          className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110"
+        >
+          Volver a entrar
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -374,9 +315,9 @@ function RecoverForm({
           Recuperar contraseña
         </h2>
         <p className="mt-1 text-sm text-slate-400">
-          Introduce el código que guardaste al crear la cuenta y elige una
-          contraseña nueva. Si lo has perdido, pídele al administrador que la
-          resetee desde el servidor.
+          Te enviaremos una contraseña nueva al correo de tu cuenta. Si no
+          llega nada, revisa spam o contacta al administrador (hace falta correo
+          configurado en el servidor).
         </p>
       </div>
 
@@ -387,27 +328,6 @@ function RecoverForm({
         autoFocus
         value={email}
         onChange={setEmail}
-      />
-      <Field
-        label="Código de recuperación"
-        type="text"
-        autoComplete="off"
-        value={code}
-        onChange={setCode}
-      />
-      <Field
-        label="Nueva contraseña"
-        type="password"
-        autoComplete="new-password"
-        value={password}
-        onChange={setPassword}
-      />
-      <Field
-        label="Repite la nueva contraseña"
-        type="password"
-        autoComplete="new-password"
-        value={password2}
-        onChange={setPassword2}
       />
 
       <div className="flex items-center justify-between gap-3 pt-1">
@@ -420,10 +340,10 @@ function RecoverForm({
         </button>
         <button
           type="submit"
-          disabled={busy || !email || !code || !password || !password2}
+          disabled={busy || !email}
           className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
         >
-          {busy ? "Guardando…" : "Cambiar contraseña"}
+          {busy ? "Enviando…" : "Enviar correo"}
         </button>
       </div>
     </form>
@@ -476,7 +396,6 @@ function Field({
             onClick={() => setVisible((v) => !v)}
             aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
             aria-pressed={visible}
-            // tabIndex=-1 evita que se cuele entre el campo y el botón de submit.
             tabIndex={-1}
             className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 hover:text-slate-300 focus:text-slate-300 focus:outline-none"
           >

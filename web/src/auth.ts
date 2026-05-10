@@ -7,6 +7,17 @@
  */
 import type { User } from "@/api/types";
 
+/** Normaliza `must_change_password` (JSON puede mandar true o 1). */
+function normalizeUser(u: User): User {
+  const raw = u.must_change_password as unknown;
+  const must =
+    raw === true ||
+    raw === 1 ||
+    raw === "1" ||
+    String(raw).toLowerCase() === "true";
+  return { ...u, must_change_password: must };
+}
+
 /** "loading" while we ask the server `/me`, then either "auth" or "anon". */
 type Status = "loading" | "anon" | "auth";
 
@@ -34,7 +45,8 @@ function setSnapshot(next: AuthSnapshot): void {
     next.status === current.status &&
     next.user?.id === current.user?.id &&
     next.user?.email === current.user?.email &&
-    next.user?.name === current.user?.name
+    next.user?.name === current.user?.name &&
+    next.user?.must_change_password === current.user?.must_change_password
   ) {
     return;
   }
@@ -42,9 +54,9 @@ function setSnapshot(next: AuthSnapshot): void {
   for (const l of listeners) l();
 }
 
-/** Mark the user as authenticated (after register/login/recover). */
+/** Mark the user as authenticated (after register/login). */
 export function setUser(user: User): void {
-  setSnapshot({ status: "auth", user });
+  setSnapshot({ status: "auth", user: normalizeUser(user) });
 }
 
 /** Mark the session as logged out (also called by the API client on 401). */

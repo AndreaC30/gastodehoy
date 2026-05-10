@@ -52,9 +52,8 @@ async def lifespan(_: FastAPI):
 
     Validates the configured timezone, refuses to start when a strong
     ``APP_SECRET`` is required (``COOKIE_SECURE=true`` or ``ENV=production``),
-    and creates any missing tables. ``create_all`` does NOT add new
-    columns to existing tables: schema-altering changes still require a
-    manual reset (drop the volume in dev).
+    and creates any missing tables. Para SQLite se aplican migraciones
+    ligeras (p. ej. columnas nuevas) tras ``create_all``.
     """
     try:
         ZoneInfo(app_settings.timezone)
@@ -75,6 +74,7 @@ async def lifespan(_: FastAPI):
             )
 
     Base.metadata.create_all(bind=db.engine)
+    db.apply_sqlite_migrations(db.engine)
     yield
 
 

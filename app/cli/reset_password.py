@@ -64,8 +64,9 @@ def main() -> None:
         new_code = generate_recovery_code()
 
         user.password_hash = hash_password(password)
-        user.password_changed_at = datetime.now(timezone.utc)
+        user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
         user.recovery_hash = hash_recovery_code(new_code)
+        user.must_change_password = False
         db.commit()
 
     print()

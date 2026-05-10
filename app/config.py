@@ -61,6 +61,40 @@ class Settings(BaseSettings):
             "En false se usa la IP del socket (recomendado en dev / sin proxy)."
         ),
     )
+    smtp_host: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("SMTP_HOST"),
+        description="Servidor SMTP (vacío = recuperación por correo desactivada).",
+    )
+    smtp_port: int = Field(
+        default=587,
+        ge=1,
+        le=65535,
+        validation_alias=AliasChoices("SMTP_PORT"),
+    )
+    smtp_user: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("SMTP_USER"),
+    )
+    smtp_password: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("SMTP_PASSWORD"),
+    )
+    smtp_from: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("SMTP_FROM"),
+        description="Remitente From (si no se pone, se usa SMTP_USER).",
+    )
+    smtp_use_tls: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("SMTP_USE_TLS"),
+        description="STARTTLS (puerto típico 587). False si usas SSL directo.",
+    )
+    smtp_use_ssl: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("SMTP_USE_SSL"),
+        description="SMTP_SSL (puerto típico 465). Si es true, TLS implícito.",
+    )
 
     def cors_origins_list(self) -> list[str]:
         parts = [x.strip() for x in self.cors_origins.split(",") if x.strip()]

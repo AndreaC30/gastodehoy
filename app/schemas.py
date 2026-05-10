@@ -55,36 +55,31 @@ class UserPublic(BaseModel):
     id: int
     email: EmailStr
     name: str
+    must_change_password: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator("must_change_password", mode="before")
+    @classmethod
+    def _coerce_must_change(cls, v: object) -> bool:
+        """SQLite puede exponer 0/1 antes de la coerción a bool."""
+        if v in (True, 1, "1", "true", "True"):
+            return True
+        return False
+
 
 class RegisterResponse(BaseModel):
-    """Sólo se devuelve UNA vez, justo al crear la cuenta. El código de
-    recuperación NO se vuelve a enseñar; el usuario debe guardarlo."""
-
     user: UserPublic
-    recovery_code: str
 
 
-class RecoverRequest(BaseModel):
+class ForgotPasswordRequest(BaseModel):
     email: EmailStr
-    recovery_code: str
-    new_password: PasswordStr
-
-    @field_validator("recovery_code")
-    @classmethod
-    def _code(cls, v: str) -> str:
-        s = v.strip()
-        if len(s) < 8:
-            raise ValueError("Código de recuperación inválido")
-        return s
 
 
-class RecoverResponse(BaseModel):
-    """Tras un reset exitoso devolvemos un código nuevo (uso único)."""
+class ForgotPasswordResponse(BaseModel):
+    """Mismo texto si el correo existe o no (anti-enumeración)."""
 
-    recovery_code: str
+    detail: str
 
 
 class UpdateName(BaseModel):

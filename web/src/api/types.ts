@@ -54,13 +54,14 @@ export type User = {
   id: number;
   email: string;
   name: string;
+  /** True hasta que cambie la contraseña temporal enviada por correo. */
+  must_change_password?: boolean;
 };
 
 export type RegisterResponse = {
   user: User;
-  recovery_code: string;
 };
 
-export type RecoverResponse = {
-  recovery_code: string;
+export type ForgotPasswordResponse = {
+  detail: string;
 };

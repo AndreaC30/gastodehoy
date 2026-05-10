@@ -12,6 +12,7 @@ import { Dashboard } from "@/components/dashboard/dashboard-view";
 import { LoadingSplash } from "@/components/loading-splash";
 import { LoginScreen } from "@/components/login-screen";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
+import { ForcePasswordChangeModal } from "@/components/force-password-change-modal";
 import { AppBackdrop } from "@/components/app-backdrop";
 import {
   setAnonymous,
@@ -63,9 +64,25 @@ export default function App() {
 }
 
 function Authed({ userName }: { userName: string }) {
-  const settingsQ = useQuery({ queryKey: ["settings"], queryFn: loadSettings });
+  const auth = useSyncExternalStore(subscribe, snapshot);
+  const mustChange = auth.user?.must_change_password === true;
+
+  const settingsQ = useQuery({
+    queryKey: ["settings"],
+    queryFn: loadSettings,
+    enabled: !mustChange,
+  });
   const [skipped, setSkipped] = useState(false);
   const qc = useQueryClient();
+
+  if (mustChange && auth.user) {
+    return (
+      <div className={APP_SHELL_CLASS}>
+        <AppBackdrop />
+        <ForcePasswordChangeModal onDone={setAuthUser} />
+      </div>
+    );
+  }
 
   if (settingsQ.isPending) {
     return <LoadingSplash />;

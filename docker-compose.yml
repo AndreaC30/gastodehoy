@@ -10,6 +10,14 @@ services:
       APP_SECRET: ${APP_SECRET:-change-me-in-prod}
       SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-30}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      # SMTP: deben existir en el .env del host; Compose las inyecta aquí.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      SMTP_USE_SSL: ${SMTP_USE_SSL:-false}
     volumes:
       # Persistencia: el archivo .db vive en ./data/ del host.
       - ./data:/app/data

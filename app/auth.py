@@ -1,8 +1,8 @@
 """Authentication primitives.
 
 Password hashing (bcrypt), session cookies signed with itsdangerous,
-recovery-code generation/verification, ``get_current_user`` dependency
-and a tiny in-memory IP rate limiter for ``/login`` and ``/recover``.
+recovery-code helpers for the admin CLI, ``get_current_user`` dependency,
+and a tiny in-memory IP rate limiter for login and forgot-password.
 """
 
 from __future__ import annotations
@@ -206,7 +206,7 @@ def _client_ip(request: Request) -> str:
 
 
 def check_login_rate(request: Request) -> None:
-    """Throttle login/recover attempts: 5 per IP per 5 minutes -> 429."""
+    """Throttle login/forgot-password attempts: 5 per IP per 5 minutes -> 429."""
     ip = _client_ip(request)
     now = monotonic()
     q = _login_attempts.setdefault(ip, deque())

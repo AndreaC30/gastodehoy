@@ -16,7 +16,8 @@ For SQLite we apply two extras the moment a connection is opened:
 from collections.abc import Generator
 from pathlib import Path
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -54,6 +55,22 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class Base(DeclarativeBase):
     """Base class for every ORM model in the project."""
+
+
+def apply_sqlite_migrations(engine: Engine) -> None:
+    """Añade columnas nuevas en SQLite sin Alembic (BBDD ya existentes)."""
+    if make_url(settings.database_url).get_backend_name() != "sqlite":
+        return
+    with engine.begin() as conn:
+        rows = conn.execute(text("PRAGMA table_info(users)")).fetchall()
+        colnames = {str(r[1]) for r in rows}
+        if "must_change_password" not in colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE users ADD COLUMN must_change_password "
+                    "BOOLEAN NOT NULL DEFAULT 0"
+                )
+            )
 
 
 def get_db() -> Generator[Session, None, None]:

@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
+from app.config import settings as app_settings
+
 
 def test_health(anon_client) -> None:
     r = anon_client.get("/health")
@@ -36,95 +38,114 @@ def test_register_sets_cookie_and_me_works(anon_client) -> None:
     body = r.json()
     assert body["user"]["email"] == "pablo@example.com"
     assert body["user"]["name"] == "Pablo"
-    assert body["recovery_code"].startswith("gdh-")
 
     me = anon_client.get("/api/auth/me")
     assert me.status_code == 200
     assert me.json()["email"] == "pablo@example.com"
 
 
-def test_recover_with_valid_code_sets_new_password_and_rotates_code(
-    anon_client,
+def test_forgot_password_without_smtp_returns_503(anon_client, monkeypatch) -> None:
+    monkeypatch.setattr(app_settings, "smtp_host", None)
+    r = anon_client.post("/api/auth/forgot-password", json={"email": "x@e.com"})
+    assert r.status_code == 503
+
+
+def test_forgot_password_sends_mail_and_sets_temp_password(
+    anon_client, monkeypatch
 ) -> None:
-    reg = anon_client.post(
-        "/api/auth/register",
-        json={"email": "lost@e.com", "name": "L", "password": "supersecret1"},
+    sent: list[tuple[str, str]] = []
+
+    def fake_send(to_email: str, temporary_password: str) -> None:
+        sent.append((to_email, temporary_password))
+
+    monkeypatch.setattr(
+        "app.routers.auth.send_forgot_password_email", fake_send
     )
-    code = reg.json()["recovery_code"]
+    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
+    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "fp@e.com", "name": "FP", "password": "supersecret1"},
+    )
     anon_client.post("/api/auth/logout")
 
-    r = anon_client.post(
-        "/api/auth/recover",
-        json={
-            "email": "lost@e.com",
-            "recovery_code": code,
-            "new_password": "newsecret1",
-        },
-    )
+    r = anon_client.post("/api/auth/forgot-password", json={"email": "fp@e.com"})
     assert r.status_code == 200
-    new_code = r.json()["recovery_code"]
-    assert new_code.startswith("gdh-")
-    assert new_code != code
+    detail = r.json()["detail"]
+    assert "correo" in detail.lower()
 
-    # Login con la NUEVA contraseña funciona.
+    assert len(sent) == 1
+    assert sent[0][0] == "fp@e.com"
+    temp_pw = sent[0][1]
+
     ok = anon_client.post(
         "/api/auth/login",
-        json={"email": "lost@e.com", "password": "newsecret1"},
+        json={"email": "fp@e.com", "password": temp_pw},
     )
     assert ok.status_code == 200
+    me = anon_client.get("/api/auth/me")
+    assert me.status_code == 200
+    assert me.json()["must_change_password"] is True
 
-    # El código viejo ya no sirve (uso único).
-    anon_client.post("/api/auth/logout")
-    bad = anon_client.post(
-        "/api/auth/recover",
+    changed = anon_client.put(
+        "/api/auth/me/password",
         json={
-            "email": "lost@e.com",
-            "recovery_code": code,
-            "new_password": "anothersecret1",
+            "current_password": temp_pw,
+            "new_password": "myownsecret2",
         },
     )
-    assert bad.status_code == 401
+    assert changed.status_code == 200
+    assert changed.json()["must_change_password"] is False
+    still = anon_client.get("/api/auth/me")
+    assert still.status_code == 200
+    assert still.json()["must_change_password"] is False
 
 
-def test_recover_wrong_code_rejected(anon_client) -> None:
-    anon_client.post(
-        "/api/auth/register",
-        json={"email": "w@e.com", "name": "W", "password": "supersecret1"},
+def test_forgot_password_unknown_email_same_response(anon_client, monkeypatch) -> None:
+    """Does not send mail or reveal existence; still returns the generic message."""
+
+    sent: list[str] = []
+
+    def fake_send(to_email: str, temporary_password: str) -> None:
+        sent.append(to_email)
+
+    monkeypatch.setattr(
+        "app.routers.auth.send_forgot_password_email", fake_send
     )
-    anon_client.post("/api/auth/logout")
+    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
+    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+
     r = anon_client.post(
-        "/api/auth/recover",
-        json={
-            "email": "w@e.com",
-            "recovery_code": "gdh-aaaa-bbbb-cccc-dddd",
-            "new_password": "newsecret1",
-        },
+        "/api/auth/forgot-password", json={"email": "ghost@e.com"}
     )
-    assert r.status_code == 401
+    assert r.status_code == 200
+    assert "correo" in r.json()["detail"].lower()
+    assert sent == []
 
 
-def test_recover_rate_limited(anon_client) -> None:
+def test_forgot_password_rate_limited(anon_client, monkeypatch) -> None:
+    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
+    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+    monkeypatch.setattr(
+        "app.routers.auth.send_forgot_password_email",
+        lambda *_a, **_k: None,
+    )
+
     anon_client.post(
         "/api/auth/register",
-        json={"email": "rl@e.com", "name": "RL", "password": "supersecret1"},
+        json={"email": "rlfp@e.com", "name": "RL", "password": "supersecret1"},
     )
     anon_client.post("/api/auth/logout")
+
     for _ in range(5):
         anon_client.post(
-            "/api/auth/recover",
-            json={
-                "email": "rl@e.com",
-                "recovery_code": "gdh-zzzz-zzzz-zzzz-zzzz",
-                "new_password": "newsecret1",
-            },
+            "/api/auth/forgot-password",
+            json={"email": "rlfp@e.com"},
         )
     blocked = anon_client.post(
-        "/api/auth/recover",
-        json={
-            "email": "rl@e.com",
-            "recovery_code": "gdh-zzzz-zzzz-zzzz-zzzz",
-            "new_password": "newsecret1",
-        },
+        "/api/auth/forgot-password",
+        json={"email": "rlfp@e.com"},
     )
     assert blocked.status_code == 429
 

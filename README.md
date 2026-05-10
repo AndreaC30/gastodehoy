@@ -19,7 +19,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Abre **http://localhost:8000** y crea tu cuenta. La pantalla te enseñará **una sola vez** un código de recuperación tipo `gdh-xxxx-xxxx-xxxx-xxxx`. Cópialo a tu gestor de contraseñas; te servirá si algún día olvidas tu contraseña.
+Abre **http://localhost:8000** y crea tu cuenta. Si olvidas la contraseña, usa **He olvidado mi contraseña**: el servidor puede enviarte una **contraseña temporal por correo** (hay que configurar variables **SMTP** en `.env`; si no, verás un error 503 en esa acción). En desarrollo local suele faltar SMTP; entonces resetea desde el servidor (apartado siguiente) o configura un SMTP de prueba.
 
 ### Bajarla (sin borrar datos)
 
@@ -115,13 +115,13 @@ Añade esta línea para un dump cada día a las 3:30 con rotación de 7 días:
 
 ### Resetear la contraseña de alguien
 
-Si un usuario pierde la contraseña **y** el código de recuperación, desde el servidor:
+Si **no** tienes recuperación por correo (SMTP) o prefieres hacerlo a mano:
 
 ```bash
 ./scripts/reset-password.sh user@example.com
 ```
 
-Te pedirá la nueva contraseña por terminal, invalidará las sesiones del usuario y te imprimirá un nuevo código de recuperación que tendrás que pasarle.
+Te pedirá la nueva contraseña por terminal, invalidará las sesiones del usuario y te imprimirá un **código de recuperación de solo uso** para que se lo pases al usuario en caso extremo (flujo administrativo; el uso normal es el correo con contraseña temporal).
 
 ### Hacer un backup manual
 
