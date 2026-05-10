@@ -3,8 +3,8 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
+import { AppBackdrop } from "@/components/app-backdrop";
 import { SettingsModal } from "@/components/settings-modal";
-import { StarryBackground } from "@/components/starry-background";
 import { api } from "@/api/client";
 import type {
   ExtraIncome,
@@ -13,7 +13,7 @@ import type {
   Summary,
   VariableExpense,
 } from "@/api/types";
-import { RADIAL_SHELL_CLASS } from "@/lib/app-layout";
+import { APP_SHELL_CLASS } from "@/lib/app-layout";
 import { money, savingsLabel } from "@/lib/format";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { logout } from "@/lib/session";
@@ -161,10 +161,10 @@ export function Dashboard({ profileName }: Props) {
   }
 
   return (
-    <div className={RADIAL_SHELL_CLASS}>
-      <StarryBackground />
+    <div className={APP_SHELL_CLASS}>
+      <AppBackdrop />
       <header className="relative z-10 border-b border-slate-800/80 px-4 py-7">
-        <div className="mx-auto flex max-w-4xl items-start justify-between gap-4">
+        <div className="mx-auto flex max-w-4xl items-start justify-between gap-4 lg:max-w-6xl">
           <div>
             <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               Gasto<span className="font-semibold text-slate-500">De</span>Hoy
@@ -202,7 +202,7 @@ export function Dashboard({ profileName }: Props) {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-4xl space-y-5 px-4 py-6 pb-20">
+      <main className="relative z-10 mx-auto max-w-4xl space-y-5 px-4 py-6 pb-20 lg:max-w-6xl">
         {error && (
           <div
             className="rounded-2xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"
@@ -292,6 +292,7 @@ export function Dashboard({ profileName }: Props) {
           </p>
         </section>
 
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start lg:gap-6">
         <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
           <div className="border-b border-slate-800 px-5 py-4">
             <h2 className="text-lg font-bold tracking-tight">
@@ -303,8 +304,10 @@ export function Dashboard({ profileName }: Props) {
           </div>
           <div className="p-5">
             <p className="mb-4 text-sm leading-relaxed text-slate-500">
-              Cada registro actualiza cuánto te queda y tu techo diario. Lo recurrente
-              va en <strong className="text-slate-400">Gastos fijos</strong> (más abajo).
+              Cada registro actualiza cuánto te queda y tu techo diario. Para gastos que
+              se repiten cada mes, usa <strong className="text-slate-400">Gastos fijos</strong>
+              <span className="hidden lg:inline"> (columna de la derecha)</span>
+              <span className="lg:hidden"> (bloque siguiente)</span>.
             </p>
             <form
               className="flex flex-wrap gap-2"
@@ -466,6 +469,7 @@ export function Dashboard({ profileName }: Props) {
             )}
           </div>
         </section>
+        </div>
 
         <footer className="rounded-xl border border-slate-800 bg-slate-900/30 px-4 py-3 text-sm text-slate-500">
           <p className="text-[0.72rem] font-semibold uppercase tracking-widest text-slate-600">

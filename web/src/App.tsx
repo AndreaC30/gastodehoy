@@ -12,7 +12,7 @@ import { Dashboard } from "@/components/dashboard/dashboard-view";
 import { LoadingSplash } from "@/components/loading-splash";
 import { LoginScreen } from "@/components/login-screen";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
-import { StarryBackground } from "@/components/starry-background";
+import { AppBackdrop } from "@/components/app-backdrop";
 import {
   setAnonymous,
   setUser as setAuthUser,
@@ -21,7 +21,7 @@ import {
 } from "@/auth";
 import { api } from "@/api/client";
 import type { Settings, User } from "./api/types";
-import { RADIAL_SHELL_CLASS } from "@/lib/app-layout";
+import { APP_SHELL_CLASS } from "@/lib/app-layout";
 
 async function loadSettings() {
   return api<Settings>("/api/settings");
@@ -52,8 +52,8 @@ export default function App() {
 
   if (auth.status === "anon" || !auth.user) {
     return (
-      <div className={RADIAL_SHELL_CLASS}>
-        <StarryBackground />
+      <div className={APP_SHELL_CLASS}>
+        <AppBackdrop />
         <LoginScreen />
       </div>
     );
@@ -78,8 +78,8 @@ function Authed({ userName }: { userName: string }) {
 
   if (needsOnboarding) {
     return (
-      <div className={RADIAL_SHELL_CLASS}>
-        <StarryBackground />
+      <div className={APP_SHELL_CLASS}>
+        <AppBackdrop />
         <OnboardingWizard
           userName={userName}
           onSkip={() => setSkipped(true)}
