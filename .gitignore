@@ -9,3 +9,4 @@ data/
 .DS_Store
 web/node_modules/
 web/dist/
+tools/pillow_pkg/

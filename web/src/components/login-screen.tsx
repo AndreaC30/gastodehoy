@@ -11,23 +11,57 @@ import type {
   User,
 } from "@/api/types";
 import { setUser } from "@/auth";
+import { BrandLogo } from "@/components/brand-logo";
 
 type Mode = "login" | "register" | "forgot";
 
+/** Pestaña inicial cuando se entra desde la landing (no aplica a “forgot”). */
+export type AuthEntryTab = "login" | "register";
+
 /** Public entry point: renders the right form. */
-export function LoginScreen() {
-  const [mode, setMode] = useState<Mode>("login");
+export function LoginScreen({
+  initialMode = "login",
+  onBackToLanding,
+}: {
+  initialMode?: AuthEntryTab;
+  onBackToLanding?: () => void;
+} = {}) {
+  const [mode, setMode] = useState<Mode>(() =>
+    initialMode === "register" ? "register" : "login",
+  );
   const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        <h1 className="text-center text-3xl font-bold tracking-tight">
-          Gasto<span className="font-semibold text-slate-500">De</span>Hoy
+        <h1 className="m-0 leading-none">
+          {onBackToLanding ? (
+            <button
+              type="button"
+              onClick={onBackToLanding}
+              className="w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+              aria-label="Volver al inicio"
+            >
+              <BrandLogo variant="hero" />
+            </button>
+          ) : (
+            <BrandLogo variant="hero" />
+          )}
         </h1>
-        <p className="mt-2 text-center text-sm text-slate-400">
+        <p className="mt-4 text-center text-sm text-slate-400">
           Cada uno con su cuenta, sin pisarse.
         </p>
+        {onBackToLanding && (
+          <div className="mt-3 flex justify-center">
+            <button
+              type="button"
+              onClick={onBackToLanding}
+              className="text-sm font-medium text-slate-400 hover:text-teal-300"
+            >
+              ← Volver al inicio
+            </button>
+          </div>
+        )}
 
         {mode !== "forgot" && (
           <div className="mt-6 flex rounded-xl border border-slate-800 bg-slate-900/60 p-1 text-sm">

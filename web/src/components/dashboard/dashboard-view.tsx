@@ -4,6 +4,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
 import { AppBackdrop } from "@/components/app-backdrop";
+import { BrandLogo } from "@/components/brand-logo";
 import { SettingsModal } from "@/components/settings-modal";
 import { api } from "@/api/client";
 import type {
@@ -166,10 +167,10 @@ export function Dashboard({ profileName }: Props) {
       <header className="relative z-10 border-b border-slate-800/80 px-4 py-7">
         <div className="mx-auto flex max-w-4xl items-start justify-between gap-4 lg:max-w-6xl">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              Gasto<span className="font-semibold text-slate-500">De</span>Hoy
+            <h1 className="m-0 leading-none">
+              <BrandLogo variant="header" />
             </h1>
-            <p className="mt-1 max-w-md text-slate-400">
+            <p className="mt-2 max-w-md text-slate-400">
               Tu margen para hoy, claro y al instante.
             </p>
           </div>
