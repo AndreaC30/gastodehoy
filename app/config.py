@@ -6,7 +6,7 @@ single module-level ``settings`` instance imported from elsewhere.
 
 from typing import Literal
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -102,6 +102,43 @@ class Settings(BaseSettings):
             "http://127.0.0.1:5173",
             "http://localhost:5173",
         ]
+
+    @field_validator("cookie_domain")
+    @classmethod
+    def validate_cookie_domain(cls, v: str | None) -> str | None:
+        """Reject empty strings, bare TLDs, and malformed domains."""
+        if v is None:
+            return None
+        v = v.strip()
+        if not v:
+            raise ValueError("cookie_domain must not be an empty string")
+        # Reject bare public TLDs (e.g. ".com", ".org", ".net")
+        _PUBLIC_TLDS = {
+            "com", "org", "net", "edu", "gov", "mil", "int",
+            "io", "co", "us", "uk", "de", "fr", "es", "it",
+            "info", "biz", "name", "pro", "aero", "coop", "museum",
+        }
+        if v.lstrip(".").lower() in _PUBLIC_TLDS:
+            raise ValueError(
+                f"cookie_domain '{v}' looks like a public TLD; "
+                "use a real domain like 'example.com'"
+            )
+        # Basic format check: at least one dot, no spaces, no wildcards
+        if "." not in v:
+            raise ValueError(
+                f"cookie_domain '{v}' is not a valid domain (missing dot)"
+            )
+        if " " in v or "*" in v:
+            raise ValueError(
+                f"cookie_domain '{v}' contains invalid characters"
+            )
+        # Each label must be non-empty and reasonable
+        for label in v.split("."):
+            if not label:
+                raise ValueError(
+                    f"cookie_domain '{v}' has empty labels"
+                )
+        return v
 
 
 settings = Settings()

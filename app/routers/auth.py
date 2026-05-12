@@ -29,7 +29,7 @@ from app.auth import (
 )
 from app.config import settings
 from app.database import get_db
-from app.mail import send_forgot_password_email
+from app.mail import send_forgot_password_email, send_welcome_email
 from app.models import User, UserSettings
 from app.schemas import (
     ChangePassword,
@@ -98,6 +98,10 @@ def register(
             detail="Ya existe una cuenta con ese email",
         ) from e
     db.refresh(user)
+    try:
+        send_welcome_email(user.email, user.name)
+    except Exception:
+        pass
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(user)

@@ -7,6 +7,8 @@ and a tiny in-memory IP rate limiter for login and forgot-password.
 
 from __future__ import annotations
 
+import ipaddress
+import re
 import secrets
 from collections import deque
 from datetime import datetime, timezone
@@ -188,7 +190,33 @@ def get_current_user(
 
 _LOGIN_WINDOW_S: Final = 5 * 60
 _LOGIN_MAX_ATTEMPTS: Final = 5
+_LOGIN_MAX_ENTRIES: Final = 10000
 _login_attempts: dict[str, deque[float]] = {}
+
+
+def _is_valid_ip(ip: str) -> bool:
+    """Validate that a string is a plausible IPv4 or IPv6 address."""
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except ValueError:
+        return False
+
+
+def _cleanup_old_attempts() -> None:
+    """Remove IPs whose oldest attempt is outside the login window.
+
+    Keeps memory bounded by purging stale entries that would never
+    count toward rate limiting anyway.
+    """
+    now = monotonic()
+    stale = [
+        ip
+        for ip, q in _login_attempts.items()
+        if not q or now - q[0] > _LOGIN_WINDOW_S
+    ]
+    for ip in stale:
+        del _login_attempts[ip]
 
 
 def _client_ip(request: Request) -> str:
@@ -201,12 +229,19 @@ def _client_ip(request: Request) -> str:
     if settings.trust_forwarded_for:
         fwd = request.headers.get("x-forwarded-for")
         if fwd:
-            return fwd.split(",")[0].strip()
+            candidate = fwd.split(",")[0].strip()
+            if _is_valid_ip(candidate):
+                return candidate
+            # If the forwarded IP is invalid, fall through to socket IP
     return request.client.host if request.client else "unknown"
 
 
 def check_login_rate(request: Request) -> None:
     """Throttle login/forgot-password attempts: 5 per IP per 5 minutes -> 429."""
+    # Periodic cleanup to bound memory
+    if len(_login_attempts) > _LOGIN_MAX_ENTRIES:
+        _cleanup_old_attempts()
+
     ip = _client_ip(request)
     now = monotonic()
     q = _login_attempts.setdefault(ip, deque())
