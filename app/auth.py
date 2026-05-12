@@ -8,7 +8,6 @@ and a tiny in-memory IP rate limiter for login and forgot-password.
 from __future__ import annotations
 
 import ipaddress
-import re
 import secrets
 from collections import deque
 from datetime import datetime, timezone
