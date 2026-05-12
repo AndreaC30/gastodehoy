@@ -1,5 +1,5 @@
 # HTTPS automático con Let's Encrypt + cabeceras de hardening.
-# Variables: SITE_DOMAIN y ACME_EMAIL (ver .env y compose.prod.yml).
+# Dominio: gastodehoy.kyadigital.es
 {
     email {$ACME_EMAIL}
 }
@@ -8,21 +8,13 @@
     encode zstd gzip
 
     header {
-        # HTTPS forzado durante 1 año (después de la primera visita).
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        # Sin sniffing de tipo MIME.
         X-Content-Type-Options "nosniff"
-        # No iframes en otra web.
         X-Frame-Options "DENY"
-        # Referer mínimo cross-site.
         Referrer-Policy "strict-origin-when-cross-origin"
-        # Sin permisos avanzados (cámara, micro, geo, etc.).
         Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
-        # CSP: solo recursos del propio origen; sin unsafe-inline porque
-        # Tailwind v4 genera clases estaticas, no inline styles.
-        # Sin eval ni inline JS.
+        # CSP: Tailwind v4 genera clases estaticas, no necesita unsafe-inline
         Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
-        # No filtrar versión del servidor.
         -Server
     }
 
