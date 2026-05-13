@@ -17,9 +17,9 @@ function MiniDonut({
   segments: { color: string; pct: number }[];
   totalLabel: string;
 }) {
-  const radius = 44;
-  const stroke = 18;
-  const size = 120;
+  const radius = 56;
+  const stroke = 22;
+  const size = 150;
   const circumference = 2 * Math.PI * radius;
   let cumulative = 0;
 
@@ -74,7 +74,7 @@ export function SpendingChart({ breakdown, total }: Props) {
   );
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 shadow-lg shadow-black/20">
+    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 sm:p-5 shadow-lg shadow-black/20">
       <h2 className="text-lg font-bold tracking-tight">
         Gastos por categoría
       </h2>
@@ -105,7 +105,7 @@ export function SpendingChart({ breakdown, total }: Props) {
         </div>
 
         {/* progress-bar list – mobile only */}
-        <div className="space-y-3 sm:hidden">
+        <div className="mt-4 space-y-4 sm:mt-0 sm:space-y-3 sm:hidden">
           {sorted.map((seg) => (
             <CategoryRow key={seg.category_id ?? "none"} seg={seg} />
           ))}
@@ -122,9 +122,9 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
   const Icon = getCategoryIcon(seg.category_icon);
 
   return (
-    <div>
+    <div className="min-w-0">
       {/* top line: icon + dot + name  |  amount + percentage */}
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-2 text-sm min-w-0">
         {/* Lucide icon */}
         <Icon
           className="h-4 w-4 shrink-0"
@@ -148,7 +148,7 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
       </div>
 
       {/* progress bar */}
-      <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-800">
+      <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-slate-800">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{
