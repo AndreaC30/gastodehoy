@@ -197,8 +197,36 @@ def compute_insights(
     if avg_daily > 0:
         days_left = (month_end - today).days
         if days_left > 0 and monthly_income > 0:
-            remaining = monthly_income - total_spent
+            # Use the same formula as compute_summary for consistency
+            from app.models import FixedExpense, ExtraIncome
+
+            fixed_total = session.scalar(
+                select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(
+                    FixedExpense.user_id == user_id
+                )
+            ) or Decimal("0")
+            fixed_total = Decimal(fixed_total).quantize(Decimal("0.01"))
+
+            extra_month = session.scalar(
+                select(func.coalesce(func.sum(ExtraIncome.amount), 0)).where(
+                    ExtraIncome.user_id == user_id,
+                    ExtraIncome.received_at >= month_start,
+                    ExtraIncome.received_at <= month_end,
+                )
+            ) or Decimal("0")
+            extra_month = Decimal(extra_month).quantize(Decimal("0.01"))
+
+            # Calculate savings the same way as budget service
+            if us and us.savings_mode == "fixed":
+                savings = max(Decimal("0"), min(us.savings_amount, monthly_income))
+            else:
+                savings = (monthly_income * us.savings_percent / Decimal("100")) if us else Decimal("0")
+            savings = savings.quantize(Decimal("0.01"))
+
+            effective_income = monthly_income + extra_month
+            remaining = effective_income - savings - fixed_total - total_spent
             daily_budget = (remaining / days_left).quantize(Decimal("0.01"))
+
             if daily_budget > 0:
                 insights.append(
                     {
@@ -209,6 +237,18 @@ def compute_insights(
                             f"Puedes gastar hasta {daily_budget}€/día."
                         ),
                         "icon": "📅",
+                    }
+                )
+            else:
+                insights.append(
+                    {
+                        "type": "warning",
+                        "title": "Presupuesto agotado",
+                        "message": (
+                            f"Has superado tu presupuesto mensual. "
+                            f"Te quedan {remaining}€ para {days_left} días."
+                        ),
+                        "icon": "🚨",
                     }
                 )
 
