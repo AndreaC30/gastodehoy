@@ -1,0 +1,8 @@
+# Overlay para desarrollo: expone el puerto 8000 directamente.
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+services:
+  app:
+    ports:
+      - "8000:8000"

@@ -1,8 +1,6 @@
 services:
   app:
     build: .
-    ports:
-      - "8000:8000"
     environment:
       # Archivo SQLite dentro del volumen montado en /app/data.
       DATABASE_URL: sqlite:////app/data/gastodehoy.db
