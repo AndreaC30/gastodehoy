@@ -164,24 +164,24 @@ export function Dashboard({ profileName }: Props) {
   return (
     <div className={APP_SHELL_CLASS}>
       <AppBackdrop />
-      <header className="relative z-10 border-b border-slate-800/80 px-4 py-7">
-        <div className="mx-auto flex max-w-4xl items-start justify-between gap-4 lg:max-w-6xl">
+      <header className="relative z-10 border-b border-slate-800/80 px-3 py-5 sm:px-4 sm:py-7">
+        <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 lg:max-w-6xl">
           <div>
             <h1 className="m-0 leading-none">
               <BrandLogo variant="header" />
             </h1>
-            <p className="mt-2 max-w-md text-slate-400">
+            <p className="mt-1.5 max-w-md text-sm text-slate-400 sm:mt-2">
               Tu margen para hoy, claro y al instante.
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-xs uppercase tracking-widest text-slate-500">
+          <div className="text-left sm:text-right">
+            <p className="text-[0.65rem] uppercase tracking-widest text-slate-500 sm:text-xs">
               Perfil
             </p>
             <p className="mt-0.5 text-sm font-semibold text-teal-300">
               {profileName}
             </p>
-            <div className="mt-1 flex items-center justify-end gap-3 text-xs">
+            <div className="mt-1 flex items-center gap-3 text-xs sm:justify-end">
               <button
                 type="button"
                 onClick={() => setShowSettings(true)}
@@ -203,10 +203,10 @@ export function Dashboard({ profileName }: Props) {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-4xl space-y-5 px-4 py-6 pb-20 lg:max-w-6xl">
+      <main className="relative z-10 mx-auto max-w-4xl space-y-4 px-3 py-5 pb-20 sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl">
         {error && (
           <div
-            className="rounded-2xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"
+            className="rounded-xl border border-rose-500/40 bg-rose-950/40 px-3 py-2.5 text-xs text-rose-200 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
             role="alert"
           >
             {(error as Error).message}
@@ -214,22 +214,22 @@ export function Dashboard({ profileName }: Props) {
         )}
 
         <section
-          className="overflow-hidden rounded-2xl border border-teal-500/20 bg-gradient-to-br from-slate-900/90 to-slate-900 p-5 shadow-xl shadow-black/30 md:p-6"
+          className="overflow-hidden rounded-xl border border-teal-500/20 bg-gradient-to-br from-slate-900/90 to-slate-900 p-4 shadow-xl shadow-black/30 sm:rounded-2xl sm:p-5 md:p-6"
           aria-live="polite"
         >
-          <div className="grid gap-6 md:grid-cols-[1fr_1.35fr] md:items-stretch md:gap-8">
-            <div className="flex flex-col justify-center rounded-xl border border-slate-800 bg-slate-900/80 p-5">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate-500">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_1.35fr] md:items-stretch md:gap-8">
+            <div className="flex flex-col justify-center rounded-lg border border-slate-800 bg-slate-900/80 p-4 sm:rounded-xl sm:p-5">
+              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-[0.72rem]">
                 Hoy puedes gastar
               </p>
-              <div className="mt-1 min-h-[2.75rem] md:min-h-[3.5rem]">
+              <div className="mt-1 min-h-[2.25rem] sm:min-h-[2.75rem] md:min-h-[3.5rem]">
                 {summaryPending ? (
                   <div
-                    className="h-10 w-44 animate-pulse rounded-lg bg-slate-700/40 md:h-14 md:w-52"
+                    className="h-8 w-36 animate-pulse rounded-lg bg-slate-700/40 sm:h-10 sm:w-44 md:h-14 md:w-52"
                     aria-hidden
                   />
                 ) : (
-                  <p className="text-4xl font-bold tracking-tight text-teal-400 md:text-5xl">
+                  <p className="text-3xl font-bold tracking-tight text-teal-400 sm:text-4xl md:text-5xl">
                     {money(summary?.suggested_spend_today)}
                   </p>
                 )}
@@ -239,13 +239,13 @@ export function Dashboard({ profileName }: Props) {
                 onClick={() => {
                   void invalidateAll().then(() => setToastMsg("Listo"));
                 }}
-                className="mt-3 w-fit text-xs font-medium text-slate-500 underline decoration-slate-600 underline-offset-4 hover:text-slate-400"
+                className="mt-2 w-fit text-[0.65rem] font-medium text-slate-500 underline decoration-slate-600 underline-offset-4 hover:text-slate-400 sm:mt-3 sm:text-xs"
               >
                 Actualizar números
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5">
               <Metric
                 label="Ahorro reservado"
                 value={
@@ -293,7 +293,7 @@ export function Dashboard({ profileName }: Props) {
           </p>
         </section>
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start lg:gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
         <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
           <div className="border-b border-slate-800 px-5 py-4">
             <h2 className="text-lg font-bold tracking-tight">
@@ -311,7 +311,7 @@ export function Dashboard({ profileName }: Props) {
               <span className="lg:hidden"> (bloque siguiente)</span>.
             </p>
             <form
-              className="flex flex-wrap gap-2"
+              className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2"
               onSubmit={onExpenseSubmit}
             >
               <input
@@ -322,18 +322,18 @@ export function Dashboard({ profileName }: Props) {
                 min="0.01"
                 placeholder="Cantidad (€)"
                 required
-                className="min-w-[140px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[120px] sm:flex-1"
               />
               <input
                 name="note"
                 type="text"
                 placeholder="Nota (opcional)"
-                className="min-w-[160px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[140px] sm:flex-1"
               />
               <button
                 type="submit"
                 disabled={addExpense.isPending}
-                className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+                className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
               >
                 Registrar
               </button>
@@ -401,14 +401,14 @@ export function Dashboard({ profileName }: Props) {
               Vivienda, seguros, suscripciones… suman aquí.
             </p>
             <form
-              className="flex flex-wrap gap-2"
+              className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2"
               onSubmit={onFixedSubmit}
             >
               <input
                 name="name"
                 placeholder="Ej. Alquiler"
                 required
-                className="min-w-[120px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[100px] sm:flex-1"
               />
               <input
                 name="amount"
@@ -418,12 +418,12 @@ export function Dashboard({ profileName }: Props) {
                 min={0}
                 placeholder="€"
                 required
-                className="w-28 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:w-24"
               />
               <button
                 type="submit"
                 disabled={addFixed.isPending}
-                className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+                className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
               >
                 Añadir
               </button>
