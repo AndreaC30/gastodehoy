@@ -24,7 +24,7 @@ from sqlalchemy import text
 from app import database as db
 from app.config import settings as app_settings
 from app.database import Base
-from app.routers import auth, budget
+from app.routers import auth, budget, categories
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST_DIR = ROOT / "web" / "dist"
@@ -140,6 +140,8 @@ app.include_router(budget.summary_router)
 app.include_router(budget.fixed_router)
 app.include_router(budget.expenses_router)
 app.include_router(budget.extra_income_router)
+app.include_router(categories.categories_router)
+app.include_router(categories.insights_router)
 
 if ASSETS_DIR.is_dir():
     app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="vite-assets")

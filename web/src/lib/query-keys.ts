@@ -7,6 +7,8 @@ export const BUDGET_QUERY_ROOTS = [
   "fixed",
   "expenses",
   "extra-income",
+  "categories",
+  "insights",
 ] as const;
 
 export function invalidateBudgetQueries(qc: QueryClient) {

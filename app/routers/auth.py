@@ -47,6 +47,7 @@ from app.schemas import (
     UpdateName,
     UserPublic,
 )
+from app.services.categories import seed_default_categories
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -148,6 +149,7 @@ def register(
             detail="Ya existe una cuenta con ese email",
         ) from e
     db.refresh(user)
+    seed_default_categories(db, user.id)
     try:
         send_welcome_email(user.email, user.name)
     except Exception as exc:

@@ -64,6 +64,10 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    categories: Mapped[list["ExpenseCategory"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
 
 class UserSettings(Base):
@@ -123,11 +127,44 @@ class VariableExpense(Base):
         index=True,
         nullable=False,
     )
+    category_id: Mapped[int | None] = mapped_column(
+        ForeignKey("expense_categories.id", ondelete="SET NULL"),
+        nullable=True,
+    )
     amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
     occurred_at: Mapped[date] = mapped_column(Date, nullable=False)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     user: Mapped[User] = relationship(back_populates="variable_expenses")
+    category: Mapped["ExpenseCategory | None"] = relationship(
+        back_populates="expenses"
+    )
+
+
+class ExpenseCategory(Base):
+    """User-defined category for variable expenses (Food, Transport, etc.)."""
+
+    __tablename__ = "expense_categories"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    name: Mapped[str] = mapped_column(String(80), nullable=False)
+    color: Mapped[str] = mapped_column(
+        String(7), default="#6366f1", nullable=False
+    )
+    icon: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    is_default: Mapped[bool] = mapped_column(
+        Boolean(), nullable=False, default=False, server_default="0"
+    )
+
+    user: Mapped[User] = relationship(back_populates="categories")
+    expenses: Mapped[list["VariableExpense"]] = relationship(
+        back_populates="category"
+    )
 
 
 class ExtraIncome(Base):
