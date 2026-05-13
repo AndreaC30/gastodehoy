@@ -1,6 +1,7 @@
 /** Financial insights panel with actionable tips. */
 import type { Insights } from "@/api/types";
 import { money } from "@/lib/format";
+import { AlertTriangle, Lightbulb, CheckCircle, Info } from "lucide-react";
 
 type Props = {
   data: Insights | undefined;
@@ -13,6 +14,13 @@ const TYPE_STYLES: Record<string, string> = {
   tip: "border-sky-500/40 bg-sky-950/30 text-sky-200",
   success: "border-emerald-500/40 bg-emerald-950/30 text-emerald-200",
   info: "border-slate-600/40 bg-slate-800/40 text-slate-300",
+};
+
+const TYPE_ICONS: Record<string, { icon: typeof AlertTriangle; colorClass: string }> = {
+  warning: { icon: AlertTriangle, colorClass: "text-amber-400" },
+  tip: { icon: Lightbulb, colorClass: "text-sky-400" },
+  success: { icon: CheckCircle, colorClass: "text-emerald-400" },
+  info: { icon: Info, colorClass: "text-slate-400" },
 };
 
 export function InsightsPanel({ data, isLoading, error }: Props) {
@@ -40,8 +48,9 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
     <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 shadow-lg shadow-black/20">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold tracking-tight">
-            💡 Insights financieros
+          <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-sky-400" />
+            Insights financieros
           </h2>
           <p className="mt-1 text-sm text-slate-500">
             Análisis de tus gastos este mes
@@ -62,8 +71,12 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
             key={i}
             className={`rounded-xl border px-4 py-3 text-sm ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
           >
-            <p className="font-semibold">
-              {insight.icon} {insight.title}
+            <p className="font-semibold flex items-center gap-2">
+              {(() => {
+                const { icon: Icon, colorClass } = TYPE_ICONS[insight.type] ?? TYPE_ICONS.info;
+                return <Icon className={`h-4 w-4 shrink-0 ${colorClass}`} />;
+              })()}
+              {insight.title}
             </p>
             <p className="mt-1 text-sm opacity-90">{insight.message}</p>
           </div>
