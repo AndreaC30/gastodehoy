@@ -110,6 +110,24 @@ def apply_sqlite_migrations(engine: Engine) -> None:
             )
         )
 
+        # Seed default categories for existing users that have none
+        from app.services.categories import DEFAULT_CATEGORIES
+        user_rows = conn.execute(text("SELECT id FROM users")).fetchall()
+        for (uid,) in user_rows:
+            existing = conn.execute(
+                text("SELECT 1 FROM expense_categories WHERE user_id = :uid LIMIT 1"),
+                {"uid": uid},
+            ).fetchone()
+            if existing is None:
+                for cat in DEFAULT_CATEGORIES:
+                    conn.execute(
+                        text(
+                            "INSERT INTO expense_categories (user_id, name, color, icon, is_default) "
+                            "VALUES (:uid, :name, :color, :icon, 1)"
+                        ),
+                        {"uid": uid, "name": cat["name"], "color": cat["color"], "icon": cat["icon"]},
+                    )
+
         # Indices para consultas de rango por fecha (dashboard)
         conn.execute(
             text(
