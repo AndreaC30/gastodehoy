@@ -11,10 +11,11 @@ from pathlib import Path
 
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi import status
 from sqlalchemy import text
 
 from app import database as db
@@ -87,6 +88,38 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def csrf_protection(request: Request, call_next):
+    """Middleware para protección CSRF en rutas API.
+
+    Verifica que requests a /api/ con cookie de sesion incluyan el header
+    X-Requested-With con valor XMLHttpRequest.
+
+    Excepciones: GET, HEAD, OPTIONS, /health, y requests sin cookie de sesion.
+    Solo aplica en produccion (no en development).
+    """
+    # No aplicar en development (tests, desarrollo local)
+    if app_settings.environment != "production":
+        return await call_next(request)
+
+    # Permitir métodos seguros sin verificacion CSRF
+    if request.url.path == "/health" or request.method in ("GET", "HEAD", "OPTIONS"):
+        return await call_next(request)
+
+    # Solo verificar en rutas API con cookie de sesion
+    if request.url.path.startswith("/api/"):
+        session_cookie = request.cookies.get("gdh_session")
+        if session_cookie:
+            requested_with = request.headers.get("X-Requested-With")
+            if requested_with != "XMLHttpRequest":
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={"detail": "CSRF validation failed"},
+                )
+
+    return await call_next(request)
 
 app.include_router(auth.router)
 app.include_router(budget.settings_router)

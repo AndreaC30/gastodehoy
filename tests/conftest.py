@@ -1,8 +1,21 @@
 """SQLite in-memory para tests; sustituye `app.database.engine` antes del lifespan."""
 
+import os
+os.environ["ENV"] = "development"
+os.environ["COOKIE_SECURE"] = "false"
+os.environ.pop("COOKIE_DOMAIN", None)
+os.environ["APP_SECRET"] = "test-secret-key-for-tests-only-12345678"
+
 from collections.abc import Generator
 
 import pytest
+from starlette.testclient import TestClient as _TC
+
+# Debug: verify settings before importing app
+print(f"[conftest] ENV={os.environ.get('ENV')}")
+print(f"[conftest] COOKIE_SECURE={os.environ.get('COOKIE_SECURE')}")
+print(f"[conftest] APP_SECRET={os.environ.get('APP_SECRET')}")
+print(f"[conftest] COOKIE_DOMAIN={os.environ.get('COOKIE_DOMAIN', 'NOT_SET')}")
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -86,7 +99,7 @@ def client(user: User) -> Generator:
     from app.auth import SESSION_COOKIE, make_session_token
     from app.main import app
 
-    with TestClient(app) as c:
+    with TestClient(app, headers={"X-Requested-With": "XMLHttpRequest"}) as c:
         c.cookies.set(SESSION_COOKIE, make_session_token(user.id))
         yield c
 
