@@ -22,9 +22,6 @@ from app.schemas import (
     FixedExpenseCreate,
     FixedExpenseRead,
     FixedExpenseUpdate,
-    PaginatedExtraIncomes,
-    PaginatedFixedExpenses,
-    PaginatedVariableExpenses,
     SummaryRead,
     VariableExpenseCreate,
     VariableExpenseRead,
@@ -119,18 +116,14 @@ def read_summary(
 # --- Fixed expenses ----------------------------------------------------------
 
 
-@fixed_router.get("", response_model=PaginatedFixedExpenses)
+@fixed_router.get("", response_model=list[FixedExpenseRead])
 def list_fixed(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=200, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
-) -> dict:
-    """List the authenticated user's fixed expenses (paginated)."""
-    total = db.scalar(
-        select(func.count(FixedExpense.id))
-        .where(FixedExpense.user_id == user.id)
-    ) or 0
+) -> list[FixedExpense]:
+    """List the authenticated user's fixed expenses (paginated, returns array)."""
     stmt = (
         select(FixedExpense)
         .where(FixedExpense.user_id == user.id)
@@ -138,11 +131,7 @@ def list_fixed(
         .limit(limit)
         .offset(offset)
     )
-    items = list(db.scalars(stmt).all())
-    return PaginatedFixedExpenses(
-        items=[FixedExpenseRead.model_validate(i) for i in items],
-        meta={"total": total, "limit": limit, "offset": offset},
-    )
+    return list(db.scalars(stmt).all())
 
 
 @fixed_router.post("", response_model=FixedExpenseRead)
@@ -198,7 +187,7 @@ def delete_fixed(
 # --- Variable (day-to-day) expenses ------------------------------------------
 
 
-@expenses_router.get("", response_model=PaginatedVariableExpenses)
+@expenses_router.get("", response_model=list[VariableExpenseRead])
 def list_expenses(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -206,16 +195,9 @@ def list_expenses(
     month: int | None = Query(default=None, ge=1, le=12),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
-) -> dict:
+) -> list[VariableExpense]:
     """List expenses for the given (or current) month, newest first (paginated)."""
     start, end = _calendar_month_bounds(year, month)
-    total = db.scalar(
-        select(func.count(VariableExpense.id)).where(
-            VariableExpense.user_id == user.id,
-            VariableExpense.occurred_at >= start,
-            VariableExpense.occurred_at <= end,
-        )
-    ) or 0
     stmt = (
         select(VariableExpense)
         .where(
@@ -227,11 +209,7 @@ def list_expenses(
         .limit(limit)
         .offset(offset)
     )
-    items = list(db.scalars(stmt).all())
-    return PaginatedVariableExpenses(
-        items=[VariableExpenseRead.model_validate(i) for i in items],
-        meta={"total": total, "limit": limit, "offset": offset},
-    )
+    return list(db.scalars(stmt).all())
 
 
 @expenses_router.post("", response_model=VariableExpenseRead)
@@ -271,7 +249,7 @@ def delete_expense(
 # --- Extra income (dated bonuses / irregular payroll) -------------------------
 
 
-@extra_income_router.get("", response_model=PaginatedExtraIncomes)
+@extra_income_router.get("", response_model=list[ExtraIncomeRead])
 def list_extra_income(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -279,16 +257,9 @@ def list_extra_income(
     month: int | None = Query(default=None, ge=1, le=12),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
-) -> dict:
+) -> list[ExtraIncome]:
     """List extra income rows for the given (or current) calendar month (paginated)."""
     start, end = _calendar_month_bounds(year, month)
-    total = db.scalar(
-        select(func.count(ExtraIncome.id)).where(
-            ExtraIncome.user_id == user.id,
-            ExtraIncome.received_at >= start,
-            ExtraIncome.received_at <= end,
-        )
-    ) or 0
     stmt = (
         select(ExtraIncome)
         .where(
@@ -300,11 +271,7 @@ def list_extra_income(
         .limit(limit)
         .offset(offset)
     )
-    items = list(db.scalars(stmt).all())
-    return PaginatedExtraIncomes(
-        items=[ExtraIncomeRead.model_validate(i) for i in items],
-        meta={"total": total, "limit": limit, "offset": offset},
-    )
+    return list(db.scalars(stmt).all())
 
 
 @extra_income_router.post("", response_model=ExtraIncomeRead)

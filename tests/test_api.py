@@ -234,7 +234,7 @@ def test_users_are_isolated(anon_client) -> None:
     assert Decimal(str(s["monthly_income"])) == Decimal("0")
     assert Decimal(str(s["variable_spent_month"])) == Decimal("0")
     expenses_res = anon_client.get("/api/expenses").json()
-    assert expenses_res["items"] == []
+    assert expenses_res == []
 
 
 def test_summary_defaults(client) -> None:
@@ -315,9 +315,8 @@ def test_list_expenses_filtered_by_year_month(client) -> None:
         json={"amount": "25.00", "occurred_at": "2026-02-10"},
     )
     jan = client.get("/api/expenses?year=2026&month=1").json()
-    assert jan["meta"]["total"] == 1
-    assert len(jan["items"]) == 1
-    assert Decimal(str(jan["items"][0]["amount"])) == Decimal("10.00")
+    assert len(jan) == 1
+    assert Decimal(str(jan[0]["amount"])) == Decimal("10.00")
 
 
 def test_list_extra_income_filtered_by_year_month(client) -> None:
@@ -334,9 +333,8 @@ def test_list_extra_income_filtered_by_year_month(client) -> None:
         json={"amount": "75.00", "received_at": "2026-04-01"},
     )
     mar = client.get("/api/extra-income?year=2026&month=3").json()
-    assert mar["meta"]["total"] == 1
-    assert len(mar["items"]) == 1
-    assert Decimal(str(mar["items"][0]["amount"])) == Decimal("50.00")
+    assert len(mar) == 1
+    assert Decimal(str(mar[0]["amount"])) == Decimal("50.00")
 
 
 def test_extra_income_list_post_delete_and_summary(client) -> None:
@@ -346,8 +344,7 @@ def test_extra_income_list_post_delete_and_summary(client) -> None:
     )
     today = date.today().isoformat()
     empty = client.get("/api/extra-income").json()
-    assert empty["items"] == []
-    assert empty["meta"]["total"] == 0
+    assert empty == []
 
     cr = client.post(
         "/api/extra-income",
@@ -358,7 +355,7 @@ def test_extra_income_list_post_delete_and_summary(client) -> None:
     assert Decimal(str(row["amount"])) == Decimal("150.00")
 
     listed = client.get("/api/extra-income").json()
-    assert len(listed["items"]) == 1
+    assert len(listed) == 1
 
     s = client.get("/api/summary").json()
     assert Decimal(str(s["extra_income_month"])) == Decimal("150.00")
@@ -366,7 +363,7 @@ def test_extra_income_list_post_delete_and_summary(client) -> None:
 
     dr = client.delete(f"/api/extra-income/{row['id']}")
     assert dr.status_code == 204
-    assert client.get("/api/extra-income").json()["items"] == []
+    assert client.get("/api/extra-income").json() == []
     s2 = client.get("/api/summary").json()
     assert Decimal(str(s2["extra_income_month"])) == Decimal("0")
 
