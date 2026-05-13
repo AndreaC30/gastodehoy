@@ -271,13 +271,13 @@ function StepFixed({
         </p>
       </div>
 
-      <form onSubmit={add} className="flex flex-wrap gap-2">
+      <form onSubmit={add} className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Ej. Alquiler"
-          className="min-w-[140px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[120px] sm:flex-1"
         />
         <input
           type="number"
@@ -287,11 +287,11 @@ function StepFixed({
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="€"
-          className="w-28 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:w-24"
         />
         <button
           type="submit"
-          className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110"
+          className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 sm:w-auto"
         >
           Añadir
         </button>
