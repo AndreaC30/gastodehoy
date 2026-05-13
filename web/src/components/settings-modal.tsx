@@ -222,7 +222,7 @@ export function SettingsModal({
               fecha cae en este mes. Se suman a tu margen después del ahorro.
             </p>
 
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <input
                 type="number"
                 inputMode="decimal"
@@ -231,19 +231,19 @@ export function SettingsModal({
                 placeholder="Cantidad (€)"
                 value={extraAmount}
                 onChange={(e) => setExtraAmount(e.target.value)}
-                className="min-w-[100px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[100px] sm:flex-1"
               />
               <input
                 type="date"
                 value={extraDate}
                 onChange={(e) => setExtraDate(e.target.value)}
-                className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:w-auto"
               />
               <button
                 type="button"
                 onClick={addExtraIncomeRow}
                 disabled={addExtra.isPending}
-                className="rounded-lg border border-teal-500/50 bg-teal-500/15 px-3 py-2 text-sm font-semibold text-teal-200 hover:bg-teal-500/25 disabled:opacity-60"
+                className="w-full rounded-lg border border-teal-500/50 bg-teal-500/15 px-3 py-2 text-sm font-semibold text-teal-200 hover:bg-teal-500/25 disabled:opacity-60 sm:w-auto"
               >
                 Añadir
               </button>
