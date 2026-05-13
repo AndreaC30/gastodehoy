@@ -32,6 +32,7 @@ def compute_insights(
             ExpenseCategory.id,
             ExpenseCategory.name,
             ExpenseCategory.color,
+            ExpenseCategory.icon,
             func.coalesce(func.sum(VariableExpense.amount), Decimal("0")),
             func.count(VariableExpense.id),
         )
@@ -49,22 +50,24 @@ def compute_insights(
             ExpenseCategory.id,
             ExpenseCategory.name,
             ExpenseCategory.color,
+            ExpenseCategory.icon,
         )
         .order_by(func.sum(VariableExpense.amount).desc())
     ).all()
 
-    total_spent = sum(row[3] for row in cat_rows)
+    total_spent = sum(row[4] for row in cat_rows)
     total_spent = Decimal(total_spent).quantize(Decimal("0.01"))
 
     breakdown: list[dict] = []
     for row in cat_rows:
-        cat_id, cat_name, cat_color, cat_total, cat_count = row
+        cat_id, cat_name, cat_color, cat_icon, cat_total, cat_count = row
         cat_total = Decimal(cat_total).quantize(Decimal("0.01"))
         breakdown.append(
             {
                 "category_id": cat_id,
                 "category_name": cat_name or "Sin categoría",
                 "category_color": cat_color or "#64748b",
+                "category_icon": cat_icon,
                 "total": cat_total,
                 "percentage": _safe_pct(cat_total, total_spent),
                 "transaction_count": cat_count,

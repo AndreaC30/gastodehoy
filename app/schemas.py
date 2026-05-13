@@ -231,6 +231,7 @@ class CategorySpending(BaseModel):
     category_id: int | None
     category_name: str
     category_color: str
+    category_icon: str | None = None
     total: Decimal
     percentage: Decimal
     transaction_count: int
