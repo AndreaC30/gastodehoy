@@ -51,7 +51,7 @@ type Props = { profileName: string };
 
 /** Filas visibles antes del "Ver más" en cada lista. */
 const FIXED_LIST_PREVIEW = 3;
-const VARIABLE_LIST_PREVIEW = 5;
+const VARIABLE_LIST_PREVIEW = 2;
 
 export function Dashboard({ profileName }: Props) {
   const qc = useQueryClient();
