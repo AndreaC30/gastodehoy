@@ -52,6 +52,7 @@ export type VariableExpense = {
   category_id: number | null;
   category_name?: string | null;
   category_color?: string | null;
+  category_icon?: string | null;
 };
 
 /** Occasional income received on a specific date (bonus, extra payroll…). */
@@ -65,6 +66,7 @@ export type CategorySpending = {
   category_id: number | null;
   category_name: string;
   category_color: string;
+  category_icon: string | null;
   total: string | number;
   percentage: string | number;
   transaction_count: number;

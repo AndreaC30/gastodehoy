@@ -204,6 +204,7 @@ def list_expenses(
             VariableExpense,
             ExpenseCategory.name.label("category_name"),
             ExpenseCategory.color.label("category_color"),
+            ExpenseCategory.icon.label("category_icon"),
         )
         .outerjoin(
             ExpenseCategory,
@@ -227,6 +228,7 @@ def list_expenses(
         exp = row[0]
         exp.category_name = row.category_name
         exp.category_color = row.category_color
+        exp.category_icon = row.category_icon
         result.append(exp)
     return result
 
