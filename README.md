@@ -6,11 +6,11 @@ Construido con **FastAPI** (Python), **SQLite** (un archivo en `./data/`), **Rea
 
 ---
 
-## 1. Probarla en tu ordenador
+## 1. Desarrollo local (Docker)
 
-Solo necesitas **Docker**.
+Solo necesitas **Docker**. La app se sirve directamente por uvicorn en el puerto 8000.
 
-### Levantarla
+### Levantar
 
 ```bash
 git clone <url> gastodehoy
@@ -19,29 +19,27 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Abre **http://localhost:8000** y crea tu cuenta. Si olvidas la contraseña, usa **He olvidado mi contraseña**: el servidor puede enviarte una **contraseña temporal por correo** (hay que configurar variables **SMTP** en `.env`; si no, verás un error 503 en esa acción). En desarrollo local suele faltar SMTP; entonces resetea desde el servidor (apartado siguiente) o configura un SMTP de prueba.
+Abre **http://localhost:8000** y crea tu cuenta.
 
-### Bajarla (sin borrar datos)
+### Bajar (sin borrar datos)
 
 ```bash
 docker compose down
 ```
 
-Cuando vuelvas a hacer `docker compose up -d`, tu cuenta y tus gastos siguen ahí.
+Al volver a hacer `up -d`, tus datos persisten en `./data/gastodehoy.db`.
 
 ### Borrar la BBDD y empezar de cero
 
-Tus datos viven en un único archivo SQLite en `./data/gastodehoy.db` (más sus laterales `*-wal` y `*-shm` mientras la app está abierta). Para limpiarlo todo:
-
 ```bash
 docker compose down
-rm -rf data
+rm -f data/gastodehoy.db data/gastodehoy.db-wal data/gastodehoy.db-shm
 docker compose up -d --build
 ```
 
-> Importante: `docker compose down -v` **no borra** estos datos. Esa opción borra "volúmenes con nombre" de Docker (lo que usaba la versión vieja con Postgres). SQLite vive en una carpeta tuya del host, así que para borrarla hace falta `rm -rf data` explícitamente.
+> `docker compose down -v` **no borra** estos datos. SQLite vive en el filesystem del host, no en un volumen Docker con nombre.
 
-### ¿No arranca?
+### Ver logs
 
 ```bash
 docker compose logs --tail=200 app
@@ -49,7 +47,41 @@ docker compose logs --tail=200 app
 
 ---
 
-## 2. Desplegarla en un servidor con HTTPS
+## 2. Desarrollo local (sin Docker)
+
+Para tocar código con recarga en caliente:
+
+```bash
+# Backend (terminal 1)
+cp .env.example .env
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+uvicorn app.main:app --reload --port 8000
+
+# Frontend (terminal 2)
+cd web && npm install && npm run dev
+```
+
+Abre **http://localhost:5173**. La BBDD SQLite se crea sola en `./data/gastodehoy.db`.
+
+Si el puerto 8000 está ocupado, lanza uvicorn en otro puerto y crea `web/.env`:
+
+```ini
+VITE_API_PROXY_TARGET=http://127.0.0.1:8001
+```
+
+### Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+Los tests usan SQLite en memoria, sin tocar la BBDD real.
+
+---
+
+## 3. Producción (Docker + Caddy + HTTPS)
 
 Pensado para un VPS (Hetzner, DigitalOcean, OVH…) o una Raspberry Pi expuesta. Necesitas:
 
@@ -57,7 +89,7 @@ Pensado para un VPS (Hetzner, DigitalOcean, OVH…) o una Raspberry Pi expuesta.
 - Los puertos **80** y **443** abiertos en el firewall.
 - **Docker** instalado en el servidor.
 
-### Paso 1 — Clona el repo en el servidor
+### Paso 1 — Clona el repo
 
 ```bash
 git clone <url> /opt/gastodehoy
@@ -70,7 +102,7 @@ cd /opt/gastodehoy
 cp .env.example .env
 ```
 
-Edita `.env` y rellena al menos estas cuatro variables:
+Edita `.env` y rellena **obligatoriamente**:
 
 ```ini
 SITE_DOMAIN=gastos.tudominio.com
@@ -79,25 +111,46 @@ APP_SECRET=<clave secreta de 32+ caracteres>
 COOKIE_SECURE=true
 ```
 
-Para generar el `APP_SECRET`:
+Genera el `APP_SECRET`:
 
 ```bash
 openssl rand -hex 32
 ```
 
-> La app se **negará a arrancar** si `COOKIE_SECURE=true` y el `APP_SECRET` es el por defecto o tiene menos de 32 caracteres. Es a propósito.
+> La app **no arranca** si `COOKIE_SECURE=true` y `APP_SECRET` es el default o tiene menos de 32 caracteres.
 
-### Paso 3 — Levanta los contenedores
+### Paso 3 — Levanta con el overlay de producción
+
+**IMPORTANTE:** En producción hay que usar **ambos** archivos de compose. Si solo usas `docker-compose.yml`, Caddy no se levanta y la app no será accesible desde fuera.
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-Caddy pide y renueva el certificado de Let's Encrypt automáticamente. Solo Caddy escucha al exterior; la app vive en una red interna.
+Esto levanta dos contenedores:
+- **app**: la API + frontend, en red interna (sin puertos expuestos al exterior).
+- **caddy**: reverse proxy con HTTPS automático vía Let's Encrypt, puertos 80 y 443.
+
+Caddy obtiene y renueva el certificado SSL automáticamente.
 
 Abre **https://gastos.tudominio.com** y crea tu primera cuenta.
 
-### Paso 4 — Programa backups diarios (recomendado)
+### Paso 4 — Permisos de la BBDD
+
+El contenedor corre como usuario `appuser` (UID 999). El directorio `./data` debe ser escribible por ese usuario:
+
+```bash
+chown 999:999 data data/gastodehoy.db
+```
+
+Si la app no arranca con error `attempt to write a readonly database`, verifica los permisos con:
+
+```bash
+ls -la data/
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs app
+```
+
+### Paso 5 — Backups diarios (recomendado)
 
 ```bash
 crontab -e
@@ -111,7 +164,7 @@ Añade esta línea para un dump cada día a las 3:30 con rotación de 7 días:
 
 ---
 
-## 3. Tareas habituales
+## 4. Tareas habituales
 
 ### Resetear la contraseña de alguien
 
@@ -135,10 +188,10 @@ Los backups se guardan en `./backups/` como `gastodehoy-YYYYMMDDTHHMMSSZ.db.gz`.
 ### Restaurar un backup
 
 ```bash
-docker compose stop app
+docker compose -f docker-compose.yml -f docker-compose.prod.yml stop app
 rm -f data/gastodehoy.db data/gastodehoy.db-wal data/gastodehoy.db-shm
 gunzip -c backups/gastodehoy-XXXX.db.gz > data/gastodehoy.db
-docker compose start app
+docker compose -f docker-compose.yml -f docker-compose.prod.yml start app
 ```
 
 > El borrado de `*-wal` y `*-shm` antes de restaurar es importante: son archivos auxiliares de SQLite y, si quedan de la BBDD vieja, pueden corromper la nueva al arrancar.
@@ -152,44 +205,6 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
 > Si la nueva versión añade columnas a la BBDD, el README de esa versión te lo dirá. En ese caso, haz un backup antes de actualizar.
-
----
-
-## 4. Desarrollar el código
-
-Si vas a tocar el código (no solo desplegar), te resultará más cómodo correr la app y el front en tu máquina con recarga en caliente. SQLite no necesita servicios extra.
-
-```bash
-# 1. Backend con auto-reload
-cp .env.example .env
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt -r requirements-dev.txt
-uvicorn app.main:app --reload --port 8000
-
-# 2. Front con auto-reload (en otra terminal)
-cd web && npm install && npm run dev
-```
-
-Abre **http://localhost:5173**. La BBDD SQLite se crea sola en `./data/gastodehoy.db`.
-
-¿El puerto 8000 está ocupado? Lanza uvicorn en otro puerto y crea `web/.env`:
-
-```bash
-uvicorn app.main:app --reload --port 8001
-```
-
-```ini
-VITE_API_PROXY_TARGET=http://127.0.0.1:8001
-```
-
-### Tests
-
-```bash
-pip install -r requirements-dev.txt
-pytest
-```
-
-Los tests usan SQLite en memoria, sin tocar la BBDD real. Cubren la API y la lógica del presupuesto. El front se valida con `npm run build`.
 
 ---
 
@@ -216,6 +231,8 @@ techo diario = (ingreso mensual − ahorro − fijos − gastos variables del me
 - Cada cuenta solo ve sus propios datos.
 - En producción, Caddy añade HSTS, CSP, `X-Frame-Options=DENY`, `Referrer-Policy`, `Permissions-Policy` y oculta la cabecera `Server`.
 - La BBDD es un único archivo SQLite con permisos de filesystem; sin puerto abierto ni usuario remoto. Para protegerla del robo físico del disco, cifra el filesystem del VPS (LUKS o equivalente).
+- Validación de dominio MX en registro y recuperación de contraseña (desde v2026.05.13).
+- Respuestas de tiempo constante en auth para evitar enumeración de usuarios.
 
 ---
 
