@@ -17,9 +17,9 @@ function MiniDonut({
   segments: { color: string; pct: number }[];
   totalLabel: string;
 }) {
-  const radius = 56;
-  const stroke = 22;
-  const size = 150;
+  const radius = 68;
+  const stroke = 26;
+  const size = 180;
   const circumference = 2 * Math.PI * radius;
   let cumulative = 0;
 
@@ -50,8 +50,8 @@ function MiniDonut({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <p className="text-[10px] text-slate-500">Total</p>
-        <p className="text-sm font-bold text-slate-100">{totalLabel}</p>
+        <p className="text-xs text-slate-500">Total</p>
+        <p className="text-base font-bold text-slate-100">{totalLabel}</p>
       </div>
     </div>
   );
@@ -90,14 +90,16 @@ export function SpendingChart({ breakdown, total }: Props) {
       */}
       <div className="mt-5">
         {/* donut – desktop only */}
-        <div className="hidden sm:flex sm:gap-6 sm:items-start">
+        <div className="hidden sm:flex sm:gap-8 sm:items-start">
+          <div className="sm:pt-2">
           <MiniDonut
             segments={donutSegments}
             totalLabel={money(total)}
           />
+          </div>
 
           {/* progress-bar list right side */}
-          <div className="flex-1 space-y-3">
+          <div className="flex-1 space-y-4">
             {sorted.map((seg) => (
               <CategoryRow key={seg.category_id ?? "none"} seg={seg} />
             ))}
