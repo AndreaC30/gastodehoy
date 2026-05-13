@@ -1,6 +1,7 @@
 /** Spending breakdown by category: small donut on desktop + progress-bar legend. */
 import type { CategorySpending } from "@/api/types";
 import { money } from "@/lib/format";
+import { getCategoryIcon } from "@/components/dashboard/category-icon";
 
 type Props = {
   breakdown: CategorySpending[];
@@ -118,21 +119,17 @@ export function SpendingChart({ breakdown, total }: Props) {
 
 function CategoryRow({ seg }: { seg: CategorySpending }) {
   const pct = Number(seg.percentage);
+  const Icon = getCategoryIcon(seg.category_icon);
 
   return (
     <div>
-      {/* top line: dot + icon + name  |  amount + percentage */}
+      {/* top line: icon + dot + name  |  amount + percentage */}
       <div className="flex items-center gap-2 text-sm">
-        {/* colour dot */}
-        <span
-          className="h-3 w-3 shrink-0 rounded-full"
-          style={{ backgroundColor: seg.category_color }}
+        {/* Lucide icon */}
+        <Icon
+          className="h-4 w-4 shrink-0"
+          style={{ color: seg.category_color }}
         />
-
-        {/* optional emoji icon */}
-        {seg.category_icon && (
-          <span className="shrink-0 text-sm">{seg.category_icon}</span>
-        )}
 
         {/* category name */}
         <span className="flex-1 truncate text-slate-300">

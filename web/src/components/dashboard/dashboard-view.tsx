@@ -21,6 +21,7 @@ import type {
   VariableExpense,
 } from "@/api/types";
 import { APP_SHELL_CLASS } from "@/lib/app-layout";
+import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { money, savingsLabel } from "@/lib/format";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { logout } from "@/lib/session";
@@ -386,7 +387,7 @@ export function Dashboard({ profileName }: Props) {
                   <option value="">Sin categoría</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
-                      {cat.icon ? `${cat.icon} ` : ""}{cat.name}
+                      {cat.name}
                     </option>
                   ))}
                 </select>
@@ -412,32 +413,31 @@ export function Dashboard({ profileName }: Props) {
               ) : (
                 <>
                   <ul className="space-y-2">
-                    {variableVisibleItems.map((it) => (
-                      <li
-                        key={it.id}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-teal-300/90">
-                              {money(it.amount)}
-                            </p>
-                            {it.category_color && (
-                              <span
-                                className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-                                style={{ backgroundColor: it.category_color }}
-                                title={it.category_name ?? undefined}
+                    {variableVisibleItems.map((it) => {
+                      const CatIcon = getCategoryIcon(it.category_icon);
+                      return (
+                        <li
+                          key={it.id}
+                          className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <CatIcon
+                                className="h-4 w-4 shrink-0"
+                                style={{ color: it.category_color ?? "#64748b" }}
                               />
-                            )}
+                              <p className="font-semibold text-teal-300/90">
+                                {money(it.amount)}
+                              </p>
+                            </div>
+                            <p className="truncate text-sm text-slate-500">
+                              {it.occurred_at}
+                              {it.note ? ` · ${it.note}` : ""}
+                              {it.category_name && !it.note
+                                ? ` · ${it.category_name}`
+                                : ""}
+                            </p>
                           </div>
-                          <p className="truncate text-sm text-slate-500">
-                            {it.occurred_at}
-                            {it.note ? ` · ${it.note}` : ""}
-                            {it.category_name && !it.note
-                              ? ` · ${it.category_name}`
-                              : ""}
-                          </p>
-                        </div>
                         <button
                           type="button"
                           onClick={() => delExpense.mutate(it.id)}
@@ -447,7 +447,8 @@ export function Dashboard({ profileName }: Props) {
                           Borrar
                         </button>
                       </li>
-                    ))}
+                    );
+                  })}
                   </ul>
                   {variableNeedsToggle && (
                     <button

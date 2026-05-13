@@ -4,15 +4,16 @@ from sqlalchemy.orm import Session
 
 from app.models import ExpenseCategory
 
+# Map of category name to Lucide icon name
 DEFAULT_CATEGORIES: list[dict[str, str]] = [
-    {"name": "Comida",     "color": "#f59e0b", "icon": "🍔"},
-    {"name": "Transporte",  "color": "#3b82f6", "icon": "🚗"},
-    {"name": "Ocio",        "color": "#a855f7", "icon": "🎮"},
-    {"name": "Salud",       "color": "#ef4444", "icon": "💊"},
-    {"name": "Educación",   "color": "#10b981", "icon": "📚"},
-    {"name": "Hogar",       "color": "#6366f1", "icon": "🏠"},
-    {"name": "Ropa",        "color": "#ec4899", "icon": "👕"},
-    {"name": "Otros",       "color": "#64748b", "icon": "📦"},
+    {"name": "Comida",     "color": "#f59e0b", "icon": "UtensilsCrossed"},
+    {"name": "Transporte",  "color": "#3b82f6", "icon": "Car"},
+    {"name": "Ocio",        "color": "#a855f7", "icon": "Gamepad2"},
+    {"name": "Salud",       "color": "#ef4444", "icon": "HeartPulse"},
+    {"name": "Educación",   "color": "#10b981", "icon": "GraduationCap"},
+    {"name": "Hogar",       "color": "#6366f1", "icon": "Home"},
+    {"name": "Ropa",        "color": "#ec4899", "icon": "Shirt"},
+    {"name": "Otros",       "color": "#64748b", "icon": "Package"},
 ]
 
 
