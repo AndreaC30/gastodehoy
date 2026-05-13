@@ -36,11 +36,22 @@ export type FixedExpense = {
   amount: string | number;
 };
 
+export type ExpenseCategory = {
+  id: number;
+  name: string;
+  color: string;
+  icon: string | null;
+  is_default: boolean;
+};
+
 export type VariableExpense = {
   id: number;
   amount: string | number;
   occurred_at: string;
   note: string | null;
+  category_id: number | null;
+  category_name?: string | null;
+  category_color?: string | null;
 };
 
 /** Occasional income received on a specific date (bonus, extra payroll…). */
@@ -48,6 +59,33 @@ export type ExtraIncome = {
   id: number;
   amount: string | number;
   received_at: string;
+};
+
+export type CategorySpending = {
+  category_id: number | null;
+  category_name: string;
+  category_color: string;
+  total: string | number;
+  percentage: string | number;
+  transaction_count: number;
+};
+
+export type InsightItem = {
+  type: "warning" | "tip" | "success" | "info";
+  title: string;
+  message: string;
+  icon: string;
+};
+
+export type Insights = {
+  period_start: string;
+  period_end: string;
+  total_spent: string | number;
+  top_category: CategorySpending | null;
+  category_breakdown: CategorySpending[];
+  insights: InsightItem[];
+  avg_daily_spend: string | number;
+  projected_monthly: string | number;
 };
 
 export type User = {

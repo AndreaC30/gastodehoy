@@ -73,6 +73,43 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                 )
             )
 
+        # Nueva tabla: expense_categories
+        conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS expense_categories ("
+                "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,"
+                "  name VARCHAR(80) NOT NULL,"
+                "  color VARCHAR(7) NOT NULL DEFAULT '#6366f1',"
+                "  icon VARCHAR(40),"
+                "  is_default BOOLEAN NOT NULL DEFAULT 0"
+                ")"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS idx_expense_categories_user "
+                "ON expense_categories(user_id)"
+            )
+        )
+
+        # Nueva columna: category_id en variable_expenses
+        ve_rows = conn.execute(text("PRAGMA table_info(variable_expenses)")).fetchall()
+        ve_colnames = {str(r[1]) for r in ve_rows}
+        if "category_id" not in ve_colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE variable_expenses ADD COLUMN category_id "
+                    "INTEGER REFERENCES expense_categories(id) ON DELETE SET NULL"
+                )
+            )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS idx_variable_expenses_category "
+                "ON variable_expenses(category_id)"
+            )
+        )
+
         # Indices para consultas de rango por fecha (dashboard)
         conn.execute(
             text(

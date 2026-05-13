@@ -1,15 +1,21 @@
 /**
- * Authenticated home: hero, variable/fixed lists, settings modal.
+ * Authenticated home: hero, variable/fixed lists, settings modal,
+ * category selector, spending chart, and financial insights.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
 import { AppBackdrop } from "@/components/app-backdrop";
 import { BrandLogo } from "@/components/brand-logo";
 import { SettingsModal } from "@/components/settings-modal";
+import { CategoryManager } from "@/components/dashboard/category-manager";
+import { SpendingChart } from "@/components/dashboard/spending-chart";
+import { InsightsPanel } from "@/components/dashboard/insights-panel";
 import { api } from "@/api/client";
 import type {
+  ExpenseCategory,
   ExtraIncome,
   FixedExpense,
+  Insights,
   Settings,
   Summary,
   VariableExpense,
@@ -34,17 +40,24 @@ async function loadExpenses() {
 async function loadExtraIncome() {
   return api<ExtraIncome[]>("/api/extra-income");
 }
+async function loadCategories() {
+  return api<ExpenseCategory[]>("/api/categories");
+}
+async function loadInsights() {
+  return api<Insights>("/api/insights");
+}
 
 type Props = { profileName: string };
 
-/** Filas visibles antes del “Ver más” en cada lista. */
+/** Filas visibles antes del "Ver más" en cada lista. */
 const FIXED_LIST_PREVIEW = 3;
-const VARIABLE_LIST_PREVIEW = 2;
+const VARIABLE_LIST_PREVIEW = 5;
 
 export function Dashboard({ profileName }: Props) {
   const qc = useQueryClient();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [expandFixedList, setExpandFixedList] = useState(false);
   const [expandVariableList, setExpandVariableList] = useState(false);
 
@@ -61,6 +74,14 @@ export function Dashboard({ profileName }: Props) {
   const extraIncomeQ = useQuery({
     queryKey: ["extra-income"],
     queryFn: loadExtraIncome,
+  });
+  const categoriesQ = useQuery({
+    queryKey: ["categories"],
+    queryFn: loadCategories,
+  });
+  const insightsQ = useQuery({
+    queryKey: ["insights"],
+    queryFn: loadInsights,
   });
 
   const summaryPending = summaryQ.isPending;
@@ -87,7 +108,11 @@ export function Dashboard({ profileName }: Props) {
   });
 
   const addExpense = useMutation({
-    mutationFn: (body: { amount: string; note: string | null }) =>
+    mutationFn: (body: {
+      amount: string;
+      note: string | null;
+      category_id: number | null;
+    }) =>
       api<VariableExpense>("/api/expenses", {
         method: "POST",
         body: JSON.stringify(body),
@@ -121,6 +146,7 @@ export function Dashboard({ profileName }: Props) {
 
   const summary = summaryQ.data;
   const settings = settingsQ.data;
+  const categories = categoriesQ.data ?? [];
 
   const variableExpenseItems = expensesQ.data ?? [];
   const variableNeedsToggle =
@@ -154,9 +180,11 @@ export function Dashboard({ profileName }: Props) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const note = String(fd.get("note") ?? "").trim();
+    const catId = fd.get("category_id");
     addExpense.mutate({
       amount: String(fd.get("amount") ?? ""),
       note: note || null,
+      category_id: catId ? Number(catId) : null,
     });
     e.currentTarget.reset();
   }
@@ -193,6 +221,14 @@ export function Dashboard({ profileName }: Props) {
               </button>
               <button
                 type="button"
+                onClick={() => setShowCategoryManager(true)}
+                className="font-medium text-slate-400 hover:text-teal-300"
+                aria-label="Gestionar categorías"
+              >
+                Categorías
+              </button>
+              <button
+                type="button"
                 onClick={() => void logout()}
                 className="font-medium text-slate-500 underline decoration-slate-700 underline-offset-4 hover:text-slate-300"
               >
@@ -213,6 +249,7 @@ export function Dashboard({ profileName }: Props) {
           </div>
         )}
 
+        {/* ── Hero: today's spending ceiling ─────────────────────────── */}
         <section
           className="overflow-hidden rounded-xl border border-teal-500/20 bg-gradient-to-br from-slate-900/90 to-slate-900 p-4 shadow-xl shadow-black/30 sm:rounded-2xl sm:p-5 md:p-6"
           aria-live="polite"
@@ -286,190 +323,232 @@ export function Dashboard({ profileName }: Props) {
             </div>
           </div>
           <p className="mt-5 border-t border-slate-800 pt-4 text-sm leading-relaxed text-slate-500">
-            “Te queda” = ingreso mensual + ingresos extra del mes − ahorro − fijos −
+            "Te queda" = ingreso mensual + ingresos extra del mes − ahorro − fijos −
             gastos registrados este mes. El ahorro (% o cantidad fija) se calcula solo
             sobre el <strong className="text-slate-300">ingreso mensual</strong>; los
             extras solo aumentan el margen disponible.
           </p>
         </section>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
-          <div className="border-b border-slate-800 px-5 py-4">
-            <h2 className="text-lg font-bold tracking-tight">
-              Gastos del día a día
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Suma aquí compras y gastos sueltos del mes
-            </p>
-          </div>
-          <div className="p-5">
-            <p className="mb-4 text-sm leading-relaxed text-slate-500">
-              Cada registro actualiza cuánto te queda y tu techo diario. Para gastos que
-              se repiten cada mes, usa <strong className="text-slate-400">Gastos fijos</strong>
-              <span className="hidden lg:inline"> (columna de la derecha)</span>
-              <span className="lg:hidden"> (bloque siguiente)</span>.
-            </p>
-            <form
-              className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2"
-              onSubmit={onExpenseSubmit}
-            >
-              <input
-                name="amount"
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                min="0.01"
-                placeholder="Cantidad (€)"
-                required
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[120px] sm:flex-1"
-              />
-              <input
-                name="note"
-                type="text"
-                placeholder="Nota (opcional)"
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[140px] sm:flex-1"
-              />
-              <button
-                type="submit"
-                disabled={addExpense.isPending}
-                className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
-              >
-                Registrar
-              </button>
-            </form>
-            <h3 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-widest text-slate-500">
-              Este mes
-            </h3>
-            {expensesQ.isPending ? (
-              <p className="text-sm text-slate-500">Cargando gastos…</p>
-            ) : (
-              <>
-                <ul className="space-y-2">
-                  {variableVisibleItems.map((it) => (
-                    <li
-                      key={it.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
-                    >
-                      <div>
-                        <p className="font-semibold text-teal-300/90">
-                          {money(it.amount)}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          {it.occurred_at}
-                          {it.note ? ` · ${it.note}` : ""}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => delExpense.mutate(it.id)}
-                        disabled={delExpense.isPending}
-                        className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
-                      >
-                        Borrar
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                {variableNeedsToggle && (
-                  <button
-                    type="button"
-                    onClick={() => setExpandVariableList((v) => !v)}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950/40 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
-                    aria-expanded={expandVariableList}
-                  >
-                    <ChevronInCircle expanded={expandVariableList} />
-                    {expandVariableList
-                      ? "Mostrar menos"
-                      : `Ver ${variableHiddenCount} gasto${variableHiddenCount === 1 ? "" : "s"} más del mes`}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        </section>
+        {/* ── Insights panel ────────────────────────────────────────── */}
+        <InsightsPanel
+          data={insightsQ.data}
+          isLoading={insightsQ.isPending}
+          error={insightsQ.error as Error | null}
+        />
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
-          <div className="border-b border-slate-800 px-5 py-4">
-            <h2 className="text-lg font-bold tracking-tight">Gastos fijos</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Lo que pagas igual cada mes
-            </p>
-          </div>
-          <div className="p-5">
-            <p className="mb-4 text-sm text-slate-500">
-              Vivienda, seguros, suscripciones… suman aquí.
-            </p>
-            <form
-              className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2"
-              onSubmit={onFixedSubmit}
-            >
-              <input
-                name="name"
-                placeholder="Ej. Alquiler"
-                required
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[100px] sm:flex-1"
-              />
-              <input
-                name="amount"
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                min={0}
-                placeholder="€"
-                required
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:w-24"
-              />
-              <button
-                type="submit"
-                disabled={addFixed.isPending}
-                className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
+        {/* ── Spending chart ────────────────────────────────────────── */}
+        {insightsQ.data && insightsQ.data.category_breakdown.length > 0 && (
+          <SpendingChart
+            breakdown={insightsQ.data.category_breakdown}
+            total={insightsQ.data.total_spent}
+          />
+        )}
+
+        {/* ── Variable + Fixed expense columns ──────────────────────── */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
+          {/* Variable expenses */}
+          <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
+            <div className="border-b border-slate-800 px-5 py-4">
+              <h2 className="text-lg font-bold tracking-tight">
+                Gastos del día a día
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Suma aquí compras y gastos sueltos del mes
+              </p>
+            </div>
+            <div className="p-5">
+              <p className="mb-4 text-sm leading-relaxed text-slate-500">
+                Cada registro actualiza cuánto te queda y tu techo diario. Para gastos que
+                se repiten cada mes, usa <strong className="text-slate-400">Gastos fijos</strong>
+                <span className="hidden lg:inline"> (columna de la derecha)</span>
+                <span className="lg:hidden"> (bloque siguiente)</span>.
+              </p>
+              <form
+                className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2"
+                onSubmit={onExpenseSubmit}
               >
-                Añadir
-              </button>
-            </form>
-            {fixedQ.isPending ? (
-              <p className="mt-4 text-sm text-slate-500">Cargando gastos fijos…</p>
-            ) : (
-              <>
-                <ul className="mt-4 space-y-2">
-                  {fixedVisibleItems.map((it) => (
-                    <li
-                      key={it.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
-                    >
-                      <div>
-                        <p className="font-semibold text-slate-200">{it.name}</p>
-                        <p className="text-sm text-slate-500">{money(it.amount)}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => delFixed.mutate(it.id)}
-                        disabled={delFixed.isPending}
-                        className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
-                      >
-                        Quitar
-                      </button>
-                    </li>
+                <input
+                  name="amount"
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="Cantidad (€)"
+                  required
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[100px] sm:flex-1"
+                />
+                <select
+                  name="category_id"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[120px] sm:flex-1"
+                  defaultValue=""
+                >
+                  <option value="">Sin categoría</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.icon ? `${cat.icon} ` : ""}{cat.name}
+                    </option>
                   ))}
-                </ul>
-                {fixedNeedsToggle && (
-                  <button
-                    type="button"
-                    onClick={() => setExpandFixedList((v) => !v)}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950/40 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
-                    aria-expanded={expandFixedList}
-                  >
-                    <ChevronInCircle expanded={expandFixedList} />
-                    {expandFixedList
-                      ? "Mostrar menos"
-                      : `Ver ${fixedHiddenCount} gasto${fixedHiddenCount === 1 ? "" : "s"} fijo${fixedHiddenCount === 1 ? "" : "s"} más`}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        </section>
+                </select>
+                <input
+                  name="note"
+                  type="text"
+                  placeholder="Nota (opcional)"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[120px] sm:flex-1"
+                />
+                <button
+                  type="submit"
+                  disabled={addExpense.isPending}
+                  className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
+                >
+                  Registrar
+                </button>
+              </form>
+              <h3 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                Este mes
+              </h3>
+              {expensesQ.isPending ? (
+                <p className="text-sm text-slate-500">Cargando gastos…</p>
+              ) : (
+                <>
+                  <ul className="space-y-2">
+                    {variableVisibleItems.map((it) => (
+                      <li
+                        key={it.id}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-teal-300/90">
+                              {money(it.amount)}
+                            </p>
+                            {it.category_color && (
+                              <span
+                                className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                                style={{ backgroundColor: it.category_color }}
+                                title={it.category_name ?? undefined}
+                              />
+                            )}
+                          </div>
+                          <p className="truncate text-sm text-slate-500">
+                            {it.occurred_at}
+                            {it.note ? ` · ${it.note}` : ""}
+                            {it.category_name && !it.note
+                              ? ` · ${it.category_name}`
+                              : ""}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => delExpense.mutate(it.id)}
+                          disabled={delExpense.isPending}
+                          className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                        >
+                          Borrar
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  {variableNeedsToggle && (
+                    <button
+                      type="button"
+                      onClick={() => setExpandVariableList((v) => !v)}
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950/40 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                      aria-expanded={expandVariableList}
+                    >
+                      <ChevronInCircle expanded={expandVariableList} />
+                      {expandVariableList
+                        ? "Mostrar menos"
+                        : `Ver ${variableHiddenCount} gasto${variableHiddenCount === 1 ? "" : "s"} más del mes`}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* Fixed expenses */}
+          <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
+            <div className="border-b border-slate-800 px-5 py-4">
+              <h2 className="text-lg font-bold tracking-tight">Gastos fijos</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Lo que pagas igual cada mes
+              </p>
+            </div>
+            <div className="p-5">
+              <p className="mb-4 text-sm text-slate-500">
+                Vivienda, seguros, suscripciones… suman aquí.
+              </p>
+              <form
+                className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2"
+                onSubmit={onFixedSubmit}
+              >
+                <input
+                  name="name"
+                  placeholder="Ej. Alquiler"
+                  required
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[100px] sm:flex-1"
+                />
+                <input
+                  name="amount"
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min={0}
+                  placeholder="€"
+                  required
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:w-24"
+                />
+                <button
+                  type="submit"
+                  disabled={addFixed.isPending}
+                  className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
+                >
+                  Añadir
+                </button>
+              </form>
+              {fixedQ.isPending ? (
+                <p className="mt-4 text-sm text-slate-500">Cargando gastos fijos…</p>
+              ) : (
+                <>
+                  <ul className="mt-4 space-y-2">
+                    {fixedVisibleItems.map((it) => (
+                      <li
+                        key={it.id}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
+                      >
+                        <div>
+                          <p className="font-semibold text-slate-200">{it.name}</p>
+                          <p className="text-sm text-slate-500">{money(it.amount)}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => delFixed.mutate(it.id)}
+                          disabled={delFixed.isPending}
+                          className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                        >
+                          Quitar
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  {fixedNeedsToggle && (
+                    <button
+                      type="button"
+                      onClick={() => setExpandFixedList((v) => !v)}
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950/40 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                      aria-expanded={expandFixedList}
+                    >
+                      <ChevronInCircle expanded={expandFixedList} />
+                      {expandFixedList
+                        ? "Mostrar menos"
+                        : `Ver ${fixedHiddenCount} gasto${fixedHiddenCount === 1 ? "" : "s"} fijo${fixedHiddenCount === 1 ? "" : "s"} más`}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </section>
         </div>
 
         <footer className="rounded-xl border border-slate-800 bg-slate-900/30 px-4 py-3 text-sm text-slate-500">
@@ -495,6 +574,17 @@ export function Dashboard({ profileName }: Props) {
           onSaved={() => {
             setShowSettings(false);
             setToastMsg("Cambios guardados");
+            void invalidateAll();
+          }}
+        />
+      )}
+
+      {showCategoryManager && (
+        <CategoryManager
+          categories={categories}
+          onClose={() => setShowCategoryManager(false)}
+          onChanged={() => {
+            setToastMsg("Categorías actualizadas");
             void invalidateAll();
           }}
         />
