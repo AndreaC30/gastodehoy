@@ -1,6 +1,8 @@
 """SQLite in-memory para tests; sustituye `app.database.engine` antes del lifespan."""
 
 import os
+
+# Set env vars BEFORE importing anything that uses pydantic-settings
 os.environ["ENV"] = "development"
 os.environ["COOKIE_SECURE"] = "false"
 os.environ.pop("COOKIE_DOMAIN", None)
@@ -9,13 +11,6 @@ os.environ["APP_SECRET"] = "test-secret-key-for-tests-only-12345678"
 from collections.abc import Generator
 
 import pytest
-from starlette.testclient import TestClient as _TC
-
-# Debug: verify settings before importing app
-print(f"[conftest] ENV={os.environ.get('ENV')}")
-print(f"[conftest] COOKIE_SECURE={os.environ.get('COOKIE_SECURE')}")
-print(f"[conftest] APP_SECRET={os.environ.get('APP_SECRET')}")
-print(f"[conftest] COOKIE_DOMAIN={os.environ.get('COOKIE_DOMAIN', 'NOT_SET')}")
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -39,15 +34,21 @@ def _install_sqlite_engine() -> None:
 
 _install_sqlite_engine()
 
-from app.auth import _login_attempts, hash_password  # noqa: E402
+# Now import app modules (after env is set and engine is installed)
+from app.auth import hash_password  # noqa: E402
+from app.config import settings  # noqa: E402
 from app.database import SessionLocal  # noqa: E402
 from app.models import (  # noqa: E402
     ExtraIncome,
     FixedExpense,
+    LoginAttempt,
     User,
     UserSettings,
     VariableExpense,
 )
+
+# Ensure cookie domain is None for tests (TestClient can't handle domain cookies)
+settings.cookie_domain = None
 
 
 @pytest.fixture(autouse=True)
@@ -58,8 +59,8 @@ def reset_db() -> Generator[None, None, None]:
         s.execute(delete(FixedExpense))
         s.execute(delete(UserSettings))
         s.execute(delete(User))
+        s.execute(delete(LoginAttempt))
         s.commit()
-    _login_attempts.clear()
     yield
 
 
@@ -110,5 +111,5 @@ def anon_client() -> Generator:
 
     from app.main import app
 
-    with TestClient(app) as c:
+    with TestClient(app, headers={"X-Requested-With": "XMLHttpRequest"}) as c:
         yield c

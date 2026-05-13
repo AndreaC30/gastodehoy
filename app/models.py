@@ -145,3 +145,17 @@ class ExtraIncome(Base):
     received_at: Mapped[date] = mapped_column(Date, nullable=False)
 
     user: Mapped[User] = relationship(back_populates="extra_incomes")
+
+
+class LoginAttempt(Base):
+    """Persistent login rate limiter (replaces in-memory dict)."""
+
+    __tablename__ = "login_attempts"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    ip: Mapped[str] = mapped_column(String(45), nullable=False, index=True)
+    attempted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )

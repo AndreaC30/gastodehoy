@@ -150,8 +150,8 @@ def register(
     db.refresh(user)
     try:
         send_welcome_email(user.email, user.name)
-    except Exception:
-        pass
+    except Exception as exc:
+        _log.warning("welcome email failed for %s: %s", user.email, exc)
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(user)
@@ -167,7 +167,7 @@ def login(
     db: Session = Depends(get_db),
 ) -> UserPublic:
     """Verify credentials, apply IP rate-limit and set the session cookie."""
-    check_login_rate(request)
+    check_login_rate(request, db)
     email = _normalize_email(payload.email)
     user = db.scalar(select(User).where(func.lower(User.email) == email))
     if user is None or not verify_password(payload.password, user.password_hash):
@@ -175,7 +175,7 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email o contraseña incorrectos",
         )
-    reset_login_rate(request)
+    reset_login_rate(request, db)
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(user)
@@ -201,7 +201,7 @@ def forgot_password(
     inexistente (no revelar cuentas). Valida que el dominio del email
     tenga registros MX antes de intentar enviar (anti-abuso SMTP).
     """
-    check_login_rate(request)
+    check_login_rate(request, db)
     if not (settings.smtp_host and settings.smtp_host.strip()):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

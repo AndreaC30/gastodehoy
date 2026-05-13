@@ -58,10 +58,11 @@ class Base(DeclarativeBase):
 
 
 def apply_sqlite_migrations(engine: Engine) -> None:
-    """Añade columnas nuevas en SQLite sin Alembic (BBDD ya existentes)."""
+    """Anade columnas nuevas e indices en SQLite sin Alembic (BBDD ya existentes)."""
     if make_url(settings.database_url).get_backend_name() != "sqlite":
         return
     with engine.begin() as conn:
+        # Migraciones de columnas
         rows = conn.execute(text("PRAGMA table_info(users)")).fetchall()
         colnames = {str(r[1]) for r in rows}
         if "must_change_password" not in colnames:
@@ -71,6 +72,20 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                     "BOOLEAN NOT NULL DEFAULT 0"
                 )
             )
+
+        # Indices para consultas de rango por fecha (dashboard)
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS idx_variable_expenses_user_date "
+                "ON variable_expenses(user_id, occurred_at)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS idx_extra_incomes_user_date "
+                "ON extra_incomes(user_id, received_at)"
+            )
+        )
 
 
 def get_db() -> Generator[Session, None, None]:

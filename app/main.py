@@ -7,11 +7,14 @@ serves the built React app from ``web/dist``.
 
 from contextlib import asynccontextmanager
 import logging
+import uuid
 from pathlib import Path
 
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from fastapi import FastAPI, Request
+_log = logging.getLogger(__name__)
+
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -91,6 +94,16 @@ app.add_middleware(
 
 
 @app.middleware("http")
+async def add_request_id(request: Request, call_next):
+    """Attach a unique request_id to every request for log correlation."""
+    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4())[:8])
+    request.state.request_id = request_id
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    return response
+
+
+@app.middleware("http")
 async def csrf_protection(request: Request, call_next):
     """Middleware para protección CSRF en rutas API.
 
@@ -144,6 +157,17 @@ def health() -> JSONResponse:
             content={"status": "degraded", "database": "unreachable"},
         )
     return JSONResponse(content={"status": "ok", "database": "ok"})
+
+
+@app.post("/csp-report")
+async def csp_report(request: Request):
+    """Receive CSP violation reports from browsers (logging only)."""
+    try:
+        body = await request.json()
+        _log.warning("CSP violation: %s", body)
+    except Exception:
+        pass
+    return Response(status_code=204)
 
 
 @app.get("/", response_model=None)

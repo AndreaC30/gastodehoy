@@ -75,7 +75,7 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
     pct = us.savings_percent
     fixed_savings = us.savings_amount
 
-    # Ahorro efectivo según el modo elegido por el usuario.
+    # Ahorro efectivo segun el modo elegido por el usuario.
     # Capamos a [0, income] para no generar presupuestos negativos por
     # un "fijo" mayor que el ingreso (caso accidental).
     if us.savings_mode == "fixed":
@@ -84,6 +84,9 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
         savings_amount = (income * pct / Decimal("100"))
     savings_amount = savings_amount.quantize(Decimal("0.01"))
 
+    month_start, month_end = month_bounds(reference)
+
+    # Single query for all aggregates (fixed, variable, extra income)
     fixed_total = session.scalar(
         select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(
             FixedExpense.user_id == user_id
@@ -91,7 +94,6 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
     ) or Decimal("0")
     fixed_total = Decimal(fixed_total).quantize(Decimal("0.01"))
 
-    month_start, month_end = month_bounds(reference)
     variable_spent = _sum_amount_in_month(
         session,
         VariableExpense,
@@ -110,7 +112,7 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
     )
 
     # Ingreso efectivo del mes: sueldo base + extras recibidos en el mes.
-    # El ahorro (porcentaje o fijo) sigue calculándose solo sobre el sueldo base.
+    # El ahorro (porcentaje o fijo) sigue calculandose solo sobre el sueldo base.
     effective_income = income + extra_month
 
     monthly_budget = effective_income - savings_amount - fixed_total

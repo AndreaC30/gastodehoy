@@ -39,7 +39,8 @@ services:
       SITE_DOMAIN: ${SITE_DOMAIN}
       ACME_EMAIL: ${ACME_EMAIL}
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     networks:
       - backend
 

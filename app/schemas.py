@@ -171,6 +171,29 @@ class ExtraIncomeRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class PaginatedMeta(BaseModel):
+    """Pagination metadata."""
+
+    total: int
+    limit: int
+    offset: int
+
+
+class PaginatedFixedExpenses(BaseModel):
+    items: list[FixedExpenseRead]
+    meta: PaginatedMeta
+
+
+class PaginatedVariableExpenses(BaseModel):
+    items: list[VariableExpenseRead]
+    meta: PaginatedMeta
+
+
+class PaginatedExtraIncomes(BaseModel):
+    items: list[ExtraIncomeRead]
+    meta: PaginatedMeta
+
+
 class SummaryRead(BaseModel):
     reference_date: date
     days_remaining_in_month: int

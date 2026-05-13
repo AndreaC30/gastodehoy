@@ -2,7 +2,7 @@
 
 Password hashing (bcrypt), session cookies signed with itsdangerous,
 recovery-code helpers for the admin CLI, ``get_current_user`` dependency,
-and a tiny in-memory IP rate limiter for login and forgot-password.
+and a persistent SQLite-backed IP rate limiter for login and forgot-password.
 """
 
 from __future__ import annotations
@@ -10,9 +10,7 @@ from __future__ import annotations
 import ipaddress
 import logging
 import secrets
-from collections import deque
-from datetime import datetime, timezone
-from time import monotonic
+from datetime import datetime, timedelta, timezone
 from typing import Final
 
 _log = logging.getLogger(__name__)
@@ -20,11 +18,12 @@ _log = logging.getLogger(__name__)
 import bcrypt
 from fastapi import Cookie, Depends, HTTPException, Request, Response, status
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.models import User
+from app.models import LoginAttempt, User
 
 PASSWORD_MIN_LEN: Final = 8
 PASSWORD_MAX_LEN: Final = 64
@@ -38,6 +37,11 @@ _BCRYPT_MAX_BYTES: Final = 72
 _RECOVERY_ALPHABET: Final = "abcdefghjkmnpqrstuvwxyz23456789"
 RECOVERY_CODE_GROUPS: Final = 4
 RECOVERY_CODE_GROUP_LEN: Final = 4
+
+# Rate limiter constants
+_LOGIN_WINDOW_S: Final = 5 * 60
+_LOGIN_MAX_ATTEMPTS: Final = 5
+_LOGIN_MAX_ENTRIES: Final = 10000
 
 
 def hash_password(password: str) -> str:
@@ -190,12 +194,6 @@ def get_current_user(
     return user
 
 
-_LOGIN_WINDOW_S: Final = 5 * 60
-_LOGIN_MAX_ATTEMPTS: Final = 5
-_LOGIN_MAX_ENTRIES: Final = 10000
-_login_attempts: dict[str, deque[float]] = {}
-
-
 def _is_valid_ip(ip: str) -> bool:
     """Validate that a string is a plausible IPv4 or IPv6 address."""
     try:
@@ -203,22 +201,6 @@ def _is_valid_ip(ip: str) -> bool:
         return True
     except ValueError:
         return False
-
-
-def _cleanup_old_attempts() -> None:
-    """Remove IPs whose oldest attempt is outside the login window.
-
-    Keeps memory bounded by purging stale entries that would never
-    count toward rate limiting anyway.
-    """
-    now = monotonic()
-    stale = [
-        ip
-        for ip, q in _login_attempts.items()
-        if not q or now - q[0] > _LOGIN_WINDOW_S
-    ]
-    for ip in stale:
-        del _login_attempts[ip]
 
 
 def _client_ip(request: Request) -> str:
@@ -234,33 +216,59 @@ def _client_ip(request: Request) -> str:
             candidate = fwd.split(",")[0].strip()
             if _is_valid_ip(candidate):
                 return candidate
-            # If the forwarded IP is invalid, fall through to socket IP
     return request.client.host if request.client else "unknown"
 
 
-def check_login_rate(request: Request) -> None:
-    """Throttle login/forgot-password attempts: 5 per IP per 5 minutes -> 429."""
-    # Periodic cleanup to bound memory
-    if len(_login_attempts) > _LOGIN_MAX_ENTRIES:
-        _cleanup_old_attempts()
+def _cleanup_old_attempts_db(db: Session, window_s: int) -> None:
+    """Remove login attempts older than the rate-limit window."""
+    cutoff = datetime.now(timezone.utc) - timedelta(seconds=window_s)
+    db.query(LoginAttempt).filter(LoginAttempt.attempted_at < cutoff).delete(
+        synchronize_session=False
+    )
 
+
+def check_login_rate(request: Request, db: Session) -> None:
+    """Throttle login/forgot-password attempts: 5 per IP per 5 minutes -> 429.
+
+    Uses SQLite-backed storage so rate limits survive restarts and work
+    across multiple workers.
+    """
     ip = _client_ip(request)
-    now = monotonic()
-    q = _login_attempts.setdefault(ip, deque())
-    while q and now - q[0] > _LOGIN_WINDOW_S:
-        q.popleft()
-    if len(q) >= _LOGIN_MAX_ATTEMPTS:
+    now = datetime.now(timezone.utc)
+
+    # Periodic cleanup to bound table size
+    total = db.scalar(select(func.count(LoginAttempt.id))) or 0
+    if total > _LOGIN_MAX_ENTRIES:
+        _cleanup_old_attempts_db(db, _LOGIN_WINDOW_S)
+
+    # Count attempts in the current window
+    cutoff = now - timedelta(seconds=_LOGIN_WINDOW_S)
+    recent_count = db.scalar(
+        select(func.count(LoginAttempt.id)).where(
+            LoginAttempt.ip == ip,
+            LoginAttempt.attempted_at >= cutoff,
+        )
+    ) or 0
+
+    if recent_count >= _LOGIN_MAX_ATTEMPTS:
         _log.warning(
-            "rate-limit: IP %s bloqueada (%d intentos en %ds)",
-            ip, len(q), _LOGIN_WINDOW_S,
+            "rate-limit: IP %s blocked (%d attempts in %ds)",
+            ip, recent_count, _LOGIN_WINDOW_S,
         )
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Demasiados intentos. Espera unos minutos.",
         )
-    q.append(now)
+
+    # Record this attempt
+    db.add(LoginAttempt(ip=ip, attempted_at=now))
+    db.commit()
 
 
-def reset_login_rate(request: Request) -> None:
+def reset_login_rate(request: Request, db: Session) -> None:
     """Forget previous failures for this IP after a successful auth."""
-    _login_attempts.pop(_client_ip(request), None)
+    ip = _client_ip(request)
+    db.query(LoginAttempt).filter(LoginAttempt.ip == ip).delete(
+        synchronize_session=False
+    )
+    db.commit()

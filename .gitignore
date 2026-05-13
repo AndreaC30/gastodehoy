@@ -10,3 +10,5 @@ data/
 web/node_modules/
 web/dist/
 tools/pillow_pkg/
+
+.env.test
