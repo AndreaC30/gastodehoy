@@ -8,6 +8,12 @@ from decimal import Decimal
 from app.config import settings as app_settings
 
 
+@pytest.fixture(autouse=True)
+def _bypass_mx_check(monkeypatch) -> None:
+    """Skip real DNS MX lookups in tests — domains are fake."""
+    monkeypatch.setattr("app.routers.auth._domain_has_mx", lambda _domain: True)
+
+
 def test_health(anon_client) -> None:
     r = anon_client.get("/health")
     assert r.status_code == 200
@@ -38,8 +44,13 @@ def test_register_sets_cookie_and_me_works(anon_client) -> None:
     body = r.json()
     assert body["user"]["email"] == "pablo@example.com"
     assert body["user"]["name"] == "Pablo"
+    # Debug: check cookies
+    print(f"[test] Cookies after register: {dict(anon_client.cookies)}")
+    print(f"[test] Response headers: {dict(r.headers)}")
 
     me = anon_client.get("/api/auth/me")
+    print(f"[test] Me status: {me.status_code}")
+    print(f"[test] Me response: {me.text[:200]}")
     assert me.status_code == 200
     assert me.json()["email"] == "pablo@example.com"
 
@@ -411,3 +422,71 @@ def test_change_password_invalidates_other_sessions(anon_client) -> None:
         other.cookies.set("gdh_session", old_cookie)
         r = other.get("/api/auth/me")
         assert r.status_code == 401
+
+
+# ── Security: email validation tests ──────────────────────────────────
+
+
+def test_register_invalid_email_format(anon_client) -> None:
+    """Register with clearly invalid email should return 400."""
+    for bad in ["no-at-sign", "missing-domain@", "@nodomain", "spaces in@email"]:
+        r = anon_client.post(
+            "/api/auth/register",
+            json={"email": bad, "name": "Bad", "password": "supersecret1"},
+        )
+        assert r.status_code == 400, f"Expected 400 for email '{bad}', got {r.status_code}"
+
+
+def test_forgot_password_invalid_email_format(anon_client, monkeypatch) -> None:
+    """Forgot-password with invalid format returns generic 200 (no enumeration)."""
+    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
+    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+    for bad in ["no-at-sign", "missing-domain@", "@nodomain"]:
+        r = anon_client.post(
+            "/api/auth/forgot-password", json={"email": bad}
+        )
+        assert r.status_code == 200
+        assert "correo" in r.json()["detail"].lower()
+
+
+def test_forgot_password_domain_without_mx_returns_generic(anon_client, monkeypatch) -> None:
+    """Forgot-password for domain without MX returns same generic message."""
+    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
+    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+    # Bypass the auto-use fixture to test real MX check
+    monkeypatch.setattr("app.routers.auth._domain_has_mx", lambda _domain: False)
+
+    r = anon_client.post(
+        "/api/auth/forgot-password", json={"email": "user@nonexistent-domain-xyz123.com"}
+    )
+    assert r.status_code == 200
+    assert "correo" in r.json()["detail"].lower()
+
+
+def test_forgot_password_no_enumeration_by_timing(anon_client, monkeypatch) -> None:
+    """Response for existing and non-existing email must be identical.
+
+    Both return 200 with the same generic message — no information leak.
+    """
+    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
+    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+    monkeypatch.setattr(
+        "app.routers.auth.send_forgot_password_email",
+        lambda *_a, **_k: None,
+    )
+
+    anon_client.post(
+        "/api/auth/register",
+        json={"email": "real@e.com", "name": "Real", "password": "supersecret1"},
+    )
+    anon_client.post("/api/auth/logout")
+
+    r_existing = anon_client.post(
+        "/api/auth/forgot-password", json={"email": "real@e.com"}
+    )
+    r_unknown = anon_client.post(
+        "/api/auth/forgot-password", json={"email": "nobody@e.com"}
+    )
+
+    assert r_existing.status_code == r_unknown.status_code == 200
+    assert r_existing.json()["detail"] == r_unknown.json()["detail"]

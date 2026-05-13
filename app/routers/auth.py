@@ -71,10 +71,20 @@ def _is_valid_email_format(email: str) -> bool:
     domain = local_domain[1]
     if "." not in domain or len(domain) < 3:
         return False
-    # Reject obviously fake domains
-    if domain in ("example.com", "example.org", "example.net", "test.com"):
-        return False
     return True
+
+
+def _domain_has_mx(domain: str) -> bool:
+    """Check if a domain has MX/A records (can receive email).
+
+    Returns True if the domain resolves, False otherwise.
+    Tests can monkeypatch this to skip real DNS lookups.
+    """
+    try:
+        records = socket.getaddrinfo(domain, 0, socket.AF_UNSPEC, socket.SOCK_STREAM)
+        return bool(records)
+    except (socket.gaierror, OSError):
+        return False
 
 
 def _random_password() -> str:
@@ -111,11 +121,7 @@ def register(
 
     # Validar que el dominio tiene registros MX
     domain = email.split("@")[-1]
-    try:
-        mx_records = socket.getaddrinfo(domain, 0, socket.AF_UNSPEC, socket.SOCK_STREAM)
-        if not mx_records:
-            raise ValueError("no MX")
-    except (socket.gaierror, ValueError, OSError):
+    if not _domain_has_mx(domain):
         _log.warning("register: dominio sin MX '%s' desde %s", domain, _client_ip(request))
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -214,11 +220,7 @@ def forgot_password(
 
     # Validar que el dominio tiene registros MX (anti-envio a dominios falsos)
     domain = email.split("@")[-1]
-    try:
-        mx_records = socket.getaddrinfo(domain, 0, socket.AF_UNSPEC, socket.SOCK_STREAM)
-        if not mx_records:
-            raise ValueError("no MX")
-    except (socket.gaierror, ValueError, OSError):
+    if not _domain_has_mx(domain):
         _log.warning(
             "forgot-password: dominio sin MX '%s' desde %s",
             domain,
