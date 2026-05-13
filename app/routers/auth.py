@@ -7,7 +7,9 @@ Cambiar contraseña o recuperar invalida sesiones anteriores cuando aplique.
 
 from __future__ import annotations
 
+import logging
 import secrets
+import socket
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -15,9 +17,12 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+_log = logging.getLogger(__name__)
+
 from app.auth import (
     PASSWORD_MAX_LEN,
     PASSWORD_MIN_LEN,
+    _client_ip,
     check_login_rate,
     clear_session_cookie,
     get_current_user,
@@ -56,6 +61,22 @@ def _normalize_email(email: str) -> str:
     return email.strip().lower()
 
 
+def _is_valid_email_format(email: str) -> bool:
+    """Validacion basica de formato de email antes de tocar la BD."""
+    if "@" not in email:
+        return False
+    local_domain = email.split("@")
+    if len(local_domain) != 2:
+        return False
+    domain = local_domain[1]
+    if "." not in domain or len(domain) < 3:
+        return False
+    # Reject obviously fake domains
+    if domain in ("example.com", "example.org", "example.net", "test.com"):
+        return False
+    return True
+
+
 def _random_password() -> str:
     """Contraseña temporal segura y dentro del rango de validación."""
     pw = secrets.token_urlsafe(32)
@@ -73,11 +94,34 @@ def _random_password() -> str:
 )
 def register(
     payload: RegisterRequest,
+    request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ) -> RegisterResponse:
     """Crea la cuenta, fija la cookie de sesión y devuelve el usuario."""
     email = _normalize_email(payload.email)
+
+    # Validar formato de email antes de tocar la BD
+    if not _is_valid_email_format(email):
+        _log.warning("register: formato invalido desde %s", _client_ip(request))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El formato del email no es válido",
+        )
+
+    # Validar que el dominio tiene registros MX
+    domain = email.split("@")[-1]
+    try:
+        mx_records = socket.getaddrinfo(domain, 0, socket.AF_UNSPEC, socket.SOCK_STREAM)
+        if not mx_records:
+            raise ValueError("no MX")
+    except (socket.gaierror, ValueError, OSError):
+        _log.warning("register: dominio sin MX '%s' desde %s", domain, _client_ip(request))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El dominio del email no es válido",
+        )
+
     now = datetime.now(timezone.utc).replace(microsecond=0)
     user = User(
         email=email,
@@ -148,7 +192,8 @@ def forgot_password(
     """Genera una contraseña nueva y la envía por correo si el usuario existe.
 
     Sin SMTP configurado responde 503. Misma respuesta 200 para correo
-    inexistente (no revelar cuentas).
+    inexistente (no revelar cuentas). Valida que el dominio del email
+    tenga registros MX antes de intentar enviar (anti-abuso SMTP).
     """
     check_login_rate(request)
     if not (settings.smtp_host and settings.smtp_host.strip()):
@@ -161,6 +206,27 @@ def forgot_password(
         )
 
     email = _normalize_email(payload.email)
+
+    # Validar formato de email antes de tocar la BD ni el DNS
+    if not _is_valid_email_format(email):
+        _log.warning("forgot-password: formato invalido desde %s", _client_ip(request))
+        return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)
+
+    # Validar que el dominio tiene registros MX (anti-envio a dominios falsos)
+    domain = email.split("@")[-1]
+    try:
+        mx_records = socket.getaddrinfo(domain, 0, socket.AF_UNSPEC, socket.SOCK_STREAM)
+        if not mx_records:
+            raise ValueError("no MX")
+    except (socket.gaierror, ValueError, OSError):
+        _log.warning(
+            "forgot-password: dominio sin MX '%s' desde %s",
+            domain,
+            _client_ip(request),
+        )
+        # Misma respuesta generica — no revelar que el dominio es invalido
+        return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)
+
     user = db.scalar(select(User).where(func.lower(User.email) == email))
 
     if user is None:
@@ -183,7 +249,7 @@ def forgot_password(
             detail="No se pudo enviar el correo. Inténtalo más tarde o contacta al administrador.",
         ) from exc
 
-    # No llamamos a reset_login_rate: cada solicitud cuenta para el límite,
+    # No llamamos a reset_login_rate: cada solicitud cuenta para el limite,
     # igual que intentos fallidos de login (anti-abuso del correo).
 
     return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)

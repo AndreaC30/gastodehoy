@@ -8,11 +8,14 @@ and a tiny in-memory IP rate limiter for login and forgot-password.
 from __future__ import annotations
 
 import ipaddress
+import logging
 import secrets
 from collections import deque
 from datetime import datetime, timezone
 from time import monotonic
 from typing import Final
+
+_log = logging.getLogger(__name__)
 
 import bcrypt
 from fastapi import Cookie, Depends, HTTPException, Request, Response, status
@@ -247,6 +250,10 @@ def check_login_rate(request: Request) -> None:
     while q and now - q[0] > _LOGIN_WINDOW_S:
         q.popleft()
     if len(q) >= _LOGIN_MAX_ATTEMPTS:
+        _log.warning(
+            "rate-limit: IP %s bloqueada (%d intentos en %ds)",
+            ip, len(q), _LOGIN_WINDOW_S,
+        )
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Demasiados intentos. Espera unos minutos.",
