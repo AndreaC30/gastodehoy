@@ -147,6 +147,7 @@ class VariableExpenseCreate(BaseModel):
     amount: Decimal = Field(gt=0, decimal_places=2)
     occurred_at: date | None = None
     note: str | None = Field(default=None, max_length=2000)
+    category_id: int | None = None
 
 
 class VariableExpenseRead(BaseModel):
@@ -154,6 +155,9 @@ class VariableExpenseRead(BaseModel):
     amount: Decimal
     occurred_at: date
     note: str | None
+    category_id: int | None
+    category_name: str | None = None
+    category_color: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -169,6 +173,85 @@ class ExtraIncomeRead(BaseModel):
     received_at: date
 
     model_config = {"from_attributes": True}
+
+
+# --- Categories --------------------------------------------------------------
+
+
+class CategoryCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    color: str = Field(
+        default="#6366f1",
+        pattern=r"^#[0-9a-fA-F]{6}$",
+    )
+    icon: str | None = Field(default=None, max_length=40)
+
+    @field_validator("name")
+    @classmethod
+    def name_not_blank(cls, v: str) -> str:
+        s = v.strip()
+        if not s:
+            raise ValueError("El nombre no puede estar vacío")
+        return s
+
+
+class CategoryUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=80)
+    color: str | None = Field(
+        default=None,
+        pattern=r"^#[0-9a-fA-F]{6}$",
+    )
+    icon: str | None = Field(default=None, max_length=40)
+
+    @field_validator("name")
+    @classmethod
+    def name_strip_optional(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        s = v.strip()
+        if not s:
+            raise ValueError("El nombre no puede estar vacío")
+        return s
+
+
+class CategoryRead(BaseModel):
+    id: int
+    name: str
+    color: str
+    icon: str | None
+    is_default: bool
+
+    model_config = {"from_attributes": True}
+
+
+# --- Insights ----------------------------------------------------------------
+
+
+class CategorySpending(BaseModel):
+    category_id: int | None
+    category_name: str
+    category_color: str
+    total: Decimal
+    percentage: Decimal
+    transaction_count: int
+
+
+class InsightItem(BaseModel):
+    type: Literal["warning", "tip", "success", "info"]
+    title: str
+    message: str
+    icon: str = "💡"
+
+
+class InsightsRead(BaseModel):
+    period_start: date
+    period_end: date
+    total_spent: Decimal
+    top_category: CategorySpending | None
+    category_breakdown: list[CategorySpending]
+    insights: list[InsightItem]
+    avg_daily_spend: Decimal
+    projected_monthly: Decimal
 
 
 class PaginatedMeta(BaseModel):

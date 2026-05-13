@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
 from app.database import get_db
-from app.models import ExtraIncome, FixedExpense, User, UserSettings, VariableExpense
+from app.models import ExtraIncome, ExpenseCategory, FixedExpense, User, UserSettings, VariableExpense
 from app.schemas import (
     BudgetSettings,
     ExtraIncomeCreate,
@@ -193,13 +193,22 @@ def list_expenses(
     user: User = Depends(get_current_user),
     year: int | None = Query(default=None, ge=2000, le=3000),
     month: int | None = Query(default=None, ge=1, le=12),
+    category_id: int | None = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
-) -> list[VariableExpense]:
+) -> list[dict]:
     """List expenses for the given (or current) month, newest first (paginated)."""
     start, end = _calendar_month_bounds(year, month)
     stmt = (
-        select(VariableExpense)
+        select(
+            VariableExpense,
+            ExpenseCategory.name.label("category_name"),
+            ExpenseCategory.color.label("category_color"),
+        )
+        .outerjoin(
+            ExpenseCategory,
+            VariableExpense.category_id == ExpenseCategory.id,
+        )
         .where(
             VariableExpense.user_id == user.id,
             VariableExpense.occurred_at >= start,
@@ -209,7 +218,17 @@ def list_expenses(
         .limit(limit)
         .offset(offset)
     )
-    return list(db.scalars(stmt).all())
+    if category_id is not None:
+        stmt = stmt.where(VariableExpense.category_id == category_id)
+
+    rows = db.execute(stmt).all()
+    result = []
+    for row in rows:
+        exp = row[0]
+        exp.category_name = row.category_name
+        exp.category_color = row.category_color
+        result.append(exp)
+    return result
 
 
 @expenses_router.post("", response_model=VariableExpenseRead)
@@ -225,6 +244,7 @@ def create_expense(
         amount=payload.amount,
         occurred_at=day,
         note=payload.note,
+        category_id=payload.category_id,
     )
     db.add(row)
     db.commit()

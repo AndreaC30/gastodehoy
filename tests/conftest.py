@@ -39,6 +39,7 @@ from app.auth import hash_password  # noqa: E402
 from app.config import settings  # noqa: E402
 from app.database import SessionLocal  # noqa: E402
 from app.models import (  # noqa: E402
+    ExpenseCategory,
     ExtraIncome,
     FixedExpense,
     LoginAttempt,
@@ -57,6 +58,7 @@ def reset_db() -> Generator[None, None, None]:
         s.execute(delete(VariableExpense))
         s.execute(delete(ExtraIncome))
         s.execute(delete(FixedExpense))
+        s.execute(delete(ExpenseCategory))
         s.execute(delete(UserSettings))
         s.execute(delete(User))
         s.execute(delete(LoginAttempt))
@@ -85,6 +87,9 @@ def _make_user(
     session.add(user)
     session.commit()
     session.refresh(user)
+    # Seed default categories for the user
+    from app.services.categories import seed_default_categories
+    seed_default_categories(session, user.id)
     return user
 
 
