@@ -15,6 +15,13 @@ import {
   Home,
   Shirt,
   Package,
+  ShoppingCart,
+  Wifi,
+  Zap,
+  Baby,
+  Plane,
+  Gift,
+  Coffee,
   // fallback / general
   Tag,
   type LucideProps,
@@ -29,6 +36,13 @@ const ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   Home,
   Shirt,
   Package,
+  ShoppingCart,
+  Wifi,
+  Zap,
+  Baby,
+  Plane,
+  Gift,
+  Coffee,
 };
 
 const DEFAULT_ICON = Tag;

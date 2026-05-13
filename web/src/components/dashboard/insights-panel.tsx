@@ -1,7 +1,20 @@
 /** Financial insights panel with actionable tips. */
 import type { Insights } from "@/api/types";
 import { money } from "@/lib/format";
-import { AlertTriangle, Lightbulb, CheckCircle, Info } from "lucide-react";
+import {
+  AlertTriangle,
+  Lightbulb,
+  CheckCircle,
+  Info,
+  PieChart,
+  AlertCircle,
+  TrendingDown,
+  TrendingUp,
+  Tags,
+  Building,
+  Calendar,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 type Props = {
   data: Insights | undefined;
@@ -16,12 +29,58 @@ const TYPE_STYLES: Record<string, string> = {
   info: "border-slate-600/40 bg-slate-800/40 text-slate-300",
 };
 
-const TYPE_ICONS: Record<string, { icon: typeof AlertTriangle; colorClass: string }> = {
-  warning: { icon: AlertTriangle, colorClass: "text-amber-400" },
-  tip: { icon: Lightbulb, colorClass: "text-sky-400" },
-  success: { icon: CheckCircle, colorClass: "text-emerald-400" },
-  info: { icon: Info, colorClass: "text-slate-400" },
+const TYPE_ICON_COLORS: Record<string, string> = {
+  warning: "text-amber-400",
+  tip: "text-sky-400",
+  success: "text-emerald-400",
+  info: "text-slate-400",
 };
+
+function getInsightIcon(title: string, type: string): { icon: LucideIcon; colorClass: string } {
+  const lower = title.toLowerCase();
+  const colorClass = TYPE_ICON_COLORS[type] ?? TYPE_ICON_COLORS.info;
+
+  if (lower.includes("gasto concentrado") || lower.includes("concentrado")) {
+    return { icon: PieChart, colorClass };
+  }
+  if (lower.includes("ingreso") || lower.includes("gastas casi todo")) {
+    return { icon: AlertCircle, colorClass };
+  }
+  if (lower.includes("buen ritmo")) {
+    return { icon: TrendingDown, colorClass };
+  }
+  if (lower.includes("sobregasto") || lower.includes("proyección")) {
+    return { icon: TrendingUp, colorClass };
+  }
+  if (lower.includes("categoriza") || lower.includes("categoría") || lower.includes("categoria")) {
+    return { icon: Tags, colorClass };
+  }
+  if (lower.includes("fijos") || lower.includes("gastos fijos")) {
+    return { icon: Building, colorClass };
+  }
+  if (lower.includes("presupuesto diario")) {
+    return { icon: Calendar, colorClass };
+  }
+  if (lower.includes("agotado") || lower.includes("presupuesto agotado")) {
+    return { icon: AlertTriangle, colorClass };
+  }
+  if (lower.includes("sigue registrando")) {
+    return { icon: Lightbulb, colorClass };
+  }
+
+  // Defaults by type
+  switch (type) {
+    case "warning":
+      return { icon: AlertTriangle, colorClass };
+    case "tip":
+      return { icon: Lightbulb, colorClass };
+    case "success":
+      return { icon: CheckCircle, colorClass };
+    case "info":
+    default:
+      return { icon: Info, colorClass };
+  }
+}
 
 export function InsightsPanel({ data, isLoading, error }: Props) {
   if (isLoading) {
@@ -66,21 +125,21 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
 
       {/* Insight cards */}
       <div className="mt-4 space-y-3">
-        {data.insights.map((insight, i) => (
-          <div
-            key={i}
-            className={`rounded-xl border px-4 py-3 text-sm ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
-          >
-            <p className="font-semibold flex items-center gap-2">
-              {(() => {
-                const { icon: Icon, colorClass } = TYPE_ICONS[insight.type] ?? TYPE_ICONS.info;
-                return <Icon className={`h-4 w-4 shrink-0 ${colorClass}`} />;
-              })()}
-              {insight.title}
-            </p>
-            <p className="mt-1 text-sm opacity-90">{insight.message}</p>
-          </div>
-        ))}
+        {data.insights.map((insight, i) => {
+          const { icon: Icon, colorClass } = getInsightIcon(insight.title, insight.type);
+          return (
+            <div
+              key={i}
+              className={`rounded-xl border px-4 py-3 text-sm ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
+            >
+              <p className="font-semibold flex items-center gap-2">
+                <Icon className={`h-4 w-4 shrink-0 ${colorClass}`} />
+                {insight.title}
+              </p>
+              <p className="mt-1 text-sm opacity-90">{insight.message}</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Projection bar */}
