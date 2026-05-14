@@ -47,8 +47,3 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-
-networks:
-  backend:
-    external: true
-    name: gastodehoy_backend
