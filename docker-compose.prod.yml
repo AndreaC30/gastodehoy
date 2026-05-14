@@ -1,7 +1,9 @@
 # Overlay para producción: HTTPS por Caddy + cookies seguras.
 #
-# Uso:
-#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Uso recomendado en servidor tras git pull (rebuild Vite dentro de la imagen):
+#   ./scripts/deploy-docker-prod.sh
+# Manualmente:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --force-recreate app
 #
 # Requiere en .env:
 #   SITE_DOMAIN=gastos.tudominio.com
