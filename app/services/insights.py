@@ -1,13 +1,14 @@
 """Spending analysis and insight generation."""
 
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 from typing import Literal
 
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from app.models import ExpenseCategory, UserSettings, VariableExpense
+from app.services.budget import today_in_app_timezone
 
 
 def _safe_pct(part: Decimal, whole: Decimal) -> Decimal:
@@ -39,7 +40,10 @@ def compute_insights(
         .select_from(VariableExpense)
         .outerjoin(
             ExpenseCategory,
-            VariableExpense.category_id == ExpenseCategory.id,
+            and_(
+                VariableExpense.category_id == ExpenseCategory.id,
+                ExpenseCategory.user_id == user_id,
+            ),
         )
         .where(
             VariableExpense.user_id == user_id,
@@ -78,7 +82,7 @@ def compute_insights(
 
     # --- Daily average & projection ------------------------------------------
     days_elapsed = (month_end - month_start).days + 1
-    today = date.today()
+    today = today_in_app_timezone()
     if today > month_end:
         elapsed = days_elapsed
     elif today < month_start:
@@ -108,7 +112,7 @@ def compute_insights(
                     f"El {top_category['percentage']}% de tu gasto este mes fue en "
                     f"{top_category['category_name']}. Considera si puedes reducirlo."
                 ),
-                "icon": "⚠️",
+                "icon": "alert_triangle",
             }
         )
 
@@ -124,7 +128,7 @@ def compute_insights(
                         f"Llevas gastado el {spend_pct}% de tu ingreso mensual. "
                         f"Intenta dejar al menos un 20% para ahorro."
                     ),
-                    "icon": "🚨",
+                    "icon": "alert_circle",
                 }
             )
         elif spend_pct < 40 and elapsed > 15:
@@ -136,7 +140,7 @@ def compute_insights(
                         f"Solo has gastado el {spend_pct}% de tu ingreso. "
                         f"Sigue así y tendrás buen margen para ahorrar."
                     ),
-                    "icon": "✅",
+                    "icon": "check_circle",
                 }
             )
 
@@ -151,7 +155,7 @@ def compute_insights(
                     f"A este ritmo, gastarás ~{projected}€ este mes "
                     f"({over}€ más que tu ingreso). Ajusta tu ritmo."
                 ),
-                "icon": "📈",
+                "icon": "trending_up",
             }
         )
 
@@ -168,7 +172,7 @@ def compute_insights(
                     f"Tienes {uncategorised['transaction_count']} gasto(s) sin categoría. "
                     f"Asignar categorías te ayuda a entender mejor en qué gastas."
                 ),
-                "icon": "🏷️",
+                "icon": "tags",
             }
         )
 
@@ -192,7 +196,7 @@ def compute_insights(
                         f"Tus gastos fijos representan el {fixed_pct}% de tu ingreso. "
                         f"Lo recomendable es mantenerlos bajo el 50%."
                     ),
-                    "icon": "🏠",
+                    "icon": "home",
                 }
             )
 
@@ -239,7 +243,7 @@ def compute_insights(
                             f"Te quedan {remaining}€ para {days_left} días. "
                             f"Puedes gastar hasta {daily_budget}€/día."
                         ),
-                        "icon": "📅",
+                        "icon": "calendar",
                     }
                 )
             else:
@@ -251,7 +255,7 @@ def compute_insights(
                             f"Has superado tu presupuesto mensual. "
                             f"Te quedan {remaining}€ para {days_left} días."
                         ),
-                        "icon": "🚨",
+                        "icon": "alert_circle",
                     }
                 )
 
@@ -265,7 +269,7 @@ def compute_insights(
                     "Registra más gastos para recibir insights personalizados "
                     "sobre tus hábitos de consumo."
                 ),
-                "icon": "💡",
+                "icon": "lightbulb",
             }
         )
 

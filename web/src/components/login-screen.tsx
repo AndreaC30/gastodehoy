@@ -4,6 +4,8 @@
  * La recuperación envía una contraseña temporal por correo (requiere SMTP en el servidor).
  */
 import { type FormEvent, useState } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import { IoArrowBack } from "react-icons/io5";
 import { api } from "@/api/client";
 import type {
   ForgotPasswordResponse,
@@ -56,9 +58,10 @@ export function LoginScreen({
             <button
               type="button"
               onClick={onBackToLanding}
-              className="text-sm font-medium text-slate-400 hover:text-teal-300"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-teal-300"
             >
-              ← Volver al inicio
+              <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
+              Volver al inicio
             </button>
           </div>
         )}
@@ -368,9 +371,10 @@ function ForgotForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-slate-400 hover:text-slate-200"
+          className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200"
         >
-          ← Volver a Entrar
+          <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
+          Volver a Entrar
         </button>
         <button
           type="submit"
@@ -433,52 +437,14 @@ function Field({
             tabIndex={-1}
             className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 hover:text-slate-300 focus:text-slate-300 focus:outline-none"
           >
-            {visible ? <EyeOffIcon /> : <EyeIcon />}
+            {visible ? (
+              <FiEyeOff className="h-[18px] w-[18px]" aria-hidden />
+            ) : (
+              <FiEye className="h-[18px] w-[18px]" aria-hidden />
+            )}
           </button>
         )}
       </div>
     </label>
-  );
-}
-
-/** Inline SVG: eye (Feather "eye"). */
-function EyeIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-/** Inline SVG: crossed-out eye (Feather "eye-off"). */
-function EyeOffIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 4.22-5.34" />
-      <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19" />
-      <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" />
-      <line x1="2" y1="2" x2="22" y2="22" />
-    </svg>
   );
 }

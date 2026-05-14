@@ -30,6 +30,8 @@ def test_protected_endpoints_require_auth(anon_client) -> None:
     assert anon_client.get("/api/fixed-expenses").status_code == 401
     assert anon_client.get("/api/expenses").status_code == 401
     assert anon_client.get("/api/extra-income").status_code == 401
+    assert anon_client.get("/api/categories").status_code == 401
+    assert anon_client.get("/api/insights").status_code == 401
     assert anon_client.get("/api/auth/me").status_code == 401
 
 
@@ -46,13 +48,8 @@ def test_register_sets_cookie_and_me_works(anon_client) -> None:
     body = r.json()
     assert body["user"]["email"] == "pablo@example.com"
     assert body["user"]["name"] == "Pablo"
-    # Debug: check cookies
-    print(f"[test] Cookies after register: {dict(anon_client.cookies)}")
-    print(f"[test] Response headers: {dict(r.headers)}")
 
     me = anon_client.get("/api/auth/me")
-    print(f"[test] Me status: {me.status_code}")
-    print(f"[test] Me response: {me.text[:200]}")
     assert me.status_code == 200
     assert me.json()["email"] == "pablo@example.com"
 

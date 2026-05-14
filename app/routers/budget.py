@@ -9,7 +9,7 @@ from datetime import date
 from typing import TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
@@ -196,7 +196,7 @@ def list_expenses(
     category_id: int | None = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
-) -> list[dict]:
+) -> list[VariableExpense]:
     """List expenses for the given (or current) month, newest first (paginated)."""
     start, end = _calendar_month_bounds(year, month)
     stmt = (
@@ -208,7 +208,10 @@ def list_expenses(
         )
         .outerjoin(
             ExpenseCategory,
-            VariableExpense.category_id == ExpenseCategory.id,
+            and_(
+                VariableExpense.category_id == ExpenseCategory.id,
+                ExpenseCategory.user_id == user.id,
+            ),
         )
         .where(
             VariableExpense.user_id == user.id,
@@ -240,6 +243,13 @@ def create_expense(
     user: User = Depends(get_current_user),
 ) -> VariableExpense:
     """Register an expense; defaults the date to today in app TZ."""
+    if payload.category_id is not None:
+        cat = db.get(ExpenseCategory, payload.category_id)
+        if cat is None or cat.user_id != user.id:
+            raise HTTPException(
+                status_code=400,
+                detail="Categoría inválida o no pertenece a tu cuenta",
+            )
     day = payload.occurred_at or today_in_app_timezone()
     row = VariableExpense(
         user_id=user.id,

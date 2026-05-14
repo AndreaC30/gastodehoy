@@ -19,16 +19,17 @@ import { OnboardingWizard } from "@/components/onboarding-wizard";
 import { ForcePasswordChangeModal } from "@/components/force-password-change-modal";
 import { AppBackdrop } from "@/components/app-backdrop";
 import {
-  setAnonymous,
+  setLoading,
   setUser as setAuthUser,
   snapshot,
   subscribe,
 } from "@/auth";
-import { api } from "@/api/client";
+import { api, UnauthorizedError } from "@/api/client";
 import type { Settings, User } from "./api/types";
 import { getStoredAnonPhase, setStoredAnonPhase } from "@/lib/anon-phase-session";
 import { APP_SHELL_CLASS } from "@/lib/app-layout";
 import { hasSeenLanding, markLandingSeen } from "@/lib/landing-preference";
+import { invalidateBudgetQueries } from "@/lib/query-keys";
 
 async function loadSettings() {
   return api<Settings>("/api/settings");
@@ -36,22 +37,55 @@ async function loadSettings() {
 
 export default function App() {
   const auth = useSyncExternalStore(subscribe, snapshot);
+  const [meBootstrapError, setMeBootstrapError] = useState<string | null>(null);
+  const [meRetryToken, setMeRetryToken] = useState(0);
 
   useEffect(() => {
     if (auth.status !== "loading") return;
     let alive = true;
+    setMeBootstrapError(null);
     (async () => {
       try {
         const u = await api<User>("/api/auth/me");
-        if (alive) setAuthUser(u);
-      } catch {
-        if (alive) setAnonymous();
+        if (alive) {
+          setMeBootstrapError(null);
+          setAuthUser(u);
+        }
+      } catch (e) {
+        if (!alive) return;
+        if (e instanceof UnauthorizedError) {
+          return;
+        }
+        setMeBootstrapError(
+          e instanceof Error ? e.message : "No se pudo conectar con el servidor.",
+        );
       }
     })();
     return () => {
       alive = false;
     };
-  }, [auth.status]);
+  }, [auth.status, meRetryToken]);
+
+  if (auth.status === "loading" && meBootstrapError) {
+    return (
+      <div className={APP_SHELL_CLASS}>
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center text-slate-300">
+          <p className="max-w-md text-sm">{meBootstrapError}</p>
+          <button
+            type="button"
+            className="rounded-lg border border-slate-600 px-4 py-2 text-sm text-teal-300 hover:bg-slate-800"
+            onClick={() => {
+              setMeBootstrapError(null);
+              setLoading();
+              setMeRetryToken((n) => n + 1);
+            }}
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (auth.status === "loading") {
     return <LoadingSplash />;
@@ -106,7 +140,7 @@ function Authed({ userName }: { userName: string }) {
           userName={userName}
           onSkip={() => setSkipped(true)}
           onDone={() => {
-            void qc.invalidateQueries();
+            void invalidateBudgetQueries(qc);
             setSkipped(false);
           }}
         />

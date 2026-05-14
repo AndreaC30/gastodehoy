@@ -1,6 +1,9 @@
-# Overlay para desarrollo: expone el puerto 8000 directamente.
+# Overlay explícito: expone el puerto 8000 (misma idea que docker-compose.override.yml).
 #
-# Uso:
+# Preferencia local: copia `docker-compose.override.example.yml` a
+# `docker-compose.override.yml` y usa solo `docker compose up` (override se fusiona solo).
+#
+# Uso de este archivo (sin override):
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 services:
   app:
