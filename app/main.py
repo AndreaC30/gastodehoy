@@ -183,4 +183,11 @@ def spa_index() -> FileResponse | JSONResponse:
                 "detail": "Frontend not built. Run: cd web && npm install && npm run build",
             },
         )
-    return FileResponse(index_path)
+    # El HTML debe revalidarse: los JS/CSS llevan hash en nombre; si el HTML cachea en
+    # cliente, la producción muestra bundles viejos aunque la imagen esté actualizada.
+    return FileResponse(
+        index_path,
+        headers={
+            "Cache-Control": "no-cache",
+        },
+    )
