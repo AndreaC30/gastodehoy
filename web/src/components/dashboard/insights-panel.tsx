@@ -1,20 +1,20 @@
 /** Financial insights panel with actionable tips. */
-import type { Insights } from "@/api/types";
-import { money } from "@/lib/format";
+import type { IconType } from "react-icons";
 import {
-  AlertTriangle,
-  Lightbulb,
-  CheckCircle,
-  Info,
-  PieChart,
-  AlertCircle,
-  TrendingDown,
-  TrendingUp,
-  Tags,
-  Building,
-  Calendar,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+  IoAlertCircleOutline,
+  IoBulbOutline,
+  IoCalendarOutline,
+  IoCheckmarkCircleOutline,
+  IoHomeOutline,
+  IoInformationCircleOutline,
+  IoPieChartOutline,
+  IoPricetagsOutline,
+  IoTrendingDownOutline,
+  IoTrendingUpOutline,
+  IoWarningOutline,
+} from "react-icons/io5";
+import type { InsightItem, Insights } from "@/api/types";
+import { money } from "@/lib/format";
 
 type Props = {
   data: Insights | undefined;
@@ -36,56 +36,73 @@ const TYPE_ICON_COLORS: Record<string, string> = {
   info: "text-slate-400",
 };
 
-function getInsightIcon(title: string, type: string): { icon: LucideIcon; colorClass: string } {
-  const lower = title.toLowerCase();
-  const colorClass = TYPE_ICON_COLORS[type] ?? TYPE_ICON_COLORS.info;
+/** API `icon` slugs from `app/services/insights.py` (no emojis on wire). */
+const INSIGHT_ICON_BY_SLUG: Record<string, IconType> = {
+  alert_triangle: IoWarningOutline,
+  alert_circle: IoAlertCircleOutline,
+  check_circle: IoCheckmarkCircleOutline,
+  trending_up: IoTrendingUpOutline,
+  tags: IoPricetagsOutline,
+  home: IoHomeOutline,
+  calendar: IoCalendarOutline,
+  lightbulb: IoBulbOutline,
+};
 
+function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: string } {
+  const colorClass = TYPE_ICON_COLORS[insight.type] ?? TYPE_ICON_COLORS.info;
+  const fromApi = INSIGHT_ICON_BY_SLUG[insight.icon];
+  if (fromApi) return { Icon: fromApi, colorClass };
+
+  const lower = insight.title.toLowerCase();
   if (lower.includes("gasto concentrado") || lower.includes("concentrado")) {
-    return { icon: PieChart, colorClass };
+    return { Icon: IoPieChartOutline, colorClass };
   }
   if (lower.includes("ingreso") || lower.includes("gastas casi todo")) {
-    return { icon: AlertCircle, colorClass };
+    return { Icon: IoAlertCircleOutline, colorClass };
   }
   if (lower.includes("buen ritmo")) {
-    return { icon: TrendingDown, colorClass };
+    return { Icon: IoTrendingDownOutline, colorClass };
   }
   if (lower.includes("sobregasto") || lower.includes("proyección")) {
-    return { icon: TrendingUp, colorClass };
+    return { Icon: IoTrendingUpOutline, colorClass };
   }
   if (lower.includes("categoriza") || lower.includes("categoría") || lower.includes("categoria")) {
-    return { icon: Tags, colorClass };
+    return { Icon: IoPricetagsOutline, colorClass };
   }
   if (lower.includes("fijos") || lower.includes("gastos fijos")) {
-    return { icon: Building, colorClass };
+    return { Icon: IoHomeOutline, colorClass };
   }
   if (lower.includes("presupuesto diario")) {
-    return { icon: Calendar, colorClass };
+    return { Icon: IoCalendarOutline, colorClass };
   }
   if (lower.includes("agotado") || lower.includes("presupuesto agotado")) {
-    return { icon: AlertTriangle, colorClass };
+    return { Icon: IoWarningOutline, colorClass };
   }
   if (lower.includes("sigue registrando")) {
-    return { icon: Lightbulb, colorClass };
+    return { Icon: IoBulbOutline, colorClass };
   }
 
-  // Defaults by type
-  switch (type) {
+  switch (insight.type) {
     case "warning":
-      return { icon: AlertTriangle, colorClass };
+      return { Icon: IoWarningOutline, colorClass };
     case "tip":
-      return { icon: Lightbulb, colorClass };
+      return { Icon: IoBulbOutline, colorClass };
     case "success":
-      return { icon: CheckCircle, colorClass };
+      return { Icon: IoCheckmarkCircleOutline, colorClass };
     case "info":
     default:
-      return { icon: Info, colorClass };
+      return { Icon: IoInformationCircleOutline, colorClass };
   }
 }
 
 export function InsightsPanel({ data, isLoading, error }: Props) {
   if (isLoading) {
     return (
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+      <section
+        className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5"
+        aria-busy="true"
+        aria-label="Cargando insights"
+      >
         <div className="h-6 w-40 animate-pulse rounded bg-slate-700/40" />
         <div className="mt-3 h-4 w-full animate-pulse rounded bg-slate-700/30" />
         <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-slate-700/30" />
@@ -107,8 +124,8 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
     <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 shadow-lg shadow-black/20">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-sky-400" />
+          <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight">
+            <IoBulbOutline className="h-5 w-5 text-sky-400" aria-hidden />
             Insights financieros
           </h2>
           <p className="mt-1 text-sm text-slate-500">
@@ -123,17 +140,16 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         </div>
       </div>
 
-      {/* Insight cards */}
       <div className="mt-4 space-y-3">
-        {data.insights.map((insight, i) => {
-          const { icon: Icon, colorClass } = getInsightIcon(insight.title, insight.type);
+        {data.insights.map((insight) => {
+          const { Icon, colorClass } = getInsightIcon(insight);
           return (
             <div
-              key={i}
+              key={`${insight.type}-${insight.title}`}
               className={`rounded-xl border px-4 py-3 text-sm ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
             >
-              <p className="font-semibold flex items-center gap-2">
-                <Icon className={`h-4 w-4 shrink-0 ${colorClass}`} />
+              <p className="flex items-center gap-2 font-semibold">
+                <Icon className={`h-4 w-4 shrink-0 ${colorClass}`} aria-hidden />
                 {insight.title}
               </p>
               <p className="mt-1 text-sm opacity-90">{insight.message}</p>
@@ -142,7 +158,6 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         })}
       </div>
 
-      {/* Projection bar */}
       {Number(data.projected_monthly) > 0 && (
         <div className="mt-5 border-t border-slate-800 pt-4">
           <div className="flex items-center justify-between text-sm">

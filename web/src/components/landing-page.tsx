@@ -1,6 +1,7 @@
 /**
  * Página de bienvenida antes del login: valor del producto y CTAs.
  */
+import { IoCheckmark } from "react-icons/io5";
 import { BrandLogo } from "@/components/brand-logo";
 import type { AuthEntryTab } from "@/components/login-screen";
 
@@ -30,10 +31,10 @@ export function LandingPage({ onEnter }: Props) {
       <ul className="mt-8 space-y-3 text-sm text-slate-400">
         <li className="flex gap-3">
           <span
-            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-xs font-semibold text-teal-300"
+            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300"
             aria-hidden
           >
-            ✓
+            <IoCheckmark className="h-3.5 w-3.5" aria-hidden />
           </span>
           <span>
             Anota lo que gastas cada día y revisa cómo se reparte a lo largo del
@@ -42,10 +43,10 @@ export function LandingPage({ onEnter }: Props) {
         </li>
         <li className="flex gap-3">
           <span
-            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-xs font-semibold text-teal-300"
+            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300"
             aria-hidden
           >
-            ✓
+            <IoCheckmark className="h-3.5 w-3.5" aria-hidden />
           </span>
           <span>
             Totales y cálculos en la pantalla principal: sin hojas de cálculo
@@ -54,10 +55,10 @@ export function LandingPage({ onEnter }: Props) {
         </li>
         <li className="flex gap-3">
           <span
-            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-xs font-semibold text-teal-300"
+            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300"
             aria-hidden
           >
-            ✓
+            <IoCheckmark className="h-3.5 w-3.5" aria-hidden />
           </span>
           <span>
             Crea cuenta o entra para guardar tu información en el servidor y no

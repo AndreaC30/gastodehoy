@@ -44,13 +44,13 @@ def test_list_categories_returns_user_only(client) -> None:
 def test_create_custom_category(client) -> None:
     r = client.post(
         "/api/categories",
-        json={"name": "Mascotas", "color": "#f97316", "icon": "🐶"},
+        json={"name": "Mascotas", "color": "#f97316", "icon": "Baby"},
     )
     assert r.status_code == 201
     cat = r.json()
     assert cat["name"] == "Mascotas"
     assert cat["color"] == "#f97316"
-    assert cat["icon"] == "🐶"
+    assert cat["icon"] == "Baby"
     assert cat["is_default"] is False
 
 
@@ -157,7 +157,34 @@ def test_create_expense_without_category(client) -> None:
     assert exp["category_id"] is None
 
 
-def test_list_expenses_includes_category_info(client) -> None:
+def test_create_expense_rejects_foreign_category_id(client, db_session) -> None:
+    """Cannot attach another user's category to an expense."""
+    from app.auth import hash_password
+    from app.models import User, UserSettings
+    from app.services.categories import seed_default_categories
+
+    other = User(
+        email="other2@example.com",
+        name="Other2",
+        password_hash=hash_password("secret-password"),
+    )
+    other.settings = UserSettings()
+    db_session.add(other)
+    db_session.commit()
+    db_session.refresh(other)
+    seed_default_categories(db_session, other.id)
+
+    ExpenseCategory = __import__("app.models", fromlist=["ExpenseCategory"]).ExpenseCategory
+    other_cat = (
+        db_session.query(ExpenseCategory).filter_by(user_id=other.id).first()
+    )
+    assert other_cat is not None
+
+    r = client.post(
+        "/api/expenses",
+        json={"amount": "1.00", "category_id": other_cat.id},
+    )
+    assert r.status_code == 400
     cats = client.get("/api/categories").json()
     food_cat = next(c for c in cats if c["name"] == "Comida")
 
@@ -177,6 +204,7 @@ def test_list_expenses_includes_category_info(client) -> None:
     categorised = next(e for e in expenses if e["category_id"] == food_cat["id"])
     assert categorised["category_name"] == "Comida"
     assert categorised["category_color"] == "#f59e0b"
+    assert categorised["category_icon"] == "UtensilsCrossed"
 
     # The uncategorised one should have None
     uncategorised = next(e for e in expenses if e["category_id"] is None)
@@ -213,6 +241,8 @@ def test_insights_empty_month(client) -> None:
     assert Decimal(str(data["total_spent"])) == Decimal("0")
     assert data["top_category"] is None
     assert len(data["insights"]) > 0
+    assert data["insights"][0]["icon"] == "lightbulb"
+    assert data["insights"][0]["icon"] == "lightbulb"
 
 
 def test_insights_with_categorised_expenses(client) -> None:

@@ -1,27 +1,13 @@
 /** Modal to create, edit, and delete expense categories. */
 import { type FormEvent, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { ExpenseCategory } from "@/api/types";
-import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import {
-  UtensilsCrossed,
-  Car,
-  Gamepad2,
-  HeartPulse,
-  GraduationCap,
-  Home,
-  Shirt,
-  Package,
-  ShoppingCart,
-  Wifi,
-  Zap,
-  Baby,
-  Plane,
-  Gift,
-  Coffee,
-  type LucideProps,
-} from "lucide-react";
+  CATEGORY_ICON_PICKER,
+  getCategoryIcon,
+} from "@/components/dashboard/category-icon";
 
 type Props = {
   categories: ExpenseCategory[];
@@ -33,24 +19,6 @@ const PRESET_COLORS = [
   "#f59e0b", "#3b82f6", "#a855f7", "#ef4444",
   "#10b981", "#6366f1", "#ec4899", "#64748b",
   "#f97316", "#14b8a6", "#8b5cf6", "#06b6d4",
-];
-
-const ICON_OPTIONS: { name: string; component: React.ComponentType<LucideProps> }[] = [
-  { name: "UtensilsCrossed", component: UtensilsCrossed },
-  { name: "Car", component: Car },
-  { name: "Gamepad2", component: Gamepad2 },
-  { name: "HeartPulse", component: HeartPulse },
-  { name: "GraduationCap", component: GraduationCap },
-  { name: "Home", component: Home },
-  { name: "Shirt", component: Shirt },
-  { name: "Package", component: Package },
-  { name: "ShoppingCart", component: ShoppingCart },
-  { name: "Wifi", component: Wifi },
-  { name: "Zap", component: Zap },
-  { name: "Baby", component: Baby },
-  { name: "Plane", component: Plane },
-  { name: "Gift", component: Gift },
-  { name: "Coffee", component: Coffee },
 ];
 
 export function CategoryManager({ categories, onClose, onChanged }: Props) {
@@ -146,18 +114,20 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Gestionar categorías"
+      aria-labelledby="category-manager-title"
     >
       <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Categorías de gasto</h2>
+          <h2 id="category-manager-title" className="text-lg font-bold">
+            Categorías de gasto
+          </h2>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
             aria-label="Cerrar"
           >
-            ✕
+            <IoClose className="h-5 w-5" aria-hidden />
           </button>
         </div>
 
@@ -167,7 +137,6 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
           </p>
         )}
 
-        {/* Existing categories */}
         <ul className="mt-4 space-y-2">
           {categories.map((cat) => {
             const Icon = getCategoryIcon(cat.icon);
@@ -204,7 +173,6 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
           })}
         </ul>
 
-        {/* Add / Edit form */}
         <form className="mt-6 space-y-3" onSubmit={onSubmit}>
           <h3 className="text-sm font-semibold text-slate-300">
             {editingId ? "Editar categoría" : "Nueva categoría"}
@@ -220,7 +188,6 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
             />
           </div>
 
-          {/* Color picker */}
           <div>
             <p className="mb-2 text-xs text-slate-500">Color</p>
             <div className="flex flex-wrap gap-2">
@@ -239,12 +206,11 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
             </div>
           </div>
 
-          {/* Icon picker */}
           <div>
             <p className="mb-2 text-xs text-slate-500">Icono</p>
             <div className="flex flex-wrap gap-2">
-              {ICON_OPTIONS.map((opt) => {
-                const OptIcon = opt.component;
+              {CATEGORY_ICON_PICKER.map((opt) => {
+                const OptIcon = opt.Icon;
                 return (
                   <button
                     key={opt.name}

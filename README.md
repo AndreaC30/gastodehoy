@@ -8,14 +8,17 @@ Construido con **FastAPI** (Python), **SQLite** (un archivo en `./data/`), **Rea
 
 ## 1. Desarrollo local (Docker)
 
-Solo necesitas **Docker**. La app se sirve directamente por uvicorn en el puerto 8000.
+Solo necesitas **Docker**. El `docker-compose.yml` base **no publica puertos** (así en producción la app solo escucha en la red interna). En tu máquina hace falta exponer el **8000**.
 
-### Levantar
+### Opción recomendada: `docker-compose.override.yml` (local, no versionado)
+
+Compose **fusiona solo** `docker-compose.yml` + `docker-compose.override.yml` si este último existe; no hace falta `-f` extra. El archivo real está en `.gitignore` para no subir tus puertos/ajustes al repo.
 
 ```bash
 git clone <url> gastodehoy
 cd gastodehoy
 cp .env.example .env
+cp docker-compose.override.example.yml docker-compose.override.yml
 docker compose up -d --build
 ```
 
@@ -44,6 +47,16 @@ docker compose up -d --build
 ```bash
 docker compose logs --tail=200 app
 ```
+
+### Opción alternativa: `docker-compose.dev.yml` (versionado, explícito)
+
+Mismo efecto que el override, pero tienes que pasar ambos ficheros:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+```
+
+Útil en CI o si no quieres un `override` en disco.
 
 ---
 

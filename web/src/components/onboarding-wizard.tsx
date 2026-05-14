@@ -9,6 +9,7 @@
  * before handing control back to the parent.
  */
 import { type FormEvent, useState } from "react";
+import { IoArrowBack, IoArrowForward } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { FixedExpense, SavingsMode, Settings } from "@/api/types";
 import { money } from "@/lib/format";
@@ -220,9 +221,10 @@ function StepIncome({
         <button
           type="submit"
           disabled={disabled}
-          className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
         >
-          Siguiente →
+          Siguiente
+          <IoArrowForward className="h-4 w-4 shrink-0" aria-hidden />
         </button>
       </div>
     </form>
@@ -334,16 +336,18 @@ function StepFixed({
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-slate-400 hover:text-slate-200"
+          className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200"
         >
-          ← Atrás
+          <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
+          Atrás
         </button>
         <button
           type="button"
           onClick={onNext}
-          className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110"
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110"
         >
-          Siguiente →
+          Siguiente
+          <IoArrowForward className="h-4 w-4 shrink-0" aria-hidden />
         </button>
       </div>
     </div>
@@ -465,9 +469,10 @@ function StepSavings({
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-slate-400 hover:text-slate-200"
+          className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200"
         >
-          ← Atrás
+          <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
+          Atrás
         </button>
         <button
           type="submit"
