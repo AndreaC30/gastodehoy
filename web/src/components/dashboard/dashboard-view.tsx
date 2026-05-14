@@ -3,6 +3,7 @@
  * category selector, spending chart, and financial insights.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { IoChevronDown } from "react-icons/io5";
 import { type FormEvent, useEffect, useState } from "react";
 import { AppBackdrop } from "@/components/app-backdrop";
 import { BrandLogo } from "@/components/brand-logo";
@@ -91,7 +92,9 @@ export function Dashboard({ profileName }: Props) {
     settingsQ.error ||
     fixedQ.error ||
     expensesQ.error ||
-    extraIncomeQ.error;
+    extraIncomeQ.error ||
+    categoriesQ.error ||
+    insightsQ.error;
 
   const invalidateAll = () => invalidateBudgetQueries(qc);
 
@@ -609,18 +612,12 @@ export function Dashboard({ profileName }: Props) {
 /** Flecha para expandir/colapsar listas largas (gira al expandir). */
 function ChevronInCircle({ expanded }: { expanded: boolean }) {
   return (
-    <svg
+    <IoChevronDown
       className={`h-5 w-5 shrink-0 text-slate-500 transition-transform duration-200 ${
         expanded ? "rotate-180" : ""
       }`}
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={2}
-      stroke="currentColor"
       aria-hidden
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-    </svg>
+    />
   );
 }
 

@@ -158,6 +158,7 @@ class VariableExpenseRead(BaseModel):
     category_id: int | None
     category_name: str | None = None
     category_color: str | None = None
+    category_icon: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -241,7 +242,7 @@ class InsightItem(BaseModel):
     type: Literal["warning", "tip", "success", "info"]
     title: str
     message: str
-    icon: str = "💡"
+    icon: str = "lightbulb"
 
 
 class InsightsRead(BaseModel):

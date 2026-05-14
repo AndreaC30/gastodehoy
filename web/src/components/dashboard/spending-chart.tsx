@@ -127,7 +127,7 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
     <div className="min-w-0">
       {/* top line: icon + dot + name  |  amount + percentage */}
       <div className="flex items-center gap-2 text-sm min-w-0">
-        {/* Lucide icon */}
+        {/* category icon (react-icons) */}
         <Icon
           className="h-4 w-4 shrink-0"
           style={{ color: seg.category_color }}

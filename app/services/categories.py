@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models import ExpenseCategory
 
-# Map of category name to Lucide icon name
+# Map of category name to icon key (react-icons / category-icon map)
 DEFAULT_CATEGORIES: list[dict[str, str]] = [
     {"name": "Comida",     "color": "#f59e0b", "icon": "UtensilsCrossed"},
     {"name": "Transporte",  "color": "#3b82f6", "icon": "Car"},

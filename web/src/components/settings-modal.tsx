@@ -4,6 +4,7 @@
  */
 import { useMutation } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
+import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { ExtraIncome, SavingsMode, Settings } from "@/api/types";
 import { money } from "@/lib/format";
@@ -129,9 +130,9 @@ export function SettingsModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="rounded-lg border border-slate-800 px-2 py-1 text-sm text-slate-400 hover:bg-slate-800/60"
+            className="rounded-lg border border-slate-800 p-1.5 text-slate-400 hover:bg-slate-800/60"
           >
-            ✕
+            <IoClose className="h-5 w-5" aria-hidden />
           </button>
         </header>
 
