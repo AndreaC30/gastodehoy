@@ -5,7 +5,10 @@ WORKDIR /web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci
 COPY web/ ./
-RUN npm run build
+# Invalida esta capa en cada deploy aunque el cache diga «sin cambios» (véase BUILD_REF).
+ARG BUILD_REF
+RUN printf "WEB_BUILD_REF=%s\\n" "${BUILD_REF:-unknown}" \
+    && npm run build
 
 # ---- API
 FROM python:3.13-slim-bookworm
