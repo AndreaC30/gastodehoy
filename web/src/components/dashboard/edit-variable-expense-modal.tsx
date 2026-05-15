@@ -1,0 +1,180 @@
+import { useMutation } from "@tanstack/react-query";
+import { type FormEvent, useEffect, useState } from "react";
+import { IoClose } from "react-icons/io5";
+import { api } from "@/api/client";
+import type { ExpenseCategory, VariableExpense } from "@/api/types";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+
+type Props = {
+  expense: VariableExpense;
+  categories: ExpenseCategory[];
+  onClose: () => void;
+  onSaved: () => void;
+};
+
+export function EditVariableExpenseModal({
+  expense,
+  categories,
+  onClose,
+  onSaved,
+}: Props) {
+  const [amount, setAmount] = useState(String(expense.amount));
+  const [occurredAt, setOccurredAt] = useState(expense.occurred_at);
+  const [categoryId, setCategoryId] = useState(
+    expense.category_id != null ? String(expense.category_id) : "",
+  );
+  const [note, setNote] = useState(expense.note ?? "");
+  const [error, setError] = useState<string | null>(null);
+
+  useBodyScrollLock(true);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const saveMut = useMutation({
+    mutationFn: (body: {
+      amount: string;
+      occurred_at: string;
+      note: string | null;
+      category_id: number | null;
+    }) =>
+      api<VariableExpense>(`/api/expenses/${expense.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      onSaved();
+      onClose();
+    },
+    onError: (e: Error) => setError(e.message),
+  });
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    const trimmedNote = note.trim();
+    saveMut.mutate({
+      amount,
+      occurred_at: occurredAt,
+      note: trimmedNote || null,
+      category_id: categoryId ? Number(categoryId) : null,
+    });
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex touch-none items-end justify-center overflow-hidden bg-black/60 p-3 sm:items-center sm:p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-variable-title"
+    >
+      <div className="modal-scroll w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="edit-variable-title" className="text-lg font-bold">
+            Editar gasto
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+            aria-label="Cerrar"
+          >
+            <IoClose className="h-5 w-5" aria-hidden />
+          </button>
+        </div>
+
+        {error && (
+          <p className="mt-3 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200">
+            {error}
+          </p>
+        )}
+
+        <form onSubmit={submit} className="mt-4 space-y-4">
+          <div>
+            <label htmlFor="edit-var-amount" className="mb-1.5 block text-xs text-slate-500">
+              Cantidad (€)
+            </label>
+            <input
+              id="edit-var-amount"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+            />
+          </div>
+          <div>
+            <label htmlFor="edit-var-date" className="mb-1.5 block text-xs text-slate-500">
+              Fecha
+            </label>
+            <input
+              id="edit-var-date"
+              type="date"
+              value={occurredAt}
+              onChange={(e) => setOccurredAt(e.target.value)}
+              required
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+            />
+          </div>
+          <div>
+            <label htmlFor="edit-var-category" className="mb-1.5 block text-xs text-slate-500">
+              Categoría
+            </label>
+            <select
+              id="edit-var-category"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+            >
+              <option value="">Sin categoría</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="edit-var-note" className="mb-1.5 block text-xs text-slate-500">
+              Nota (opcional)
+            </label>
+            <input
+              id="edit-var-note"
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+            />
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={saveMut.isPending}
+              className="flex-1 rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+            >
+              {saveMut.isPending ? "Guardando…" : "Guardar"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

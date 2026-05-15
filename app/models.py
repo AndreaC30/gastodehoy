@@ -112,6 +112,7 @@ class FixedExpense(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    icon: Mapped[str | None] = mapped_column(String(40), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="fixed_expenses")
 

@@ -9,6 +9,9 @@ import { AppBackdrop } from "@/components/app-backdrop";
 import { BrandLogo } from "@/components/brand-logo";
 import { SettingsModal } from "@/components/settings-modal";
 import { CategoryManager } from "@/components/dashboard/category-manager";
+import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
+import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
+import { IconSelectDropdown } from "@/components/dashboard/icon-select-dropdown";
 import { SpendingChart } from "@/components/dashboard/spending-chart";
 import { InsightsPanel } from "@/components/dashboard/insights-panel";
 import { api } from "@/api/client";
@@ -22,7 +25,10 @@ import type {
   VariableExpense,
 } from "@/api/types";
 import { APP_SHELL_CLASS } from "@/lib/app-layout";
-import { getCategoryIcon } from "@/components/dashboard/category-icon";
+import {
+  DEFAULT_FIXED_EXPENSE_ICON,
+  getCategoryIcon,
+} from "@/components/dashboard/category-icon";
 import { money, savingsLabel } from "@/lib/format";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { logout } from "@/lib/session";
@@ -63,6 +69,11 @@ export function Dashboard({ profileName }: Props) {
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [expandFixedList, setExpandFixedList] = useState(false);
   const [expandVariableList, setExpandVariableList] = useState(false);
+  const [fixedFormIcon, setFixedFormIcon] = useState(DEFAULT_FIXED_EXPENSE_ICON);
+  const [editingFixed, setEditingFixed] = useState<FixedExpense | null>(null);
+  const [editingVariable, setEditingVariable] = useState<VariableExpense | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!toastMsg) return;
@@ -100,12 +111,13 @@ export function Dashboard({ profileName }: Props) {
   const invalidateAll = () => invalidateBudgetQueries(qc);
 
   const addFixed = useMutation({
-    mutationFn: (body: { name: string; amount: string }) =>
+    mutationFn: (body: { name: string; amount: string; icon: string }) =>
       api<FixedExpense>("/api/fixed-expenses", {
         method: "POST",
         body: JSON.stringify(body),
       }),
     onSuccess: () => {
+      setFixedFormIcon(DEFAULT_FIXED_EXPENSE_ICON);
       setToastMsg("Gasto fijo añadido");
       void invalidateAll();
     },
@@ -177,6 +189,7 @@ export function Dashboard({ profileName }: Props) {
     addFixed.mutate({
       name: String(fd.get("name") ?? ""),
       amount: String(fd.get("amount") ?? ""),
+      icon: fixedFormIcon,
     });
     e.currentTarget.reset();
   }
@@ -443,14 +456,23 @@ export function Dashboard({ profileName }: Props) {
                                 : ""}
                             </p>
                           </div>
-                        <button
-                          type="button"
-                          onClick={() => delExpense.mutate(it.id)}
-                          disabled={delExpense.isPending}
-                          className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
-                        >
-                          Borrar
-                        </button>
+                          <div className="flex shrink-0 gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setEditingVariable(it)}
+                              className="rounded-lg border border-slate-600 px-2.5 py-1 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => delExpense.mutate(it.id)}
+                              disabled={delExpense.isPending}
+                              className="rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                            >
+                              Borrar
+                            </button>
+                          </div>
                       </li>
                     );
                   })}
@@ -489,12 +511,18 @@ export function Dashboard({ profileName }: Props) {
                 className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2"
                 onSubmit={onFixedSubmit}
               >
-                <input
-                  name="name"
-                  placeholder="Ej. Alquiler"
-                  required
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[100px] sm:flex-1"
-                />
+                <div className="flex w-full min-w-0 gap-2 sm:min-w-[140px] sm:flex-1">
+                  <IconSelectDropdown
+                    value={fixedFormIcon}
+                    onChange={setFixedFormIcon}
+                  />
+                  <input
+                    name="name"
+                    placeholder="Ej. Alquiler"
+                    required
+                    className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+                  />
+                </div>
                 <input
                   name="amount"
                   type="number"
@@ -518,25 +546,40 @@ export function Dashboard({ profileName }: Props) {
               ) : (
                 <>
                   <ul className="mt-4 space-y-2">
-                    {fixedVisibleItems.map((it) => (
-                      <li
-                        key={it.id}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
-                      >
-                        <div>
-                          <p className="font-semibold text-slate-200">{it.name}</p>
-                          <p className="text-sm text-slate-500">{money(it.amount)}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => delFixed.mutate(it.id)}
-                          disabled={delFixed.isPending}
-                          className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                    {fixedVisibleItems.map((it) => {
+                      const FixedIcon = getCategoryIcon(it.icon);
+                      return (
+                        <li
+                          key={it.id}
+                          className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
                         >
-                          Quitar
-                        </button>
-                      </li>
-                    ))}
+                          <div className="flex min-w-0 items-center gap-2">
+                            <FixedIcon className="h-4 w-4 shrink-0 text-sky-400/90" />
+                            <div className="min-w-0">
+                              <p className="font-semibold text-slate-200">{it.name}</p>
+                              <p className="text-sm text-slate-500">{money(it.amount)}</p>
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setEditingFixed(it)}
+                              className="rounded-lg border border-slate-600 px-2.5 py-1 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => delFixed.mutate(it.id)}
+                              disabled={delFixed.isPending}
+                              className="rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                            >
+                              Quitar
+                            </button>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                   {fixedNeedsToggle && (
                     <button
@@ -583,6 +626,29 @@ export function Dashboard({ profileName }: Props) {
           onClose={() => setShowCategoryManager(false)}
           onChanged={() => {
             setToastMsg("Categorías actualizadas");
+            void invalidateAll();
+          }}
+        />
+      )}
+
+      {editingFixed && (
+        <EditFixedExpenseModal
+          expense={editingFixed}
+          onClose={() => setEditingFixed(null)}
+          onSaved={() => {
+            setToastMsg("Gasto fijo actualizado");
+            void invalidateAll();
+          }}
+        />
+      )}
+
+      {editingVariable && (
+        <EditVariableExpenseModal
+          expense={editingVariable}
+          categories={categories}
+          onClose={() => setEditingVariable(null)}
+          onSaved={() => {
+            setToastMsg("Gasto actualizado");
             void invalidateAll();
           }}
         />

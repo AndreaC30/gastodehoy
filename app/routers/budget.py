@@ -25,6 +25,7 @@ from app.schemas import (
     SummaryRead,
     VariableExpenseCreate,
     VariableExpenseRead,
+    VariableExpenseUpdate,
 )
 from app.services.budget import compute_summary, month_bounds, today_in_app_timezone
 
@@ -141,7 +142,12 @@ def create_fixed(
     user: User = Depends(get_current_user),
 ) -> FixedExpense:
     """Add a new fixed expense for the authenticated user."""
-    row = FixedExpense(user_id=user.id, name=payload.name, amount=payload.amount)
+    row = FixedExpense(
+        user_id=user.id,
+        name=payload.name,
+        amount=payload.amount,
+        icon=payload.icon,
+    )
     db.add(row)
     db.commit()
     db.refresh(row)
@@ -159,12 +165,15 @@ def update_fixed(
     row = _get_owned_or_404(
         db, FixedExpense, expense_id, user.id, "Gasto fijo no encontrado"
     )
-    if payload.name is None and payload.amount is None:
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
         raise HTTPException(status_code=400, detail="Nada que actualizar")
-    if payload.name is not None:
-        row.name = payload.name
-    if payload.amount is not None:
-        row.amount = payload.amount
+    if "name" in updates:
+        row.name = updates["name"]
+    if "amount" in updates:
+        row.amount = updates["amount"]
+    if "icon" in updates:
+        row.icon = updates["icon"]
     db.commit()
     db.refresh(row)
     return row
@@ -259,6 +268,41 @@ def create_expense(
         category_id=payload.category_id,
     )
     db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+@expenses_router.patch("/{expense_id}", response_model=VariableExpenseRead)
+def update_expense(
+    expense_id: int,
+    payload: VariableExpenseUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> VariableExpense:
+    """Patch amount, date, note and/or category; 404 if not owned by user."""
+    row = _get_owned_or_404(
+        db, VariableExpense, expense_id, user.id, "Gasto no encontrado"
+    )
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
+        raise HTTPException(status_code=400, detail="Nada que actualizar")
+    if "category_id" in updates:
+        cid = updates["category_id"]
+        if cid is not None:
+            cat = db.get(ExpenseCategory, cid)
+            if cat is None or cat.user_id != user.id:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Categoría inválida o no pertenece a tu cuenta",
+                )
+        row.category_id = cid
+    if "amount" in updates:
+        row.amount = updates["amount"]
+    if "occurred_at" in updates:
+        row.occurred_at = updates["occurred_at"]
+    if "note" in updates:
+        row.note = updates["note"]
     db.commit()
     db.refresh(row)
     return row
