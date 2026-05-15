@@ -34,6 +34,7 @@ export type FixedExpense = {
   id: number;
   name: string;
   amount: string | number;
+  icon: string | null;
 };
 
 export type ExpenseCategory = {
