@@ -34,6 +34,7 @@ def compute_insights(
             ExpenseCategory.name,
             ExpenseCategory.color,
             ExpenseCategory.icon,
+            ExpenseCategory.monthly_budget,
             func.coalesce(func.sum(VariableExpense.amount), Decimal("0")),
             func.count(VariableExpense.id),
         )
@@ -55,17 +56,23 @@ def compute_insights(
             ExpenseCategory.name,
             ExpenseCategory.color,
             ExpenseCategory.icon,
+            ExpenseCategory.monthly_budget,
         )
         .order_by(func.sum(VariableExpense.amount).desc())
     ).all()
 
-    total_spent = sum(row[4] for row in cat_rows)
+    total_spent = sum(row[5] for row in cat_rows)
     total_spent = Decimal(total_spent).quantize(Decimal("0.01"))
 
     breakdown: list[dict] = []
     for row in cat_rows:
-        cat_id, cat_name, cat_color, cat_icon, cat_total, cat_count = row
+        cat_id, cat_name, cat_color, cat_icon, cat_budget, cat_total, cat_count = row
         cat_total = Decimal(cat_total).quantize(Decimal("0.01"))
+        budget: Decimal | None = None
+        if cat_budget is not None:
+            budget = Decimal(cat_budget).quantize(Decimal("0.01"))
+        over_budget = budget is not None and cat_total > budget
+        budget_used = _safe_pct(cat_total, budget) if budget and budget > 0 else None
         breakdown.append(
             {
                 "category_id": cat_id,
@@ -75,6 +82,9 @@ def compute_insights(
                 "total": cat_total,
                 "percentage": _safe_pct(cat_total, total_spent),
                 "transaction_count": cat_count,
+                "monthly_budget": budget,
+                "over_budget": over_budget,
+                "budget_used_percent": budget_used,
             }
         )
 
@@ -159,7 +169,24 @@ def compute_insights(
             }
         )
 
-    # 4. Uncategorised expenses
+    # 4. Category monthly budget exceeded
+    for item in breakdown:
+        if not item.get("over_budget"):
+            continue
+        budget = item["monthly_budget"]
+        insights.append(
+            {
+                "type": "warning",
+                "title": f"Presupuesto superado: {item['category_name']}",
+                "message": (
+                    f"Has gastado {item['total']}€ de {budget}€ presupuestados "
+                    f"en {item['category_name']} este mes. Ajusta el ritmo o revisa el límite."
+                ),
+                "icon": "alert_triangle",
+            }
+        )
+
+    # 5. Uncategorised expenses
     uncategorised = next(
         (b for b in breakdown if b["category_id"] is None), None
     )
@@ -176,7 +203,7 @@ def compute_insights(
             }
         )
 
-    # 5. Fixed expenses ratio
+    # 6. Fixed expenses ratio
     if us and monthly_income > 0:
         from app.models import FixedExpense
 
@@ -200,7 +227,7 @@ def compute_insights(
                 }
             )
 
-    # 6. Daily spending tip
+    # 7. Daily spending tip
     if avg_daily > 0:
         days_left = (month_end - today).days
         if days_left > 0 and monthly_income > 0:

@@ -27,16 +27,31 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
   const [formName, setFormName] = useState("");
   const [formColor, setFormColor] = useState("#6366f1");
   const [formIcon, setFormIcon] = useState("Tag");
+  const [formBudget, setFormBudget] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  function parseBudgetInput(raw: string): number | null {
+    const s = raw.trim().replace(",", ".");
+    if (!s) return null;
+    const n = Number(s);
+    if (!Number.isFinite(n) || n < 0) return null;
+    return Math.round(n * 100) / 100;
+  }
+
   const createMut = useMutation({
-    mutationFn: (body: { name: string; color: string; icon: string | null }) =>
+    mutationFn: (body: {
+      name: string;
+      color: string;
+      icon: string | null;
+      monthly_budget: number | null;
+    }) =>
       api<ExpenseCategory>("/api/categories", {
         method: "POST",
         body: JSON.stringify(body),
       }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["categories"] });
+      void qc.invalidateQueries({ queryKey: ["insights"] });
       resetForm();
       onChanged();
     },
@@ -49,13 +64,20 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
       name: string;
       color: string;
       icon: string | null;
+      monthly_budget: number | null;
     }) =>
       api<ExpenseCategory>(`/api/categories/${body.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ name: body.name, color: body.color, icon: body.icon }),
+        body: JSON.stringify({
+          name: body.name,
+          color: body.color,
+          icon: body.icon,
+          monthly_budget: body.monthly_budget,
+        }),
       }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["categories"] });
+      void qc.invalidateQueries({ queryKey: ["insights"] });
       resetForm();
       onChanged();
     },
@@ -66,6 +88,7 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
     mutationFn: (id: number) => api(`/api/categories/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["categories"] });
+      void qc.invalidateQueries({ queryKey: ["insights"] });
       onChanged();
     },
     onError: (e: Error) => setError(e.message),
@@ -76,6 +99,7 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
     setFormName("");
     setFormColor("#6366f1");
     setFormIcon("Tag");
+    setFormBudget("");
     setError(null);
   }
 
@@ -84,24 +108,32 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
     setFormName(cat.name);
     setFormColor(cat.color);
     setFormIcon(cat.icon ?? "Tag");
+    setFormBudget(
+      cat.monthly_budget != null && cat.monthly_budget !== ""
+        ? String(cat.monthly_budget)
+        : "",
+    );
     setError(null);
   }
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!formName.trim()) return;
+    const monthly_budget = parseBudgetInput(formBudget);
     if (editingId) {
       updateMut.mutate({
         id: editingId,
         name: formName.trim(),
         color: formColor,
         icon: formIcon.trim() || null,
+        monthly_budget,
       });
     } else {
       createMut.mutate({
         name: formName.trim(),
         color: formColor,
         icon: formIcon.trim() || null,
+        monthly_budget,
       });
     }
   }
@@ -152,6 +184,11 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
                 <Icon className="h-4 w-4 shrink-0 text-slate-400" />
                 <span className="flex-1 text-sm text-slate-200">
                   {cat.name}
+                  {cat.monthly_budget != null && cat.monthly_budget !== "" && (
+                    <span className="ml-2 text-xs text-slate-500">
+                      · {String(cat.monthly_budget)}€/mes
+                    </span>
+                  )}
                 </span>
                 <button
                   type="button"
@@ -186,6 +223,23 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
               maxLength={80}
               className="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs text-slate-500">
+              Presupuesto mensual (opcional)
+            </label>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={formBudget}
+              onChange={(e) => setFormBudget(e.target.value)}
+              placeholder="Ej. 80"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+            />
+            <p className="mt-1 text-xs text-slate-600">
+              Si gastas más de este importe en el mes, la app te avisará.
+            </p>
           </div>
 
           <div>

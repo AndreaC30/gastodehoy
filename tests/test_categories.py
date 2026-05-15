@@ -18,17 +18,62 @@ def _bypass_mx_check(monkeypatch) -> None:
 # ── Category CRUD ──────────────────────────────────────────────────────────
 
 
+def test_supermercado_backfill_for_legacy_user(db_session) -> None:
+    """Cuentas antiguas sin Supermercado la reciben al arrancar (apply_sqlite_migrations)."""
+    from app.database import apply_sqlite_migrations, engine
+    from app.models import ExpenseCategory, User
+    from app.services.categories import DEFAULT_CATEGORIES
+
+    user = User(
+        email="legacy@example.com",
+        name="Legacy",
+        password_hash="x",
+    )
+    db_session.add(user)
+    db_session.commit()
+    legacy_defaults = [c for c in DEFAULT_CATEGORIES if c["name"] != "Supermercado"]
+    for c in legacy_defaults:
+        db_session.add(
+            ExpenseCategory(
+                user_id=user.id,
+                name=c["name"],
+                color=c["color"],
+                icon=c["icon"],
+                is_default=True,
+            )
+        )
+    db_session.commit()
+    assert (
+        db_session.query(ExpenseCategory)
+        .filter(ExpenseCategory.user_id == user.id)
+        .count()
+        == 8
+    )
+
+    apply_sqlite_migrations(engine)
+
+    names = {
+        row.name
+        for row in db_session.query(ExpenseCategory)
+        .filter(ExpenseCategory.user_id == user.id)
+        .all()
+    }
+    assert "Supermercado" in names
+    assert len(names) == 9
+
+
 def test_register_seeds_default_categories(anon_client) -> None:
-    """New user should get 8 default categories automatically."""
+    """New user should get default categories automatically."""
     r = anon_client.post(
         "/api/auth/register",
         json={"email": "cat@e.com", "name": "Cat", "password": "supersecret1"},
     )
     assert r.status_code == 201
     cats = anon_client.get("/api/categories").json()
-    assert len(cats) == 8
+    assert len(cats) == 9
     names = {c["name"] for c in cats}
     assert "Comida" in names
+    assert "Supermercado" in names
     assert "Transporte" in names
     assert "Ocio" in names
     # All should be marked as default
@@ -38,7 +83,7 @@ def test_register_seeds_default_categories(anon_client) -> None:
 def test_list_categories_returns_user_only(client) -> None:
     """Each user sees only their own categories."""
     cats = client.get("/api/categories").json()
-    assert len(cats) == 8  # seeded defaults
+    assert len(cats) == 9  # seeded defaults
 
 
 def test_create_custom_category(client) -> None:

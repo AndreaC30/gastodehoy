@@ -186,6 +186,7 @@ class CategoryCreate(BaseModel):
         pattern=r"^#[0-9a-fA-F]{6}$",
     )
     icon: str | None = Field(default=None, max_length=40)
+    monthly_budget: Decimal | None = Field(default=None, ge=0)
 
     @field_validator("name")
     @classmethod
@@ -203,6 +204,7 @@ class CategoryUpdate(BaseModel):
         pattern=r"^#[0-9a-fA-F]{6}$",
     )
     icon: str | None = Field(default=None, max_length=40)
+    monthly_budget: Decimal | None = Field(default=None, ge=0)
 
     @field_validator("name")
     @classmethod
@@ -220,6 +222,7 @@ class CategoryRead(BaseModel):
     name: str
     color: str
     icon: str | None
+    monthly_budget: Decimal | None = None
     is_default: bool
 
     model_config = {"from_attributes": True}
@@ -236,6 +239,9 @@ class CategorySpending(BaseModel):
     total: Decimal
     percentage: Decimal
     transaction_count: int
+    monthly_budget: Decimal | None = None
+    over_budget: bool = False
+    budget_used_percent: Decimal | None = None
 
 
 class InsightItem(BaseModel):

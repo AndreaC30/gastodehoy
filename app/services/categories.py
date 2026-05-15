@@ -4,10 +4,12 @@ from sqlalchemy.orm import Session
 
 from app.models import ExpenseCategory
 
-# Map of category name to icon key (react-icons / category-icon map)
+# Categorías iniciales: nuevos usuarios (seed_default_categories) y referencia
+# para backfills en apply_sqlite_migrations (p. ej. Supermercado en cuentas antiguas).
 DEFAULT_CATEGORIES: list[dict[str, str]] = [
-    {"name": "Comida",     "color": "#f59e0b", "icon": "UtensilsCrossed"},
-    {"name": "Transporte",  "color": "#3b82f6", "icon": "Car"},
+    {"name": "Comida",       "color": "#f59e0b", "icon": "UtensilsCrossed"},
+    {"name": "Supermercado", "color": "#14b8a6", "icon": "ShoppingCart"},
+    {"name": "Transporte",   "color": "#3b82f6", "icon": "Car"},
     {"name": "Ocio",        "color": "#a855f7", "icon": "Gamepad2"},
     {"name": "Salud",       "color": "#ef4444", "icon": "HeartPulse"},
     {"name": "Educación",   "color": "#10b981", "icon": "GraduationCap"},
