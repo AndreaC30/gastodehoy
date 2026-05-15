@@ -62,6 +62,7 @@ def create_category(
         name=payload.name,
         color=payload.color,
         icon=payload.icon,
+        monthly_budget=payload.monthly_budget,
         is_default=False,
     )
     db.add(row)
@@ -79,12 +80,15 @@ def update_category(
 ) -> ExpenseCategory:
     """Update a category (built-in or custom)."""
     row = _get_category_or_404(db, category_id, user.id)
-    if payload.name is not None:
-        row.name = payload.name
-    if payload.color is not None:
-        row.color = payload.color
-    if payload.icon is not None:
-        row.icon = payload.icon
+    updates = payload.model_dump(exclude_unset=True)
+    if "name" in updates:
+        row.name = updates["name"]
+    if "color" in updates:
+        row.color = updates["color"]
+    if "icon" in updates:
+        row.icon = updates["icon"]
+    if "monthly_budget" in updates:
+        row.monthly_budget = updates["monthly_budget"]
     db.commit()
     db.refresh(row)
     return row

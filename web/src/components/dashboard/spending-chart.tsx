@@ -122,40 +122,60 @@ export function SpendingChart({ breakdown, total }: Props) {
 function CategoryRow({ seg }: { seg: CategorySpending }) {
   const pct = Number(seg.percentage);
   const Icon = getCategoryIcon(seg.category_icon);
+  const budget =
+    seg.monthly_budget != null && seg.monthly_budget !== ""
+      ? Number(seg.monthly_budget)
+      : null;
+  const spent = Number(seg.total);
+  const hasBudget = budget != null && budget > 0;
+  const budgetPct = hasBudget ? Math.min(100, (spent / budget) * 100) : pct;
+  const barWidth = hasBudget ? budgetPct : pct;
+  const overBudget = Boolean(seg.over_budget);
 
   return (
     <div className="min-w-0">
-      {/* top line: icon + dot + name  |  amount + percentage */}
       <div className="flex items-center gap-2 text-sm min-w-0">
-        {/* category icon (react-icons) */}
         <Icon
           className="h-4 w-4 shrink-0"
           style={{ color: seg.category_color }}
         />
 
-        {/* category name */}
         <span className="flex-1 truncate text-slate-300">
           {seg.category_name}
+          {overBudget && (
+            <span className="ml-1.5 text-xs font-medium text-amber-400">
+              · sobre presupuesto
+            </span>
+          )}
         </span>
 
-        {/* amount – bold */}
-        <span className="shrink-0 font-semibold text-slate-200">
+        <span
+          className={`shrink-0 font-semibold ${overBudget ? "text-amber-300" : "text-slate-200"}`}
+        >
           {money(seg.total)}
+          {hasBudget && (
+            <span className="font-normal text-slate-500">
+              {" "}
+              / {money(budget)}
+            </span>
+          )}
         </span>
 
-        {/* percentage – muted */}
         <span className="shrink-0 text-xs text-slate-500">
-          {pct.toFixed(0)}%
+          {hasBudget && seg.budget_used_percent != null
+            ? `${Number(seg.budget_used_percent).toFixed(0)}% pres.`
+            : `${pct.toFixed(0)}%`}
         </span>
       </div>
 
-      {/* progress bar */}
       <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-slate-800">
         <div
-          className="h-full rounded-full transition-all duration-500"
+          className={`h-full rounded-full transition-all duration-500 ${
+            overBudget ? "bg-amber-500" : ""
+          }`}
           style={{
-            width: `${pct}%`,
-            backgroundColor: seg.category_color,
+            width: `${barWidth}%`,
+            backgroundColor: overBudget ? undefined : seg.category_color,
           }}
         />
       </div>

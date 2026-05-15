@@ -41,6 +41,7 @@ export type ExpenseCategory = {
   name: string;
   color: string;
   icon: string | null;
+  monthly_budget: string | number | null;
   is_default: boolean;
 };
 
@@ -70,6 +71,9 @@ export type CategorySpending = {
   total: string | number;
   percentage: string | number;
   transaction_count: number;
+  monthly_budget: string | number | null;
+  over_budget: boolean;
+  budget_used_percent: string | number | null;
 };
 
 export type InsightItem = {

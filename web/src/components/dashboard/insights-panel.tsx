@@ -72,6 +72,9 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
   if (lower.includes("fijos") || lower.includes("gastos fijos")) {
     return { Icon: IoHomeOutline, colorClass };
   }
+  if (lower.includes("presupuesto superado")) {
+    return { Icon: IoWarningOutline, colorClass };
+  }
   if (lower.includes("presupuesto diario")) {
     return { Icon: IoCalendarOutline, colorClass };
   }
