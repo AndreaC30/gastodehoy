@@ -152,6 +152,13 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                 )
             )
 
+        fe_rows = conn.execute(text("PRAGMA table_info(fixed_expenses)")).fetchall()
+        fe_colnames = {str(r[1]) for r in fe_rows}
+        if "icon" not in fe_colnames:
+            conn.execute(
+                text("ALTER TABLE fixed_expenses ADD COLUMN icon VARCHAR(40)")
+            )
+
         # Supermercado: usuarios ya registrados (sin tocar el resto de categorías ni gastos).
         # Solo INSERT si no existe ese nombre; nuevos usuarios ya la reciben vía DEFAULT_CATEGORIES.
         super_default = next(

@@ -110,6 +110,7 @@ class BudgetSettings(BaseModel):
 class FixedExpenseCreate(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     amount: Decimal = Field(ge=0, decimal_places=2)
+    icon: str | None = Field(default=None, max_length=40)
 
     @field_validator("name")
     @classmethod
@@ -123,6 +124,7 @@ class FixedExpenseCreate(BaseModel):
 class FixedExpenseUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     amount: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    icon: str | None = Field(default=None, max_length=40)
 
     @field_validator("name")
     @classmethod
@@ -139,6 +141,7 @@ class FixedExpenseRead(BaseModel):
     id: int
     name: str
     amount: Decimal
+    icon: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -148,6 +151,21 @@ class VariableExpenseCreate(BaseModel):
     occurred_at: date | None = None
     note: str | None = Field(default=None, max_length=2000)
     category_id: int | None = None
+
+
+class VariableExpenseUpdate(BaseModel):
+    amount: Decimal | None = Field(default=None, gt=0, decimal_places=2)
+    occurred_at: date | None = None
+    note: str | None = Field(default=None, max_length=2000)
+    category_id: int | None = None
+
+    @field_validator("note")
+    @classmethod
+    def note_strip_optional(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        s = v.strip()
+        return s if s else None
 
 
 class VariableExpenseRead(BaseModel):

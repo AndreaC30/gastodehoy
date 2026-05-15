@@ -285,6 +285,59 @@ def test_fixed_expense_whitespace_name_rejected(client) -> None:
     assert r.status_code == 422
 
 
+def test_fixed_expense_with_icon(client) -> None:
+    r = client.post(
+        "/api/fixed-expenses",
+        json={"name": "Alquiler", "amount": "800.00", "icon": "Home"},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["name"] == "Alquiler"
+    assert body["icon"] == "Home"
+
+    listed = client.get("/api/fixed-expenses").json()
+    assert len(listed) == 1
+    assert listed[0]["icon"] == "Home"
+
+
+def test_patch_variable_expense(client) -> None:
+    created = client.post(
+        "/api/expenses",
+        json={"amount": "25.50", "note": "café"},
+    )
+    assert created.status_code == 200
+    eid = created.json()["id"]
+
+    updated = client.patch(
+        f"/api/expenses/{eid}",
+        json={"amount": "30.00", "note": "café actualizado"},
+    )
+    assert updated.status_code == 200
+    body = updated.json()
+    assert body["note"] == "café actualizado"
+    from decimal import Decimal
+
+    assert Decimal(str(body["amount"])) == Decimal("30.00")
+
+
+def test_patch_fixed_expense(client) -> None:
+    created = client.post(
+        "/api/fixed-expenses",
+        json={"name": "Luz", "amount": "80.00", "icon": "Zap"},
+    )
+    assert created.status_code == 200
+    fid = created.json()["id"]
+
+    updated = client.patch(
+        f"/api/fixed-expenses/{fid}",
+        json={"amount": "95.50"},
+    )
+    assert updated.status_code == 200
+    from decimal import Decimal
+
+    assert Decimal(str(updated.json()["amount"])) == Decimal("95.50")
+
+
 def test_add_variable_expense_updates_summary(client) -> None:
     client.put(
         "/api/settings",

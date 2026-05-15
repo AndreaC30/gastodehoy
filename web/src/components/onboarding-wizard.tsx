@@ -12,6 +12,11 @@ import { type FormEvent, useState } from "react";
 import { IoArrowBack, IoArrowForward } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { FixedExpense, SavingsMode, Settings } from "@/api/types";
+import {
+  DEFAULT_FIXED_EXPENSE_ICON,
+  getCategoryIcon,
+} from "@/components/dashboard/category-icon";
+import { IconSelectDropdown } from "@/components/dashboard/icon-select-dropdown";
 import { money } from "@/lib/format";
 
 type Props = {
@@ -23,7 +28,7 @@ type Props = {
 type Step = 1 | 2 | 3;
 
 /** In-memory representation of a fixed expense before it's POSTed. */
-type LocalFixed = { name: string; amount: string };
+type LocalFixed = { name: string; amount: string; icon: string };
 
 /** Public wrapper: orchestrates the three steps and the final save. */
 export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
@@ -63,7 +68,11 @@ export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
         if (!f.name.trim()) continue;
         await api<FixedExpense>("/api/fixed-expenses", {
           method: "POST",
-          body: JSON.stringify({ name: f.name.trim(), amount: f.amount || "0" }),
+          body: JSON.stringify({
+            name: f.name.trim(),
+            amount: f.amount || "0",
+            icon: f.icon,
+          }),
         });
       }
       onDone();
@@ -245,14 +254,16 @@ function StepFixed({
 }) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
+  const [icon, setIcon] = useState(DEFAULT_FIXED_EXPENSE_ICON);
 
   function add(e: FormEvent) {
     e.preventDefault();
     const n = name.trim();
     if (!n) return;
-    setItems([...items, { name: n, amount: amount || "0" }]);
+    setItems([...items, { name: n, amount: amount || "0", icon }]);
     setName("");
     setAmount("");
+    setIcon(DEFAULT_FIXED_EXPENSE_ICON);
   }
 
   function remove(i: number) {
@@ -274,13 +285,16 @@ function StepFixed({
       </div>
 
       <form onSubmit={add} className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Ej. Alquiler"
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[120px] sm:flex-1"
-        />
+        <div className="flex w-full min-w-0 gap-2 sm:min-w-[140px] sm:flex-1">
+          <IconSelectDropdown value={icon} onChange={setIcon} />
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ej. Alquiler"
+            className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+          />
+        </div>
         <input
           type="number"
           inputMode="decimal"
@@ -301,14 +315,19 @@ function StepFixed({
 
       {items.length > 0 ? (
         <ul className="space-y-2">
-          {items.map((it, i) => (
+          {items.map((it, i) => {
+            const FixedIcon = getCategoryIcon(it.icon);
+            return (
             <li
               key={`${it.name}-${i}`}
               className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
             >
-              <div>
-                <p className="font-semibold text-slate-200">{it.name}</p>
-                <p className="text-sm text-slate-500">{money(it.amount)}</p>
+              <div className="flex min-w-0 items-center gap-2">
+                <FixedIcon className="h-4 w-4 shrink-0 text-sky-400/90" />
+                <div>
+                  <p className="font-semibold text-slate-200">{it.name}</p>
+                  <p className="text-sm text-slate-500">{money(it.amount)}</p>
+                </div>
               </div>
               <button
                 type="button"
@@ -318,7 +337,8 @@ function StepFixed({
                 Quitar
               </button>
             </li>
-          ))}
+            );
+          })}
         </ul>
       ) : (
         <p className="rounded-lg border border-dashed border-slate-800 px-4 py-3 text-center text-sm text-slate-500">

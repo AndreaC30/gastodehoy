@@ -62,9 +62,52 @@ export const CATEGORY_ICON_PICKER: { name: string; Icon: IconType }[] = [
 
 const DEFAULT_ICON = IoPricetagOutline;
 
+/** Suggested default when adding a fixed expense (rent, utilities, …). */
+export const DEFAULT_FIXED_EXPENSE_ICON = "Home";
+
 export function getCategoryIcon(name: string | null | undefined): IconType {
   if (!name) return DEFAULT_ICON;
   if (ICON_MAP[name]) return ICON_MAP[name];
   if (name.length <= 4 && /\p{Emoji_Presentation}/u.test(name)) return DEFAULT_ICON;
   return DEFAULT_ICON;
+}
+
+type IconPickerStripProps = {
+  value: string;
+  onChange: (name: string) => void;
+  className?: string;
+};
+
+/** Compact icon grid (same keys as ``ExpenseCategory.icon``). */
+export function CategoryIconPickerStrip({
+  value,
+  onChange,
+  className,
+}: IconPickerStripProps) {
+  return (
+    <div className={className} role="group" aria-label="Elegir icono">
+      <div className="flex flex-wrap gap-1.5">
+        {CATEGORY_ICON_PICKER.map((opt) => {
+          const OptIcon = opt.Icon;
+          const selected = value === opt.name;
+          return (
+            <button
+              key={opt.name}
+              type="button"
+              onClick={() => onChange(opt.name)}
+              className={`rounded-lg border p-1.5 ${
+                selected
+                  ? "border-sky-500 bg-sky-500/20"
+                  : "border-slate-700 hover:border-slate-500"
+              }`}
+              aria-label={opt.name}
+              aria-pressed={selected}
+            >
+              <OptIcon className="h-4 w-4 text-slate-300" />
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
