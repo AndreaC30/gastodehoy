@@ -142,6 +142,46 @@ def apply_sqlite_migrations(engine: Engine) -> None:
             )
         )
 
+        cat_rows = conn.execute(text("PRAGMA table_info(expense_categories)")).fetchall()
+        cat_colnames = {str(r[1]) for r in cat_rows}
+        if "monthly_budget" not in cat_colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE expense_categories ADD COLUMN monthly_budget "
+                    "NUMERIC(14, 2)"
+                )
+            )
+
+        # Supermercado: usuarios ya registrados (sin tocar el resto de categorías ni gastos).
+        # Solo INSERT si no existe ese nombre; nuevos usuarios ya la reciben vía DEFAULT_CATEGORIES.
+        super_default = next(
+            (c for c in DEFAULT_CATEGORIES if c["name"] == "Supermercado"),
+            None,
+        )
+        if super_default is not None:
+            for (uid,) in user_rows:
+                has_super = conn.execute(
+                    text(
+                        "SELECT 1 FROM expense_categories "
+                        "WHERE user_id = :uid AND name = :name LIMIT 1"
+                    ),
+                    {"uid": uid, "name": super_default["name"]},
+                ).fetchone()
+                if has_super is None:
+                    conn.execute(
+                        text(
+                            "INSERT INTO expense_categories "
+                            "(user_id, name, color, icon, is_default) "
+                            "VALUES (:uid, :name, :color, :icon, 1)"
+                        ),
+                        {
+                            "uid": uid,
+                            "name": super_default["name"],
+                            "color": super_default["color"],
+                            "icon": super_default["icon"],
+                        },
+                    )
+
 
 def get_db() -> Generator[Session, None, None]:
     """Yield a Session bound to the current request and close it on exit."""

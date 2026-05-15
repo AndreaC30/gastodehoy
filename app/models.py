@@ -157,6 +157,9 @@ class ExpenseCategory(Base):
         String(7), default="#6366f1", nullable=False
     )
     icon: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    monthly_budget: Mapped[Decimal | None] = mapped_column(
+        Numeric(14, 2), nullable=True
+    )
     is_default: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, default=False, server_default="0"
     )
