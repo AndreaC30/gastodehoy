@@ -1,6 +1,7 @@
 /** Pie legal del dashboard (sin exponer fórmulas internas). */
 
-const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL?.trim() ?? "";
+const CONTACT_EMAIL =
+  import.meta.env.VITE_CONTACT_EMAIL?.trim() || "gastodehoy@gmail.com";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
