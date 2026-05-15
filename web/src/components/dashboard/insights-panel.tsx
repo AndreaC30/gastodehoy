@@ -75,7 +75,7 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
   if (lower.includes("presupuesto superado")) {
     return { Icon: IoWarningOutline, colorClass };
   }
-  if (lower.includes("presupuesto diario")) {
+  if (lower.includes("presupuesto diario") || lower.includes("tope diario")) {
     return { Icon: IoCalendarOutline, colorClass };
   }
   if (lower.includes("agotado") || lower.includes("presupuesto agotado")) {
@@ -124,9 +124,9 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
   if (!data) return null;
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 shadow-lg shadow-black/20">
-      <div className="flex items-center justify-between">
-        <div>
+    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 shadow-lg shadow-black/20 sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight">
             <IoBulbOutline className="h-5 w-5 text-sky-400" aria-hidden />
             Insights financieros
@@ -134,9 +134,13 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
           <p className="mt-1 text-sm text-slate-500">
             Análisis de tus gastos este mes
           </p>
+          <p className="mt-2 text-xs leading-relaxed text-slate-600">
+            El gasto variable medio/día es lo que ya has registrado; «Hoy puedes
+            gastar» arriba incluye ingreso, ahorro y fijos.
+          </p>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-slate-500">Promedio diario</p>
+        <div className="text-right sm:shrink-0">
+          <p className="text-xs text-slate-500">Gasto variable medio/día</p>
           <p className="text-sm font-semibold text-slate-200">
             {money(data.avg_daily_spend)}
           </p>
@@ -164,7 +168,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
       {Number(data.projected_monthly) > 0 && (
         <div className="mt-5 border-t border-slate-800 pt-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">Proyección mensual</span>
+            <span className="text-slate-400">Si sigues así (solo variables)</span>
             <span className="font-semibold text-slate-200">
               {money(data.projected_monthly)}
             </span>
@@ -178,7 +182,9 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
             />
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            Llevas {money(data.total_spent)} de {money(data.projected_monthly)} proyectados
+            Llevas {money(data.total_spent)} en variables; si mantienes este ritmo,
+            cerrarías el mes en unos {money(data.projected_monthly)} (sin contar
+            ingresos ni ahorro).
           </p>
         </div>
       )}

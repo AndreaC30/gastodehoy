@@ -8,6 +8,7 @@ import {
   CATEGORY_ICON_PICKER,
   getCategoryIcon,
 } from "@/components/dashboard/category-icon";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 
 type Props = {
   categories: ExpenseCategory[];
@@ -29,6 +30,8 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
   const [formIcon, setFormIcon] = useState("Tag");
   const [formBudget, setFormBudget] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  useBodyScrollLock(true);
 
   function parseBudgetInput(raw: string): number | null {
     const s = raw.trim().replace(",", ".");
@@ -140,7 +143,7 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-50 flex touch-none items-end justify-center overflow-hidden bg-black/60 p-3 sm:items-center sm:p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -148,7 +151,7 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
       aria-modal="true"
       aria-labelledby="category-manager-title"
     >
-      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+      <div className="modal-scroll max-h-[min(85vh,100dvh)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-700 bg-slate-900 p-4 pr-3 shadow-2xl sm:rounded-2xl sm:p-6 sm:pr-5">
         <div className="flex items-center justify-between">
           <h2 id="category-manager-title" className="text-lg font-bold">
             Categorías de gasto
@@ -175,36 +178,40 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
             return (
               <li
                 key={cat.id}
-                className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2.5"
+                className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2.5 sm:flex-row sm:items-center sm:gap-3"
               >
-                <span
-                  className="h-4 w-4 shrink-0 rounded-full"
-                  style={{ backgroundColor: cat.color }}
-                />
-                <Icon className="h-4 w-4 shrink-0 text-slate-400" />
-                <span className="flex-1 text-sm text-slate-200">
-                  {cat.name}
-                  {cat.monthly_budget != null && cat.monthly_budget !== "" && (
-                    <span className="ml-2 text-xs text-slate-500">
-                      · {String(cat.monthly_budget)}€/mes
-                    </span>
-                  )}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => startEdit(cat)}
-                  className="rounded px-2 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                >
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => deleteMut.mutate(cat.id)}
-                  disabled={deleteMut.isPending}
-                  className="rounded px-2 py-1 text-xs text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
-                >
-                  Borrar
-                </button>
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <span
+                    className="h-4 w-4 shrink-0 rounded-full"
+                    style={{ backgroundColor: cat.color }}
+                  />
+                  <Icon className="h-4 w-4 shrink-0 text-slate-400" />
+                  <span className="min-w-0 flex-1 text-sm text-slate-200">
+                    {cat.name}
+                    {cat.monthly_budget != null && cat.monthly_budget !== "" && (
+                      <span className="ml-2 text-xs text-slate-500">
+                        · {String(cat.monthly_budget)}€/mes
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div className="flex shrink-0 gap-2 self-end sm:self-center">
+                  <button
+                    type="button"
+                    onClick={() => startEdit(cat)}
+                    className="rounded px-2 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteMut.mutate(cat.id)}
+                    disabled={deleteMut.isPending}
+                    className="rounded px-2 py-1 text-xs text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                  >
+                    Borrar
+                  </button>
+                </div>
               </li>
             );
           })}

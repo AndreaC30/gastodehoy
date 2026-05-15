@@ -26,6 +26,7 @@ import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { money, savingsLabel } from "@/lib/format";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { logout } from "@/lib/session";
+import { SiteFooter } from "@/components/site-footer";
 
 async function loadSummary() {
   return api<Summary>("/api/summary");
@@ -213,7 +214,7 @@ export function Dashboard({ profileName }: Props) {
             <p className="mt-0.5 text-sm font-semibold text-teal-300">
               {profileName}
             </p>
-            <div className="mt-1 flex items-center gap-3 text-xs sm:justify-end">
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:justify-end">
               <button
                 type="button"
                 onClick={() => setShowSettings(true)}
@@ -304,7 +305,7 @@ export function Dashboard({ profileName }: Props) {
                 value={money(summary?.fixed_expenses_total)}
               />
               <Metric
-                label="Gastado este mes"
+                label="Variables este mes"
                 value={money(summary?.variable_spent_month)}
               />
               <Metric
@@ -327,10 +328,11 @@ export function Dashboard({ profileName }: Props) {
             </div>
           </div>
           <p className="mt-5 border-t border-slate-800 pt-4 text-sm leading-relaxed text-slate-500">
-            "Te queda" = ingreso mensual + ingresos extra del mes − ahorro − fijos −
-            gastos registrados este mes. El ahorro (% o cantidad fija) se calcula solo
-            sobre el <strong className="text-slate-300">ingreso mensual</strong>; los
-            extras solo aumentan el margen disponible.
+            Es lo que te queda del mes repartido entre los días que faltan: ingreso y
+            extras, menos ahorro, gastos fijos y lo que ya registraste en gastos del día
+            a día. El ahorro (% o cantidad fija) solo se calcula sobre tu{" "}
+            <strong className="text-slate-300">ingreso mensual</strong>; los extras solo
+            te dan más margen.
           </p>
         </section>
 
@@ -555,15 +557,7 @@ export function Dashboard({ profileName }: Props) {
           </section>
         </div>
 
-        <footer className="rounded-xl border border-slate-800 bg-slate-900/30 px-4 py-3 text-sm text-slate-500">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-widest text-slate-600">
-            Fórmula
-          </p>
-          <p className="mt-1 font-mono text-xs leading-relaxed text-slate-500">
-            (ingreso + extras del mes − ahorro − fijos − gastos del mes) ÷ días que
-            quedan
-          </p>
-        </footer>
+        <SiteFooter />
       </main>
 
       {showSettings && settings && (

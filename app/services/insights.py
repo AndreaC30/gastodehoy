@@ -8,7 +8,7 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from app.models import ExpenseCategory, UserSettings, VariableExpense
-from app.services.budget import today_in_app_timezone
+from app.services.budget import days_remaining_in_month, today_in_app_timezone
 
 
 def _safe_pct(part: Decimal, whole: Decimal) -> Decimal:
@@ -229,7 +229,7 @@ def compute_insights(
 
     # 7. Daily spending tip
     if avg_daily > 0:
-        days_left = (month_end - today).days
+        days_left = days_remaining_in_month(today)
         if days_left > 0 and monthly_income > 0:
             # Use the same formula as compute_summary for consistency
             from app.models import FixedExpense, ExtraIncome
@@ -259,16 +259,17 @@ def compute_insights(
 
             effective_income = monthly_income + extra_month
             remaining = effective_income - savings - fixed_total - total_spent
-            daily_budget = (remaining / days_left).quantize(Decimal("0.01"))
+            divisor = Decimal(max(1, days_left))
+            daily_budget = (remaining / divisor).quantize(Decimal("0.01"))
 
             if daily_budget > 0:
                 insights.append(
                     {
                         "type": "info",
-                        "title": "Presupuesto diario restante",
+                        "title": "Tope diario recomendado",
                         "message": (
-                            f"Te quedan {remaining}€ para {days_left} días. "
-                            f"Puedes gastar hasta {daily_budget}€/día."
+                            f"Te quedan {remaining}€ repartidos en {days_left} días "
+                            f"(hasta {daily_budget}€/día, igual que «Hoy puedes gastar»)."
                         ),
                         "icon": "calendar",
                     }

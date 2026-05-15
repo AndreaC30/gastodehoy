@@ -74,7 +74,7 @@ export function SpendingChart({ breakdown, total }: Props) {
   );
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 sm:p-5 shadow-lg shadow-black/20">
+    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 shadow-lg shadow-black/20 sm:p-5">
       <h2 className="text-lg font-bold tracking-tight">
         Gastos por categoría
       </h2>
@@ -134,13 +134,13 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
 
   return (
     <div className="min-w-0">
-      <div className="flex items-center gap-2 text-sm min-w-0">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm">
         <Icon
           className="h-4 w-4 shrink-0"
           style={{ color: seg.category_color }}
         />
 
-        <span className="flex-1 truncate text-slate-300">
+        <span className="min-w-0 flex-1 truncate text-slate-300">
           {seg.category_name}
           {overBudget && (
             <span className="ml-1.5 text-xs font-medium text-amber-400">
@@ -150,7 +150,9 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
         </span>
 
         <span
-          className={`shrink-0 font-semibold ${overBudget ? "text-amber-300" : "text-slate-200"}`}
+          className={`shrink-0 basis-full text-right font-semibold sm:basis-auto sm:text-left ${
+            overBudget ? "text-amber-300" : "text-slate-200"
+          }`}
         >
           {money(seg.total)}
           {hasBudget && (
@@ -159,12 +161,11 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
               / {money(budget)}
             </span>
           )}
-        </span>
-
-        <span className="shrink-0 text-xs text-slate-500">
-          {hasBudget && seg.budget_used_percent != null
-            ? `${Number(seg.budget_used_percent).toFixed(0)}% pres.`
-            : `${pct.toFixed(0)}%`}
+          <span className="ml-2 text-xs font-normal text-slate-500 sm:ml-0">
+            {hasBudget && seg.budget_used_percent != null
+              ? `${Number(seg.budget_used_percent).toFixed(0)}% pres.`
+              : `${pct.toFixed(0)}%`}
+          </span>
         </span>
       </div>
 
