@@ -8,6 +8,7 @@ import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { ExtraIncome, SavingsMode, Settings } from "@/api/types";
 import { money } from "@/lib/format";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 
 type Props = {
   initial: Settings;
@@ -41,6 +42,8 @@ export function SettingsModal({
   const [extraDate, setExtraDate] = useState(todayIsoLocal);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useBodyScrollLock(true);
 
   const addExtra = useMutation({
     mutationFn: (body: { amount: string; received_at: string }) =>
@@ -108,13 +111,13 @@ export function SettingsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6"
+      className="fixed inset-0 z-50 flex touch-none items-end justify-center overflow-hidden bg-black/60 px-3 py-4 sm:items-center sm:px-4 sm:py-6"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl shadow-black/50"
+        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 pr-3 shadow-2xl shadow-black/50 sm:rounded-2xl sm:p-5 sm:pr-4"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="mb-4 flex items-start justify-between gap-3">

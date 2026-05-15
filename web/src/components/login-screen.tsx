@@ -367,11 +367,11 @@ function ForgotForm({
         onChange={setEmail}
       />
 
-      <div className="flex items-center justify-between gap-3 pt-1">
+      <div className="flex flex-col-reverse gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200"
+          className="inline-flex w-full items-center justify-center gap-1 text-sm text-slate-400 hover:text-slate-200 sm:w-auto sm:justify-start"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           Volver a Entrar
@@ -379,7 +379,7 @@ function ForgotForm({
         <button
           type="submit"
           disabled={busy || !email}
-          className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+          className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
         >
           {busy ? "Enviando…" : "Enviar correo"}
         </button>
