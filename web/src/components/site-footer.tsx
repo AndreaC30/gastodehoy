@@ -1,5 +1,7 @@
 /** Pie legal del dashboard (sin exponer fórmulas internas). */
 
+import { showLegalPage } from "@/lib/legal-pages-state";
+
 const CONTACT_EMAIL =
   import.meta.env.VITE_CONTACT_EMAIL?.trim() || "gastodehoy@gmail.com";
 
@@ -15,6 +17,23 @@ export function SiteFooter() {
         Contenido, diseño y software son propiedad de sus titulares. Queda
         prohibida la copia, reproducción o uso comercial sin autorización
         expresa.
+      </p>
+      <p className="mt-2">
+        <button
+          type="button"
+          onClick={() => showLegalPage("privacy")}
+          className="text-teal-400/80 underline decoration-teal-500/40 underline-offset-2 hover:text-teal-300"
+        >
+          Política de Privacidad
+        </button>
+        {" · "}
+        <button
+          type="button"
+          onClick={() => showLegalPage("legal")}
+          className="text-teal-400/80 underline decoration-teal-500/40 underline-offset-2 hover:text-teal-300"
+        >
+          Aviso Legal
+        </button>
       </p>
       {CONTACT_EMAIL ? (
         <p className="mt-2">

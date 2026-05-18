@@ -9,6 +9,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Dashboard } from "@/components/dashboard/dashboard-view";
+import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { LandingPage } from "@/components/landing-page";
 import { LoadingSplash } from "@/components/loading-splash";
 import {
@@ -18,6 +19,8 @@ import {
 import { OnboardingWizard } from "@/components/onboarding-wizard";
 import { ForcePasswordChangeModal } from "@/components/force-password-change-modal";
 import { AppBackdrop } from "@/components/app-backdrop";
+import { PrivacyPolicy } from "@/components/privacy-policy";
+import { LegalNotice } from "@/components/legal-notice";
 import {
   setLoading,
   setUser as setAuthUser,
@@ -30,6 +33,12 @@ import { getStoredAnonPhase, setStoredAnonPhase } from "@/lib/anon-phase-session
 import { APP_SHELL_CLASS } from "@/lib/app-layout";
 import { hasSeenLanding, markLandingSeen } from "@/lib/landing-preference";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
+import {
+  subscribeToLegalPage,
+  getLegalPage,
+  showLegalPage,
+  type LegalPage,
+} from "@/lib/legal-pages-state";
 
 async function loadSettings() {
   return api<Settings>("/api/settings");
@@ -39,6 +48,10 @@ export default function App() {
   const auth = useSyncExternalStore(subscribe, snapshot);
   const [meBootstrapError, setMeBootstrapError] = useState<string | null>(null);
   const [meRetryToken, setMeRetryToken] = useState(0);
+
+  // Legal page overlay (privacy policy / legal notice)
+  const [legalPage, setLegalPage] = useState<LegalPage>(getLegalPage);
+  useEffect(() => subscribeToLegalPage(setLegalPage), []);
 
   useEffect(() => {
     if (auth.status !== "loading") return;
@@ -66,8 +79,26 @@ export default function App() {
     };
   }, [auth.status, meRetryToken]);
 
-  if (auth.status === "loading" && meBootstrapError) {
+  // Legal page overlays — rendered above everything, bypassing auth checks
+  if (legalPage === "privacy") {
     return (
+      <div className={APP_SHELL_CLASS}>
+        <PrivacyPolicy onBack={() => showLegalPage(null)} />
+      </div>
+    );
+  }
+  if (legalPage === "legal") {
+    return (
+      <div className={APP_SHELL_CLASS}>
+        <LegalNotice onBack={() => showLegalPage(null)} />
+      </div>
+    );
+  }
+
+  let content: React.ReactNode;
+
+  if (auth.status === "loading" && meBootstrapError) {
+    content = (
       <div className={APP_SHELL_CLASS}>
         <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center text-slate-300">
           <p className="max-w-md text-sm">{meBootstrapError}</p>
@@ -85,21 +116,24 @@ export default function App() {
         </div>
       </div>
     );
-  }
-
-  if (auth.status === "loading") {
-    return <LoadingSplash />;
-  }
-
-  if (auth.status === "anon" || !auth.user) {
-    return (
+  } else if (auth.status === "loading") {
+    content = <LoadingSplash />;
+  } else if (auth.status === "anon" || !auth.user) {
+    content = (
       <div className={APP_SHELL_CLASS}>
         <AnonFlow />
       </div>
     );
+  } else {
+    content = <Authed userName={auth.user.name} />;
   }
 
-  return <Authed userName={auth.user.name} />;
+  return (
+    <>
+      {content}
+      <CookieConsentBanner />
+    </>
+  );
 }
 
 function Authed({ userName }: { userName: string }) {
