@@ -17,6 +17,19 @@ import favicon192 from "./assets/gastodehoy-favicon-192.png";
 import favicon512 from "./assets/gastodehoy-favicon.png";
 import "./index.css";
 
+// Prevent scroll wheel from changing number inputs (native browser behavior
+// can silently increment/decrement while the user types)
+document.addEventListener(
+  "wheel",
+  (e) => {
+    const target = e.target as HTMLElement | null;
+    if (target?.tagName === "INPUT" && (target as HTMLInputElement).type === "number") {
+      e.preventDefault();
+    }
+  },
+  { passive: false },
+);
+
 if (document.documentElement.dataset.gdhFavicons !== "1") {
   document.documentElement.dataset.gdhFavicons = "1";
 
