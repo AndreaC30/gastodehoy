@@ -14,6 +14,7 @@ import type {
 } from "@/api/types";
 import { setUser } from "@/auth";
 import { BrandLogo } from "@/components/brand-logo";
+import { showLegalPage } from "@/lib/legal-pages-state";
 
 type Mode = "login" | "register" | "forgot";
 
@@ -220,6 +221,7 @@ function RegisterForm({
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -280,9 +282,23 @@ function RegisterForm({
         value={password2}
         onChange={setPassword2}
       />
+      <label className="flex items-start gap-2 text-xs text-slate-400 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={acceptedTerms}
+          onChange={(e) => setAcceptedTerms(e.target.checked)}
+          className="mt-0.5 h-4 w-4 rounded border-slate-600 bg-slate-800 accent-teal-500"
+        />
+        <span>
+          He leído y acepto la{" "}
+          <button type="button" onClick={() => showLegalPage("privacy")} className="text-teal-400 underline hover:text-teal-300">política de privacidad</button>
+          {" "}y las{" "}
+          <button type="button" onClick={() => showLegalPage("legal")} className="text-teal-400 underline hover:text-teal-300">condiciones de uso</button>
+        </span>
+      </label>
       <button
         type="submit"
-        disabled={busy || !email || !name || !password || !password2}
+        disabled={busy || !email || !name || !password || !password2 || !acceptedTerms}
         className="mt-2 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
       >
         {busy ? "Creando…" : "Crear cuenta"}

@@ -1,15 +1,17 @@
 # Overlay para producción: HTTPS por Caddy + cookies seguras.
+# Incluye los 3 proyectos: gastodehoy, kya-system-hermes, hermes-core
 #
-# Uso recomendado en servidor tras git pull (rebuild Vite dentro de la imagen):
-#   ./scripts/deploy-docker-prod.sh
-# Manualmente:
+# Uso:
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --force-recreate app
+#   docker compose -f /root/kya-system-hermes/docker-compose.yml -f docker-compose.prod.yml up -d --build kya
+#   docker compose -f /root/hermes-core/docker-compose.yml -f docker-compose.prod.yml up -d --build hermes-core
 #
 # Requiere en .env:
-#   SITE_DOMAIN=gastos.tudominio.com
+#   SITE_DOMAIN=gastodehoy.kyadigital.es
 #   ACME_EMAIL=tu-email@ejemplo.com
 #   APP_SECRET=<openssl rand -hex 32>
 #   COOKIE_SECURE=true
+
 services:
   app:
     # Solo expuesto a la red interna; Caddy hace de puerta.
@@ -26,6 +28,46 @@ services:
       backend:
         aliases:
           - app
+
+  kya:
+    build:
+      context: /root/kya-system-hermes
+    container_name: kya-system-hermes
+    restart: unless-stopped
+    ports: []
+    volumes:
+      - kya-data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/var/log:ro
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-875698538}
+      - APP_SECRET=${APP_SECRET:-kya-secret-change-me}
+      - APP_USER=${APP_USER:-admin}
+      - APP_PASS=${APP_PASS:-kya2026}
+      - COLLECTOR_INTERVAL=30
+    networks:
+      backend:
+        aliases:
+          - kya
+
+  hermes-core:
+    build:
+      context: /root/hermes-core
+    container_name: hermes-core
+    restart: unless-stopped
+    ports: []
+    volumes:
+      - /root/.hermes:/root/.hermes:ro
+    environment:
+      - APP_SECRET=${APP_SECRET:-hermes-secret-change-me}
+      - APP_USER=${APP_USER:-admin}
+      - APP_PASS=${APP_PASS:-hermes2026}
+      - HERMES_HOME=/root/.hermes
+    networks:
+      backend:
+        aliases:
+          - hermes-core
 
   caddy:
     image: caddy:2-alpine
@@ -49,3 +91,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  kya-data:
