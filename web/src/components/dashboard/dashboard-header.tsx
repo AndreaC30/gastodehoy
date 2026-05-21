@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { IoMenu } from "react-icons/io5";
 import { BrandLogo } from "@/components/brand-logo";
 import {
@@ -10,6 +9,8 @@ import { FOCUS_RING } from "@/lib/ui-a11y";
 type Props = {
   profileName: string;
   settingsReady: boolean;
+  menuOpen: boolean;
+  onMenuOpenChange: (open: boolean) => void;
   onOpenSettings: () => void;
   onOpenCategories: () => void;
   onOpenSavingsGoals: () => void;
@@ -21,6 +22,8 @@ type Props = {
 export function DashboardHeader({
   profileName,
   settingsReady,
+  menuOpen,
+  onMenuOpenChange,
   onOpenSettings,
   onOpenCategories,
   onOpenSavingsGoals,
@@ -28,8 +31,6 @@ export function DashboardHeader({
   onStartTour,
   exportBusy = false,
 }: Props) {
-  const [menuOpen, setMenuOpen] = useState(false);
-
   function handleNavigate(action: DashboardNavAction) {
     switch (action) {
       case "settings":
@@ -75,7 +76,7 @@ export function DashboardHeader({
             </p>
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
+              onClick={() => onMenuOpenChange(true)}
               className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-base font-medium text-slate-200 shadow-sm transition-colors hover:border-teal-500/40 hover:bg-slate-800 hover:text-teal-200 ${FOCUS_RING}`}
               aria-expanded={menuOpen}
               aria-controls="dashboard-nav-panel"
@@ -96,7 +97,8 @@ export function DashboardHeader({
         profileName={profileName}
         settingsReady={settingsReady}
         exportBusy={exportBusy}
-        onClose={() => setMenuOpen(false)}
+        onClose={() => onMenuOpenChange(false)}
+        onReopenMenu={() => onMenuOpenChange(true)}
         onNavigate={handleNavigate}
       />
     </>

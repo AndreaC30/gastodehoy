@@ -16,12 +16,14 @@ import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { INPUT_CLASS, INPUT_FLEX_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   initial: Settings;
   extras: ExtraIncome[];
   onClose: () => void;
+  onBackToMenu?: () => void;
   onSaved: (next: Settings) => void;
   onExtrasChanged: () => void;
 };
@@ -57,6 +59,7 @@ export function SettingsModal({
   initial,
   extras,
   onClose,
+  onBackToMenu,
   onSaved,
   onExtrasChanged,
 }: Props) {
@@ -311,22 +314,20 @@ export function SettingsModal({
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/60"
-              >
-                Cancelar
-              </button>
+            <ModalMenuFooter
+              className="pt-2"
+              onBackToMenu={onBackToMenu}
+              onClose={onClose}
+              closeLabel="Cancelar"
+            >
               <button
                 type="submit"
                 disabled={busy}
-                className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+                className="min-h-11 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
               >
                 {busy ? "Guardando…" : "Guardar"}
               </button>
-            </div>
+            </ModalMenuFooter>
           </form>
         ) : (
           <div
@@ -471,15 +472,11 @@ export function SettingsModal({
               )}
             </ul>
 
-            <div className="flex justify-end pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/60"
-              >
-                Cerrar
-              </button>
-            </div>
+            <ModalMenuFooter
+              className="pt-2"
+              onBackToMenu={onBackToMenu}
+              onClose={onClose}
+            />
           </div>
         )}
       </div>

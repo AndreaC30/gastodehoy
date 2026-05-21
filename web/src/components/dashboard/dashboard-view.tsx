@@ -80,6 +80,12 @@ export function Dashboard({ profileName }: Props) {
   );
   const [exportBusy, setExportBusy] = useState(false);
   const [showTour, setShowTour] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  function returnToMenu(closePanel: () => void) {
+    closePanel();
+    setMenuOpen(true);
+  }
 
   useEffect(() => {
     if (!toastMsg) return;
@@ -248,11 +254,26 @@ export function Dashboard({ profileName }: Props) {
       <DashboardHeader
         profileName={profileName}
         settingsReady={!!settingsQ.data}
-        onOpenSettings={() => setShowSettings(true)}
-        onOpenCategories={() => setShowCategoryManager(true)}
-        onOpenSavingsGoals={() => setShowSavingsGoals(true)}
-        onExport={() => void handleExport()}
+        menuOpen={menuOpen}
+        onMenuOpenChange={setMenuOpen}
+        onOpenSettings={() => {
+          setMenuOpen(false);
+          setShowSettings(true);
+        }}
+        onOpenCategories={() => {
+          setMenuOpen(false);
+          setShowCategoryManager(true);
+        }}
+        onOpenSavingsGoals={() => {
+          setMenuOpen(false);
+          setShowSavingsGoals(true);
+        }}
+        onExport={() => {
+          setMenuOpen(false);
+          void handleExport();
+        }}
         onStartTour={() => {
+          setMenuOpen(false);
           setShowTour(true);
         }}
         exportBusy={exportBusy}
@@ -342,6 +363,7 @@ export function Dashboard({ profileName }: Props) {
         <SettingsModal
           initial={settings}
           extras={extraIncomeQ.data ?? []}
+          onBackToMenu={() => returnToMenu(() => setShowSettings(false))}
           onClose={() => setShowSettings(false)}
           onExtrasChanged={() => {
             setToastMsg("Ingresos extra actualizados");
@@ -358,6 +380,7 @@ export function Dashboard({ profileName }: Props) {
       {showSavingsGoals && (
         <SavingsGoalsModal
           reservedSavings={summaryQ.data?.savings_amount}
+          onBackToMenu={() => returnToMenu(() => setShowSavingsGoals(false))}
           onClose={() => setShowSavingsGoals(false)}
         />
       )}
@@ -365,6 +388,7 @@ export function Dashboard({ profileName }: Props) {
       {showCategoryManager && (
         <CategoryManager
           categories={categories}
+          onBackToMenu={() => returnToMenu(() => setShowCategoryManager(false))}
           onClose={() => setShowCategoryManager(false)}
           onChanged={() => {
             setToastMsg("Categorías actualizadas");
@@ -399,6 +423,7 @@ export function Dashboard({ profileName }: Props) {
       {showTour && (
         <GuidedTour
           steps={DASHBOARD_TOUR_STEPS}
+          onBackToMenu={() => returnToMenu(() => setShowTour(false))}
           onComplete={finishTour}
           onSkip={skipTour}
         />
