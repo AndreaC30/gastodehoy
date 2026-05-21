@@ -1,11 +1,17 @@
+import { useState } from "react";
+import { IoMenu } from "react-icons/io5";
 import { BrandLogo } from "@/components/brand-logo";
-import { logout } from "@/lib/session";
+import {
+  DashboardNavPanel,
+  type DashboardNavAction,
+} from "@/components/dashboard/dashboard-nav-panel";
 
 type Props = {
   profileName: string;
   settingsReady: boolean;
   onOpenSettings: () => void;
   onOpenCategories: () => void;
+  onOpenSavingsGoals: () => void;
 };
 
 export function DashboardHeader({
@@ -13,53 +19,69 @@ export function DashboardHeader({
   settingsReady,
   onOpenSettings,
   onOpenCategories,
+  onOpenSavingsGoals,
 }: Props) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  function handleNavigate(action: DashboardNavAction) {
+    switch (action) {
+      case "settings":
+        onOpenSettings();
+        break;
+      case "categories":
+        onOpenCategories();
+        break;
+      case "savings-goals":
+        onOpenSavingsGoals();
+        break;
+    }
+  }
+
   return (
-    <header className="relative z-10 border-b border-slate-800/80 px-3 py-5 sm:px-4 sm:py-7">
-      <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 lg:max-w-6xl">
-        <div>
-          <h1 className="m-0 leading-none">
-            <BrandLogo variant="header" />
-          </h1>
-          <p className="mt-1.5 max-w-md text-sm text-slate-400 sm:mt-2">
-            Tu margen para hoy, claro y al instante.
-          </p>
-        </div>
-        <div className="text-left sm:text-right">
-          <p className="text-[0.65rem] uppercase tracking-widest text-slate-500 sm:text-xs">
-            Perfil
-          </p>
-          <p className="mt-0.5 text-sm font-semibold text-teal-300">
-            {profileName}
-          </p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:justify-end">
+    <>
+      <header className="relative z-10 border-b border-slate-800/80 px-3 py-5 sm:px-4 sm:py-7">
+        <div className="mx-auto flex max-w-4xl items-start justify-between gap-3 lg:max-w-6xl">
+          <div className="min-w-0 flex-1">
+            <h1 className="m-0 leading-none">
+              <BrandLogo variant="header" />
+            </h1>
+            <p className="mt-1.5 max-w-md text-sm text-slate-400 sm:mt-2">
+              Tu margen para hoy, claro y al instante.
+            </p>
+          </div>
+
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            <p className="hidden text-[0.65rem] uppercase tracking-widest text-slate-500 sm:block sm:text-xs">
+              Perfil
+            </p>
+            <p className="hidden max-w-[10rem] truncate text-sm font-semibold text-teal-300 sm:block">
+              {profileName}
+            </p>
             <button
               type="button"
-              onClick={onOpenSettings}
-              disabled={!settingsReady}
-              className="font-medium text-slate-400 hover:text-teal-300 disabled:opacity-40"
-              aria-label="Configura tus ingresos"
+              onClick={() => setMenuOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm font-medium text-slate-200 shadow-sm transition-colors hover:border-teal-500/40 hover:bg-slate-800 hover:text-teal-200"
+              aria-expanded={menuOpen}
+              aria-controls="dashboard-nav-panel"
+              aria-haspopup="dialog"
             >
-              Tus ingresos
+              <IoMenu className="h-5 w-5 shrink-0" aria-hidden />
+              <span>Menú</span>
             </button>
-            <button
-              type="button"
-              onClick={onOpenCategories}
-              className="font-medium text-slate-400 hover:text-teal-300"
-              aria-label="Gestionar categorías"
-            >
-              Categorías
-            </button>
-            <button
-              type="button"
-              onClick={() => void logout()}
-              className="font-medium text-slate-500 underline decoration-slate-700 underline-offset-4 hover:text-slate-300"
-            >
-              Cerrar sesión
-            </button>
+            <p className="max-w-[8.5rem] truncate text-xs font-medium text-teal-300/90 sm:hidden">
+              {profileName}
+            </p>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      <DashboardNavPanel
+        open={menuOpen}
+        profileName={profileName}
+        settingsReady={settingsReady}
+        onClose={() => setMenuOpen(false)}
+        onNavigate={handleNavigate}
+      />
+    </>
   );
 }

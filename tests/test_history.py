@@ -15,14 +15,20 @@ def test_summary_history_returns_three_months(client, user, db_session) -> None:
     data = r.json()
     assert len(data["months"]) == 3
     today = today_in_app_timezone()
-    assert data["months"][0]["year"] == today.year
-    assert data["months"][0]["month"] == today.month
+    assert data["months"][-1]["year"] == today.year
+    assert data["months"][-1]["month"] == today.month
 
 
 def test_compute_month_history_order(db_session, user) -> None:
     rows = compute_month_history(db_session, user.id, months=3)
     assert len(rows) == 3
-    assert rows[0]["year"] >= rows[1]["year"]
+    today = today_in_app_timezone()
+    assert rows[-1]["year"] == today.year
+    assert rows[-1]["month"] == today.month
+    assert (rows[0]["year"], rows[0]["month"]) < (
+        rows[-1]["year"],
+        rows[-1]["month"],
+    )
 
 
 def test_insight_vs_previous_month_more(client, user, db_session) -> None:

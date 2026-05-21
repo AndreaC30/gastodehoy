@@ -42,13 +42,13 @@ def compute_month_history(
     user_id: int,
     months: int = 3,
 ) -> list[dict]:
-    """Return budget snapshots for the last ``months`` calendar months (newest first)."""
+    """Return budget snapshots for the last ``months`` calendar months (oldest first)."""
     months = max(1, min(months, 12))
     today = today_in_app_timezone()
     y, m = today.year, today.month
     out: list[dict] = []
 
-    for i in range(months):
+    for i in range(months - 1, -1, -1):
         cy, cm = _shift_month(y, m, -i)
         ref = _reference_for_month(cy, cm, today)
         snap = compute_summary(session, user_id, ref)
