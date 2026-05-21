@@ -3,7 +3,7 @@
  * fields that the onboarding wizard captured (income + savings rule).
  */
 import { useMutation } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { ExtraIncome, SavingsMode, Settings } from "@/api/types";
@@ -12,6 +12,8 @@ import { money } from "@/lib/format";
 import { setAnonymous } from "@/auth";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   initial: Settings;
@@ -21,11 +23,9 @@ type Props = {
   onExtrasChanged: () => void;
 };
 
-const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-slate-100 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40";
+const inputClass = `${INPUT_CLASS} py-2.5`;
 
-const inputClassSm =
-  "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40";
+const inputClassSm = `${INPUT_CLASS} text-sm`;
 
 function todayIsoLocal(): string {
   const d = new Date();
@@ -54,8 +54,10 @@ export function SettingsModal({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useBodyScrollLock(true);
+  useDialogA11y(true, panelRef);
 
   const addExtra = useMutation({
     mutationFn: (body: { amount: string; received_at: string }) =>
@@ -147,15 +149,21 @@ export function SettingsModal({
       className="fixed inset-0 z-50 flex touch-none items-end justify-center overflow-hidden bg-black/60 px-3 py-4 sm:items-center sm:px-4 sm:py-6"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="settings-modal-title"
       onClick={onClose}
     >
       <div
+        ref={panelRef}
+        tabIndex={-1}
         className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 pr-3 shadow-2xl shadow-black/50 sm:rounded-2xl sm:p-5 sm:pr-4"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold tracking-tight">
+            <h2
+              id="settings-modal-title"
+              className="text-lg font-bold tracking-tight"
+            >
               Configura tus ingresos
             </h2>
             <p className="text-sm text-slate-500">
@@ -173,7 +181,11 @@ export function SettingsModal({
         </header>
 
         {error && (
-          <div className="mb-3 rounded-xl border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200">
+          <div
+            className="mb-3 rounded-xl border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200"
+            role="alert"
+            aria-live="polite"
+          >
             {error}
           </div>
         )}

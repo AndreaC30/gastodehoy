@@ -5,6 +5,7 @@ import {
   CATEGORY_ICON_PICKER,
   getCategoryIcon,
 } from "@/components/dashboard/category-icon";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 
 type Props = {
   value: string;
@@ -24,8 +25,15 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
         setOpen(false);
       }
     }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
     document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   function pick(name: string) {
@@ -38,7 +46,7 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex h-[42px] min-w-[42px] items-center justify-center gap-0.5 rounded-lg border border-slate-700 bg-slate-950 px-1.5 hover:border-slate-500 focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+        className={`flex h-11 min-w-11 items-center justify-center gap-0.5 rounded-lg border border-slate-700 bg-slate-950 px-1.5 hover:border-slate-500 ${FOCUS_RING}`}
         aria-label="Elegir icono"
         aria-expanded={open}
         aria-haspopup="listbox"

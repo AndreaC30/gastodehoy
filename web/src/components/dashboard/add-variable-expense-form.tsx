@@ -1,9 +1,9 @@
 import { type FormEvent } from "react";
 import type { ExpenseCategory } from "@/api/types";
 import { FormField } from "@/components/ui/form-field";
+import { BTN_PRIMARY, INPUT_CLASS } from "@/lib/ui-a11y";
 
-const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40";
+const inputClass = INPUT_CLASS;
 
 type Props = {
   categories: ExpenseCategory[];
@@ -65,7 +65,7 @@ export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props)
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto sm:self-end"
+        className={`w-full sm:w-auto sm:self-end ${BTN_PRIMARY}`}
       >
         Registrar
       </button>

@@ -125,10 +125,16 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
   if (!data) return null;
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 shadow-lg shadow-black/20 sm:p-5">
+    <section
+      className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 shadow-lg shadow-black/20 sm:p-5"
+      aria-labelledby="insights-panel-title"
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight">
+          <h2
+            id="insights-panel-title"
+            className="flex items-center gap-2 text-lg font-bold tracking-tight"
+          >
             <IoBulbOutline className="h-5 w-5 text-sky-400" aria-hidden />
             Insights financieros
           </h2>
@@ -148,11 +154,11 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         </div>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <ul className="mt-4 list-none space-y-3 p-0">
         {data.insights.map((insight) => {
           const { Icon, colorClass } = getInsightIcon(insight);
           return (
-            <div
+            <li
               key={`${insight.type}-${insight.title}`}
               className={`rounded-xl border px-4 py-3 text-sm ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
             >
@@ -161,10 +167,10 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
                 {insight.title}
               </p>
               <p className="mt-1 text-sm opacity-90">{insight.message}</p>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
 
       {Number(data.projected_monthly) > 0 && (
         <div className="mt-5 border-t border-slate-800 pt-4">

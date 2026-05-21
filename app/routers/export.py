@@ -2,7 +2,6 @@
 
 import csv
 import io
-from datetime import date
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
@@ -21,6 +20,11 @@ from app.models import (
 from app.services.budget import month_bounds, today_in_app_timezone
 
 router = APIRouter(prefix="/api/export", tags=["export"])
+
+_SAVINGS_MODE_LABEL = {
+    "percent": "porcentaje",
+    "fixed": "cantidad_fija",
+}
 
 
 @router.get("/csv")
@@ -65,23 +69,29 @@ def export_csv(
 
     buf = io.StringIO()
     w = csv.writer(buf)
-    w.writerow(["section", "field", "value"])
+    w.writerow(["seccion", "campo", "valor"])
     if settings:
-        w.writerow(["settings", "monthly_income", settings.monthly_income])
-        w.writerow(["settings", "savings_mode", settings.savings_mode])
-        w.writerow(["settings", "savings_percent", settings.savings_percent])
-        w.writerow(["settings", "savings_amount", settings.savings_amount])
+        w.writerow(["ajustes", "ingreso_mensual", settings.monthly_income])
+        w.writerow(
+            [
+                "ajustes",
+                "modo_ahorro",
+                _SAVINGS_MODE_LABEL.get(settings.savings_mode, settings.savings_mode),
+            ]
+        )
+        w.writerow(["ajustes", "porcentaje_ahorro", settings.savings_percent])
+        w.writerow(["ajustes", "cantidad_ahorro", settings.savings_amount])
     w.writerow([])
-    w.writerow(["fixed_expenses", "name", "amount"])
+    w.writerow(["gastos_fijos", "nombre", "importe"])
     for row in fixed:
-        w.writerow(["fixed", row.name, row.amount])
+        w.writerow(["gasto_fijo", row.name, row.amount])
     w.writerow([])
-    w.writerow(["variable_expenses", "date", "amount", "category", "note"])
+    w.writerow(["gastos_variables", "fecha", "importe", "categoria", "nota"])
     for row in variables:
         cat = cat_names.get(row.category_id) if row.category_id else ""
         w.writerow(
             [
-                "variable",
+                "gasto_variable",
                 row.occurred_at.isoformat(),
                 row.amount,
                 cat or "",

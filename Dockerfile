@@ -6,7 +6,10 @@ COPY web/package.json web/package-lock.json ./
 RUN npm ci
 COPY web/ ./
 # Invalida esta capa en cada deploy aunque el cache diga «sin cambios» (véase BUILD_REF).
+# SITE_DOMAIN: hostname público (p. ej. gastodehoy.kyadigital.es) → canonical/OG absolutos en dist/.
 ARG BUILD_REF
+ARG SITE_DOMAIN
+ENV SITE_DOMAIN=${SITE_DOMAIN}
 RUN printf "WEB_BUILD_REF=%s\\n" "${BUILD_REF:-unknown}" \
     && npm run build
 

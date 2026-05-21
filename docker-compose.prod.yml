@@ -14,6 +14,11 @@
 
 services:
   app:
+    build:
+      context: .
+      args:
+        SITE_DOMAIN: ${SITE_DOMAIN}
+        BUILD_REF: ${BUILD_REF:-prod}
     # Solo expuesto a la red interna; Caddy hace de puerta.
     ports: []
     environment:

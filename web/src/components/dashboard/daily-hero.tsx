@@ -1,6 +1,7 @@
 import type { Summary } from "@/api/types";
 import { Metric } from "@/components/dashboard/metric";
 import { money, savingsLabel } from "@/lib/format";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 
 type Props = {
   summary: Summary | undefined;
@@ -34,7 +35,8 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
           <button
             type="button"
             onClick={onRefresh}
-            className="mt-2 w-fit text-[0.65rem] font-medium text-slate-500 underline decoration-slate-600 underline-offset-4 hover:text-slate-400 sm:mt-3 sm:text-xs"
+            aria-label="Actualizar números del presupuesto"
+            className={`mt-2 min-h-11 w-fit px-1 text-[0.65rem] font-medium text-slate-500 underline decoration-slate-600 underline-offset-4 hover:text-slate-400 sm:mt-3 sm:text-xs ${FOCUS_RING}`}
           >
             Actualizar números
           </button>

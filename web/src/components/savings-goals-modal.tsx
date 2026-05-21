@@ -1,10 +1,12 @@
 /**
  * Modal for savings goals (same pattern as SettingsModal).
  */
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { IoClose } from "react-icons/io5";
 import { SavingsGoalsContent } from "@/components/dashboard/savings-goals-panel";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 
 type Props = {
   reservedSavings?: string | number;
@@ -12,7 +14,9 @@ type Props = {
 };
 
 export function SavingsGoalsModal({ reservedSavings, onClose }: Props) {
+  const panelRef = useRef<HTMLDivElement>(null);
   useBodyScrollLock(true);
+  useDialogA11y(true, panelRef);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -31,6 +35,8 @@ export function SavingsGoalsModal({ reservedSavings, onClose }: Props) {
       onClick={onClose}
     >
       <div
+        ref={panelRef}
+        tabIndex={-1}
         className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 pr-3 shadow-2xl shadow-black/50 sm:rounded-2xl sm:p-5 sm:pr-4"
         onClick={(e) => e.stopPropagation()}
       >
@@ -50,7 +56,7 @@ export function SavingsGoalsModal({ reservedSavings, onClose }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="rounded-lg border border-slate-800 p-1.5 text-slate-400 hover:bg-slate-800/60"
+            className={`min-h-11 min-w-11 rounded-lg border border-slate-800 p-1.5 text-slate-400 hover:bg-slate-800/60 ${FOCUS_RING}`}
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
