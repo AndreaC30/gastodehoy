@@ -6,11 +6,14 @@ import { useMutation } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
-import type { ExtraIncome, SavingsMode, Settings } from "@/api/types";
+import type {
+  ExtraIncome,
+  ExtraIncomeSavingsMode,
+  SavingsMode,
+  Settings,
+} from "@/api/types";
 import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
-import { setAnonymous } from "@/auth";
-import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { INPUT_CLASS, INPUT_FLEX_CLASS } from "@/lib/ui-a11y";
@@ -26,6 +29,20 @@ type Props = {
 const inputClass = `${INPUT_CLASS} py-2.5`;
 
 const inputClassSm = `${INPUT_CLASS} text-sm`;
+
+type SettingsTab = "monthly" | "extra";
+
+function describeExtraSavings(it: ExtraIncome): string {
+  const mode = it.savings_mode ?? "none";
+  if (mode === "all") return "Todo reservado · no suma al margen";
+  if (mode === "percent") {
+    return `Ahorro ${it.savings_percent}% de este ingreso`;
+  }
+  if (mode === "fixed") {
+    return `Ahorro fijo ${money(it.savings_fixed)}`;
+  }
+  return "Todo disponible para gastar";
+}
 
 function todayIsoLocal(): string {
   const d = new Date();
@@ -47,20 +64,28 @@ export function SettingsModal({
   const [mode, setMode] = useState<SavingsMode>(initial.savings_mode);
   const [percent, setPercent] = useState(String(initial.savings_percent ?? "0"));
   const [amount, setAmount] = useState(String(initial.savings_amount ?? "0"));
+  const [tab, setTab] = useState<SettingsTab>("monthly");
   const [extraAmount, setExtraAmount] = useState("");
   const [extraDate, setExtraDate] = useState(todayIsoLocal);
+  const [extraSavingsMode, setExtraSavingsMode] =
+    useState<ExtraIncomeSavingsMode>("none");
+  const [extraSavingsPercent, setExtraSavingsPercent] = useState("0");
+  const [extraSavingsFixed, setExtraSavingsFixed] = useState("0");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deletePassword, setDeletePassword] = useState("");
-  const [deleteBusy, setDeleteBusy] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useBodyScrollLock(true);
   useDialogA11y(true, panelRef);
 
   const addExtra = useMutation({
-    mutationFn: (body: { amount: string; received_at: string }) =>
+    mutationFn: (body: {
+      amount: string;
+      received_at: string;
+      savings_mode: ExtraIncomeSavingsMode;
+      savings_percent: string;
+      savings_fixed: string;
+    }) =>
       api<ExtraIncome>("/api/extra-income", {
         method: "POST",
         body: JSON.stringify(body),
@@ -68,6 +93,9 @@ export function SettingsModal({
     onSuccess: () => {
       setExtraAmount("");
       setExtraDate(todayIsoLocal());
+      setExtraSavingsMode("none");
+      setExtraSavingsPercent("0");
+      setExtraSavingsFixed("0");
       onExtrasChanged();
     },
     onError: (e: Error) => setError(e.message),
@@ -110,27 +138,6 @@ export function SettingsModal({
     }
   }
 
-  async function confirmDeleteAccount() {
-    if (!deletePassword.trim()) {
-      setError("Escribe tu contraseña para confirmar la eliminación.");
-      return;
-    }
-    setDeleteBusy(true);
-    setError(null);
-    try {
-      await api("/api/auth/me/delete", {
-        method: "POST",
-        body: JSON.stringify({ password: deletePassword }),
-      });
-      await logout();
-      setAnonymous();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setDeleteBusy(false);
-    }
-  }
-
   function addExtraIncomeRow() {
     setError(null);
     const n = Number(extraAmount.replace(",", "."));
@@ -138,9 +145,31 @@ export function SettingsModal({
       setError("Indica una cantidad mayor que cero para el ingreso extra.");
       return;
     }
+    if (extraSavingsMode === "percent") {
+      const pct = Number(extraSavingsPercent.replace(",", "."));
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100) {
+        setError("El porcentaje a ahorrar debe estar entre 0 y 100.");
+        return;
+      }
+    }
+    if (extraSavingsMode === "fixed") {
+      const fixed = Number(extraSavingsFixed.replace(",", "."));
+      if (!Number.isFinite(fixed) || fixed < 0) {
+        setError("Indica una cantidad fija a ahorrar válida.");
+        return;
+      }
+      if (fixed > n) {
+        setError("No puedes ahorrar más que el importe del ingreso extra.");
+        return;
+      }
+    }
     addExtra.mutate({
       amount: extraAmount,
       received_at: extraDate,
+      savings_mode: extraSavingsMode,
+      savings_percent:
+        extraSavingsMode === "percent" ? extraSavingsPercent || "0" : "0",
+      savings_fixed: extraSavingsMode === "fixed" ? extraSavingsFixed || "0" : "0",
     });
   }
 
@@ -167,7 +196,7 @@ export function SettingsModal({
               Configura tus ingresos
             </h2>
             <p className="text-sm text-slate-500">
-              Ingreso mensual, ahorro e ingresos extra del mes.
+              Ingreso mensual, ahorro del sueldo e ingresos extra del mes.
             </p>
           </div>
           <button
@@ -190,82 +219,139 @@ export function SettingsModal({
           </div>
         )}
 
-        <form onSubmit={submit} className="space-y-4">
-          <FormField id="settings-income" label="Ingreso mensual (€)">
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min={0}
-              required
-              value={income}
-              onChange={(e) => setIncome(e.target.value)}
-              className={inputClass}
-            />
-          </FormField>
+        <div
+          className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
+          role="tablist"
+          aria-label="Secciones de ingresos"
+        >
+          <TabBtn
+            active={tab === "monthly"}
+            onClick={() => setTab("monthly")}
+            id="settings-tab-monthly"
+            controls="settings-panel-monthly"
+          >
+            Ingreso mensual
+          </TabBtn>
+          <TabBtn
+            active={tab === "extra"}
+            onClick={() => setTab("extra")}
+            id="settings-tab-extra"
+            controls="settings-panel-extra"
+          >
+            Ingresos extra
+          </TabBtn>
+        </div>
 
-          <div>
-            <p id="settings-savings-label" className="text-sm font-medium text-slate-400">
-              Ahorro
-            </p>
-            <div
-              className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
-              role="group"
-              aria-labelledby="settings-savings-label"
-            >
-              <ModeBtn
-                active={mode === "percent"}
-                onClick={() => setMode("percent")}
+        {tab === "monthly" ? (
+          <form
+            id="settings-panel-monthly"
+            role="tabpanel"
+            aria-labelledby="settings-tab-monthly"
+            onSubmit={submit}
+            className="space-y-4"
+          >
+            <FormField id="settings-income" label="Ingreso mensual (€)">
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min={0}
+                required
+                value={income}
+                onChange={(e) => setIncome(e.target.value)}
+                className={inputClass}
+              />
+            </FormField>
+
+            <div>
+              <p
+                id="settings-savings-label"
+                className="text-sm font-medium text-slate-400"
               >
-                % del sueldo
-              </ModeBtn>
-              <ModeBtn active={mode === "fixed"} onClick={() => setMode("fixed")}>
-                Cantidad fija
-              </ModeBtn>
+                Ahorro del sueldo
+              </p>
+              <div
+                className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
+                role="group"
+                aria-labelledby="settings-savings-label"
+              >
+                <ModeBtn
+                  active={mode === "percent"}
+                  onClick={() => setMode("percent")}
+                >
+                  % del sueldo
+                </ModeBtn>
+                <ModeBtn
+                  active={mode === "fixed"}
+                  onClick={() => setMode("fixed")}
+                >
+                  Cantidad fija
+                </ModeBtn>
+              </div>
+
+              {mode === "percent" ? (
+                <SavingsInputRow
+                  id="settings-savings-percent"
+                  label="Porcentaje de ahorro"
+                  suffix="%"
+                  hint="Solo sobre el ingreso mensual. Los extras tienen su propia regla en la otra pestaña."
+                  value={percent}
+                  onChange={setPercent}
+                  max={100}
+                />
+              ) : (
+                <SavingsInputRow
+                  id="settings-savings-amount"
+                  label="Cantidad fija al mes (€)"
+                  suffix="€"
+                  hint="Fija cada mes, aparte del ingreso mensual."
+                  value={amount}
+                  onChange={setAmount}
+                />
+              )}
             </div>
 
-            {mode === "percent" ? (
-              <SavingsInputRow
-                id="settings-savings-percent"
-                label="Porcentaje de ahorro"
-                suffix="%"
-                hint="Se calcula solo sobre el ingreso mensual; los ingresos extra no aumentan este porcentaje."
-                value={percent}
-                onChange={setPercent}
-                max={100}
-              />
-            ) : (
-              <SavingsInputRow
-                id="settings-savings-amount"
-                label="Cantidad fija al mes (€)"
-                suffix="€"
-                hint="Cantidad fija al mes, aparte del ingreso mensual; los extras no la modifican."
-                value={amount}
-                onChange={setAmount}
-              />
-            )}
-          </div>
-
-          <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-            <p className="text-sm font-medium text-slate-300">Ingresos extra</p>
-            <p className="mt-1 text-xs leading-relaxed text-slate-500">
-              Pagos puntuales en otro día (bonus, nómina extra…). Solo cuentan si la
-              fecha cae en este mes. Se suman a tu margen después del ahorro.
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={busy}
+                className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+              >
+                {busy ? "Guardando…" : "Guardar"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div
+            id="settings-panel-extra"
+            role="tabpanel"
+            aria-labelledby="settings-tab-extra"
+            className="space-y-4"
+          >
+            <p className="text-sm leading-relaxed text-slate-400">
+              Bonus, nómina extra… Solo cuentan si la fecha cae en este mes. Lo que
+              reserves aquí no suma a «Hoy puedes gastar»; el resto sí.
             </p>
 
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap">
               <FormField
                 id="settings-extra-amount"
                 label="Cantidad (€)"
-                className="w-full min-w-0 sm:flex-1"
-                labelClassName="sr-only"
+                className="w-full min-w-0 lg:flex-1"
               >
                 <input
                   type="number"
                   inputMode="decimal"
                   step="0.01"
                   min="0.01"
-                  placeholder="Cantidad (€)"
+                  placeholder="Ej. 150"
                   value={extraAmount}
                   onChange={(e) => setExtraAmount(e.target.value)}
                   className={inputClassSm}
@@ -274,8 +360,7 @@ export function SettingsModal({
               <FormField
                 id="settings-extra-date"
                 label="Fecha de cobro"
-                className="w-full sm:w-auto"
-                labelClassName="sr-only"
+                className="w-full lg:w-auto"
               >
                 <input
                   type="date"
@@ -284,17 +369,79 @@ export function SettingsModal({
                   className={inputClassSm}
                 />
               </FormField>
-              <button
-                type="button"
-                onClick={addExtraIncomeRow}
-                disabled={addExtra.isPending}
-                className="w-full rounded-lg border border-teal-500/50 bg-teal-500/15 px-3 py-2 text-sm font-semibold text-teal-200 hover:bg-teal-500/25 disabled:opacity-60 sm:w-auto sm:self-end"
-              >
-                Añadir
-              </button>
             </div>
 
-            <ul className="mt-3 space-y-2">
+            <div>
+              <p
+                id="settings-extra-savings-label"
+                className="text-sm font-medium text-slate-400"
+              >
+                ¿Cuánto ahorrar de este ingreso?
+              </p>
+              <div
+                className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
+                role="group"
+                aria-labelledby="settings-extra-savings-label"
+              >
+                <ModeBtn
+                  active={extraSavingsMode === "none"}
+                  onClick={() => setExtraSavingsMode("none")}
+                >
+                  Gastar todo
+                </ModeBtn>
+                <ModeBtn
+                  active={extraSavingsMode === "all"}
+                  onClick={() => setExtraSavingsMode("all")}
+                >
+                  Ahorrar todo
+                </ModeBtn>
+                <ModeBtn
+                  active={extraSavingsMode === "percent"}
+                  onClick={() => setExtraSavingsMode("percent")}
+                >
+                  Un %
+                </ModeBtn>
+                <ModeBtn
+                  active={extraSavingsMode === "fixed"}
+                  onClick={() => setExtraSavingsMode("fixed")}
+                >
+                  Cantidad fija
+                </ModeBtn>
+              </div>
+
+              {extraSavingsMode === "percent" && (
+                <SavingsInputRow
+                  id="settings-extra-savings-percent"
+                  label="Porcentaje a reservar"
+                  suffix="%"
+                  hint="Ese porcentaje del ingreso extra no entra en tu margen de gasto."
+                  value={extraSavingsPercent}
+                  onChange={setExtraSavingsPercent}
+                  max={100}
+                />
+              )}
+              {extraSavingsMode === "fixed" && (
+                <SavingsInputRow
+                  id="settings-extra-savings-fixed"
+                  label="Cantidad a reservar (€)"
+                  suffix="€"
+                  hint="No puede superar el importe del ingreso extra."
+                  value={extraSavingsFixed}
+                  onChange={setExtraSavingsFixed}
+                />
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={addExtraIncomeRow}
+              disabled={addExtra.isPending}
+              className="w-full rounded-lg border border-teal-500/50 bg-teal-500/15 px-3 py-2 text-sm font-semibold text-teal-200 hover:bg-teal-500/25 disabled:opacity-60"
+            >
+              {addExtra.isPending ? "Añadiendo…" : "Añadir ingreso extra"}
+            </button>
+
+            <ul className="space-y-2">
               {extras.length === 0 ? (
                 <li className="text-sm text-slate-600">Ninguno este mes.</li>
               ) : (
@@ -308,7 +455,7 @@ export function SettingsModal({
                         {money(it.amount)}
                       </p>
                       <p className="truncate text-xs text-slate-500">
-                        Recibido el {it.received_at}
+                        {it.received_at} · {describeExtraSavings(it)}
                       </p>
                     </div>
                     <button
@@ -323,82 +470,18 @@ export function SettingsModal({
                 ))
               )}
             </ul>
-          </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/60"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={busy}
-              className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
-            >
-              {busy ? "Guardando…" : "Guardar"}
-            </button>
-          </div>
-        </form>
-
-        <div className="mt-6 border-t border-slate-800 pt-5">
-          <h3 className="text-sm font-semibold text-slate-300">Zona de cuenta</h3>
-          <p className="mt-1 text-xs leading-relaxed text-slate-500">
-            Eliminar la cuenta borra todos tus datos de forma permanente.
-          </p>
-          {!deleteOpen ? (
-            <button
-              type="button"
-              onClick={() => {
-                setDeleteOpen(true);
-                setDeletePassword("");
-                setError(null);
-              }}
-              className="mt-3 rounded-lg border border-rose-500/40 px-3 py-2 text-sm font-medium text-rose-400 hover:bg-rose-500/10"
-            >
-              Eliminar cuenta
-            </button>
-          ) : (
-            <div className="mt-3 space-y-3 rounded-xl border border-rose-500/30 bg-rose-950/20 p-4">
-              <FormField
-                id="delete-account-password"
-                label="Contraseña actual"
-                hint="Confirma que eres tú. Esta acción no se puede deshacer."
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/60"
               >
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-rose-500/50 focus:ring-2 focus:ring-rose-500/40"
-                />
-              </FormField>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => void confirmDeleteAccount()}
-                  disabled={deleteBusy}
-                  className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-60"
-                >
-                  {deleteBusy ? "Eliminando…" : "Confirmar eliminación"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDeleteOpen(false);
-                    setDeletePassword("");
-                  }}
-                  disabled={deleteBusy}
-                  className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/60"
-                >
-                  Cancelar
-                </button>
-              </div>
+                Cerrar
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -449,7 +532,39 @@ function SavingsInputRow({
   );
 }
 
-/** Pill button used to switch between "% del sueldo" and "Cantidad fija". */
+function TabBtn({
+  active,
+  onClick,
+  children,
+  id,
+  controls,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  id: string;
+  controls: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      id={id}
+      aria-selected={active}
+      aria-controls={controls}
+      onClick={onClick}
+      className={`min-h-11 rounded-lg px-3 py-2 font-medium transition ${
+        active
+          ? "bg-slate-900 text-slate-100 shadow-inner"
+          : "text-slate-500 hover:text-slate-300"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Pill button used to switch savings modes. */
 function ModeBtn({
   active,
   onClick,

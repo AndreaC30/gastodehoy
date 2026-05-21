@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.models import ExpenseCategory, ExtraIncome, FixedExpense, UserSettings, VariableExpense
 from app.services.budget import month_bounds
+from app.services.extra_income_savings import spendable_from_extra
 
 CategoryBucket = Literal["need", "want", "other"]
 
@@ -113,14 +114,19 @@ def compute_rule_503020(session: Session, user_id: int, month: date) -> dict:
         income = us.monthly_income.quantize(Decimal("0.01"))
         savings_amount = _effective_savings(us)
 
-    extra_raw = session.scalar(
-        select(func.coalesce(func.sum(ExtraIncome.amount), 0)).where(
-            ExtraIncome.user_id == user_id,
-            ExtraIncome.received_at >= month_start,
-            ExtraIncome.received_at <= month_end,
-        )
-    ) or Decimal("0")
-    income = (income + Decimal(extra_raw)).quantize(Decimal("0.01"))
+    extra_rows = list(
+        session.scalars(
+            select(ExtraIncome).where(
+                ExtraIncome.user_id == user_id,
+                ExtraIncome.received_at >= month_start,
+                ExtraIncome.received_at <= month_end,
+            )
+        ).all()
+    )
+    extra_spendable = sum(
+        (spendable_from_extra(r) for r in extra_rows), start=Decimal("0")
+    ).quantize(Decimal("0.01"))
+    income = (income + extra_spendable).quantize(Decimal("0.01"))
 
     fixed_total = session.scalar(
         select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(

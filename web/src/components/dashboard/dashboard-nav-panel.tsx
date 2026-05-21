@@ -1,13 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   IoClose,
   IoDownloadOutline,
   IoFlagOutline,
   IoHelpCircleOutline,
   IoLogOutOutline,
+  IoPersonOutline,
   IoPricetagsOutline,
   IoWalletOutline,
 } from "react-icons/io5";
+import { AccountModal } from "@/components/account-modal";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { FOCUS_RING } from "@/lib/ui-a11y";
@@ -17,7 +19,8 @@ export type DashboardNavAction =
   | "categories"
   | "savings-goals"
   | "export"
-  | "guided-tour";
+  | "guided-tour"
+  | "account";
 
 type Props = {
   open: boolean;
@@ -44,6 +47,7 @@ export function DashboardNavPanel({
   onClose,
   onNavigate,
 }: Props) {
+  const [accountOpen, setAccountOpen] = useState(false);
   useBodyScrollLock(open);
 
   useEffect(() => {
@@ -58,12 +62,6 @@ export function DashboardNavPanel({
   if (!open) return null;
 
   const items: NavItem[] = [
-    {
-      id: "guided-tour",
-      label: "Guía paso a paso",
-      description: "Tutorial: qué es cada zona y cómo rellenar",
-      Icon: IoHelpCircleOutline,
-    },
     {
       id: "settings",
       label: "Tus ingresos",
@@ -90,9 +88,26 @@ export function DashboardNavPanel({
       Icon: IoDownloadOutline,
       disabled: exportBusy,
     },
+    {
+      id: "guided-tour",
+      label: "Guía paso a paso",
+      description: "Tutorial: qué es cada zona del panel",
+      Icon: IoHelpCircleOutline,
+    },
+    {
+      id: "account",
+      label: "Cuenta",
+      description: "Sesión y eliminación de cuenta",
+      Icon: IoPersonOutline,
+    },
   ];
 
   function pick(action: DashboardNavAction) {
+    if (action === "account") {
+      onClose();
+      setAccountOpen(true);
+      return;
+    }
     onClose();
     onNavigate(action);
   }
@@ -164,15 +179,21 @@ export function DashboardNavPanel({
               onClose();
               void logout();
             }}
-            className="flex w-full items-center gap-3 rounded-xl border border-rose-500/30 bg-rose-950/30 px-3 py-3 text-left text-sm font-medium text-rose-300 transition-colors hover:bg-rose-950/50"
+            className={`flex w-full items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-3 text-left text-sm font-medium text-slate-300 transition-colors hover:bg-slate-800 ${FOCUS_RING}`}
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-500/25 bg-rose-950/50">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-950">
               <IoLogOutOutline className="h-[1.15rem] w-[1.15rem]" aria-hidden />
             </span>
             Cerrar sesión
           </button>
         </div>
       </nav>
+
+      <AccountModal
+        open={accountOpen}
+        profileName={profileName}
+        onClose={() => setAccountOpen(false)}
+      />
     </div>
   );
 }

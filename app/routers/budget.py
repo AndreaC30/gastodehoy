@@ -371,7 +371,14 @@ def create_extra_income(
 ) -> ExtraIncome:
     """Register extra income; defaults the date to today in app TZ."""
     day = payload.received_at or today_in_app_timezone()
-    row = ExtraIncome(user_id=user.id, amount=payload.amount, received_at=day)
+    row = ExtraIncome(
+        user_id=user.id,
+        amount=payload.amount,
+        received_at=day,
+        savings_mode=payload.savings_mode,
+        savings_percent=payload.savings_percent,
+        savings_fixed=payload.savings_fixed,
+    )
     db.add(row)
     db.commit()
     db.refresh(row)

@@ -142,6 +142,30 @@ def apply_sqlite_migrations(engine: Engine) -> None:
             )
         )
 
+        ei_rows = conn.execute(text("PRAGMA table_info(extra_incomes)")).fetchall()
+        ei_colnames = {str(r[1]) for r in ei_rows}
+        if "savings_mode" not in ei_colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE extra_incomes ADD COLUMN savings_mode "
+                    "VARCHAR(16) NOT NULL DEFAULT 'none'"
+                )
+            )
+        if "savings_percent" not in ei_colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE extra_incomes ADD COLUMN savings_percent "
+                    "NUMERIC(5, 2) NOT NULL DEFAULT 0"
+                )
+            )
+        if "savings_fixed" not in ei_colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE extra_incomes ADD COLUMN savings_fixed "
+                    "NUMERIC(14, 2) NOT NULL DEFAULT 0"
+                )
+            )
+
         cat_rows = conn.execute(text("PRAGMA table_info(expense_categories)")).fetchall()
         cat_colnames = {str(r[1]) for r in cat_rows}
         if "monthly_budget" not in cat_colnames:
