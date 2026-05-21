@@ -30,6 +30,13 @@ ROOT = Path(__file__).resolve().parent.parent
 DIST_DIR = ROOT / "web" / "dist"
 ASSETS_DIR = DIST_DIR / "assets"
 
+# Copied from web/public (and sitemap.xml rewritten at build) — not under /assets.
+SEO_STATIC_FILES: dict[str, str] = {
+    "robots.txt": "text/plain; charset=utf-8",
+    "sitemap.xml": "application/xml",
+    "og-image.png": "image/png",
+}
+
 
 DEFAULT_APP_SECRET = "change-me-in-prod"
 MIN_APP_SECRET_LEN = 32
@@ -173,6 +180,33 @@ async def csp_report(request: Request):
     except Exception:
         pass
     return Response(status_code=204)
+
+
+def _dist_root_file(name: str, media_type: str) -> FileResponse | JSONResponse:
+    """Serve a file from ``web/dist`` root (SEO / public), with path traversal blocked."""
+    dist_root = DIST_DIR.resolve()
+    path = (DIST_DIR / name).resolve()
+    if not path.is_file() or path.parent != dist_root:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": "Not Found"},
+        )
+    return FileResponse(path, media_type=media_type)
+
+
+@app.get("/robots.txt", response_model=None)
+def robots_txt() -> FileResponse | JSONResponse:
+    return _dist_root_file("robots.txt", SEO_STATIC_FILES["robots.txt"])
+
+
+@app.get("/sitemap.xml", response_model=None)
+def sitemap_xml() -> FileResponse | JSONResponse:
+    return _dist_root_file("sitemap.xml", SEO_STATIC_FILES["sitemap.xml"])
+
+
+@app.get("/og-image.png", response_model=None)
+def og_image() -> FileResponse | JSONResponse:
+    return _dist_root_file("og-image.png", SEO_STATIC_FILES["og-image.png"])
 
 
 @app.get("/", response_model=None)

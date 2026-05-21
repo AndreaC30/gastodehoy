@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 
 from app.config import settings as app_settings
+from app.main import DIST_DIR
 
 
 @pytest.fixture(autouse=True)
@@ -22,6 +24,20 @@ def test_health(anon_client) -> None:
     body = r.json()
     assert body.get("status") == "ok"
     assert body.get("database") == "ok"
+
+
+@pytest.mark.parametrize("path", ["/robots.txt", "/sitemap.xml", "/og-image.png"])
+def test_seo_static_files(anon_client, path: str) -> None:
+    name = Path(path).name
+    if not (DIST_DIR / name).is_file():
+        pytest.skip("web/dist not built (npm run build in web/)")
+    r = anon_client.get(path)
+    assert r.status_code == 200
+    if name == "sitemap.xml":
+        assert "urlset" in r.text
+        assert "gastodehoy" in r.text.lower() or "http" in r.text
+    if name == "robots.txt":
+        assert "Sitemap:" in r.text
 
 
 def test_protected_endpoints_require_auth(anon_client) -> None:
