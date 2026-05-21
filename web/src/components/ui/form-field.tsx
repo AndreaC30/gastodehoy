@@ -5,6 +5,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { cn } from "@/lib/utils";
 
 type ControlProps = {
   id?: string;
@@ -29,7 +30,7 @@ export function FormField({
   hint,
   error,
   className,
-  labelClassName = "block text-sm font-medium text-slate-400",
+  labelClassName = "block text-sm font-medium text-slate-300 sm:text-base",
   children,
 }: Props) {
   const fallbackId = useId();
@@ -48,18 +49,18 @@ export function FormField({
     : children;
 
   return (
-    <div className={className}>
+    <div className={cn("min-w-0", className)}>
       <label htmlFor={id} className={labelClassName}>
         {label}
       </label>
       <div className="mt-1.5">{control}</div>
       {hint && (
-        <p id={hintId} className="mt-2 text-xs leading-relaxed text-slate-500">
+        <p id={hintId} className="mt-2 text-sm leading-relaxed text-slate-400">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} role="alert" className="mt-1.5 text-xs text-rose-300">
+        <p id={errorId} role="alert" className="mt-1.5 text-sm text-rose-300">
           {error}
         </p>
       )}

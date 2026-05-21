@@ -4,6 +4,7 @@ import { IoPieChartOutline } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { Rule503020 } from "@/api/types";
 import { money } from "@/lib/format";
+import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
 
 async function loadRule503020() {
   return api<Rule503020>("/api/rule-503020");
@@ -22,9 +23,9 @@ function pctBar(
   const over = actualNum > targetNum + 5;
   return (
     <div key={label}>
-      <div className="flex items-baseline justify-between gap-2 text-xs">
-        <span className="font-medium text-slate-400">{label}</span>
-        <span className="tabular-nums text-slate-300">
+      <div className="flex items-baseline justify-between gap-2 text-sm sm:text-base">
+        <span className="font-medium text-slate-300">{label}</span>
+        <span className="tabular-nums text-slate-200">
           {actual}% <span className="text-slate-600">/ {target}%</span>
         </span>
       </div>
@@ -34,7 +35,7 @@ function pctBar(
           style={{ width: `${width}%` }}
         />
       </div>
-      <p className="mt-0.5 text-[0.65rem] text-slate-600">{money(amount)}</p>
+      <p className={`mt-0.5 ${TYPE_CAPTION}`}>{money(amount)}</p>
     </div>
   );
 }
@@ -75,10 +76,10 @@ export function Rule503020Panel() {
           aria-hidden
         />
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold tracking-tight text-slate-300">
+          <h2 className="text-base font-semibold tracking-tight text-slate-200 sm:text-lg">
             Regla 50/30/20
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className={`mt-0.5 ${TYPE_CAPTION}`}>
             Necesidades, deseos y ahorro frente a tu ingreso del mes (
             {money(data.income)})
           </p>
@@ -110,7 +111,7 @@ export function Rule503020Panel() {
       </div>
 
       {Number(data.other_spent) > 0 && (
-        <p className="mt-3 text-xs text-slate-500">
+        <p className={`mt-3 ${TYPE_CAPTION}`}>
           Otros gastos (sin clasificar): {money(data.other_spent)}
         </p>
       )}
@@ -120,7 +121,7 @@ export function Rule503020Panel() {
           {data.insights.map((msg, i) => (
             <li
               key={i}
-              className="rounded-lg border border-slate-800/80 bg-slate-950/50 px-3 py-2 text-xs leading-snug text-slate-400"
+              className={`rounded-lg border border-slate-800/80 bg-slate-950/50 px-3 py-2.5 ${TYPE_BODY}`}
             >
               {msg}
             </li>

@@ -32,6 +32,12 @@ import { APP_SHELL_CLASS } from "@/lib/app-layout";
 import { DEFAULT_FIXED_EXPENSE_ICON } from "@/components/dashboard/category-icon";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { SiteFooter } from "@/components/site-footer";
+import { GuidedTour } from "@/components/guided-tour";
+import { DASHBOARD_TOUR_STEPS } from "@/lib/dashboard-tour-steps";
+import {
+  hasCompletedDashboardTour,
+  markDashboardTourCompleted,
+} from "@/lib/guided-tour-preference";
 
 async function loadSummary() {
   return api<Summary>("/api/summary");
@@ -73,6 +79,7 @@ export function Dashboard({ profileName }: Props) {
     null,
   );
   const [exportBusy, setExportBusy] = useState(false);
+  const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
     if (!toastMsg) return;
@@ -96,6 +103,24 @@ export function Dashboard({ profileName }: Props) {
     queryKey: ["insights"],
     queryFn: loadInsights,
   });
+
+  useEffect(() => {
+    if (!settingsQ.data || hasCompletedDashboardTour()) return;
+    const t = window.setTimeout(() => setShowTour(true), 1500);
+    return () => window.clearTimeout(t);
+  }, [settingsQ.data]);
+
+  function finishTour() {
+    markDashboardTourCompleted();
+    setShowTour(false);
+    setToastMsg("Guía completada. Puedes volver a verla desde el menú.");
+  }
+
+  function skipTour() {
+    markDashboardTourCompleted();
+    setShowTour(false);
+  }
+
   const error =
     summaryQ.error ||
     settingsQ.error ||
@@ -227,6 +252,7 @@ export function Dashboard({ profileName }: Props) {
         onOpenCategories={() => setShowCategoryManager(true)}
         onOpenSavingsGoals={() => setShowSavingsGoals(true)}
         onExport={() => void handleExport()}
+        onStartTour={() => setShowTour(true)}
         exportBusy={exportBusy}
       />
 
@@ -252,10 +278,6 @@ export function Dashboard({ profileName }: Props) {
           }}
         />
 
-        <MonthHistoryStrip />
-
-        <Rule503020Panel />
-
         <InsightsPanel
           data={insightsQ.data}
           isLoading={insightsQ.isPending}
@@ -269,7 +291,8 @@ export function Dashboard({ profileName }: Props) {
           />
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
+        <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
+          <div className="min-w-0">
           <VariableExpensesSection
             categories={categories}
             items={variableExpenseItems}
@@ -285,6 +308,8 @@ export function Dashboard({ profileName }: Props) {
             onEdit={setEditingVariable}
             onDelete={(id) => delExpense.mutate(id)}
           />
+          </div>
+          <div className="min-w-0">
           <FixedExpensesSection
             items={fixedItems}
             visibleItems={fixedVisibleItems}
@@ -301,7 +326,12 @@ export function Dashboard({ profileName }: Props) {
             onEdit={setEditingFixed}
             onDelete={(id) => delFixed.mutate(id)}
           />
+          </div>
         </div>
+
+        <MonthHistoryStrip />
+
+        <Rule503020Panel />
 
         <SiteFooter />
       </main>
@@ -364,8 +394,16 @@ export function Dashboard({ profileName }: Props) {
         />
       )}
 
+      {showTour && (
+        <GuidedTour
+          steps={DASHBOARD_TOUR_STEPS}
+          onComplete={finishTour}
+          onSkip={skipTour}
+        />
+      )}
+
       <div
-        className={`pointer-events-none fixed bottom-5 left-4 right-4 z-50 mx-auto max-w-md rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-center text-sm text-slate-100 shadow-2xl transition-all duration-200 ${
+        className={`pointer-events-none fixed bottom-5 left-4 right-4 z-50 mx-auto max-w-md break-words rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-center text-base text-slate-100 shadow-2xl transition-all duration-200 ${
           toastMsg ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
         role="status"

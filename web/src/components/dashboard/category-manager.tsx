@@ -168,8 +168,8 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
         tabIndex={-1}
         className="modal-scroll max-h-[min(85vh,100dvh)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-700 bg-slate-900 p-4 pr-3 shadow-2xl sm:rounded-2xl sm:p-6 sm:pr-5"
       >
-        <div className="flex items-center justify-between">
-          <h2 id="category-manager-title" className="text-lg font-bold">
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <h2 id="category-manager-title" className="min-w-0 flex-1 text-lg font-bold">
             Categorías de gasto
           </h2>
           <button
@@ -205,10 +205,11 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
                     style={{ backgroundColor: cat.color }}
                   />
                   <Icon className="h-4 w-4 shrink-0 text-slate-400" />
-                  <span className="min-w-0 flex-1 text-sm text-slate-200">
+                  <span className="min-w-0 flex-1 truncate text-sm text-slate-200">
                     {cat.name}
                     {cat.monthly_budget != null && cat.monthly_budget !== "" && (
-                      <span className="ml-2 text-xs text-slate-500">
+                      <span className="text-xs text-slate-500">
+                        {" "}
                         · {String(cat.monthly_budget)}€/mes
                       </span>
                     )}

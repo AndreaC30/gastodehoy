@@ -15,6 +15,7 @@ import {
 } from "react-icons/io5";
 import type { InsightItem, Insights } from "@/api/types";
 import { money } from "@/lib/format";
+import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
 
 type Props = {
   data: Insights | undefined;
@@ -103,6 +104,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
   if (isLoading) {
     return (
       <section
+        data-tour="insights"
         className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5"
         aria-busy="true"
         aria-label="Cargando insights"
@@ -116,7 +118,10 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-5 text-sm text-rose-300">
+      <section
+        data-tour="insights"
+        className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-5 text-sm text-rose-300"
+      >
         No se pudieron cargar los insights. {error.message}
       </section>
     );
@@ -126,6 +131,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
 
   return (
     <section
+      data-tour="insights"
       className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 shadow-lg shadow-black/20 sm:p-5"
       aria-labelledby="insights-panel-title"
     >
@@ -138,17 +144,15 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
             <IoBulbOutline className="h-5 w-5 text-sky-400" aria-hidden />
             Insights financieros
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Análisis de tus gastos este mes
-          </p>
-          <p className="mt-2 text-xs leading-relaxed text-slate-600">
+          <p className={`mt-1 ${TYPE_CAPTION}`}>Análisis de tus gastos este mes</p>
+          <p className={`mt-2 ${TYPE_BODY} text-slate-500`}>
             El gasto variable medio/día es lo que ya has registrado; «Hoy puedes
             gastar» arriba incluye ingreso, ahorro y fijos.
           </p>
         </div>
         <div className="text-right sm:shrink-0">
-          <p className="text-xs text-slate-500">Gasto variable medio/día</p>
-          <p className="text-sm font-semibold text-slate-200">
+          <p className={TYPE_CAPTION}>Gasto variable medio/día</p>
+          <p className="text-base font-semibold text-slate-200">
             {money(data.avg_daily_spend)}
           </p>
         </div>
@@ -160,13 +164,13 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
           return (
             <li
               key={`${insight.type}-${insight.title}`}
-              className={`rounded-xl border px-4 py-3 text-sm ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
+              className={`rounded-xl border px-4 py-3 text-base ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
             >
-              <p className="flex items-center gap-2 font-semibold">
-                <Icon className={`h-4 w-4 shrink-0 ${colorClass}`} aria-hidden />
-                {insight.title}
+              <p className="flex items-start gap-2 font-semibold">
+                <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${colorClass}`} aria-hidden />
+                <span className="min-w-0 flex-1 break-words">{insight.title}</span>
               </p>
-              <p className="mt-1 text-sm opacity-90">{insight.message}</p>
+              <p className="mt-1 break-words text-sm opacity-90">{insight.message}</p>
             </li>
           );
         })}

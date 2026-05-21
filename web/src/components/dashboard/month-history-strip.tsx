@@ -5,6 +5,7 @@ import { api } from "@/api/client";
 import type { MonthHistoryRead } from "@/api/types";
 import { money } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui-a11y";
+import { TYPE_CAPTION, TYPE_EYEBROW } from "@/lib/typography";
 
 const MONTH_OPTIONS = [3, 6, 12] as const;
 type MonthCount = (typeof MONTH_OPTIONS)[number];
@@ -19,7 +20,7 @@ function historyTitle(months: MonthCount): string {
 
 function gridClass(months: MonthCount): string {
   if (months === 3) return "grid grid-cols-3 gap-2 sm:gap-3";
-  if (months === 6) return "grid grid-cols-6 gap-2 sm:grid-cols-3 sm:gap-3";
+  if (months === 6) return "grid grid-cols-3 gap-2 sm:gap-3";
   return "flex gap-2 overflow-x-auto pb-1 sm:gap-3 [-webkit-overflow-scrolling:touch]";
 }
 
@@ -74,10 +75,10 @@ export function MonthHistoryStrip() {
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-sm font-semibold tracking-tight text-slate-300">
+          <h2 className="text-base font-semibold tracking-tight text-slate-200 sm:text-lg">
             {historyTitle(months)}
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500">Gasto variable por mes</p>
+          <p className={`mt-0.5 ${TYPE_CAPTION}`}>Gasto variable por mes</p>
         </div>
         <div
           className="inline-flex rounded-lg border border-slate-700 bg-slate-900/80 p-0.5"
@@ -90,7 +91,7 @@ export function MonthHistoryStrip() {
               type="button"
               onClick={() => setMonths(n)}
               aria-pressed={months === n}
-              className={`min-h-11 min-w-11 rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+              className={`min-h-11 min-w-11 rounded-md px-2.5 py-1 text-sm font-semibold transition-colors ${FOCUS_RING} ${
                 months === n
                   ? "bg-teal-600 text-white"
                   : "text-slate-400 hover:text-slate-200"
@@ -109,11 +110,9 @@ export function MonthHistoryStrip() {
               key={`${row.year}-${row.month}`}
               className={cardClass(months, isCurrentMonth)}
             >
-              <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">
-                {row.month_label}
-              </p>
+              <p className={`${TYPE_EYEBROW} text-center`}>{row.month_label}</p>
               <p
-                className={`mt-1 text-base font-bold tabular-nums sm:text-lg ${
+                className={`mt-1 truncate text-base font-bold tabular-nums sm:text-lg ${
                   isCurrentMonth ? "text-teal-400" : "text-slate-200"
                 }`}
               >

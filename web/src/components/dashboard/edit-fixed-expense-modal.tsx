@@ -74,7 +74,7 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5"
+        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5"
       >
         <div className="flex items-center justify-between gap-3">
           <h2 id="edit-fixed-title" className="text-lg font-bold">
@@ -104,7 +104,7 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
             <label htmlFor="edit-fixed-name" className="mb-1.5 block text-xs text-slate-500">
               Concepto
             </label>
-            <div className="flex gap-2">
+            <div className="flex min-w-0 gap-2">
               <IconSelectDropdown value={icon} onChange={setIcon} />
               <input
                 id="edit-fixed-name"

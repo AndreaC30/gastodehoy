@@ -457,7 +457,7 @@ function Field({
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-400">
+      <label htmlFor={id} className="block text-sm font-medium text-slate-300 sm:text-base">
         {label}
       </label>
       <div className="relative mt-1.5">

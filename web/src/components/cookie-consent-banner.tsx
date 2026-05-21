@@ -109,18 +109,18 @@ export function CookieConsentBanner() {
         </p>
 
         {/* Buttons */}
-        <div className="flex shrink-0 items-center gap-2.5">
+        <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-2 sm:w-auto">
           <button
             type="button"
             onClick={handleDecline}
-            className="whitespace-nowrap rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500 hover:bg-slate-800/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
+            className="min-h-11 rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500 hover:bg-slate-800/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
           >
             Solo necesarias
           </button>
           <button
             type="button"
             onClick={handleAccept}
-            className="whitespace-nowrap rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-black/20 transition-all hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
+            className="min-h-11 rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-black/20 transition-all hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
           >
             Aceptar
           </button>

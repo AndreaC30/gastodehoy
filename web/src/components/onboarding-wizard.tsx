@@ -335,11 +335,11 @@ function StepFixed({
               key={`${it.name}-${i}`}
               className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
             >
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 <FixedIcon className="h-4 w-4 shrink-0 text-sky-400/90" />
-                <div>
-                  <p className="font-semibold text-slate-200">{it.name}</p>
-                  <p className="text-sm text-slate-500">{money(it.amount)}</p>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-slate-200">{it.name}</p>
+                  <p className="truncate text-sm tabular-nums text-slate-500">{money(it.amount)}</p>
                 </div>
               </div>
               <button
@@ -457,7 +457,7 @@ function StepSavings({
       {mode === "percent" ? (
         <label htmlFor="onboarding-savings-percent" className="block text-sm font-medium text-slate-400">
           Porcentaje de ahorro
-          <div className="mt-1.5 flex items-center gap-2">
+          <div className="mt-1.5 flex min-w-0 items-center gap-2">
             <input
               id="onboarding-savings-percent"
               type="number"
@@ -468,15 +468,15 @@ function StepSavings({
               value={percent}
               onChange={(e) => setPercent(e.target.value)}
               autoFocus
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className="min-w-0 flex-1 max-w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
             />
-            <span className="text-slate-500">%</span>
+            <span className="shrink-0 text-slate-500">%</span>
           </div>
         </label>
       ) : (
         <label htmlFor="onboarding-savings-amount" className="block text-sm font-medium text-slate-400">
           Cantidad fija al mes
-          <div className="mt-1.5 flex items-center gap-2">
+          <div className="mt-1.5 flex min-w-0 items-center gap-2">
             <input
               id="onboarding-savings-amount"
               type="number"
@@ -487,9 +487,9 @@ function StepSavings({
               onChange={(e) => setAmount(e.target.value)}
               autoFocus
               placeholder="200.00"
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className="min-w-0 flex-1 max-w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
             />
-            <span className="text-slate-500">€</span>
+            <span className="shrink-0 text-slate-500">€</span>
           </div>
         </label>
       )}

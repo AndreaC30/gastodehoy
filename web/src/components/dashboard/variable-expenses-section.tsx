@@ -4,6 +4,7 @@ import { ChevronInCircle } from "@/components/dashboard/chevron-expand";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { money } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui-a11y";
+import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
 import { type FormEvent } from "react";
 
 type Props = {
@@ -38,15 +39,20 @@ export function VariableExpensesSection({
   onDelete,
 }: Props) {
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
+    <section
+      data-tour="variable-expenses"
+      className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20"
+    >
       <div className="border-b border-slate-800 px-5 py-4">
-        <h2 className="text-lg font-bold tracking-tight">Gastos del día a día</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h2 className="text-lg font-bold tracking-tight sm:text-xl">
+          Gastos del día a día
+        </h2>
+        <p className={`mt-1 ${TYPE_CAPTION}`}>
           Suma aquí compras y gastos sueltos del mes
         </p>
       </div>
       <div className="p-5">
-        <p className="mb-4 text-sm leading-relaxed text-slate-500">
+        <p className={`mb-4 ${TYPE_BODY}`}>
           Cada registro actualiza cuánto te queda y tu techo diario. Para gastos que
           se repiten cada mes, usa{" "}
           <strong className="text-slate-400">Gastos fijos</strong>
@@ -71,15 +77,15 @@ export function VariableExpensesSection({
                 return (
                   <li
                     key={it.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
+                    className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex min-w-0 items-center gap-2">
                         <CatIcon
                           className="h-4 w-4 shrink-0"
                           style={{ color: it.category_color ?? "#64748b" }}
                         />
-                        <p className="font-semibold text-teal-300/90">
+                        <p className="truncate font-semibold tabular-nums text-teal-300/90">
                           {money(it.amount)}
                         </p>
                       </div>
@@ -91,7 +97,7 @@ export function VariableExpensesSection({
                           : ""}
                       </p>
                     </div>
-                    <div className="flex shrink-0 gap-1.5">
+                    <div className="flex shrink-0 gap-1.5 self-end sm:self-center">
                       <button
                         type="button"
                         onClick={() => onEdit(it)}
