@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   IoClose,
+  IoDownloadOutline,
   IoFlagOutline,
   IoLogOutOutline,
   IoPricetagsOutline,
@@ -9,12 +10,17 @@ import {
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 
-export type DashboardNavAction = "settings" | "categories" | "savings-goals";
+export type DashboardNavAction =
+  | "settings"
+  | "categories"
+  | "savings-goals"
+  | "export";
 
 type Props = {
   open: boolean;
   profileName: string;
   settingsReady: boolean;
+  exportBusy?: boolean;
   onClose: () => void;
   onNavigate: (action: DashboardNavAction) => void;
 };
@@ -31,6 +37,7 @@ export function DashboardNavPanel({
   open,
   profileName,
   settingsReady,
+  exportBusy = false,
   onClose,
   onNavigate,
 }: Props) {
@@ -66,6 +73,13 @@ export function DashboardNavPanel({
       label: "Metas de ahorro",
       description: "Objetivos y progreso ahorrado",
       Icon: IoFlagOutline,
+    },
+    {
+      id: "export",
+      label: exportBusy ? "Exportando…" : "Exportar CSV",
+      description: "Ajustes, gastos fijos y variables del mes",
+      Icon: IoDownloadOutline,
+      disabled: exportBusy,
     },
   ];
 

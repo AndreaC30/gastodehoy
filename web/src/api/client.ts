@@ -68,3 +68,50 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
+
+/**
+ * Download a CSV (or other binary/text) from the API with session credentials.
+ */
+export async function downloadCsv(path: string, filename: string): Promise<void> {
+  const res = await fetch(path, {
+    credentials: "include",
+    headers: {
+      Accept: "text/csv",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+  });
+
+  if (res.status === 401) {
+    setAnonymous();
+    throw new UnauthorizedError();
+  }
+
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body: unknown = await res.json();
+      if (
+        body &&
+        typeof body === "object" &&
+        "detail" in body &&
+        body.detail != null
+      ) {
+        detail = String(body.detail);
+      }
+    } catch {
+      /* ignore */
+    }
+    throw new Error(`HTTP ${res.status}: ${detail || res.statusText || "Error"}`);
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}

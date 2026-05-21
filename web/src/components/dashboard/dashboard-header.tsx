@@ -12,6 +12,8 @@ type Props = {
   onOpenSettings: () => void;
   onOpenCategories: () => void;
   onOpenSavingsGoals: () => void;
+  onExport: () => void;
+  exportBusy?: boolean;
 };
 
 export function DashboardHeader({
@@ -20,6 +22,8 @@ export function DashboardHeader({
   onOpenSettings,
   onOpenCategories,
   onOpenSavingsGoals,
+  onExport,
+  exportBusy = false,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -33,6 +37,9 @@ export function DashboardHeader({
         break;
       case "savings-goals":
         onOpenSavingsGoals();
+        break;
+      case "export":
+        onExport();
         break;
     }
   }
@@ -79,6 +86,7 @@ export function DashboardHeader({
         open={menuOpen}
         profileName={profileName}
         settingsReady={settingsReady}
+        exportBusy={exportBusy}
         onClose={() => setMenuOpen(false)}
         onNavigate={handleNavigate}
       />

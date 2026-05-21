@@ -376,3 +376,20 @@ class MonthHistoryItem(BaseModel):
 
 class MonthHistoryRead(BaseModel):
     months: list[MonthHistoryItem]
+
+
+class Rule503020Read(BaseModel):
+    year: int
+    month: int
+    income: Decimal
+    savings_amount: Decimal
+    needs_spent: Decimal
+    wants_spent: Decimal
+    other_spent: Decimal
+    needs_pct: Decimal
+    wants_pct: Decimal
+    savings_pct: Decimal
+    target_needs_pct: Decimal
+    target_wants_pct: Decimal
+    target_savings_pct: Decimal
+    insights: list[str]

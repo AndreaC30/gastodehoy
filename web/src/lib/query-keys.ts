@@ -10,6 +10,7 @@ export const BUDGET_QUERY_ROOTS = [
   "categories",
   "insights",
   "history",
+  "rule-503020",
   "savings-goals",
 ] as const;
 

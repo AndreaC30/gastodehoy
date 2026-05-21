@@ -16,14 +16,14 @@ import { VariableExpensesSection } from "@/components/dashboard/variable-expense
 import { SpendingChart } from "@/components/dashboard/spending-chart";
 import { InsightsPanel } from "@/components/dashboard/insights-panel";
 import { MonthHistoryStrip } from "@/components/dashboard/month-history-strip";
+import { Rule503020Panel } from "@/components/dashboard/rule-503020-panel";
 import { SavingsGoalsModal } from "@/components/savings-goals-modal";
-import { api } from "@/api/client";
+import { api, downloadCsv } from "@/api/client";
 import type {
   ExpenseCategory,
   ExtraIncome,
   FixedExpense,
   Insights,
-  MonthHistoryRead,
   Settings,
   Summary,
   VariableExpense,
@@ -54,10 +54,6 @@ async function loadCategories() {
 async function loadInsights() {
   return api<Insights>("/api/insights");
 }
-async function loadMonthHistory() {
-  return api<MonthHistoryRead>("/api/summary/history?months=3");
-}
-
 type Props = { profileName: string };
 
 const FIXED_LIST_PREVIEW = 3;
@@ -76,6 +72,7 @@ export function Dashboard({ profileName }: Props) {
   const [editingVariable, setEditingVariable] = useState<VariableExpense | null>(
     null,
   );
+  const [exportBusy, setExportBusy] = useState(false);
 
   useEffect(() => {
     if (!toastMsg) return;
@@ -99,10 +96,6 @@ export function Dashboard({ profileName }: Props) {
     queryKey: ["insights"],
     queryFn: loadInsights,
   });
-  const historyQ = useQuery({
-    queryKey: ["history"],
-    queryFn: loadMonthHistory,
-  });
   const error =
     summaryQ.error ||
     settingsQ.error ||
@@ -110,8 +103,7 @@ export function Dashboard({ profileName }: Props) {
     expensesQ.error ||
     extraIncomeQ.error ||
     categoriesQ.error ||
-    insightsQ.error ||
-    historyQ.error;
+    insightsQ.error;
 
   const invalidateAll = () => invalidateBudgetQueries(qc);
 
@@ -211,6 +203,20 @@ export function Dashboard({ profileName }: Props) {
     e.currentTarget.reset();
   }
 
+  async function handleExport() {
+    setExportBusy(true);
+    try {
+      const now = new Date();
+      const filename = `gastodehoy-export-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}.csv`;
+      await downloadCsv("/api/export/csv", filename);
+      setToastMsg("CSV descargado");
+    } catch (e) {
+      setToastMsg((e as Error).message);
+    } finally {
+      setExportBusy(false);
+    }
+  }
+
   return (
     <div className={APP_SHELL_CLASS}>
       <AppBackdrop />
@@ -220,6 +226,8 @@ export function Dashboard({ profileName }: Props) {
         onOpenSettings={() => setShowSettings(true)}
         onOpenCategories={() => setShowCategoryManager(true)}
         onOpenSavingsGoals={() => setShowSavingsGoals(true)}
+        onExport={() => void handleExport()}
+        exportBusy={exportBusy}
       />
 
       <main className="relative z-10 mx-auto max-w-4xl space-y-4 px-3 py-5 pb-20 sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl">
@@ -240,11 +248,9 @@ export function Dashboard({ profileName }: Props) {
           }}
         />
 
-        <MonthHistoryStrip
-          data={historyQ.data}
-          isLoading={historyQ.isPending}
-          error={historyQ.error as Error | null}
-        />
+        <MonthHistoryStrip />
+
+        <Rule503020Panel />
 
         <InsightsPanel
           data={insightsQ.data}
