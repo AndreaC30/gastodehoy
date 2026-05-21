@@ -46,11 +46,13 @@ export function MonthHistoryStrip({ data, isLoading, error }: Props) {
       </h2>
       <p className="mt-0.5 text-xs text-slate-500">Gasto variable por mes</p>
       <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
-        {months.map((row, index) => (
+        {months.map((row, index) => {
+          const isCurrentMonth = index === months.length - 1;
+          return (
           <div
             key={`${row.year}-${row.month}`}
             className={`rounded-xl border px-2.5 py-2.5 text-center sm:px-3 ${
-              index === 0
+              isCurrentMonth
                 ? "border-teal-500/35 bg-teal-500/10"
                 : "border-slate-800 bg-slate-900/90"
             }`}
@@ -60,13 +62,14 @@ export function MonthHistoryStrip({ data, isLoading, error }: Props) {
             </p>
             <p
               className={`mt-1 text-base font-bold tabular-nums sm:text-lg ${
-                index === 0 ? "text-teal-400" : "text-slate-200"
+                isCurrentMonth ? "text-teal-400" : "text-slate-200"
               }`}
             >
               {money(row.variable_spent_month)}
             </p>
           </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

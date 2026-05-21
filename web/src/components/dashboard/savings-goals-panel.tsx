@@ -154,7 +154,7 @@ type PanelProps = {
   reservedSavings?: string | number;
 };
 
-export function SavingsGoalsPanel({ reservedSavings }: PanelProps) {
+export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [target, setTarget] = useState("");
@@ -207,21 +207,13 @@ export function SavingsGoalsPanel({ reservedSavings }: PanelProps) {
   const goals = goalsQ.data ?? [];
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
-      <div className="border-b border-slate-800 px-5 py-4">
-        <h2 className="text-lg font-bold tracking-tight">Metas de ahorro</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Objetivos con nombre y cantidad; actualiza lo que llevas ahorrado.
-          {reservedSavings != null && Number(reservedSavings) > 0 && (
-            <>
-              {" "}
-              Ahorro reservado este mes:{" "}
-              <span className="text-teal-400/90">{money(reservedSavings)}</span>.
-            </>
-          )}
+    <div className="space-y-4">
+      {reservedSavings != null && Number(reservedSavings) > 0 && (
+        <p className="rounded-xl border border-teal-500/25 bg-teal-500/10 px-3 py-2 text-sm text-slate-300">
+          Ahorro reservado este mes:{" "}
+          <span className="font-semibold text-teal-300">{money(reservedSavings)}</span>
         </p>
-      </div>
-      <div className="space-y-4 p-5">
+      )}
         {goalsQ.isPending && (
           <div className="h-16 animate-pulse rounded-xl bg-slate-800/40" aria-hidden />
         )}
@@ -283,7 +275,6 @@ export function SavingsGoalsPanel({ reservedSavings }: PanelProps) {
             {formError}
           </p>
         )}
-      </div>
-    </section>
+    </div>
   );
 }

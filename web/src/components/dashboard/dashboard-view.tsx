@@ -15,12 +15,15 @@ import { FixedExpensesSection } from "@/components/dashboard/fixed-expenses-sect
 import { VariableExpensesSection } from "@/components/dashboard/variable-expenses-section";
 import { SpendingChart } from "@/components/dashboard/spending-chart";
 import { InsightsPanel } from "@/components/dashboard/insights-panel";
+import { MonthHistoryStrip } from "@/components/dashboard/month-history-strip";
+import { SavingsGoalsModal } from "@/components/savings-goals-modal";
 import { api } from "@/api/client";
 import type {
   ExpenseCategory,
   ExtraIncome,
   FixedExpense,
   Insights,
+  MonthHistoryRead,
   Settings,
   Summary,
   VariableExpense,
@@ -51,6 +54,10 @@ async function loadCategories() {
 async function loadInsights() {
   return api<Insights>("/api/insights");
 }
+async function loadMonthHistory() {
+  return api<MonthHistoryRead>("/api/summary/history?months=3");
+}
+
 type Props = { profileName: string };
 
 const FIXED_LIST_PREVIEW = 3;
@@ -61,6 +68,7 @@ export function Dashboard({ profileName }: Props) {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showSavingsGoals, setShowSavingsGoals] = useState(false);
   const [expandFixedList, setExpandFixedList] = useState(false);
   const [expandVariableList, setExpandVariableList] = useState(false);
   const [fixedFormIcon, setFixedFormIcon] = useState(DEFAULT_FIXED_EXPENSE_ICON);
@@ -91,6 +99,10 @@ export function Dashboard({ profileName }: Props) {
     queryKey: ["insights"],
     queryFn: loadInsights,
   });
+  const historyQ = useQuery({
+    queryKey: ["history"],
+    queryFn: loadMonthHistory,
+  });
   const error =
     summaryQ.error ||
     settingsQ.error ||
@@ -98,7 +110,8 @@ export function Dashboard({ profileName }: Props) {
     expensesQ.error ||
     extraIncomeQ.error ||
     categoriesQ.error ||
-    insightsQ.error;
+    insightsQ.error ||
+    historyQ.error;
 
   const invalidateAll = () => invalidateBudgetQueries(qc);
 
@@ -206,6 +219,7 @@ export function Dashboard({ profileName }: Props) {
         settingsReady={!!settingsQ.data}
         onOpenSettings={() => setShowSettings(true)}
         onOpenCategories={() => setShowCategoryManager(true)}
+        onOpenSavingsGoals={() => setShowSavingsGoals(true)}
       />
 
       <main className="relative z-10 mx-auto max-w-4xl space-y-4 px-3 py-5 pb-20 sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl">
@@ -224,6 +238,12 @@ export function Dashboard({ profileName }: Props) {
           onRefresh={() => {
             void invalidateAll().then(() => setToastMsg("Listo"));
           }}
+        />
+
+        <MonthHistoryStrip
+          data={historyQ.data}
+          isLoading={historyQ.isPending}
+          error={historyQ.error as Error | null}
         />
 
         <InsightsPanel
@@ -290,6 +310,13 @@ export function Dashboard({ profileName }: Props) {
             setToastMsg("Cambios guardados");
             void invalidateAll();
           }}
+        />
+      )}
+
+      {showSavingsGoals && (
+        <SavingsGoalsModal
+          reservedSavings={summaryQ.data?.savings_amount}
+          onClose={() => setShowSavingsGoals(false)}
         />
       )}
 
