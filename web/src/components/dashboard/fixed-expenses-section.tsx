@@ -6,6 +6,7 @@ import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
 import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
+import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
 
 const inputClass = INPUT_CLASS;
 
@@ -43,20 +44,23 @@ export function FixedExpensesSection({
   onDelete,
 }: Props) {
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20">
+    <section
+      data-tour="fixed-expenses"
+      className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20"
+    >
       <div className="border-b border-slate-800 px-5 py-4">
-        <h2 className="text-lg font-bold tracking-tight">Gastos fijos</h2>
-        <p className="mt-1 text-sm text-slate-500">Lo que pagas igual cada mes</p>
+        <h2 className="text-lg font-bold tracking-tight sm:text-xl">Gastos fijos</h2>
+        <p className={`mt-1 ${TYPE_CAPTION}`}>Lo que pagas igual cada mes</p>
       </div>
       <div className="p-5">
-        <p className="mb-4 text-sm text-slate-500">
+        <p className={`mb-4 ${TYPE_BODY}`}>
           Vivienda, seguros, suscripciones… suman aquí.
         </p>
         <form
-          className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2"
+          className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-2"
           onSubmit={onSubmit}
         >
-          <div className="flex w-full min-w-0 gap-2 sm:min-w-[140px] sm:flex-1">
+          <div className="flex w-full min-w-0 gap-2 lg:min-w-0 lg:flex-1">
             <IconSelectDropdown value={formIcon} onChange={onFormIconChange} />
             <FormField
               id="fixed-expense-name"
@@ -75,7 +79,7 @@ export function FixedExpensesSection({
           <FormField
             id="fixed-expense-amount"
             label="Importe (€)"
-            className="w-full sm:w-24"
+            className="w-full lg:w-28"
             labelClassName="sr-only"
           >
             <input
@@ -92,7 +96,7 @@ export function FixedExpensesSection({
           <button
             type="submit"
             disabled={pending}
-            className={`w-full sm:w-auto ${BTN_PRIMARY}`}
+            className={`w-full lg:w-auto ${BTN_PRIMARY}`}
           >
             Añadir
           </button>
@@ -107,16 +111,16 @@ export function FixedExpensesSection({
                 return (
                   <li
                     key={it.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
+                    className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <FixedIcon className="h-4 w-4 shrink-0 text-sky-400/90" />
-                      <div className="min-w-0">
-                        <p className="font-semibold text-slate-200">{it.name}</p>
-                        <p className="text-sm text-slate-500">{money(it.amount)}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-slate-200">{it.name}</p>
+                        <p className="truncate text-sm tabular-nums text-slate-500">{money(it.amount)}</p>
                       </div>
                     </div>
-                    <div className="flex shrink-0 gap-1.5">
+                    <div className="flex shrink-0 gap-1.5 self-end sm:self-center">
                       <button
                         type="button"
                         onClick={() => onEdit(it)}

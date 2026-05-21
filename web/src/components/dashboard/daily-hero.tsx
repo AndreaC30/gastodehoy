@@ -2,6 +2,7 @@ import type { Summary } from "@/api/types";
 import { Metric } from "@/components/dashboard/metric";
 import { money, savingsLabel } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui-a11y";
+import { TYPE_BODY, TYPE_EYEBROW } from "@/lib/typography";
 
 type Props = {
   summary: Summary | undefined;
@@ -12,14 +13,13 @@ type Props = {
 export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
   return (
     <section
+      data-tour="hero"
       className="overflow-hidden rounded-xl border border-teal-500/20 bg-gradient-to-br from-slate-900/90 to-slate-900 p-4 shadow-xl shadow-black/30 sm:rounded-2xl sm:p-5 md:p-6"
       aria-live="polite"
     >
       <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_1.35fr] md:items-stretch md:gap-8">
         <div className="flex flex-col justify-center rounded-lg border border-slate-800 bg-slate-900/80 p-4 sm:rounded-xl sm:p-5">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-[0.72rem]">
-            Hoy puedes gastar
-          </p>
+          <p className={TYPE_EYEBROW}>Hoy puedes gastar</p>
           <div className="mt-1 min-h-[2.25rem] sm:min-h-[2.75rem] md:min-h-[3.5rem]">
             {summaryPending ? (
               <div
@@ -27,7 +27,7 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
                 aria-hidden
               />
             ) : (
-              <p className="text-3xl font-bold tracking-tight text-teal-400 sm:text-4xl md:text-5xl">
+              <p className="break-words text-2xl font-bold tabular-nums tracking-tight text-teal-400 min-[375px]:text-3xl sm:text-4xl md:text-5xl">
                 {money(summary?.suggested_spend_today)}
               </p>
             )}
@@ -36,7 +36,7 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
             type="button"
             onClick={onRefresh}
             aria-label="Actualizar números del presupuesto"
-            className={`mt-2 min-h-11 w-fit px-1 text-[0.65rem] font-medium text-slate-500 underline decoration-slate-600 underline-offset-4 hover:text-slate-400 sm:mt-3 sm:text-xs ${FOCUS_RING}`}
+            className={`mt-2 min-h-11 w-fit px-1 text-sm font-medium text-slate-400 underline decoration-slate-600 underline-offset-4 hover:text-slate-300 sm:mt-3 ${FOCUS_RING}`}
           >
             Actualizar números
           </button>
@@ -79,7 +79,7 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
           />
         </div>
       </div>
-      <p className="mt-5 border-t border-slate-800 pt-4 text-sm leading-relaxed text-slate-500">
+      <p className={`mt-5 border-t border-slate-800 pt-4 ${TYPE_BODY}`}>
         Es lo que te queda del mes repartido entre los días que faltan: ingreso y
         extras, menos ahorro, gastos fijos y lo que ya registraste en gastos del día
         a día. El ahorro (% o cantidad fija) solo se calcula sobre tu{" "}

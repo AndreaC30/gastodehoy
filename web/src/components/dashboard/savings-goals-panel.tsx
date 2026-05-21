@@ -250,7 +250,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
             placeholder="Nombre (ej. Vacaciones)"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/30 sm:min-w-[140px] sm:flex-1"
+            className="w-full min-w-0 max-w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/30 sm:min-w-0 sm:flex-1"
           />
           <input
             type="number"

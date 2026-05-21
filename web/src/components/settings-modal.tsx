@@ -13,7 +13,7 @@ import { setAnonymous } from "@/auth";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
-import { INPUT_CLASS } from "@/lib/ui-a11y";
+import { INPUT_CLASS, INPUT_FLEX_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   initial: Settings;
@@ -159,7 +159,7 @@ export function SettingsModal({
         onClick={(e) => e.stopPropagation()}
       >
         <header className="mb-4 flex items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0 flex-1">
             <h2
               id="settings-modal-title"
               className="text-lg font-bold tracking-tight"
@@ -257,7 +257,7 @@ export function SettingsModal({
               <FormField
                 id="settings-extra-amount"
                 label="Cantidad (€)"
-                className="w-full sm:min-w-[100px] sm:flex-1"
+                className="w-full min-w-0 sm:flex-1"
                 labelClassName="sr-only"
               >
                 <input
@@ -303,11 +303,11 @@ export function SettingsModal({
                     key={it.id}
                     className="flex items-center justify-between gap-2 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2"
                   >
-                    <div>
-                      <p className="font-semibold text-teal-300/90">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold tabular-nums text-teal-300/90">
                         {money(it.amount)}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="truncate text-xs text-slate-500">
                         Recibido el {it.received_at}
                       </p>
                     </div>
@@ -427,7 +427,7 @@ function SavingsInputRow({
       <label htmlFor={id} className="text-sm font-medium text-slate-400">
         {label}
       </label>
-      <div className="mt-1.5 flex items-center gap-2">
+      <div className="mt-1.5 flex min-w-0 items-center gap-2">
         <input
           id={id}
           type="number"
@@ -438,9 +438,9 @@ function SavingsInputRow({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           aria-describedby={hintId}
-          className={inputClass}
+          className={INPUT_FLEX_CLASS}
         />
-        <span className="text-slate-500">{suffix}</span>
+        <span className="shrink-0 text-slate-500">{suffix}</span>
       </div>
       <p id={hintId} className="mt-2 text-xs leading-relaxed text-slate-500">
         {hint}

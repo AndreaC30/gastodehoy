@@ -3,6 +3,7 @@ import {
   IoClose,
   IoDownloadOutline,
   IoFlagOutline,
+  IoHelpCircleOutline,
   IoLogOutOutline,
   IoPricetagsOutline,
   IoWalletOutline,
@@ -15,7 +16,8 @@ export type DashboardNavAction =
   | "settings"
   | "categories"
   | "savings-goals"
-  | "export";
+  | "export"
+  | "guided-tour";
 
 type Props = {
   open: boolean;
@@ -56,6 +58,12 @@ export function DashboardNavPanel({
   if (!open) return null;
 
   const items: NavItem[] = [
+    {
+      id: "guided-tour",
+      label: "Guía paso a paso",
+      description: "Tutorial: qué es cada zona y cómo rellenar",
+      Icon: IoHelpCircleOutline,
+    },
     {
       id: "settings",
       label: "Tus ingresos",
@@ -137,10 +145,10 @@ export function DashboardNavPanel({
                   <Icon className="h-[1.15rem] w-[1.15rem]" aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-slate-100">
+                  <span className="block text-base font-semibold text-slate-100">
                     {label}
                   </span>
-                  <span className="mt-0.5 block text-xs leading-snug text-slate-500">
+                  <span className="mt-0.5 block text-sm leading-snug text-slate-400">
                     {description}
                   </span>
                 </span>

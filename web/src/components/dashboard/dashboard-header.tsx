@@ -14,6 +14,7 @@ type Props = {
   onOpenCategories: () => void;
   onOpenSavingsGoals: () => void;
   onExport: () => void;
+  onStartTour: () => void;
   exportBusy?: boolean;
 };
 
@@ -24,6 +25,7 @@ export function DashboardHeader({
   onOpenCategories,
   onOpenSavingsGoals,
   onExport,
+  onStartTour,
   exportBusy = false,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -42,6 +44,9 @@ export function DashboardHeader({
       case "export":
         onExport();
         break;
+      case "guided-tour":
+        onStartTour();
+        break;
     }
   }
 
@@ -53,13 +58,16 @@ export function DashboardHeader({
             <h1 className="m-0 leading-none">
               <BrandLogo variant="header" />
             </h1>
-            <p className="mt-1.5 max-w-md text-sm text-slate-400 sm:mt-2">
+            <p className="mt-1.5 max-w-md text-base text-slate-400 sm:mt-2">
               Tu margen para hoy, claro y al instante.
             </p>
           </div>
 
-          <div className="flex shrink-0 flex-col items-end gap-2">
-            <p className="hidden text-[0.65rem] uppercase tracking-widest text-slate-500 sm:block sm:text-xs">
+          <div
+            data-tour="menu"
+            className="flex shrink-0 flex-col items-end gap-2"
+          >
+            <p className="hidden text-xs uppercase tracking-widest text-slate-500 sm:block sm:text-sm">
               Perfil
             </p>
             <p className="hidden max-w-[10rem] truncate text-sm font-semibold text-teal-300 sm:block">
@@ -68,7 +76,7 @@ export function DashboardHeader({
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
-              className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm font-medium text-slate-200 shadow-sm transition-colors hover:border-teal-500/40 hover:bg-slate-800 hover:text-teal-200 ${FOCUS_RING}`}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-base font-medium text-slate-200 shadow-sm transition-colors hover:border-teal-500/40 hover:bg-slate-800 hover:text-teal-200 ${FOCUS_RING}`}
               aria-expanded={menuOpen}
               aria-controls="dashboard-nav-panel"
               aria-haspopup="dialog"

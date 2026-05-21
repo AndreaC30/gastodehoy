@@ -14,13 +14,13 @@ type Props = {
 export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props) {
   return (
     <form
-      className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2"
+      className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-2"
       onSubmit={onSubmit}
     >
       <FormField
         id="var-expense-amount"
         label="Cantidad (€)"
-        className="w-full sm:min-w-[100px] sm:flex-1"
+        className="w-full min-w-0 lg:flex-1"
         labelClassName="sr-only"
       >
         <input
@@ -37,7 +37,7 @@ export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props)
       <FormField
         id="var-expense-category"
         label="Categoría"
-        className="w-full sm:min-w-[120px] sm:flex-1"
+        className="w-full min-w-0 lg:flex-1"
         labelClassName="sr-only"
       >
         <select name="category_id" defaultValue="" className={inputClass}>
@@ -52,7 +52,7 @@ export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props)
       <FormField
         id="var-expense-note"
         label="Nota (opcional)"
-        className="w-full sm:min-w-[120px] sm:flex-1"
+        className="w-full min-w-0 lg:flex-1"
         labelClassName="sr-only"
       >
         <input
@@ -65,7 +65,7 @@ export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props)
       <button
         type="submit"
         disabled={pending}
-        className={`w-full sm:w-auto sm:self-end ${BTN_PRIMARY}`}
+        className={`w-full lg:w-auto lg:self-end ${BTN_PRIMARY}`}
       >
         Registrar
       </button>

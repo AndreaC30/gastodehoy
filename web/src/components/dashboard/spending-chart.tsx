@@ -1,4 +1,4 @@
-/** Spending breakdown by category: small donut on desktop + progress-bar legend. */
+/** Spending breakdown by category: donut + progress-bar legend (all viewports). */
 import type { CategorySpending } from "@/api/types";
 import { money } from "@/lib/format";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
@@ -82,32 +82,12 @@ export function SpendingChart({ breakdown, total }: Props) {
         Distribución de tus gastos este mes
       </p>
 
-      {/*
-        Desktop (≥ sm): two-column layout
-          left  – small donut
-          right – progress-bar legend
-        Mobile: single-column progress-bar legend only
-      */}
-      <div className="mt-5">
-        {/* donut – desktop only */}
-        <div className="hidden sm:flex sm:gap-8 sm:items-start">
-          <div className="sm:pt-2">
-          <MiniDonut
-            segments={donutSegments}
-            totalLabel={money(total)}
-          />
-          </div>
-
-          {/* progress-bar list right side */}
-          <div className="flex-1 space-y-4">
-            {sorted.map((seg) => (
-              <CategoryRow key={seg.category_id ?? "none"} seg={seg} />
-            ))}
-          </div>
+      <div className="mt-5 flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">
+        <div className="shrink-0 pt-1 sm:pt-2">
+          <MiniDonut segments={donutSegments} totalLabel={money(total)} />
         </div>
 
-        {/* progress-bar list – mobile only */}
-        <div className="mt-4 space-y-4 sm:mt-0 sm:space-y-3 sm:hidden">
+        <div className="w-full min-w-0 flex-1 space-y-4">
           {sorted.map((seg) => (
             <CategoryRow key={seg.category_id ?? "none"} seg={seg} />
           ))}
