@@ -3,7 +3,7 @@
  *
  * La recuperación envía una contraseña temporal por correo (requiere SMTP en el servidor).
  */
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useId, useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IoArrowBack } from "react-icons/io5";
 import { api } from "@/api/client";
@@ -180,6 +180,7 @@ function LoginForm({
   return (
     <form onSubmit={submit} className="space-y-3">
       <Field
+        id="login-email"
         label="Email"
         type="email"
         autoComplete="email"
@@ -188,6 +189,7 @@ function LoginForm({
         onChange={setEmail}
       />
       <Field
+        id="login-password"
         label="Contraseña"
         type="password"
         autoComplete="current-password"
@@ -253,6 +255,7 @@ function RegisterForm({
   return (
     <form onSubmit={submit} className="space-y-3">
       <Field
+        id="register-email"
         label="Email"
         type="email"
         autoComplete="email"
@@ -261,6 +264,7 @@ function RegisterForm({
         onChange={setEmail}
       />
       <Field
+        id="register-name"
         label="Tu nombre (lo verás en la cabecera)"
         type="text"
         autoComplete="name"
@@ -269,6 +273,7 @@ function RegisterForm({
         onChange={setName}
       />
       <Field
+        id="register-password"
         label="Contraseña (8–64 caracteres)"
         type="password"
         autoComplete="new-password"
@@ -276,6 +281,7 @@ function RegisterForm({
         onChange={setPassword}
       />
       <Field
+        id="register-password2"
         label="Repite la contraseña"
         type="password"
         autoComplete="new-password"
@@ -375,6 +381,7 @@ function ForgotForm({
       </div>
 
       <Field
+        id="forgot-email"
         label="Email"
         type="email"
         autoComplete="email"
@@ -409,6 +416,7 @@ function ForgotForm({
  * so the user can verify what they are typing.
  */
 function Field({
+  id: idProp,
   label,
   type,
   value,
@@ -417,6 +425,7 @@ function Field({
   autoComplete,
   maxLength,
 }: {
+  id?: string;
   label: string;
   type: "email" | "password" | "text";
   value: string;
@@ -425,15 +434,20 @@ function Field({
   autoComplete?: string;
   maxLength?: number;
 }) {
+  const fallbackId = useId();
+  const id = idProp ?? fallbackId;
   const [visible, setVisible] = useState(false);
   const isPassword = type === "password";
   const effectiveType = isPassword && visible ? "text" : type;
 
   return (
-    <label className="block text-sm font-medium text-slate-400">
-      {label}
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-slate-400">
+        {label}
+      </label>
       <div className="relative mt-1.5">
         <input
+          id={id}
           type={effectiveType}
           autoFocus={autoFocus}
           autoComplete={autoComplete}
@@ -461,6 +475,6 @@ function Field({
           </button>
         )}
       </div>
-    </label>
+    </div>
   );
 }

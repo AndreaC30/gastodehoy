@@ -43,6 +43,7 @@ from app.models import (  # noqa: E402
     ExtraIncome,
     FixedExpense,
     LoginAttempt,
+    SavingsGoal,
     User,
     UserSettings,
     VariableExpense,
@@ -57,6 +58,7 @@ def reset_db() -> Generator[None, None, None]:
     with SessionLocal() as s:
         s.execute(delete(VariableExpense))
         s.execute(delete(ExtraIncome))
+        s.execute(delete(SavingsGoal))
         s.execute(delete(FixedExpense))
         s.execute(delete(ExpenseCategory))
         s.execute(delete(UserSettings))

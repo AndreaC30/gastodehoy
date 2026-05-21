@@ -90,10 +90,13 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
 
         <form onSubmit={submit} className="mt-4 space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs text-slate-500">Concepto</label>
+            <label htmlFor="edit-fixed-name" className="mb-1.5 block text-xs text-slate-500">
+              Concepto
+            </label>
             <div className="flex gap-2">
               <IconSelectDropdown value={icon} onChange={setIcon} />
               <input
+                id="edit-fixed-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}

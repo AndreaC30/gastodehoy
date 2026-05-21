@@ -205,9 +205,10 @@ function StepIncome({
           cálculos.
         </p>
       </div>
-      <label className="block text-sm font-medium text-slate-400">
+      <label htmlFor="onboarding-income" className="block text-sm font-medium text-slate-400">
         Ingreso mensual (€)
         <input
+          id="onboarding-income"
           type="number"
           inputMode="decimal"
           step="0.01"
@@ -288,14 +289,17 @@ function StepFixed({
         <div className="flex w-full min-w-0 gap-2 sm:min-w-[140px] sm:flex-1">
           <IconSelectDropdown value={icon} onChange={setIcon} />
           <input
+            id="onboarding-fixed-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Ej. Alquiler"
+            aria-label="Nombre del gasto fijo"
             className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
           />
         </div>
         <input
+          id="onboarding-fixed-amount"
           type="number"
           inputMode="decimal"
           step="0.01"
@@ -303,6 +307,7 @@ function StepFixed({
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="€"
+          aria-label="Importe del gasto fijo"
           className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:w-24"
         />
         <button
@@ -436,10 +441,11 @@ function StepSavings({
       </div>
 
       {mode === "percent" ? (
-        <label className="block text-sm font-medium text-slate-400">
+        <label htmlFor="onboarding-savings-percent" className="block text-sm font-medium text-slate-400">
           Porcentaje de ahorro
           <div className="mt-1.5 flex items-center gap-2">
             <input
+              id="onboarding-savings-percent"
               type="number"
               inputMode="decimal"
               step="0.01"
@@ -454,10 +460,11 @@ function StepSavings({
           </div>
         </label>
       ) : (
-        <label className="block text-sm font-medium text-slate-400">
+        <label htmlFor="onboarding-savings-amount" className="block text-sm font-medium text-slate-400">
           Cantidad fija al mes
           <div className="mt-1.5 flex items-center gap-2">
             <input
+              id="onboarding-savings-amount"
               type="number"
               inputMode="decimal"
               step="0.01"

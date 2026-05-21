@@ -22,12 +22,14 @@ from app.schemas import (
     FixedExpenseCreate,
     FixedExpenseRead,
     FixedExpenseUpdate,
+    MonthHistoryRead,
     SummaryRead,
     VariableExpenseCreate,
     VariableExpenseRead,
     VariableExpenseUpdate,
 )
 from app.services.budget import compute_summary, month_bounds, today_in_app_timezone
+from app.services.history import compute_month_history
 
 # One router per HTTP prefix. They are all included from app.main as
 # part of the same logical "budget" surface.
@@ -112,6 +114,17 @@ def read_summary(
     """Return today's budget snapshot for the authenticated user."""
     data = compute_summary(db, user.id, today_in_app_timezone())
     return SummaryRead(**data)
+
+
+@summary_router.get("/summary/history", response_model=MonthHistoryRead)
+def read_summary_history(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+    months: int = Query(default=3, ge=1, le=12),
+) -> MonthHistoryRead:
+    """Return budget snapshots for the last N calendar months (newest first)."""
+    items = compute_month_history(db, user.id, months=months)
+    return MonthHistoryRead(months=items)
 
 
 # --- Fixed expenses ----------------------------------------------------------

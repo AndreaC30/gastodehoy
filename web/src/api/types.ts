@@ -8,6 +8,22 @@
 /** How the user wants their savings computed each month. */
 export type SavingsMode = "percent" | "fixed";
 
+export type MonthHistoryItem = {
+  year: number;
+  month: number;
+  month_label: string;
+  period_start: string;
+  period_end: string;
+  variable_spent_month: string | number;
+  savings_amount: string | number;
+  remaining_this_month: string | number;
+};
+
+/** API response for GET /api/summary/history */
+export type MonthHistoryRead = {
+  months: MonthHistoryItem[];
+};
+
 export type Summary = {
   reference_date: string;
   days_remaining_in_month: number;
@@ -109,4 +125,12 @@ export type RegisterResponse = {
 
 export type ForgotPasswordResponse = {
   detail: string;
+};
+
+export type SavingsGoal = {
+  id: number;
+  name: string;
+  target_amount: string | number;
+  current_amount: string | number;
+  target_date: string | null;
 };

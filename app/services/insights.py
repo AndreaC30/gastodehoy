@@ -8,7 +8,16 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from app.models import ExpenseCategory, UserSettings, VariableExpense
-from app.services.budget import days_remaining_in_month, today_in_app_timezone
+from app.services.budget import days_remaining_in_month, month_bounds, today_in_app_timezone
+
+
+def _previous_month_bounds(month_start: date) -> tuple[date, date]:
+    """First and last day of the calendar month before ``month_start``."""
+    if month_start.month == 1:
+        ref = date(month_start.year - 1, 12, 1)
+    else:
+        ref = date(month_start.year, month_start.month - 1, 1)
+    return month_bounds(ref)
 
 
 def _safe_pct(part: Decimal, whole: Decimal) -> Decimal:
@@ -111,6 +120,56 @@ def compute_insights(
         select(UserSettings).where(UserSettings.user_id == user_id)
     )
     monthly_income = us.monthly_income if us else Decimal("0")
+
+    # 0. Month-over-month variable spending
+    prev_start, prev_end = _previous_month_bounds(month_start)
+    prev_spent = session.scalar(
+        select(func.coalesce(func.sum(VariableExpense.amount), 0)).where(
+            VariableExpense.user_id == user_id,
+            VariableExpense.occurred_at >= prev_start,
+            VariableExpense.occurred_at <= prev_end,
+        )
+    ) or Decimal("0")
+    prev_spent = Decimal(prev_spent).quantize(Decimal("0.01"))
+    if prev_spent > 0:
+        diff = total_spent - prev_spent
+        pct_change = _safe_pct(abs(diff), prev_spent)
+        if diff > Decimal("0.01"):
+            insights.append(
+                {
+                    "type": "warning",
+                    "title": "Más gasto que el mes pasado",
+                    "message": (
+                        f"Este mes llevas {total_spent}€ en gastos variables, "
+                        f"{pct_change}% más que los {prev_spent}€ del mes anterior."
+                    ),
+                    "icon": "trending_up",
+                }
+            )
+        elif diff < Decimal("-0.01"):
+            insights.append(
+                {
+                    "type": "success",
+                    "title": "Menos gasto que el mes pasado",
+                    "message": (
+                        f"Este mes llevas {total_spent}€ en gastos variables, "
+                        f"{pct_change}% menos que los {prev_spent}€ del mes anterior."
+                    ),
+                    "icon": "trending_down",
+                }
+            )
+        else:
+            insights.append(
+                {
+                    "type": "info",
+                    "title": "Ritmo similar al mes pasado",
+                    "message": (
+                        f"Tus gastos variables ({total_spent}€) van parecidos "
+                        f"al mes anterior ({prev_spent}€)."
+                    ),
+                    "icon": "calendar",
+                }
+            )
 
     # 1. Top category concentration
     if top_category and top_category["percentage"] > 50:

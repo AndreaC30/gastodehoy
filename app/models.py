@@ -68,6 +68,10 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    savings_goals: Mapped[list["SavingsGoal"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
 
 class UserSettings(Base):
@@ -186,6 +190,27 @@ class ExtraIncome(Base):
     received_at: Mapped[date] = mapped_column(Date, nullable=False)
 
     user: Mapped[User] = relationship(back_populates="extra_incomes")
+
+
+class SavingsGoal(Base):
+    """Named savings target with optional deadline."""
+
+    __tablename__ = "savings_goals"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    name: Mapped[str] = mapped_column(String(80), nullable=False)
+    target_amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    current_amount: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2), default=Decimal("0"), nullable=False
+    )
+    target_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+
+    user: Mapped[User] = relationship(back_populates="savings_goals")
 
 
 class LoginAttempt(Base):
