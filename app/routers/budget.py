@@ -122,7 +122,7 @@ def read_summary_history(
     user: User = Depends(get_current_user),
     months: int = Query(default=3, ge=1, le=12),
 ) -> MonthHistoryRead:
-    """Return budget snapshots for the last N calendar months (newest first)."""
+    """Return budget snapshots for the last N calendar months (oldest first)."""
     items = compute_month_history(db, user.id, months=months)
     return MonthHistoryRead(months=items)
 

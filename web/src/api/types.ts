@@ -134,3 +134,21 @@ export type SavingsGoal = {
   current_amount: string | number;
   target_date: string | null;
 };
+
+/** API response for GET /api/rule-503020 */
+export type Rule503020 = {
+  year: number;
+  month: number;
+  income: string | number;
+  savings_amount: string | number;
+  needs_spent: string | number;
+  wants_spent: string | number;
+  other_spent: string | number;
+  needs_pct: string | number;
+  wants_pct: string | number;
+  savings_pct: string | number;
+  target_needs_pct: string | number;
+  target_wants_pct: string | number;
+  target_savings_pct: string | number;
+  insights: string[];
+};

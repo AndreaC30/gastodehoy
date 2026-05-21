@@ -204,6 +204,10 @@ function StepIncome({
           Lo que entra cada mes después de impuestos. Es la base de todos los
           cálculos.
         </p>
+        <p className="mt-2 rounded-lg border border-slate-800/80 bg-slate-950/50 px-3 py-2 text-xs leading-relaxed text-slate-500">
+          Ejemplos: nómina 1.800€, autónomo 2.400€, pensión 950€. Usa tu media
+          real si varía un poco cada mes.
+        </p>
       </div>
       <label htmlFor="onboarding-income" className="block text-sm font-medium text-slate-400">
         Ingreso mensual (€)
@@ -281,7 +285,11 @@ function StepFixed({
         </h2>
         <p className="mt-1 text-sm text-slate-400">
           Alquiler, seguros, suscripciones, lo que se paga igual cada mes.
-          Puedes saltarte este paso y añadirlos después.
+        </p>
+        <p className="mt-2 rounded-lg border border-dashed border-slate-700/80 px-3 py-2 text-xs leading-relaxed text-slate-500">
+          Este paso es opcional: si no tienes los importes a mano, pulsa
+          Siguiente sin añadir nada y complétalo luego desde el panel de gastos
+          fijos.
         </p>
       </div>
 
@@ -428,6 +436,12 @@ function StepSavings({
         </h2>
         <p className="mt-1 text-sm text-slate-400">
           Elige cómo prefieres definir tu ahorro.
+        </p>
+        <p className="mt-2 rounded-lg border border-teal-500/25 bg-teal-950/25 px-3 py-2 text-xs leading-relaxed text-teal-200/90">
+          Consejo: muchas personas empiezan con un{" "}
+          <strong className="font-semibold text-teal-300">10%</strong> del sueldo
+          y lo suben poco a poco. La regla 50/30/20 apunta a un 20% a largo
+          plazo.
         </p>
       </div>
 

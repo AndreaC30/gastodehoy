@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import smtplib
+from decimal import Decimal
 from email.message import EmailMessage
 
 from app.config import settings
@@ -75,6 +76,71 @@ def send_welcome_email(to_email: str, name: str) -> None:
         "El equipo de GastoDeHoy\n"
     )
     send_email(to_email, subject, body)
+
+
+def _format_eur(amount) -> str:
+    """Format a decimal amount for Spanish locale-style emails."""
+    return f"{Decimal(amount).quantize(Decimal('0.01')):.2f} €".replace(".", ",")
+
+
+def send_weekly_digest_email(to_email: str, name: str, digest: dict) -> None:
+    """Envía el resumen semanal en HTML simple (español)."""
+    weekly = _format_eur(digest["weekly_variable_spent"])
+    remaining = _format_eur(digest["remaining_this_month"])
+    savings = _format_eur(digest["savings_amount"])
+    month_spent = _format_eur(digest["variable_spent_month"])
+    week_start = digest["week_start"]
+    week_end = digest["week_end"]
+
+    subject = f"GastoDeHoy — resumen semanal, {name}"
+    text = (
+        f"Hola, {name}.\n\n"
+        f"Gasto variable (últimos 7 días, {week_start:%d/%m}–{week_end:%d/%m}): {weekly}\n"
+        f"Gasto variable del mes: {month_spent}\n"
+        f"Te queda este mes: {remaining}\n"
+        f"Ahorro reservado: {savings}\n\n"
+        "Entra en GastoDeHoy para ver el detalle.\n"
+    )
+    html = (
+        f"<p>Hola, <strong>{name}</strong>.</p>"
+        "<p>Tu resumen semanal en <strong>GastoDeHoy</strong>:</p>"
+        "<ul>"
+        f"<li>Gasto variable (últimos 7 días, "
+        f"{week_start:%d/%m}–{week_end:%d/%m}): <strong>{weekly}</strong></li>"
+        f"<li>Gasto variable del mes: <strong>{month_spent}</strong></li>"
+        f"<li>Te queda este mes: <strong>{remaining}</strong></li>"
+        f"<li>Ahorro reservado: <strong>{savings}</strong></li>"
+        "</ul>"
+        "<p>Entra en la app para ver el detalle.</p>"
+    )
+
+    host = settings.smtp_host
+    if not host or not host.strip():
+        raise SMTPNotConfiguredError("SMTP_HOST no está configurado")
+
+    from_addr = settings.smtp_from or settings.smtp_user
+    if not from_addr:
+        raise SMTPNotConfiguredError("SMTP_FROM o SMTP_USER deben estar configurados")
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = from_addr
+    msg["To"] = to_email
+    msg.set_content(text)
+    msg.add_alternative(html, subtype="html")
+
+    if settings.smtp_use_ssl:
+        with smtplib.SMTP_SSL(host, settings.smtp_port) as smtp:
+            if settings.smtp_user and settings.smtp_password:
+                smtp.login(settings.smtp_user, settings.smtp_password)
+            smtp.send_message(msg)
+    else:
+        with smtplib.SMTP(host, settings.smtp_port) as smtp:
+            if settings.smtp_use_tls:
+                smtp.starttls()
+            if settings.smtp_user and settings.smtp_password:
+                smtp.login(settings.smtp_user, settings.smtp_password)
+            smtp.send_message(msg)
 
 
 def send_forgot_password_email(to_email: str, temporary_password: str) -> None:
