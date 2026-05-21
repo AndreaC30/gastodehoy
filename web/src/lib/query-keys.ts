@@ -9,6 +9,8 @@ export const BUDGET_QUERY_ROOTS = [
   "extra-income",
   "categories",
   "insights",
+  "history",
+  "savings-goals",
 ] as const;
 
 export function invalidateBudgetQueries(qc: QueryClient) {

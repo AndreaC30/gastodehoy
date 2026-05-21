@@ -42,6 +42,7 @@ const INSIGHT_ICON_BY_SLUG: Record<string, IconType> = {
   alert_circle: IoAlertCircleOutline,
   check_circle: IoCheckmarkCircleOutline,
   trending_up: IoTrendingUpOutline,
+  trending_down: IoTrendingDownOutline,
   tags: IoPricetagsOutline,
   home: IoHomeOutline,
   calendar: IoCalendarOutline,

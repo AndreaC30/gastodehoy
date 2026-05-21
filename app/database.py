@@ -159,6 +159,25 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                 text("ALTER TABLE fixed_expenses ADD COLUMN icon VARCHAR(40)")
             )
 
+        conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS savings_goals ("
+                "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,"
+                "  name VARCHAR(80) NOT NULL,"
+                "  target_amount NUMERIC(14, 2) NOT NULL,"
+                "  current_amount NUMERIC(14, 2) NOT NULL DEFAULT 0,"
+                "  target_date DATE"
+                ")"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS idx_savings_goals_user "
+                "ON savings_goals(user_id)"
+            )
+        )
+
         # Supermercado: usuarios ya registrados (sin tocar el resto de categorías ni gastos).
         # Solo INSERT si no existe ese nombre; nuevos usuarios ya la reciben vía DEFAULT_CATEGORIES.
         super_default = next(

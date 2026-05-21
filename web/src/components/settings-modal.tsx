@@ -7,7 +7,10 @@ import { type FormEvent, useEffect, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { ExtraIncome, SavingsMode, Settings } from "@/api/types";
+import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
+import { setAnonymous } from "@/auth";
+import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 
 type Props = {
@@ -17,6 +20,12 @@ type Props = {
   onSaved: (next: Settings) => void;
   onExtrasChanged: () => void;
 };
+
+const inputClass =
+  "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-slate-100 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40";
+
+const inputClassSm =
+  "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40";
 
 function todayIsoLocal(): string {
   const d = new Date();
@@ -42,6 +51,9 @@ export function SettingsModal({
   const [extraDate, setExtraDate] = useState(todayIsoLocal);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   useBodyScrollLock(true);
 
@@ -96,6 +108,27 @@ export function SettingsModal({
     }
   }
 
+  async function confirmDeleteAccount() {
+    if (!deletePassword.trim()) {
+      setError("Escribe tu contraseña para confirmar la eliminación.");
+      return;
+    }
+    setDeleteBusy(true);
+    setError(null);
+    try {
+      await api("/api/auth/me/delete", {
+        method: "POST",
+        body: JSON.stringify({ password: deletePassword }),
+      });
+      await logout();
+      setAnonymous();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
+
   function addExtraIncomeRow() {
     setError(null);
     const n = Number(extraAmount.replace(",", "."));
@@ -146,8 +179,7 @@ export function SettingsModal({
         )}
 
         <form onSubmit={submit} className="space-y-4">
-          <label className="block text-sm font-medium text-slate-400">
-            Ingreso mensual (€)
+          <FormField id="settings-income" label="Ingreso mensual (€)">
             <input
               type="number"
               inputMode="decimal"
@@ -156,66 +188,49 @@ export function SettingsModal({
               required
               value={income}
               onChange={(e) => setIncome(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-slate-100 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className={inputClass}
             />
-          </label>
+          </FormField>
 
           <div>
-            <p className="text-sm font-medium text-slate-400">Ahorro</p>
-            <div className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm">
+            <p id="settings-savings-label" className="text-sm font-medium text-slate-400">
+              Ahorro
+            </p>
+            <div
+              className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
+              role="group"
+              aria-labelledby="settings-savings-label"
+            >
               <ModeBtn
                 active={mode === "percent"}
                 onClick={() => setMode("percent")}
               >
                 % del sueldo
               </ModeBtn>
-              <ModeBtn
-                active={mode === "fixed"}
-                onClick={() => setMode("fixed")}
-              >
+              <ModeBtn active={mode === "fixed"} onClick={() => setMode("fixed")}>
                 Cantidad fija
               </ModeBtn>
             </div>
 
             {mode === "percent" ? (
-              <>
-                <div className="mt-3 flex items-center gap-2">
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    step="0.01"
-                    min={0}
-                    max={100}
-                    value={percent}
-                    onChange={(e) => setPercent(e.target.value)}
-                    className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
-                  />
-                  <span className="text-slate-500">%</span>
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                  Se calcula solo sobre el ingreso mensual; los ingresos extra
-                  no aumentan este porcentaje.
-                </p>
-              </>
+              <SavingsInputRow
+                id="settings-savings-percent"
+                label="Porcentaje de ahorro"
+                suffix="%"
+                hint="Se calcula solo sobre el ingreso mensual; los ingresos extra no aumentan este porcentaje."
+                value={percent}
+                onChange={setPercent}
+                max={100}
+              />
             ) : (
-              <>
-                <div className="mt-3 flex items-center gap-2">
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    step="0.01"
-                    min={0}
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
-                  />
-                  <span className="text-slate-500">€</span>
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                  Cantidad fija al mes, aparte del ingreso mensual; los extras no la
-                  modifican.
-                </p>
-              </>
+              <SavingsInputRow
+                id="settings-savings-amount"
+                label="Cantidad fija al mes (€)"
+                suffix="€"
+                hint="Cantidad fija al mes, aparte del ingreso mensual; los extras no la modifican."
+                value={amount}
+                onChange={setAmount}
+              />
             )}
           </div>
 
@@ -227,27 +242,41 @@ export function SettingsModal({
             </p>
 
             <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                min="0.01"
-                placeholder="Cantidad (€)"
-                value={extraAmount}
-                onChange={(e) => setExtraAmount(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:min-w-[100px] sm:flex-1"
-              />
-              <input
-                type="date"
-                value={extraDate}
-                onChange={(e) => setExtraDate(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:w-auto"
-              />
+              <FormField
+                id="settings-extra-amount"
+                label="Cantidad (€)"
+                className="w-full sm:min-w-[100px] sm:flex-1"
+                labelClassName="sr-only"
+              >
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="Cantidad (€)"
+                  value={extraAmount}
+                  onChange={(e) => setExtraAmount(e.target.value)}
+                  className={inputClassSm}
+                />
+              </FormField>
+              <FormField
+                id="settings-extra-date"
+                label="Fecha de cobro"
+                className="w-full sm:w-auto"
+                labelClassName="sr-only"
+              >
+                <input
+                  type="date"
+                  value={extraDate}
+                  onChange={(e) => setExtraDate(e.target.value)}
+                  className={inputClassSm}
+                />
+              </FormField>
               <button
                 type="button"
                 onClick={addExtraIncomeRow}
                 disabled={addExtra.isPending}
-                className="w-full rounded-lg border border-teal-500/50 bg-teal-500/15 px-3 py-2 text-sm font-semibold text-teal-200 hover:bg-teal-500/25 disabled:opacity-60 sm:w-auto"
+                className="w-full rounded-lg border border-teal-500/50 bg-teal-500/15 px-3 py-2 text-sm font-semibold text-teal-200 hover:bg-teal-500/25 disabled:opacity-60 sm:w-auto sm:self-end"
               >
                 Añadir
               </button>
@@ -301,7 +330,109 @@ export function SettingsModal({
             </button>
           </div>
         </form>
+
+        <div className="mt-6 border-t border-slate-800 pt-5">
+          <h3 className="text-sm font-semibold text-slate-300">Zona de cuenta</h3>
+          <p className="mt-1 text-xs leading-relaxed text-slate-500">
+            Eliminar la cuenta borra todos tus datos de forma permanente.
+          </p>
+          {!deleteOpen ? (
+            <button
+              type="button"
+              onClick={() => {
+                setDeleteOpen(true);
+                setDeletePassword("");
+                setError(null);
+              }}
+              className="mt-3 rounded-lg border border-rose-500/40 px-3 py-2 text-sm font-medium text-rose-400 hover:bg-rose-500/10"
+            >
+              Eliminar cuenta
+            </button>
+          ) : (
+            <div className="mt-3 space-y-3 rounded-xl border border-rose-500/30 bg-rose-950/20 p-4">
+              <FormField
+                id="delete-account-password"
+                label="Contraseña actual"
+                hint="Confirma que eres tú. Esta acción no se puede deshacer."
+              >
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-rose-500/50 focus:ring-2 focus:ring-rose-500/40"
+                />
+              </FormField>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void confirmDeleteAccount()}
+                  disabled={deleteBusy}
+                  className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-60"
+                >
+                  {deleteBusy ? "Eliminando…" : "Confirmar eliminación"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteOpen(false);
+                    setDeletePassword("");
+                  }}
+                  disabled={deleteBusy}
+                  className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/60"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function SavingsInputRow({
+  id,
+  label,
+  suffix,
+  hint,
+  value,
+  onChange,
+  max,
+}: {
+  id: string;
+  label: string;
+  suffix: string;
+  hint: string;
+  value: string;
+  onChange: (v: string) => void;
+  max?: number;
+}) {
+  const hintId = `${id}-hint`;
+  return (
+    <div className="mt-3">
+      <label htmlFor={id} className="text-sm font-medium text-slate-400">
+        {label}
+      </label>
+      <div className="mt-1.5 flex items-center gap-2">
+        <input
+          id={id}
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min={0}
+          max={max}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-describedby={hintId}
+          className={inputClass}
+        />
+        <span className="text-slate-500">{suffix}</span>
+      </div>
+      <p id={hintId} className="mt-2 text-xs leading-relaxed text-slate-500">
+        {hint}
+      </p>
     </div>
   );
 }

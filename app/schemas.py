@@ -280,6 +280,51 @@ class InsightsRead(BaseModel):
     projected_monthly: Decimal
 
 
+# --- Savings goals -----------------------------------------------------------
+
+
+class SavingsGoalCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    target_amount: Decimal = Field(gt=0, decimal_places=2)
+    current_amount: Decimal = Field(default=Decimal("0"), ge=0, decimal_places=2)
+    target_date: date | None = None
+
+    @field_validator("name")
+    @classmethod
+    def name_not_blank(cls, v: str) -> str:
+        s = v.strip()
+        if not s:
+            raise ValueError("El nombre no puede estar vacío")
+        return s
+
+
+class SavingsGoalUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=80)
+    target_amount: Decimal | None = Field(default=None, gt=0, decimal_places=2)
+    current_amount: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    target_date: date | None = None
+
+    @field_validator("name")
+    @classmethod
+    def name_strip_optional(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        s = v.strip()
+        if not s:
+            raise ValueError("El nombre no puede estar vacío")
+        return s
+
+
+class SavingsGoalRead(BaseModel):
+    id: int
+    name: str
+    target_amount: Decimal
+    current_amount: Decimal
+    target_date: date | None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PaginatedMeta(BaseModel):
     """Pagination metadata."""
 
@@ -316,3 +361,18 @@ class SummaryRead(BaseModel):
     monthly_budget_after_fixed_and_savings: Decimal
     remaining_this_month: Decimal
     suggested_spend_today: Decimal
+
+
+class MonthHistoryItem(BaseModel):
+    year: int
+    month: int
+    month_label: str
+    period_start: date
+    period_end: date
+    variable_spent_month: Decimal
+    savings_amount: Decimal
+    remaining_this_month: Decimal
+
+
+class MonthHistoryRead(BaseModel):
+    months: list[MonthHistoryItem]
