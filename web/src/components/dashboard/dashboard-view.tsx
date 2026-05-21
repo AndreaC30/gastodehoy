@@ -252,7 +252,9 @@ export function Dashboard({ profileName }: Props) {
         onOpenCategories={() => setShowCategoryManager(true)}
         onOpenSavingsGoals={() => setShowSavingsGoals(true)}
         onExport={() => void handleExport()}
-        onStartTour={() => setShowTour(true)}
+        onStartTour={() => {
+          setShowTour(true);
+        }}
         exportBusy={exportBusy}
       />
 

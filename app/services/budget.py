@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.models import ExtraIncome, FixedExpense, UserSettings, VariableExpense
+from app.services.extra_income_savings import saved_from_extra, spendable_from_extra
 
 
 def _sum_amount_in_month(
@@ -102,18 +103,28 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
         month_start,
         month_end,
     )
-    extra_month = _sum_amount_in_month(
-        session,
-        ExtraIncome,
-        user_id,
-        ExtraIncome.received_at,
-        month_start,
-        month_end,
+    extra_rows = list(
+        session.scalars(
+            select(ExtraIncome).where(
+                ExtraIncome.user_id == user_id,
+                ExtraIncome.received_at >= month_start,
+                ExtraIncome.received_at <= month_end,
+            )
+        ).all()
     )
+    extra_month = sum(
+        (Decimal(r.amount) for r in extra_rows), start=Decimal("0")
+    ).quantize(Decimal("0.01"))
+    extra_saved_month = sum(
+        (saved_from_extra(r) for r in extra_rows), start=Decimal("0")
+    ).quantize(Decimal("0.01"))
+    extra_spendable = sum(
+        (spendable_from_extra(r) for r in extra_rows), start=Decimal("0")
+    ).quantize(Decimal("0.01"))
 
-    # Ingreso efectivo del mes: sueldo base + extras recibidos en el mes.
-    # El ahorro (porcentaje o fijo) sigue calculandose solo sobre el sueldo base.
-    effective_income = income + extra_month
+    # Ingreso efectivo: sueldo base + parte de extras no reservada como ahorro.
+    # El ahorro del sueldo (porcentaje o fijo) sigue solo sobre el ingreso mensual.
+    effective_income = income + extra_spendable
 
     monthly_budget = effective_income - savings_amount - fixed_total
     remaining = monthly_budget - variable_spent
@@ -127,6 +138,7 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
         "days_remaining_in_month": days_left,
         "monthly_income": income.quantize(Decimal("0.01")),
         "extra_income_month": extra_month,
+        "extra_income_saved_month": extra_saved_month,
         "savings_mode": us.savings_mode,
         "savings_percent": pct.quantize(Decimal("0.01")),
         "savings_amount": savings_amount,

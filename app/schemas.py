@@ -9,7 +9,15 @@ from datetime import date
 from decimal import Decimal
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from app.auth import (
     NAME_MAX_LEN,
@@ -184,12 +192,26 @@ class VariableExpenseRead(BaseModel):
 class ExtraIncomeCreate(BaseModel):
     amount: Decimal = Field(gt=0, decimal_places=2)
     received_at: date | None = None
+    savings_mode: str = Field(default="none", pattern=r"^(none|all|percent|fixed)$")
+    savings_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    savings_fixed: Decimal = Field(default=Decimal("0"), ge=0)
+
+    @model_validator(mode="after")
+    def validate_savings(self) -> "ExtraIncomeCreate":
+        if self.savings_mode == "fixed" and self.savings_fixed > self.amount:
+            raise ValueError(
+                "La cantidad a ahorrar no puede ser mayor que el ingreso extra."
+            )
+        return self
 
 
 class ExtraIncomeRead(BaseModel):
     id: int
     amount: Decimal
     received_at: date
+    savings_mode: str
+    savings_percent: Decimal
+    savings_fixed: Decimal
 
     model_config = {"from_attributes": True}
 
@@ -353,6 +375,7 @@ class SummaryRead(BaseModel):
     days_remaining_in_month: int
     monthly_income: Decimal
     extra_income_month: Decimal
+    extra_income_saved_month: Decimal
     savings_mode: SavingsMode
     savings_percent: Decimal
     savings_amount: Decimal

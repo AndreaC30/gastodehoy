@@ -188,6 +188,16 @@ class ExtraIncome(Base):
     )
     amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
     received_at: Mapped[date] = mapped_column(Date, nullable=False)
+    # none = gastar todo; all | percent | fixed = reservar antes del margen
+    savings_mode: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="none", server_default="none"
+    )
+    savings_percent: Mapped[Decimal] = mapped_column(
+        Numeric(5, 2), nullable=False, default=Decimal("0"), server_default="0"
+    )
+    savings_fixed: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2), nullable=False, default=Decimal("0"), server_default="0"
+    )
 
     user: Mapped[User] = relationship(back_populates="extra_incomes")
 
