@@ -5,9 +5,9 @@ import { ChevronInCircle } from "@/components/dashboard/chevron-expand";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
+import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
 
-const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40";
+const inputClass = INPUT_CLASS;
 
 type Props = {
   items: FixedExpense[];
@@ -92,7 +92,7 @@ export function FixedExpensesSection({
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
+            className={`w-full sm:w-auto ${BTN_PRIMARY}`}
           >
             Añadir
           </button>
@@ -120,7 +120,8 @@ export function FixedExpensesSection({
                       <button
                         type="button"
                         onClick={() => onEdit(it)}
-                        className="rounded-lg border border-slate-600 px-2.5 py-1 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                        className={`min-h-11 rounded-lg border border-slate-600 px-2.5 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800 ${FOCUS_RING}`}
+                        aria-label={`Editar gasto fijo ${it.name}`}
                       >
                         Editar
                       </button>
@@ -128,7 +129,8 @@ export function FixedExpensesSection({
                         type="button"
                         onClick={() => onDelete(it.id)}
                         disabled={deletePending}
-                        className="rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                        className={`min-h-11 rounded-lg border border-rose-500/40 px-2.5 py-1.5 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
+                        aria-label={`Quitar gasto fijo ${it.name}`}
                       >
                         Quitar
                       </button>
@@ -141,7 +143,7 @@ export function FixedExpensesSection({
               <button
                 type="button"
                 onClick={onToggleExpand}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950/40 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                className={`mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950/40 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 ${FOCUS_RING}`}
                 aria-expanded={expanded}
               >
                 <ChevronInCircle expanded={expanded} />

@@ -32,9 +32,10 @@ def test_export_csv_includes_sections(client, db_session, user) -> None:
     assert r.status_code == 200
     assert "text/csv" in r.headers.get("content-type", "")
     body = r.text
-    assert "settings" in body
-    assert "monthly_income" in body
-    assert "fixed_expenses" in body
+    assert "seccion,campo,valor" in body
+    assert "ajustes" in body
+    assert "ingreso_mensual" in body
+    assert "gastos_fijos" in body
     assert "Internet" in body
-    assert "variable_expenses" in body
+    assert "gastos_variables" in body
     assert "12.50" in body

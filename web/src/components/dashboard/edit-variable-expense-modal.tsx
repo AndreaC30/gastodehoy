@@ -1,9 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { ExpenseCategory, VariableExpense } from "@/api/types";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   expense: VariableExpense;
@@ -26,7 +28,9 @@ export function EditVariableExpenseModal({
   const [note, setNote] = useState(expense.note ?? "");
   const [error, setError] = useState<string | null>(null);
 
+  const panelRef = useRef<HTMLDivElement>(null);
   useBodyScrollLock(true);
+  useDialogA11y(true, panelRef);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -76,7 +80,11 @@ export function EditVariableExpenseModal({
       aria-modal="true"
       aria-labelledby="edit-variable-title"
     >
-      <div className="modal-scroll w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5">
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        className="modal-scroll w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5"
+      >
         <div className="flex items-center justify-between gap-3">
           <h2 id="edit-variable-title" className="text-lg font-bold">
             Editar gasto
@@ -84,7 +92,7 @@ export function EditVariableExpenseModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+            className={`min-h-11 min-w-11 rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200 ${FOCUS_RING}`}
             aria-label="Cerrar"
           >
             <IoClose className="h-5 w-5" aria-hidden />
@@ -92,7 +100,10 @@ export function EditVariableExpenseModal({
         </div>
 
         {error && (
-          <p className="mt-3 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200">
+          <p
+            className="mt-3 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200"
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -111,7 +122,7 @@ export function EditVariableExpenseModal({
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className={INPUT_CLASS}
             />
           </div>
           <div>
@@ -124,7 +135,7 @@ export function EditVariableExpenseModal({
               value={occurredAt}
               onChange={(e) => setOccurredAt(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className={INPUT_CLASS}
             />
           </div>
           <div>
@@ -135,7 +146,7 @@ export function EditVariableExpenseModal({
               id="edit-var-category"
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className={INPUT_CLASS}
             >
               <option value="">Sin categoría</option>
               {categories.map((cat) => (
@@ -154,21 +165,21 @@ export function EditVariableExpenseModal({
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className={INPUT_CLASS}
             />
           </div>
           <div className="flex gap-2 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+              className={`flex-1 ${BTN_SECONDARY}`}
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saveMut.isPending}
-              className="flex-1 rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+              className={`flex-1 ${BTN_PRIMARY}`}
             >
               {saveMut.isPending ? "Guardando…" : "Guardar"}
             </button>

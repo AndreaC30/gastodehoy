@@ -15,6 +15,7 @@ import type {
 import { setUser } from "@/auth";
 import { BrandLogo } from "@/components/brand-logo";
 import { showLegalPage } from "@/lib/legal-pages-state";
+import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Mode = "login" | "register" | "forgot";
 
@@ -59,7 +60,7 @@ export function LoginScreen({
             <button
               type="button"
               onClick={onBackToLanding}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-teal-300"
+              className={`inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-teal-300 ${FOCUS_RING}`}
             >
               <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
               Volver al inicio
@@ -68,7 +69,11 @@ export function LoginScreen({
         )}
 
         {mode !== "forgot" && (
-          <div className="mt-6 flex rounded-xl border border-slate-800 bg-slate-900/60 p-1 text-sm">
+          <div
+            className="mt-6 flex rounded-xl border border-slate-800 bg-slate-900/60 p-1 text-sm"
+            role="tablist"
+            aria-label="Acceso a la cuenta"
+          >
               <TabButton
                 active={mode === "login"}
                 onClick={() => {
@@ -91,7 +96,11 @@ export function LoginScreen({
         )}
 
         {error && (
-          <div className="mt-4 rounded-2xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-sm text-rose-200">
+          <div
+            className="mt-4 rounded-2xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"
+            role="alert"
+            aria-live="polite"
+          >
             {error}
           </div>
         )}
@@ -135,8 +144,10 @@ function TabButton({
   return (
     <button
       type="button"
+      role="tab"
+      aria-selected={active}
       onClick={onClick}
-      className={`flex-1 rounded-lg px-3 py-2 font-medium transition ${
+      className={`min-h-11 flex-1 rounded-lg px-3 py-2 font-medium transition ${FOCUS_RING} ${
         active
           ? "bg-slate-950 text-slate-100 shadow-inner"
           : "text-slate-500 hover:text-slate-300"
@@ -199,7 +210,7 @@ function LoginForm({
       <button
         type="submit"
         disabled={busy || !email || !password}
-        className="mt-2 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+        className={`mt-2 w-full ${BTN_PRIMARY}`}
       >
         {busy ? "Entrando…" : "Entrar"}
       </button>
@@ -288,12 +299,16 @@ function RegisterForm({
         value={password2}
         onChange={setPassword2}
       />
-      <label className="flex items-start gap-2 text-xs text-slate-400 cursor-pointer">
+      <label
+        htmlFor="register-accept-terms"
+        className="flex cursor-pointer items-start gap-2 text-xs text-slate-400"
+      >
         <input
+          id="register-accept-terms"
           type="checkbox"
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
-          className="mt-0.5 h-4 w-4 rounded border-slate-600 bg-slate-800 accent-teal-500"
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-600 bg-slate-800 accent-teal-500"
         />
         <span>
           He leído y acepto la{" "}
@@ -305,7 +320,7 @@ function RegisterForm({
       <button
         type="submit"
         disabled={busy || !email || !name || !password || !password2 || !acceptedTerms}
-        className="mt-2 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+        className={`mt-2 w-full ${BTN_PRIMARY}`}
       >
         {busy ? "Creando…" : "Crear cuenta"}
       </button>
@@ -454,9 +469,9 @@ function Field({
           maxLength={maxLength}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full rounded-lg border border-slate-700 bg-slate-950 py-2.5 pl-3 ${
+          className={`${INPUT_CLASS} py-2.5 pl-3 ${
             isPassword ? "pr-10" : "pr-3"
-          } outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40`}
+          }`}
         />
         {isPassword && (
           <button
@@ -464,8 +479,7 @@ function Field({
             onClick={() => setVisible((v) => !v)}
             aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
             aria-pressed={visible}
-            tabIndex={-1}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 hover:text-slate-300 focus:text-slate-300 focus:outline-none"
+            className={`absolute inset-y-0 right-0 flex min-h-11 min-w-11 items-center justify-center text-slate-500 hover:text-slate-300 ${FOCUS_RING}`}
           >
             {visible ? (
               <FiEyeOff className="h-[18px] w-[18px]" aria-hidden />

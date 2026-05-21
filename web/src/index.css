@@ -41,3 +41,38 @@ svg {
 .modal-scroll::-webkit-scrollbar-thumb:hover {
   background-color: rgb(100 116 139);
 }
+
+/* Enlace «saltar al contenido» (visible al recibir foco por teclado). */
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  border-radius: 0.5rem;
+  border: 1px solid rgb(45 212 191 / 0.5);
+  background: rgb(15 23 42);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(45 212 191);
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid rgb(45 212 191);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

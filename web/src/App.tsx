@@ -182,7 +182,14 @@ function Authed({ userName }: { userName: string }) {
     );
   }
 
-  return <Dashboard profileName={userName} />;
+  return (
+    <>
+      <a href="#main-content" className="skip-link">
+        Saltar al contenido principal
+      </a>
+      <Dashboard profileName={userName} />
+    </>
+  );
 }
 
 /** Usuario no autenticado: landing o login; F5 conserva la vista gracias a sessionStorage. */

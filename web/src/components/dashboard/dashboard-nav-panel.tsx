@@ -9,6 +9,7 @@ import {
 } from "react-icons/io5";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 
 export type DashboardNavAction =
   | "settings"
@@ -116,7 +117,7 @@ export function DashboardNavPanel({
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-lg border border-slate-800 p-2 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200"
+            className={`shrink-0 min-h-11 min-w-11 rounded-lg border border-slate-800 p-2 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200 ${FOCUS_RING}`}
             aria-label="Cerrar menú"
           >
             <IoClose className="h-5 w-5" aria-hidden />

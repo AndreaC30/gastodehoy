@@ -4,6 +4,7 @@ import { useState } from "react";
 import { api } from "@/api/client";
 import type { MonthHistoryRead } from "@/api/types";
 import { money } from "@/lib/format";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 
 const MONTH_OPTIONS = [3, 6, 12] as const;
 type MonthCount = (typeof MONTH_OPTIONS)[number];
@@ -89,7 +90,7 @@ export function MonthHistoryStrip() {
               type="button"
               onClick={() => setMonths(n)}
               aria-pressed={months === n}
-              className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+              className={`min-h-11 min-w-11 rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${FOCUS_RING} ${
                 months === n
                   ? "bg-teal-600 text-white"
                   : "text-slate-400 hover:text-slate-200"

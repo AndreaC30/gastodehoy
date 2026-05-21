@@ -3,6 +3,7 @@ import { AddVariableExpenseForm } from "@/components/dashboard/add-variable-expe
 import { ChevronInCircle } from "@/components/dashboard/chevron-expand";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { money } from "@/lib/format";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 import { type FormEvent } from "react";
 
 type Props = {
@@ -94,7 +95,8 @@ export function VariableExpensesSection({
                       <button
                         type="button"
                         onClick={() => onEdit(it)}
-                        className="rounded-lg border border-slate-600 px-2.5 py-1 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                        className={`min-h-11 rounded-lg border border-slate-600 px-2.5 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800 ${FOCUS_RING}`}
+                        aria-label={`Editar gasto de ${money(it.amount)}${it.note ? `, ${it.note}` : ""}`}
                       >
                         Editar
                       </button>
@@ -102,7 +104,8 @@ export function VariableExpensesSection({
                         type="button"
                         onClick={() => onDelete(it.id)}
                         disabled={deletePending}
-                        className="rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                        className={`min-h-11 rounded-lg border border-rose-500/40 px-2.5 py-1.5 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
+                        aria-label={`Borrar gasto de ${money(it.amount)}`}
                       >
                         Borrar
                       </button>

@@ -1,5 +1,5 @@
 /** Modal to create, edit, and delete expense categories. */
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
@@ -9,6 +9,8 @@ import {
   getCategoryIcon,
 } from "@/components/dashboard/category-icon";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   categories: ExpenseCategory[];
@@ -31,7 +33,17 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
   const [formBudget, setFormBudget] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const panelRef = useRef<HTMLDivElement>(null);
   useBodyScrollLock(true);
+  useDialogA11y(true, panelRef);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   function parseBudgetInput(raw: string): number | null {
     const s = raw.trim().replace(",", ".");
@@ -151,7 +163,11 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
       aria-modal="true"
       aria-labelledby="category-manager-title"
     >
-      <div className="modal-scroll max-h-[min(85vh,100dvh)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-700 bg-slate-900 p-4 pr-3 shadow-2xl sm:rounded-2xl sm:p-6 sm:pr-5">
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        className="modal-scroll max-h-[min(85vh,100dvh)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-700 bg-slate-900 p-4 pr-3 shadow-2xl sm:rounded-2xl sm:p-6 sm:pr-5"
+      >
         <div className="flex items-center justify-between">
           <h2 id="category-manager-title" className="text-lg font-bold">
             Categorías de gasto
@@ -167,7 +183,10 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
         </div>
 
         {error && (
-          <p className="mt-3 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200">
+          <p
+            className="mt-3 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200"
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -199,7 +218,8 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
                   <button
                     type="button"
                     onClick={() => startEdit(cat)}
-                    className="rounded px-2 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                    className={`min-h-11 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200 ${FOCUS_RING}`}
+                    aria-label={`Editar categoría ${cat.name}`}
                   >
                     Editar
                   </button>
@@ -207,7 +227,8 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
                     type="button"
                     onClick={() => deleteMut.mutate(cat.id)}
                     disabled={deleteMut.isPending}
-                    className="rounded px-2 py-1 text-xs text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                    className={`min-h-11 rounded-lg px-2.5 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
+                    aria-label={`Borrar categoría ${cat.name}`}
                   >
                     Borrar
                   </button>
@@ -221,36 +242,41 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
           <h3 className="text-sm font-semibold text-slate-300">
             {editingId ? "Editar categoría" : "Nueva categoría"}
           </h3>
-          <div className="flex gap-2">
+          <div>
+            <label htmlFor="cat-form-name" className="mb-1 block text-xs text-slate-500">
+              Nombre
+            </label>
             <input
+              id="cat-form-name"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
-              placeholder="Nombre"
+              placeholder="Ej. Ocio"
               required
               maxLength={80}
-              className="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className={INPUT_CLASS}
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs text-slate-500">
+            <label htmlFor="cat-form-budget" className="mb-1 block text-xs text-slate-500">
               Presupuesto mensual (opcional)
             </label>
             <input
+              id="cat-form-budget"
               type="text"
               inputMode="decimal"
               value={formBudget}
               onChange={(e) => setFormBudget(e.target.value)}
               placeholder="Ej. 80"
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className={INPUT_CLASS}
             />
             <p className="mt-1 text-xs text-slate-600">
               Si gastas más de este importe en el mes, la app te avisará.
             </p>
           </div>
 
-          <div>
-            <p className="mb-2 text-xs text-slate-500">Color</p>
+          <fieldset>
+            <legend className="mb-2 text-xs text-slate-500">Color</legend>
             <div className="flex flex-wrap gap-2">
               {PRESET_COLORS.map((c) => (
                 <button
@@ -265,10 +291,10 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
                 />
               ))}
             </div>
-          </div>
+          </fieldset>
 
-          <div>
-            <p className="mb-2 text-xs text-slate-500">Icono</p>
+          <fieldset>
+            <legend className="mb-2 text-xs text-slate-500">Icono</legend>
             <div className="flex flex-wrap gap-2">
               {CATEGORY_ICON_PICKER.map((opt) => {
                 const OptIcon = opt.Icon;
@@ -289,13 +315,13 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
                 );
               })}
             </div>
-          </div>
+          </fieldset>
 
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={createMut.isPending || updateMut.isPending}
-              className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+              className={BTN_PRIMARY}
             >
               {editingId ? "Guardar" : "Crear"}
             </button>
@@ -303,7 +329,7 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
               <button
                 type="button"
                 onClick={resetForm}
-                className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-400 hover:bg-slate-800"
+                className={BTN_SECONDARY}
               >
                 Cancelar
               </button>

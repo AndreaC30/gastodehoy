@@ -1,11 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { FixedExpense } from "@/api/types";
 import { DEFAULT_FIXED_EXPENSE_ICON } from "@/components/dashboard/category-icon";
 import { IconSelectDropdown } from "@/components/dashboard/icon-select-dropdown";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   expense: FixedExpense;
@@ -19,7 +21,9 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
   const [icon, setIcon] = useState(expense.icon ?? DEFAULT_FIXED_EXPENSE_ICON);
   const [error, setError] = useState<string | null>(null);
 
+  const panelRef = useRef<HTMLDivElement>(null);
   useBodyScrollLock(true);
+  useDialogA11y(true, panelRef);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -67,7 +71,11 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
       aria-modal="true"
       aria-labelledby="edit-fixed-title"
     >
-      <div className="modal-scroll w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5">
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        className="modal-scroll w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5"
+      >
         <div className="flex items-center justify-between gap-3">
           <h2 id="edit-fixed-title" className="text-lg font-bold">
             Editar gasto fijo
@@ -75,7 +83,7 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+            className={`min-h-11 min-w-11 rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200 ${FOCUS_RING}`}
             aria-label="Cerrar"
           >
             <IoClose className="h-5 w-5" aria-hidden />
@@ -83,7 +91,10 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
         </div>
 
         {error && (
-          <p className="mt-3 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200">
+          <p
+            className="mt-3 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200"
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -101,7 +112,7 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+                className={`min-w-0 flex-1 ${INPUT_CLASS}`}
               />
             </div>
           </div>
@@ -118,21 +129,21 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className={INPUT_CLASS}
             />
           </div>
           <div className="flex gap-2 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+              className={`flex-1 ${BTN_SECONDARY}`}
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saveMut.isPending}
-              className="flex-1 rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+              className={`flex-1 ${BTN_PRIMARY}`}
             >
               {saveMut.isPending ? "Guardando…" : "Guardar"}
             </button>
