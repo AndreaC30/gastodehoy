@@ -29,6 +29,7 @@ type Props = {
   settingsReady: boolean;
   exportBusy?: boolean;
   onClose: () => void;
+  onReopenMenu: () => void;
   onNavigate: (action: DashboardNavAction) => void;
 };
 
@@ -46,6 +47,7 @@ export function DashboardNavPanel({
   settingsReady,
   exportBusy = false,
   onClose,
+  onReopenMenu,
   onNavigate,
 }: Props) {
   const [accountOpen, setAccountOpen] = useState(false);
@@ -199,6 +201,10 @@ export function DashboardNavPanel({
         open={accountOpen}
         profileName={profileName}
         onClose={() => setAccountOpen(false)}
+        onBackToMenu={() => {
+          setAccountOpen(false);
+          onReopenMenu();
+        }}
         onRequestDelete={() => {
           setAccountOpen(false);
           setDeleteOpen(true);
@@ -208,6 +214,10 @@ export function DashboardNavPanel({
       <DeleteAccountModal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+        onBackToMenu={() => {
+          setDeleteOpen(false);
+          onReopenMenu();
+        }}
       />
     </>
   );

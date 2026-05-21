@@ -9,14 +9,16 @@ import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { FormField } from "@/components/ui/form-field";
+import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  onBackToMenu?: () => void;
 };
 
-export function DeleteAccountModal({ open, onClose }: Props) {
+export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -127,15 +129,12 @@ export function DeleteAccountModal({ open, onClose }: Props) {
           </FormField>
         </div>
 
-        <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={busy}
-            className={`min-h-11 w-full rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/60 sm:w-auto ${FOCUS_RING}`}
-          >
-            Cancelar
-          </button>
+        <ModalMenuFooter
+          className="mt-4"
+          onBackToMenu={onBackToMenu}
+          onClose={onClose}
+          closeLabel="Cancelar"
+        >
           <button
             type="button"
             onClick={() => void confirmDelete()}
@@ -144,7 +143,7 @@ export function DeleteAccountModal({ open, onClose }: Props) {
           >
             {busy ? "Eliminando…" : "Confirmar eliminación"}
           </button>
-        </div>
+        </ModalMenuFooter>
       </div>
     </div>
   );

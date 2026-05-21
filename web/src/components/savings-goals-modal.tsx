@@ -6,14 +6,20 @@ import { IoClose } from "react-icons/io5";
 import { SavingsGoalsContent } from "@/components/dashboard/savings-goals-panel";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 
 type Props = {
   reservedSavings?: string | number;
   onClose: () => void;
+  onBackToMenu?: () => void;
 };
 
-export function SavingsGoalsModal({ reservedSavings, onClose }: Props) {
+export function SavingsGoalsModal({
+  reservedSavings,
+  onClose,
+  onBackToMenu,
+}: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   useBodyScrollLock(true);
   useDialogA11y(true, panelRef);
@@ -63,6 +69,8 @@ export function SavingsGoalsModal({ reservedSavings, onClose }: Props) {
         </header>
 
         <SavingsGoalsContent reservedSavings={reservedSavings} />
+
+        <ModalMenuFooter className="mt-4" onBackToMenu={onBackToMenu} onClose={onClose} />
       </div>
     </div>
   );

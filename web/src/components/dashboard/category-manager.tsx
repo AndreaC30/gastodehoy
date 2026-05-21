@@ -10,11 +10,13 @@ import {
 } from "@/components/dashboard/category-icon";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   categories: ExpenseCategory[];
   onClose: () => void;
+  onBackToMenu?: () => void;
   onChanged: () => void;
 };
 
@@ -24,7 +26,12 @@ const PRESET_COLORS = [
   "#f97316", "#14b8a6", "#8b5cf6", "#06b6d4",
 ];
 
-export function CategoryManager({ categories, onClose, onChanged }: Props) {
+export function CategoryManager({
+  categories,
+  onClose,
+  onBackToMenu,
+  onChanged,
+}: Props) {
   const qc = useQueryClient();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formName, setFormName] = useState("");
@@ -337,6 +344,8 @@ export function CategoryManager({ categories, onClose, onChanged }: Props) {
             )}
           </div>
         </form>
+
+        <ModalMenuFooter className="mt-4" onBackToMenu={onBackToMenu} onClose={onClose} />
       </div>
     </div>
   );

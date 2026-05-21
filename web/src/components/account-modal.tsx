@@ -6,12 +6,14 @@ import { IoClose, IoLogOutOutline } from "react-icons/io5";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 
 type Props = {
   open: boolean;
   profileName: string;
   onClose: () => void;
+  onBackToMenu?: () => void;
   onRequestDelete: () => void;
 };
 
@@ -19,6 +21,7 @@ export function AccountModal({
   open,
   profileName,
   onClose,
+  onBackToMenu,
   onRequestDelete,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -105,15 +108,7 @@ export function AccountModal({
           </button>
         </div>
 
-        <div className="mt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className={`min-h-11 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/60 ${FOCUS_RING}`}
-          >
-            Cerrar
-          </button>
-        </div>
+        <ModalMenuFooter className="mt-4" onBackToMenu={onBackToMenu} onClose={onClose} />
       </div>
     </div>
   );

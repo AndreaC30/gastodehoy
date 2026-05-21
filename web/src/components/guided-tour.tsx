@@ -16,6 +16,7 @@ type Props = {
   steps: TourStep[];
   onComplete: () => void;
   onSkip: () => void;
+  onBackToMenu?: () => void;
 };
 
 type SpotlightRect = {
@@ -57,7 +58,7 @@ function TourSpotlightOverlay({ rect }: { rect: SpotlightRect | null }) {
   );
 }
 
-export function GuidedTour({ steps, onComplete, onSkip }: Props) {
+export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<{
     top: number;
@@ -190,28 +191,44 @@ export function GuidedTour({ steps, onComplete, onSkip }: Props) {
         <p id="guided-tour-body" className="mt-1.5 break-words text-base text-slate-300">
           {step.body}
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={isLast ? finishComplete : goNext}
-            disabled={scrolling}
-            className={`min-w-[7rem] flex-1 ${BTN_PRIMARY}`}
-          >
-            {isLast ? "Listo" : "Siguiente"}
-          </button>
-          {index > 0 && (
+        <div className="mt-4 flex flex-col gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={goPrev}
+              onClick={isLast ? finishComplete : goNext}
               disabled={scrolling}
-              className={BTN_SECONDARY}
+              className={`min-h-11 min-w-[7rem] flex-1 ${BTN_PRIMARY}`}
             >
-              Atrás
+              {isLast ? "Listo" : "Siguiente"}
+            </button>
+            {index > 0 && (
+              <button
+                type="button"
+                onClick={goPrev}
+                disabled={scrolling}
+                className={`min-h-11 ${BTN_SECONDARY}`}
+              >
+                Atrás
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={finishSkip}
+              className={`min-h-11 ${BTN_SECONDARY}`}
+            >
+              Omitir
+            </button>
+          </div>
+          {onBackToMenu && (
+            <button
+              type="button"
+              onClick={onBackToMenu}
+              disabled={scrolling}
+              className={`min-h-11 w-full text-sm font-medium text-slate-400 underline decoration-slate-600 underline-offset-4 hover:text-slate-200 ${FOCUS_RING}`}
+            >
+              Volver al menú
             </button>
           )}
-          <button type="button" onClick={finishSkip} className={BTN_SECONDARY}>
-            Omitir
-          </button>
         </div>
       </div>
     </div>
