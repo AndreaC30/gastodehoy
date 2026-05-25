@@ -11,6 +11,10 @@ For SQLite we apply two extras the moment a connection is opened:
 * ``journal_mode=WAL``: write-ahead-log lets readers and a single writer
   proceed concurrently and survives the occasional crash without
   corrupting the database.
+* ``busy_timeout=5000``: wait up to 5s on lock contention instead of
+  failing immediately with "database is locked".
+* ``synchronous=NORMAL``: safe with WAL; fewer fsyncs than FULL while
+  keeping durability for typical single-host deployments.
 """
 
 from collections.abc import Generator
@@ -47,6 +51,8 @@ if _is_sqlite:
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA busy_timeout=5000")
+        cursor.execute("PRAGMA synchronous=NORMAL")
         cursor.close()
 
 

@@ -26,6 +26,7 @@ import type {
   Insights,
   Settings,
   Summary,
+  PaginatedVariableExpenses,
   VariableExpense,
 } from "@/api/types";
 import { APP_SHELL_CLASS } from "@/lib/app-layout";
@@ -48,8 +49,20 @@ async function loadSettings() {
 async function loadFixed() {
   return api<FixedExpense[]>("/api/fixed-expenses");
 }
+/** Current-month expenses; fetches all pages (API caps limit at 200). */
 async function loadExpenses() {
-  return api<VariableExpense[]>("/api/expenses");
+  const pageLimit = 200;
+  const all: VariableExpense[] = [];
+  let offset = 0;
+  for (;;) {
+    const page = await api<PaginatedVariableExpenses>(
+      `/api/expenses?limit=${pageLimit}&offset=${offset}`,
+    );
+    all.push(...page.items);
+    if (all.length >= page.meta.total) break;
+    offset += pageLimit;
+  }
+  return all;
 }
 async function loadExtraIncome() {
   return api<ExtraIncome[]>("/api/extra-income");

@@ -7,9 +7,13 @@ from typing import Literal
 from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
-from app.models import ExpenseCategory, ExtraIncome, UserSettings, VariableExpense
-from app.services.budget import days_remaining_in_month, month_bounds, today_in_app_timezone
-from app.services.extra_income_savings import spendable_from_extra
+from app.models import ExpenseCategory, UserSettings, VariableExpense
+from app.services.budget import (
+    compute_summary,
+    days_remaining_in_month,
+    month_bounds,
+    today_in_app_timezone,
+)
 
 
 def _previous_month_bounds(month_start: date) -> tuple[date, date]:
@@ -263,16 +267,17 @@ def compute_insights(
             }
         )
 
-    # 6. Fixed expenses ratio
-    if us and monthly_income > 0:
-        from app.models import FixedExpense
+    days_left = days_remaining_in_month(today)
+    needs_budget_snapshot = monthly_income > 0 and (
+        us is not None or (avg_daily > 0 and days_left > 0)
+    )
+    summary = (
+        compute_summary(session, user_id, today) if needs_budget_snapshot else None
+    )
 
-        fixed_total = session.scalar(
-            select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(
-                FixedExpense.user_id == user_id
-            )
-        ) or Decimal("0")
-        fixed_total = Decimal(fixed_total).quantize(Decimal("0.01"))
+    # 6. Fixed expenses ratio
+    if us and monthly_income > 0 and summary is not None:
+        fixed_total = summary["fixed_expenses_total"]
         fixed_pct = _safe_pct(fixed_total, monthly_income)
         if fixed_pct > 60:
             insights.append(
@@ -287,69 +292,35 @@ def compute_insights(
                 }
             )
 
-    # 7. Daily spending tip
-    if avg_daily > 0:
-        days_left = days_remaining_in_month(today)
-        if days_left > 0 and monthly_income > 0:
-            # Use the same formula as compute_summary for consistency
-            from app.models import FixedExpense
+    # 7. Daily spending tip (aligned with dashboard «Hoy puedes gastar»)
+    if avg_daily > 0 and days_left > 0 and monthly_income > 0 and summary is not None:
+        remaining = summary["remaining_this_month"]
+        daily_budget = summary["suggested_spend_today"]
 
-            fixed_total = session.scalar(
-                select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(
-                    FixedExpense.user_id == user_id
-                )
-            ) or Decimal("0")
-            fixed_total = Decimal(fixed_total).quantize(Decimal("0.01"))
-
-            extra_rows = list(
-                session.scalars(
-                    select(ExtraIncome).where(
-                        ExtraIncome.user_id == user_id,
-                        ExtraIncome.received_at >= month_start,
-                        ExtraIncome.received_at <= month_end,
-                    )
-                ).all()
+        if daily_budget > 0:
+            insights.append(
+                {
+                    "type": "info",
+                    "title": "Tope diario recomendado",
+                    "message": (
+                        f"Te quedan {remaining}€ repartidos en {days_left} días "
+                        f"(hasta {daily_budget}€/día, igual que «Hoy puedes gastar»)."
+                    ),
+                    "icon": "calendar",
+                }
             )
-            extra_spendable = sum(
-                (spendable_from_extra(r) for r in extra_rows), start=Decimal("0")
-            ).quantize(Decimal("0.01"))
-
-            # Calculate savings the same way as budget service
-            if us and us.savings_mode == "fixed":
-                savings = max(Decimal("0"), min(us.savings_amount, monthly_income))
-            else:
-                savings = (monthly_income * us.savings_percent / Decimal("100")) if us else Decimal("0")
-            savings = savings.quantize(Decimal("0.01"))
-
-            effective_income = monthly_income + extra_spendable
-            remaining = effective_income - savings - fixed_total - total_spent
-            divisor = Decimal(max(1, days_left))
-            daily_budget = (remaining / divisor).quantize(Decimal("0.01"))
-
-            if daily_budget > 0:
-                insights.append(
-                    {
-                        "type": "info",
-                        "title": "Tope diario recomendado",
-                        "message": (
-                            f"Te quedan {remaining}€ repartidos en {days_left} días "
-                            f"(hasta {daily_budget}€/día, igual que «Hoy puedes gastar»)."
-                        ),
-                        "icon": "calendar",
-                    }
-                )
-            else:
-                insights.append(
-                    {
-                        "type": "warning",
-                        "title": "Presupuesto agotado",
-                        "message": (
-                            f"Has superado tu presupuesto mensual. "
-                            f"Te quedan {remaining}€ para {days_left} días."
-                        ),
-                        "icon": "alert_circle",
-                    }
-                )
+        else:
+            insights.append(
+                {
+                    "type": "warning",
+                    "title": "Presupuesto agotado",
+                    "message": (
+                        f"Has superado tu presupuesto mensual. "
+                        f"Te quedan {remaining}€ para {days_left} días."
+                    ),
+                    "icon": "alert_circle",
+                }
+            )
 
     # Fallback if no insights generated
     if not insights:
