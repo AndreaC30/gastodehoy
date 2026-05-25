@@ -4,6 +4,8 @@ Web sencilla que te dice **cuánto puedes gastar hoy** sin salirte del presupues
 
 Construido con **FastAPI** (Python), **SQLite** (un archivo en `./data/`), **React + Vite + Tailwind**. En producción usa **Caddy** para HTTPS automático.
 
+En cada conexión SQLite la API activa automáticamente **WAL**, `busy_timeout` (5 s) y `synchronous=NORMAL` para lecturas concurrentes y menos errores «database is locked» con un solo proceso escritor (Docker o local).
+
 ---
 
 ## 1. Desarrollo local (Docker)

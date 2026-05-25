@@ -242,7 +242,7 @@ def test_create_expense_rejects_foreign_category_id(client, db_session) -> None:
         json={"amount": "3.00"},  # uncategorised
     )
 
-    expenses = client.get("/api/expenses").json()
+    expenses = client.get("/api/expenses").json()["items"]
     assert len(expenses) == 2
 
     # The categorised expense should have category info
@@ -271,8 +271,9 @@ def test_filter_expenses_by_category(client) -> None:
     )
 
     food_only = client.get(f"/api/expenses?category_id={food_cat['id']}").json()
-    assert len(food_only) == 1
-    assert food_only[0]["category_id"] == food_cat["id"]
+    assert food_only["meta"]["total"] == 1
+    assert len(food_only["items"]) == 1
+    assert food_only["items"][0]["category_id"] == food_cat["id"]
 
 
 # ── Insights ───────────────────────────────────────────────────────────────

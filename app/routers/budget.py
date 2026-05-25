@@ -23,6 +23,8 @@ from app.schemas import (
     FixedExpenseRead,
     FixedExpenseUpdate,
     MonthHistoryRead,
+    PaginatedMeta,
+    PaginatedVariableExpenses,
     SummaryRead,
     VariableExpenseCreate,
     VariableExpenseRead,
@@ -209,7 +211,7 @@ def delete_fixed(
 # --- Variable (day-to-day) expenses ------------------------------------------
 
 
-@expenses_router.get("", response_model=list[VariableExpenseRead])
+@expenses_router.get("", response_model=PaginatedVariableExpenses)
 def list_expenses(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -218,9 +220,22 @@ def list_expenses(
     category_id: int | None = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
-) -> list[VariableExpense]:
-    """List expenses for the given (or current) month, newest first (paginated)."""
+) -> PaginatedVariableExpenses:
+    """List expenses for the given (or current) calendar month, newest first."""
     start, end = _calendar_month_bounds(year, month)
+    filters = [
+        VariableExpense.user_id == user.id,
+        VariableExpense.occurred_at >= start,
+        VariableExpense.occurred_at <= end,
+    ]
+    if category_id is not None:
+        filters.append(VariableExpense.category_id == category_id)
+
+    total = (
+        db.scalar(select(func.count()).select_from(VariableExpense).where(*filters))
+        or 0
+    )
+
     stmt = (
         select(
             VariableExpense,
@@ -235,27 +250,25 @@ def list_expenses(
                 ExpenseCategory.user_id == user.id,
             ),
         )
-        .where(
-            VariableExpense.user_id == user.id,
-            VariableExpense.occurred_at >= start,
-            VariableExpense.occurred_at <= end,
-        )
+        .where(*filters)
         .order_by(VariableExpense.occurred_at.desc(), VariableExpense.id.desc())
         .limit(limit)
         .offset(offset)
     )
-    if category_id is not None:
-        stmt = stmt.where(VariableExpense.category_id == category_id)
 
     rows = db.execute(stmt).all()
-    result = []
+    items: list[VariableExpenseRead] = []
     for row in rows:
         exp = row[0]
         exp.category_name = row.category_name
         exp.category_color = row.category_color
         exp.category_icon = row.category_icon
-        result.append(exp)
-    return result
+        items.append(VariableExpenseRead.model_validate(exp))
+
+    return PaginatedVariableExpenses(
+        items=items,
+        meta=PaginatedMeta(total=total, limit=limit, offset=offset),
+    )
 
 
 @expenses_router.post("", response_model=VariableExpenseRead)
