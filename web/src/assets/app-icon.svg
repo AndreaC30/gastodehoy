@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="gdh" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="100%" stop-color="#14b8a6" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#gdh)" />
+  <!-- Calendario: anillas -->
+  <rect x="168" y="96" width="56" height="56" rx="14" fill="#0f172a" />
+  <rect x="288" y="96" width="56" height="56" rx="14" fill="#0f172a" />
+  <!-- $ con trazo grueso (Resvg sí lo pinta; los paths rellenos complejos fallaban) -->
+  <g fill="none" stroke="#0f172a" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="256" y1="188" x2="256" y2="424" stroke-width="44" />
+    <path
+      stroke-width="40"
+      d="M312 220 C312 168 284 148 256 148 C214 148 188 182 188 224 C188 262 218 286 256 298 C294 310 324 338 324 378 C324 420 296 452 256 452 C214 452 188 422 188 382"
+    />
+  </g>
+</svg>

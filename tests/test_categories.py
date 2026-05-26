@@ -242,7 +242,7 @@ def test_create_expense_rejects_foreign_category_id(client, db_session) -> None:
         json={"amount": "3.00"},  # uncategorised
     )
 
-    expenses = client.get("/api/expenses").json()
+    expenses = client.get("/api/expenses").json()["items"]
     assert len(expenses) == 2
 
     # The categorised expense should have category info
@@ -271,8 +271,9 @@ def test_filter_expenses_by_category(client) -> None:
     )
 
     food_only = client.get(f"/api/expenses?category_id={food_cat['id']}").json()
-    assert len(food_only) == 1
-    assert food_only[0]["category_id"] == food_cat["id"]
+    assert food_only["meta"]["total"] == 1
+    assert len(food_only["items"]) == 1
+    assert food_only["items"][0]["category_id"] == food_cat["id"]
 
 
 # ── Insights ───────────────────────────────────────────────────────────────
@@ -355,6 +356,26 @@ def test_insights_high_spending_warning(client) -> None:
 
 def test_insights_requires_auth(anon_client) -> None:
     assert anon_client.get("/api/insights").status_code == 401
+
+
+def test_daily_notification_requires_auth(anon_client) -> None:
+    assert anon_client.get("/api/insights/daily-notification").status_code == 401
+
+
+def test_daily_notification_positive(client, user) -> None:
+    client.put(
+        "/api/settings",
+        json={
+            "monthly_income": "2000.00",
+            "savings_mode": "percent",
+            "savings_percent": "10",
+            "savings_amount": "0",
+        },
+    )
+    r = client.get("/api/insights/daily-notification")
+    assert r.status_code == 200
+    data = r.json()
+    assert data is None or ("title" in data and "body" in data)
 
 
 def test_insights_filter_by_year_month(client) -> None:

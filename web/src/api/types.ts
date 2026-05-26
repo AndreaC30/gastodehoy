@@ -74,6 +74,18 @@ export type VariableExpense = {
   category_icon?: string | null;
 };
 
+export type PaginatedMeta = {
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+/** API response for GET /api/expenses */
+export type PaginatedVariableExpenses = {
+  items: VariableExpense[];
+  meta: PaginatedMeta;
+};
+
 /** Occasional income received on a specific date (bonus, extra payroll…). */
 export type ExtraIncomeSavingsMode = "none" | "all" | "percent" | "fixed";
 
@@ -115,6 +127,12 @@ export type Insights = {
   insights: InsightItem[];
   avg_daily_spend: string | number;
   projected_monthly: string | number;
+};
+
+export type DailyNotification = {
+  tag: string;
+  title: string;
+  body: string;
 };
 
 export type User = {

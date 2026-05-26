@@ -18,6 +18,12 @@ import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { INPUT_CLASS, INPUT_FLEX_CLASS } from "@/lib/ui-a11y";
+import {
+  isDailyNotificationEnabled,
+  setDailyNotificationEnabled,
+} from "@/lib/daily-notification-preference";
+import { requestNotificationPermission } from "@/lib/daily-notification";
+import { registerWebPush, unregisterWebPush } from "@/lib/push-subscription";
 
 type Props = {
   initial: Settings;
@@ -76,6 +82,7 @@ export function SettingsModal({
   const [extraSavingsFixed, setExtraSavingsFixed] = useState("0");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [dailyNotify, setDailyNotify] = useState(isDailyNotificationEnabled);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useBodyScrollLock(true);
@@ -313,6 +320,39 @@ export function SettingsModal({
                 />
               )}
             </div>
+
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3">
+              <input
+                type="checkbox"
+                checked={dailyNotify}
+                className="mt-1 h-4 w-4 rounded border-slate-600 text-sky-500 focus:ring-sky-500"
+                onChange={async (e) => {
+                  const on = e.target.checked;
+                  setError(null);
+                  if (on) {
+                    const perm = await requestNotificationPermission();
+                    if (perm !== "granted") {
+                      setError(
+                        "Activa las notificaciones en los ajustes del navegador o del sistema para recibir el aviso diario.",
+                      );
+                      return;
+                    }
+                    await registerWebPush();
+                  } else {
+                    await unregisterWebPush();
+                  }
+                  setDailyNotificationEnabled(on);
+                  setDailyNotify(on);
+                }}
+              />
+              <span className="text-sm text-slate-300">
+                <span className="font-medium text-slate-100">Aviso diario</span>
+                <span className="mt-0.5 block text-slate-400">
+                  Mensaje positivo al abrir la app y, si el servidor tiene VAPID, también por
+                  push con la app cerrada (cron diario). Máximo uno por día al abrir.
+                </span>
+              </span>
+            </label>
 
             <ModalMenuFooter
               className="pt-2"

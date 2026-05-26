@@ -247,7 +247,8 @@ def test_users_are_isolated(anon_client) -> None:
     assert Decimal(str(s["monthly_income"])) == Decimal("0")
     assert Decimal(str(s["variable_spent_month"])) == Decimal("0")
     expenses_res = anon_client.get("/api/expenses").json()
-    assert expenses_res == []
+    assert expenses_res["items"] == []
+    assert expenses_res["meta"]["total"] == 0
 
 
 def test_summary_defaults(client) -> None:
@@ -381,8 +382,27 @@ def test_list_expenses_filtered_by_year_month(client) -> None:
         json={"amount": "25.00", "occurred_at": "2026-02-10"},
     )
     jan = client.get("/api/expenses?year=2026&month=1").json()
-    assert len(jan) == 1
-    assert Decimal(str(jan[0]["amount"])) == Decimal("10.00")
+    assert jan["meta"]["total"] == 1
+    assert len(jan["items"]) == 1
+    assert Decimal(str(jan["items"][0]["amount"])) == Decimal("10.00")
+
+
+def test_list_expenses_pagination(client) -> None:
+    client.put(
+        "/api/settings",
+        json={"monthly_income": "1000.00", "savings_percent": "0"},
+    )
+    today = date.today().isoformat()
+    for amount in ("1.00", "2.00", "3.00"):
+        client.post("/api/expenses", json={"amount": amount, "occurred_at": today})
+
+    page1 = client.get("/api/expenses?limit=2&offset=0").json()
+    assert page1["meta"] == {"total": 3, "limit": 2, "offset": 0}
+    assert len(page1["items"]) == 2
+
+    page2 = client.get("/api/expenses?limit=2&offset=2").json()
+    assert page2["meta"] == {"total": 3, "limit": 2, "offset": 2}
+    assert len(page2["items"]) == 1
 
 
 def test_list_extra_income_filtered_by_year_month(client) -> None:

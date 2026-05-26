@@ -1,5 +1,7 @@
 """Spending analysis and insight generation."""
 
+from __future__ import annotations
+
 from datetime import date
 from decimal import Decimal
 from typing import Literal
@@ -7,9 +9,33 @@ from typing import Literal
 from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
-from app.models import ExpenseCategory, ExtraIncome, UserSettings, VariableExpense
-from app.services.budget import days_remaining_in_month, month_bounds, today_in_app_timezone
-from app.services.extra_income_savings import spendable_from_extra
+from app.models import ExpenseCategory, UserSettings, VariableExpense
+from app.services.budget import (
+    compute_summary,
+    days_remaining_in_month,
+    month_bounds,
+    today_in_app_timezone,
+)
+
+# ── Insight type constants (used by notification_message.py) ─────────────────
+INSIGHT_TYPE_WARNING: str = "warning"
+INSIGHT_TYPE_SUCCESS: str = "success"
+INSIGHT_TYPE_INFO: str = "info"
+INSIGHT_TYPE_TIP: str = "tip"
+
+# ── Insight title constants (used by notification_message.py for matching) ──
+TITLE_MORE_SPENDING: str = "Más gasto que el mes pasado"
+TITLE_LESS_SPENDING: str = "Menos gasto que el mes pasado"
+TITLE_SIMILAR_PACE: str = "Ritmo similar al mes pasado"
+TITLE_CONCENTRATED_SPENDING: str = "Gasto concentrado"
+TITLE_HIGH_SPENDING_RATIO: str = "Gastas casi todo tu ingreso"
+TITLE_GOOD_PACE: str = "¡Buen ritmo de gasto!"
+TITLE_PROJECTED_OVERSPEND: str = "Proyección de sobregasto"
+TITLE_CATEGORIZE_EXPENSES: str = "Categoriza tus gastos"
+TITLE_HIGH_FIXED_COSTS: str = "Gastos fijos altos"
+TITLE_DAILY_LIMIT: str = "Tope diario recomendado"
+TITLE_BUDGET_EXHAUSTED: str = "Presupuesto agotado"
+TITLE_KEEP_RECORDING: str = "Sigue registrando"
 
 
 def _previous_month_bounds(month_start: date) -> tuple[date, date]:
@@ -33,6 +59,7 @@ def compute_insights(
     user_id: int,
     month_start: date,
     month_end: date,
+    summary: dict | None = None,
 ) -> dict:
     """Analyse variable expenses for the period and return structured insights."""
 
@@ -138,8 +165,8 @@ def compute_insights(
         if diff > Decimal("0.01"):
             insights.append(
                 {
-                    "type": "warning",
-                    "title": "Más gasto que el mes pasado",
+                    "type": INSIGHT_TYPE_WARNING,
+                    "title": TITLE_MORE_SPENDING,
                     "message": (
                         f"Este mes llevas {total_spent}€ en gastos variables, "
                         f"{pct_change}% más que los {prev_spent}€ del mes anterior."
@@ -150,8 +177,8 @@ def compute_insights(
         elif diff < Decimal("-0.01"):
             insights.append(
                 {
-                    "type": "success",
-                    "title": "Menos gasto que el mes pasado",
+                    "type": INSIGHT_TYPE_SUCCESS,
+                    "title": TITLE_LESS_SPENDING,
                     "message": (
                         f"Este mes llevas {total_spent}€ en gastos variables, "
                         f"{pct_change}% menos que los {prev_spent}€ del mes anterior."
@@ -162,8 +189,8 @@ def compute_insights(
         else:
             insights.append(
                 {
-                    "type": "info",
-                    "title": "Ritmo similar al mes pasado",
+                    "type": INSIGHT_TYPE_INFO,
+                    "title": TITLE_SIMILAR_PACE,
                     "message": (
                         f"Tus gastos variables ({total_spent}€) van parecidos "
                         f"al mes anterior ({prev_spent}€)."
@@ -176,8 +203,8 @@ def compute_insights(
     if top_category and top_category["percentage"] > 50:
         insights.append(
             {
-                "type": "warning",
-                "title": "Gasto concentrado",
+                "type": INSIGHT_TYPE_WARNING,
+                "title": TITLE_CONCENTRATED_SPENDING,
                 "message": (
                     f"El {top_category['percentage']}% de tu gasto este mes fue en "
                     f"{top_category['category_name']}. Considera si puedes reducirlo."
@@ -192,8 +219,8 @@ def compute_insights(
         if spend_pct > 80:
             insights.append(
                 {
-                    "type": "warning",
-                    "title": "Gastas casi todo tu ingreso",
+                    "type": INSIGHT_TYPE_WARNING,
+                    "title": TITLE_HIGH_SPENDING_RATIO,
                     "message": (
                         f"Llevas gastado el {spend_pct}% de tu ingreso mensual. "
                         f"Intenta dejar al menos un 20% para ahorro."
@@ -204,8 +231,8 @@ def compute_insights(
         elif spend_pct < 40 and elapsed > 15:
             insights.append(
                 {
-                    "type": "success",
-                    "title": "¡Buen ritmo de gasto!",
+                    "type": INSIGHT_TYPE_SUCCESS,
+                    "title": TITLE_GOOD_PACE,
                     "message": (
                         f"Solo has gastado el {spend_pct}% de tu ingreso. "
                         f"Sigue así y tendrás buen margen para ahorrar."
@@ -219,8 +246,8 @@ def compute_insights(
         over = projected - monthly_income
         insights.append(
             {
-                "type": "warning",
-                "title": "Proyección de sobregasto",
+                "type": INSIGHT_TYPE_WARNING,
+                "title": TITLE_PROJECTED_OVERSPEND,
                 "message": (
                     f"A este ritmo, gastarás ~{projected}€ este mes "
                     f"({over}€ más que tu ingreso). Ajusta tu ritmo."
@@ -236,7 +263,7 @@ def compute_insights(
         budget = item["monthly_budget"]
         insights.append(
             {
-                "type": "warning",
+                "type": INSIGHT_TYPE_WARNING,
                 "title": f"Presupuesto superado: {item['category_name']}",
                 "message": (
                     f"Has gastado {item['total']}€ de {budget}€ presupuestados "
@@ -253,8 +280,8 @@ def compute_insights(
     if uncategorised and uncategorised["transaction_count"] > 0:
         insights.append(
             {
-                "type": "tip",
-                "title": "Categoriza tus gastos",
+                "type": INSIGHT_TYPE_TIP,
+                "title": TITLE_CATEGORIZE_EXPENSES,
                 "message": (
                     f"Tienes {uncategorised['transaction_count']} gasto(s) sin categoría. "
                     f"Asignar categorías te ayuda a entender mejor en qué gastas."
@@ -263,22 +290,22 @@ def compute_insights(
             }
         )
 
-    # 6. Fixed expenses ratio
-    if us and monthly_income > 0:
-        from app.models import FixedExpense
+    days_left = days_remaining_in_month(today)
+    needs_budget_snapshot = monthly_income > 0 and (
+        us is not None or (avg_daily > 0 and days_left > 0)
+    )
+    if summary is None and needs_budget_snapshot:
+        summary = compute_summary(session, user_id, today)
 
-        fixed_total = session.scalar(
-            select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(
-                FixedExpense.user_id == user_id
-            )
-        ) or Decimal("0")
-        fixed_total = Decimal(fixed_total).quantize(Decimal("0.01"))
+    # 6. Fixed expenses ratio
+    if us and monthly_income > 0 and summary is not None:
+        fixed_total = summary["fixed_expenses_total"]
         fixed_pct = _safe_pct(fixed_total, monthly_income)
         if fixed_pct > 60:
             insights.append(
                 {
-                    "type": "info",
-                    "title": "Gastos fijos altos",
+                    "type": INSIGHT_TYPE_INFO,
+                    "title": TITLE_HIGH_FIXED_COSTS,
                     "message": (
                         f"Tus gastos fijos representan el {fixed_pct}% de tu ingreso. "
                         f"Lo recomendable es mantenerlos bajo el 50%."
@@ -287,76 +314,42 @@ def compute_insights(
                 }
             )
 
-    # 7. Daily spending tip
-    if avg_daily > 0:
-        days_left = days_remaining_in_month(today)
-        if days_left > 0 and monthly_income > 0:
-            # Use the same formula as compute_summary for consistency
-            from app.models import FixedExpense
+    # 7. Daily spending tip (aligned with dashboard «Hoy puedes gastar»)
+    if avg_daily > 0 and days_left > 0 and monthly_income > 0 and summary is not None:
+        remaining = summary["remaining_this_month"]
+        daily_budget = summary["suggested_spend_today"]
 
-            fixed_total = session.scalar(
-                select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(
-                    FixedExpense.user_id == user_id
-                )
-            ) or Decimal("0")
-            fixed_total = Decimal(fixed_total).quantize(Decimal("0.01"))
-
-            extra_rows = list(
-                session.scalars(
-                    select(ExtraIncome).where(
-                        ExtraIncome.user_id == user_id,
-                        ExtraIncome.received_at >= month_start,
-                        ExtraIncome.received_at <= month_end,
-                    )
-                ).all()
+        if daily_budget > 0:
+            insights.append(
+                {
+                    "type": INSIGHT_TYPE_INFO,
+                    "title": TITLE_DAILY_LIMIT,
+                    "message": (
+                        f"Te quedan {remaining}€ repartidos en {days_left} días "
+                        f"(hasta {daily_budget}€/día, igual que «Hoy puedes gastar»)."
+                    ),
+                    "icon": "calendar",
+                }
             )
-            extra_spendable = sum(
-                (spendable_from_extra(r) for r in extra_rows), start=Decimal("0")
-            ).quantize(Decimal("0.01"))
-
-            # Calculate savings the same way as budget service
-            if us and us.savings_mode == "fixed":
-                savings = max(Decimal("0"), min(us.savings_amount, monthly_income))
-            else:
-                savings = (monthly_income * us.savings_percent / Decimal("100")) if us else Decimal("0")
-            savings = savings.quantize(Decimal("0.01"))
-
-            effective_income = monthly_income + extra_spendable
-            remaining = effective_income - savings - fixed_total - total_spent
-            divisor = Decimal(max(1, days_left))
-            daily_budget = (remaining / divisor).quantize(Decimal("0.01"))
-
-            if daily_budget > 0:
-                insights.append(
-                    {
-                        "type": "info",
-                        "title": "Tope diario recomendado",
-                        "message": (
-                            f"Te quedan {remaining}€ repartidos en {days_left} días "
-                            f"(hasta {daily_budget}€/día, igual que «Hoy puedes gastar»)."
-                        ),
-                        "icon": "calendar",
-                    }
-                )
-            else:
-                insights.append(
-                    {
-                        "type": "warning",
-                        "title": "Presupuesto agotado",
-                        "message": (
-                            f"Has superado tu presupuesto mensual. "
-                            f"Te quedan {remaining}€ para {days_left} días."
-                        ),
-                        "icon": "alert_circle",
-                    }
-                )
+        else:
+            insights.append(
+                {
+                    "type": INSIGHT_TYPE_WARNING,
+                    "title": TITLE_BUDGET_EXHAUSTED,
+                    "message": (
+                        f"Has superado tu presupuesto mensual. "
+                        f"Te quedan {remaining}€ para {days_left} días."
+                    ),
+                    "icon": "alert_circle",
+                }
+            )
 
     # Fallback if no insights generated
     if not insights:
         insights.append(
             {
-                "type": "info",
-                "title": "Sigue registrando",
+                "type": INSIGHT_TYPE_INFO,
+                "title": TITLE_KEEP_RECORDING,
                 "message": (
                     "Registra más gastos para recibir insights personalizados "
                     "sobre tus hábitos de consumo."

@@ -11,6 +11,10 @@ For SQLite we apply two extras the moment a connection is opened:
 * ``journal_mode=WAL``: write-ahead-log lets readers and a single writer
   proceed concurrently and survives the occasional crash without
   corrupting the database.
+* ``busy_timeout=5000``: wait up to 5s on lock contention instead of
+  failing immediately with "database is locked".
+* ``synchronous=NORMAL``: safe with WAL; fewer fsyncs than FULL while
+  keeping durability for typical single-host deployments.
 """
 
 from collections.abc import Generator
@@ -47,6 +51,8 @@ if _is_sqlite:
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA busy_timeout=5000")
+        cursor.execute("PRAGMA synchronous=NORMAL")
         cursor.close()
 
 
@@ -199,6 +205,25 @@ def apply_sqlite_migrations(engine: Engine) -> None:
             text(
                 "CREATE INDEX IF NOT EXISTS idx_savings_goals_user "
                 "ON savings_goals(user_id)"
+            )
+        )
+
+        conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS push_subscriptions ("
+                "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,"
+                "  endpoint TEXT NOT NULL UNIQUE,"
+                "  p256dh VARCHAR(255) NOT NULL,"
+                "  auth VARCHAR(128) NOT NULL,"
+                "  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+                ")"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user "
+                "ON push_subscriptions(user_id)"
             )
         )
 

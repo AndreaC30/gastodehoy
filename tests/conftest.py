@@ -7,6 +7,7 @@ os.environ["ENV"] = "development"
 os.environ["COOKIE_SECURE"] = "false"
 os.environ.pop("COOKIE_DOMAIN", None)
 os.environ["APP_SECRET"] = "test-secret-key-for-tests-only-12345678"
+os.environ["TIMEZONE"] = "Europe/Madrid"
 
 from collections.abc import Generator
 

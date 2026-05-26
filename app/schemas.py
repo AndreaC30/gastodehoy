@@ -302,6 +302,29 @@ class InsightsRead(BaseModel):
     projected_monthly: Decimal
 
 
+class DailyNotificationRead(BaseModel):
+    """Positive daily message for browser notifications (optional)."""
+
+    tag: str
+    title: str
+    body: str
+
+
+class PushConfigRead(BaseModel):
+    enabled: bool
+    public_key: str | None = None
+
+
+class PushKeysCreate(BaseModel):
+    p256dh: str = Field(min_length=1)
+    auth: str = Field(min_length=1)
+
+
+class PushSubscribeCreate(BaseModel):
+    endpoint: str = Field(min_length=8)
+    keys: PushKeysCreate
+
+
 # --- Savings goals -----------------------------------------------------------
 
 
