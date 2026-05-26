@@ -55,12 +55,14 @@ async function loadExpenses() {
   const pageLimit = 200;
   const all: VariableExpense[] = [];
   let offset = 0;
-  for (;;) {
+  const maxPages = 100; // safety limit to prevent infinite pagination loops
+  for (let i = 0; i < maxPages; i++) {
     const page = await api<PaginatedVariableExpenses>(
       `/api/expenses?limit=${pageLimit}&offset=${offset}`,
     );
     all.push(...page.items);
     if (all.length >= page.meta.total) break;
+    if (page.items.length === 0) break; // edge guard: empty page → stop
     offset += pageLimit;
   }
   return all;

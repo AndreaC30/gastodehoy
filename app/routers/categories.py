@@ -135,8 +135,8 @@ def read_daily_notification(
     """Return one positive notification message for today, or null if none."""
     today = today_in_app_timezone()
     start, end = month_bounds(today)
-    insights_data = compute_insights(db, user.id, start, end)
     summary = compute_summary(db, user.id, today)
+    insights_data = compute_insights(db, user.id, start, end, summary=summary)
     payload = pick_daily_notification(insights_data, summary)
     if payload is None:
         return None
