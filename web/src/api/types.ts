@@ -129,6 +129,12 @@ export type Insights = {
   projected_monthly: string | number;
 };
 
+export type DailyNotification = {
+  tag: string;
+  title: string;
+  body: string;
+};
+
 export type User = {
   id: number;
   email: string;

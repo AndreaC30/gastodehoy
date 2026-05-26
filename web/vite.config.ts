@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
           description:
             "Descubre cuánto puedes gastar hoy y controla tus gastos diarios con tu presupuesto personal.",
           theme_color: "#0f172a",
-          background_color: "#0f172a",
+          background_color: "#000000",
           display: "standalone",
           start_url: "/",
           lang: "es",
@@ -53,7 +53,7 @@ export default defineConfig(({ mode }) => {
               purpose: "any",
             },
             {
-              src: "/gastodehoy-app-icon.png",
+              src: "/gastodehoy-app-icon-maskable.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "maskable",
@@ -67,6 +67,7 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+          importScripts: ["push-handler.js"],
           navigateFallback: "index.html",
           runtimeCaching: [
             {

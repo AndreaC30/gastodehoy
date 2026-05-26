@@ -14,11 +14,13 @@ from app.schemas import (
     CategoryCreate,
     CategoryRead,
     CategoryUpdate,
+    DailyNotificationRead,
     InsightsRead,
 )
-from app.services.budget import month_bounds, today_in_app_timezone
+from app.services.budget import compute_summary, month_bounds, today_in_app_timezone
 from app.services.categories import seed_default_categories
 from app.services.insights import compute_insights
+from app.services.notification_message import pick_daily_notification
 
 categories_router = APIRouter(prefix="/api/categories", tags=["categories"])
 insights_router = APIRouter(prefix="/api/insights", tags=["insights"])
@@ -123,3 +125,19 @@ def read_insights(
     start, end = month_bounds(date(y, m, 1))
     data = compute_insights(db, user.id, start, end)
     return InsightsRead(**data)
+
+
+@insights_router.get("/daily-notification", response_model=DailyNotificationRead | None)
+def read_daily_notification(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> DailyNotificationRead | None:
+    """Return one positive notification message for today, or null if none."""
+    today = today_in_app_timezone()
+    start, end = month_bounds(today)
+    insights_data = compute_insights(db, user.id, start, end)
+    summary = compute_summary(db, user.id, today)
+    payload = pick_daily_notification(insights_data, summary)
+    if payload is None:
+        return None
+    return DailyNotificationRead(**payload)

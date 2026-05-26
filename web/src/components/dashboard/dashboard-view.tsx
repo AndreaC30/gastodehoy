@@ -39,6 +39,7 @@ import {
   hasCompletedDashboardTour,
   markDashboardTourCompleted,
 } from "@/lib/guided-tour-preference";
+import { maybeShowDailyNotification } from "@/lib/daily-notification";
 
 async function loadSummary() {
   return api<Summary>("/api/summary");
@@ -128,6 +129,11 @@ export function Dashboard({ profileName }: Props) {
     const t = window.setTimeout(() => setShowTour(true), 1500);
     return () => window.clearTimeout(t);
   }, [settingsQ.data]);
+
+  useEffect(() => {
+    if (!summaryQ.isSuccess) return;
+    void maybeShowDailyNotification();
+  }, [summaryQ.isSuccess]);
 
   function finishTour() {
     markDashboardTourCompleted();

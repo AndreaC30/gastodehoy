@@ -24,7 +24,7 @@ from sqlalchemy import text
 from app import database as db
 from app.config import settings as app_settings
 from app.database import Base
-from app.routers import auth, budget, budget_rules, categories, export, goals
+from app.routers import auth, budget, budget_rules, categories, export, goals, push
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST_DIR = ROOT / "web" / "dist"
@@ -42,6 +42,7 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
     "gastodehoy-favicon-192.png": "image/png",
     "gastodehoy-app-icon.png": "image/png",
     "gastodehoy-apple-touch-180.png": "image/png",
+    "gastodehoy-app-icon-maskable.png": "image/png",
 }
 
 
@@ -159,6 +160,7 @@ app.include_router(export.router)
 app.include_router(categories.categories_router)
 app.include_router(categories.insights_router)
 app.include_router(goals.router)
+app.include_router(push.router)
 
 if ASSETS_DIR.is_dir():
     app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="vite-assets")
@@ -252,6 +254,14 @@ def pwa_apple_touch_icon() -> FileResponse | JSONResponse:
     return _dist_root_file(
         "gastodehoy-apple-touch-180.png",
         DIST_ROOT_STATIC_FILES["gastodehoy-apple-touch-180.png"],
+    )
+
+
+@app.get("/gastodehoy-app-icon-maskable.png", response_model=None)
+def pwa_icon_maskable() -> FileResponse | JSONResponse:
+    return _dist_root_file(
+        "gastodehoy-app-icon-maskable.png",
+        DIST_ROOT_STATIC_FILES["gastodehoy-app-icon-maskable.png"],
     )
 
 
