@@ -26,6 +26,7 @@ import type {
   Insights,
   Settings,
   Summary,
+  PaginatedVariableExpenses,
   VariableExpense,
 } from "@/api/types";
 import { APP_SHELL_CLASS } from "@/lib/app-layout";
@@ -38,6 +39,7 @@ import {
   hasCompletedDashboardTour,
   markDashboardTourCompleted,
 } from "@/lib/guided-tour-preference";
+import { maybeShowDailyNotification } from "@/lib/daily-notification";
 
 async function loadSummary() {
   return api<Summary>("/api/summary");
@@ -48,8 +50,22 @@ async function loadSettings() {
 async function loadFixed() {
   return api<FixedExpense[]>("/api/fixed-expenses");
 }
+/** Current-month expenses; fetches all pages (API caps limit at 200). */
 async function loadExpenses() {
-  return api<VariableExpense[]>("/api/expenses");
+  const pageLimit = 200;
+  const all: VariableExpense[] = [];
+  let offset = 0;
+  const maxPages = 100; // safety limit to prevent infinite pagination loops
+  for (let i = 0; i < maxPages; i++) {
+    const page = await api<PaginatedVariableExpenses>(
+      `/api/expenses?limit=${pageLimit}&offset=${offset}`,
+    );
+    all.push(...page.items);
+    if (all.length >= page.meta.total) break;
+    if (page.items.length === 0) break; // edge guard: empty page → stop
+    offset += pageLimit;
+  }
+  return all;
 }
 async function loadExtraIncome() {
   return api<ExtraIncome[]>("/api/extra-income");
@@ -115,6 +131,11 @@ export function Dashboard({ profileName }: Props) {
     const t = window.setTimeout(() => setShowTour(true), 1500);
     return () => window.clearTimeout(t);
   }, [settingsQ.data]);
+
+  useEffect(() => {
+    if (!summaryQ.isSuccess) return;
+    void maybeShowDailyNotification();
+  }, [summaryQ.isSuccess]);
 
   function finishTour() {
     markDashboardTourCompleted();
