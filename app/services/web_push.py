@@ -29,6 +29,7 @@ def send_push_payload(subscription: PushSubscription, payload: dict[str, Any]) -
             data=json.dumps(payload, ensure_ascii=False),
             vapid_private_key=settings.vapid_private_key,
             vapid_claims={"sub": settings.vapid_subject},
+            headers={"Urgency": "high", "TTL": "86400"},
         )
         return True
     except WebPushException as exc:
