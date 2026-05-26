@@ -44,17 +44,24 @@ def send_push_payload(subscription: PushSubscription, payload: dict[str, Any]) -
         return False
 
 
-def send_to_user(session: Session, user_id: int, payload: dict[str, Any]) -> int:
-    """Send payload to all subscriptions for ``user_id``. Returns success count."""
+def send_to_user(session: Session, user_id: int, payload: dict[str, Any]) -> tuple[int, int]:
+    """Send payload to all subscriptions for ``user_id``.
+
+    Returns (success_count, failed_count). Failed/expired subscriptions are
+    automatically removed from the database.
+    """
     rows = list(
         session.scalars(
             select(PushSubscription).where(PushSubscription.user_id == user_id)
         ).all()
     )
     sent = 0
+    failed = 0
     for row in rows:
         if send_push_payload(row, payload):
             sent += 1
-        elif row in session:
-            session.delete(row)
-    return sent
+        else:
+            failed += 1
+            if row in session:
+                session.delete(row)
+    return sent, failed

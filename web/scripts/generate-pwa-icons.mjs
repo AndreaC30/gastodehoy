@@ -11,17 +11,26 @@ import sharp from "sharp";
 const webDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourcePath = path.join(webDir, "src/assets/gastodehoy-calendar-icon-source.png");
 
-/** Fondo negro como el arte 3D original (evita marco gris al instalar). */
-const ICON_BG = { r: 0, g: 0, b: 0, alpha: 1 };
-
 async function squareIcon(size) {
-  return sharp(sourcePath)
+  const meta = await sharp(sourcePath).metadata();
+  const dim = Math.max(meta.width, meta.height);
+  // Pad to square first so the icon fills the entire square without bars
+  const squared = await sharp(sourcePath)
+    .extend({
+      top: Math.floor((dim - meta.height) / 2),
+      bottom: Math.ceil((dim - meta.height) / 2),
+      left: Math.floor((dim - meta.width) / 2),
+      right: Math.ceil((dim - meta.width) / 2),
+      background: { r: 0, g: 0, b: 0, alpha: 1 },
+    })
+    .toBuffer();
+  return sharp(squared)
     .resize(size, size, {
       fit: "contain",
-      background: ICON_BG,
+      background: { r: 0, g: 0, b: 0, alpha: 1 },
       kernel: sharp.kernel.lanczos3,
     })
-    .png()
+    .png({ compressionLevel: 9, palette: true })
     .toBuffer();
 }
 

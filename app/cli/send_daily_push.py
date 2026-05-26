@@ -24,7 +24,7 @@ from app.models import PushSubscription, User
 from app.services.budget import compute_summary, month_bounds, today_in_app_timezone
 from app.services.insights import compute_insights
 from app.services.notification_message import pick_daily_notification
-from app.services.web_push import send_push_payload
+from app.services.web_push import send_to_user
 
 _log = logging.getLogger(__name__)
 
@@ -62,8 +62,8 @@ def main() -> None:
             user = db.get(User, user_id)
             if user is None:
                 continue
-            insights_data = compute_insights(db, user_id, start, end)
             summary = compute_summary(db, user_id, today)
+            insights_data = compute_insights(db, user_id, start, end, summary=summary)
             msg = pick_daily_notification(insights_data, summary)
             if msg is None:
                 skipped += 1
@@ -77,12 +77,9 @@ def main() -> None:
                 _log.info("dry-run user=%s: %s — %s", user.email, msg["title"], msg["body"])
                 sent += 1
                 continue
-            for sub in user_subs:
-                if send_push_payload(sub, payload):
-                    sent += 1
-                else:
-                    db.delete(sub)
-                    failed += 1
+            s, f = send_to_user(db, user_id, payload)
+            sent += s
+            failed += f
         db.commit()
 
     print(f"Push diario: {sent} enviados, {skipped} sin mensaje, {failed} fallidos/expirados.")

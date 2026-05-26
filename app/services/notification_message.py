@@ -5,6 +5,13 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
+from app.services.insights import (
+    INSIGHT_TYPE_INFO,
+    INSIGHT_TYPE_SUCCESS,
+    TITLE_DAILY_LIMIT,
+    TITLE_SIMILAR_PACE,
+)
+
 
 def pick_daily_notification(
     insights_payload: dict[str, Any],
@@ -17,7 +24,7 @@ def pick_daily_notification(
     insights = insights_payload.get("insights") or []
 
     for item in insights:
-        if item.get("type") != "success":
+        if item.get("type") != INSIGHT_TYPE_SUCCESS:
             continue
         return {
             "tag": "gdh-insight-success",
@@ -41,16 +48,16 @@ def pick_daily_notification(
             }
 
     for item in insights:
-        if item.get("type") != "info":
+        if item.get("type") != INSIGHT_TYPE_INFO:
             continue
         title = item.get("title") or ""
-        if title == "Tope diario recomendado":
+        if title == TITLE_DAILY_LIMIT:
             return {
                 "tag": "gdh-insight-daily",
                 "title": "Tu tope de hoy",
                 "body": item["message"],
             }
-        if title == "Ritmo similar al mes pasado":
+        if title == TITLE_SIMILAR_PACE:
             return {
                 "tag": "gdh-insight-steady",
                 "title": title,

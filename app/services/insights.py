@@ -1,5 +1,7 @@
 """Spending analysis and insight generation."""
 
+from __future__ import annotations
+
 from datetime import date
 from decimal import Decimal
 from typing import Literal
@@ -14,6 +16,26 @@ from app.services.budget import (
     month_bounds,
     today_in_app_timezone,
 )
+
+# ── Insight type constants (used by notification_message.py) ─────────────────
+INSIGHT_TYPE_WARNING: str = "warning"
+INSIGHT_TYPE_SUCCESS: str = "success"
+INSIGHT_TYPE_INFO: str = "info"
+INSIGHT_TYPE_TIP: str = "tip"
+
+# ── Insight title constants (used by notification_message.py for matching) ──
+TITLE_MORE_SPENDING: str = "Más gasto que el mes pasado"
+TITLE_LESS_SPENDING: str = "Menos gasto que el mes pasado"
+TITLE_SIMILAR_PACE: str = "Ritmo similar al mes pasado"
+TITLE_CONCENTRATED_SPENDING: str = "Gasto concentrado"
+TITLE_HIGH_SPENDING_RATIO: str = "Gastas casi todo tu ingreso"
+TITLE_GOOD_PACE: str = "¡Buen ritmo de gasto!"
+TITLE_PROJECTED_OVERSPEND: str = "Proyección de sobregasto"
+TITLE_CATEGORIZE_EXPENSES: str = "Categoriza tus gastos"
+TITLE_HIGH_FIXED_COSTS: str = "Gastos fijos altos"
+TITLE_DAILY_LIMIT: str = "Tope diario recomendado"
+TITLE_BUDGET_EXHAUSTED: str = "Presupuesto agotado"
+TITLE_KEEP_RECORDING: str = "Sigue registrando"
 
 
 def _previous_month_bounds(month_start: date) -> tuple[date, date]:
@@ -37,6 +59,7 @@ def compute_insights(
     user_id: int,
     month_start: date,
     month_end: date,
+    summary: dict | None = None,
 ) -> dict:
     """Analyse variable expenses for the period and return structured insights."""
 
@@ -142,8 +165,8 @@ def compute_insights(
         if diff > Decimal("0.01"):
             insights.append(
                 {
-                    "type": "warning",
-                    "title": "Más gasto que el mes pasado",
+                    "type": INSIGHT_TYPE_WARNING,
+                    "title": TITLE_MORE_SPENDING,
                     "message": (
                         f"Este mes llevas {total_spent}€ en gastos variables, "
                         f"{pct_change}% más que los {prev_spent}€ del mes anterior."
@@ -154,8 +177,8 @@ def compute_insights(
         elif diff < Decimal("-0.01"):
             insights.append(
                 {
-                    "type": "success",
-                    "title": "Menos gasto que el mes pasado",
+                    "type": INSIGHT_TYPE_SUCCESS,
+                    "title": TITLE_LESS_SPENDING,
                     "message": (
                         f"Este mes llevas {total_spent}€ en gastos variables, "
                         f"{pct_change}% menos que los {prev_spent}€ del mes anterior."
@@ -166,8 +189,8 @@ def compute_insights(
         else:
             insights.append(
                 {
-                    "type": "info",
-                    "title": "Ritmo similar al mes pasado",
+                    "type": INSIGHT_TYPE_INFO,
+                    "title": TITLE_SIMILAR_PACE,
                     "message": (
                         f"Tus gastos variables ({total_spent}€) van parecidos "
                         f"al mes anterior ({prev_spent}€)."
@@ -180,8 +203,8 @@ def compute_insights(
     if top_category and top_category["percentage"] > 50:
         insights.append(
             {
-                "type": "warning",
-                "title": "Gasto concentrado",
+                "type": INSIGHT_TYPE_WARNING,
+                "title": TITLE_CONCENTRATED_SPENDING,
                 "message": (
                     f"El {top_category['percentage']}% de tu gasto este mes fue en "
                     f"{top_category['category_name']}. Considera si puedes reducirlo."
@@ -196,8 +219,8 @@ def compute_insights(
         if spend_pct > 80:
             insights.append(
                 {
-                    "type": "warning",
-                    "title": "Gastas casi todo tu ingreso",
+                    "type": INSIGHT_TYPE_WARNING,
+                    "title": TITLE_HIGH_SPENDING_RATIO,
                     "message": (
                         f"Llevas gastado el {spend_pct}% de tu ingreso mensual. "
                         f"Intenta dejar al menos un 20% para ahorro."
@@ -208,8 +231,8 @@ def compute_insights(
         elif spend_pct < 40 and elapsed > 15:
             insights.append(
                 {
-                    "type": "success",
-                    "title": "¡Buen ritmo de gasto!",
+                    "type": INSIGHT_TYPE_SUCCESS,
+                    "title": TITLE_GOOD_PACE,
                     "message": (
                         f"Solo has gastado el {spend_pct}% de tu ingreso. "
                         f"Sigue así y tendrás buen margen para ahorrar."
@@ -223,8 +246,8 @@ def compute_insights(
         over = projected - monthly_income
         insights.append(
             {
-                "type": "warning",
-                "title": "Proyección de sobregasto",
+                "type": INSIGHT_TYPE_WARNING,
+                "title": TITLE_PROJECTED_OVERSPEND,
                 "message": (
                     f"A este ritmo, gastarás ~{projected}€ este mes "
                     f"({over}€ más que tu ingreso). Ajusta tu ritmo."
@@ -240,7 +263,7 @@ def compute_insights(
         budget = item["monthly_budget"]
         insights.append(
             {
-                "type": "warning",
+                "type": INSIGHT_TYPE_WARNING,
                 "title": f"Presupuesto superado: {item['category_name']}",
                 "message": (
                     f"Has gastado {item['total']}€ de {budget}€ presupuestados "
@@ -257,8 +280,8 @@ def compute_insights(
     if uncategorised and uncategorised["transaction_count"] > 0:
         insights.append(
             {
-                "type": "tip",
-                "title": "Categoriza tus gastos",
+                "type": INSIGHT_TYPE_TIP,
+                "title": TITLE_CATEGORIZE_EXPENSES,
                 "message": (
                     f"Tienes {uncategorised['transaction_count']} gasto(s) sin categoría. "
                     f"Asignar categorías te ayuda a entender mejor en qué gastas."
@@ -271,9 +294,8 @@ def compute_insights(
     needs_budget_snapshot = monthly_income > 0 and (
         us is not None or (avg_daily > 0 and days_left > 0)
     )
-    summary = (
-        compute_summary(session, user_id, today) if needs_budget_snapshot else None
-    )
+    if summary is None and needs_budget_snapshot:
+        summary = compute_summary(session, user_id, today)
 
     # 6. Fixed expenses ratio
     if us and monthly_income > 0 and summary is not None:
@@ -282,8 +304,8 @@ def compute_insights(
         if fixed_pct > 60:
             insights.append(
                 {
-                    "type": "info",
-                    "title": "Gastos fijos altos",
+                    "type": INSIGHT_TYPE_INFO,
+                    "title": TITLE_HIGH_FIXED_COSTS,
                     "message": (
                         f"Tus gastos fijos representan el {fixed_pct}% de tu ingreso. "
                         f"Lo recomendable es mantenerlos bajo el 50%."
@@ -300,8 +322,8 @@ def compute_insights(
         if daily_budget > 0:
             insights.append(
                 {
-                    "type": "info",
-                    "title": "Tope diario recomendado",
+                    "type": INSIGHT_TYPE_INFO,
+                    "title": TITLE_DAILY_LIMIT,
                     "message": (
                         f"Te quedan {remaining}€ repartidos en {days_left} días "
                         f"(hasta {daily_budget}€/día, igual que «Hoy puedes gastar»)."
@@ -312,8 +334,8 @@ def compute_insights(
         else:
             insights.append(
                 {
-                    "type": "warning",
-                    "title": "Presupuesto agotado",
+                    "type": INSIGHT_TYPE_WARNING,
+                    "title": TITLE_BUDGET_EXHAUSTED,
                     "message": (
                         f"Has superado tu presupuesto mensual. "
                         f"Te quedan {remaining}€ para {days_left} días."
@@ -326,8 +348,8 @@ def compute_insights(
     if not insights:
         insights.append(
             {
-                "type": "info",
-                "title": "Sigue registrando",
+                "type": INSIGHT_TYPE_INFO,
+                "title": TITLE_KEEP_RECORDING,
                 "message": (
                     "Registra más gastos para recibir insights personalizados "
                     "sobre tus hábitos de consumo."
