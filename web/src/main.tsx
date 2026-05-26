@@ -17,6 +17,11 @@ import favicon192 from "./assets/gastodehoy-favicon-192.png";
 import favicon512 from "./assets/gastodehoy-favicon.png";
 import "./index.css";
 
+// Clear app icon badge when the app opens (PWA Badging API)
+if (typeof navigator !== "undefined" && "clearAppBadge" in navigator) {
+  (navigator as any).clearAppBadge?.();
+}
+
 // Prevent scroll wheel from changing number inputs (native browser behavior
 // can silently increment/decrement while the user types)
 document.addEventListener(
