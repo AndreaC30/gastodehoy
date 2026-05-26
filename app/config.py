@@ -95,6 +95,27 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("SMTP_USE_SSL"),
         description="SMTP_SSL (puerto típico 465). Si es true, TLS implícito.",
     )
+    vapid_public_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("VAPID_PUBLIC_KEY"),
+        description="Clave pública VAPID (Web Push). Vacía = push desactivado.",
+    )
+    vapid_private_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("VAPID_PRIVATE_KEY"),
+        description="Clave privada VAPID. No la subas al repo.",
+    )
+    vapid_subject: str = Field(
+        default="mailto:admin@gastodehoy.local",
+        validation_alias=AliasChoices("VAPID_SUBJECT"),
+        description="Contacto VAPID (mailto: o https:).",
+    )
+
+    def web_push_enabled(self) -> bool:
+        """True when both VAPID keys are set."""
+        pub = (self.vapid_public_key or "").strip()
+        priv = (self.vapid_private_key or "").strip()
+        return bool(pub and priv)
 
     def cors_origins_list(self) -> list[str]:
         parts = [x.strip() for x in self.cors_origins.split(",") if x.strip()]

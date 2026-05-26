@@ -358,6 +358,26 @@ def test_insights_requires_auth(anon_client) -> None:
     assert anon_client.get("/api/insights").status_code == 401
 
 
+def test_daily_notification_requires_auth(anon_client) -> None:
+    assert anon_client.get("/api/insights/daily-notification").status_code == 401
+
+
+def test_daily_notification_positive(client, user) -> None:
+    client.put(
+        "/api/settings",
+        json={
+            "monthly_income": "2000.00",
+            "savings_mode": "percent",
+            "savings_percent": "10",
+            "savings_amount": "0",
+        },
+    )
+    r = client.get("/api/insights/daily-notification")
+    assert r.status_code == 200
+    data = r.json()
+    assert data is None or ("title" in data and "body" in data)
+
+
 def test_insights_filter_by_year_month(client) -> None:
     """Insights should accept year/month filters."""
     cats = client.get("/api/categories").json()

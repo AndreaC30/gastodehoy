@@ -208,6 +208,25 @@ def apply_sqlite_migrations(engine: Engine) -> None:
             )
         )
 
+        conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS push_subscriptions ("
+                "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,"
+                "  endpoint TEXT NOT NULL UNIQUE,"
+                "  p256dh VARCHAR(255) NOT NULL,"
+                "  auth VARCHAR(128) NOT NULL,"
+                "  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+                ")"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user "
+                "ON push_subscriptions(user_id)"
+            )
+        )
+
         # Supermercado: usuarios ya registrados (sin tocar el resto de categorías ni gastos).
         # Solo INSERT si no existe ese nombre; nuevos usuarios ya la reciben vía DEFAULT_CATEGORIES.
         super_default = next(

@@ -72,6 +72,10 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    push_subscriptions: Mapped[list["PushSubscription"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
 
 class UserSettings(Base):
@@ -221,6 +225,29 @@ class SavingsGoal(Base):
     target_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 
     user: Mapped[User] = relationship(back_populates="savings_goals")
+
+
+class PushSubscription(Base):
+    """Browser Web Push subscription (one row per device/endpoint)."""
+
+    __tablename__ = "push_subscriptions"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    endpoint: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    p256dh: Mapped[str] = mapped_column(String(255), nullable=False)
+    auth: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    user: Mapped[User] = relationship(back_populates="push_subscriptions")
 
 
 class LoginAttempt(Base):

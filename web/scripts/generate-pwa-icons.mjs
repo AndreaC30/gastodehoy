@@ -1,15 +1,36 @@
 /**
- * Regenerate square PWA / favicon PNGs from src/assets/app-icon.svg.
- * Run: node scripts/generate-pwa-icons.mjs
+ * PWA / favicon PNGs from the glossy 3D calendar master asset.
+ * Edit: web/src/assets/gastodehoy-calendar-icon-source.png
+ * Run: npm run icons
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { Resvg } from "@resvg/resvg-js";
+import sharp from "sharp";
 
 const webDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const svgPath = path.join(webDir, "src/assets/app-icon.svg");
-const svg = readFileSync(svgPath, "utf8");
+const sourcePath = path.join(webDir, "src/assets/gastodehoy-calendar-icon-source.png");
+
+/** Fondo negro como el arte 3D original (evita marco gris al instalar). */
+const ICON_BG = { r: 0, g: 0, b: 0, alpha: 1 };
+
+async function squareIcon(size) {
+  return sharp(sourcePath)
+    .resize(size, size, {
+      fit: "contain",
+      background: ICON_BG,
+      kernel: sharp.kernel.lanczos3,
+    })
+    .png()
+    .toBuffer();
+}
+
+function writeAsset(name, png) {
+  writeFileSync(path.join(webDir, "src/assets", name), png);
+  if (name.startsWith("gastodehoy-")) {
+    writeFileSync(path.join(webDir, "public", name), png);
+  }
+}
 
 const sizes = [
   { size: 512, assets: ["gastodehoy-app-icon.png", "gastodehoy-favicon.png"] },
@@ -20,18 +41,21 @@ const sizes = [
 ];
 
 for (const { size, assets } of sizes) {
-  const png = new Resvg(svg, {
-    fitTo: { mode: "width", value: size },
-  }).render().asPng();
-
+  const png = await squareIcon(size);
   for (const name of assets) {
-    const assetPath = path.join(webDir, "src/assets", name);
-    writeFileSync(assetPath, png);
-    const publicPath = path.join(webDir, "public", name);
-    if (name.startsWith("gastodehoy-")) {
-      writeFileSync(publicPath, png);
-    }
+    writeAsset(name, png);
   }
 }
 
-console.log("PWA icons written:", sizes.map((s) => `${s.size}px`).join(", "));
+const maskable = await squareIcon(512);
+writeAsset("gastodehoy-app-icon-maskable.png", maskable);
+
+const og = await squareIcon(512);
+writeFileSync(path.join(webDir, "public", "og-image.png"), og);
+
+const meta = await sharp(sourcePath).metadata();
+console.log(
+  `PWA icons OK desde ${path.basename(sourcePath)} (${meta.width}x${meta.height}) →`,
+  sizes.map((s) => `${s.size}px`).join(", "),
+  "+ maskable + og-image",
+);
