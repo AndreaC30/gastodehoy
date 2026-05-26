@@ -10,15 +10,19 @@ self.addEventListener("push", (event) => {
       payload.body = event.data.text();
     }
   }
-  event.waitUntil(
-    self.registration.showNotification(payload.title, {
-      body: payload.body,
-      icon: "/gastodehoy-favicon-192.png",
-      badge: "/gastodehoy-favicon-192.png",
-      tag: payload.tag || "gdh-push",
-      data: { url: "/" },
-    }),
-  );
+  const show = self.registration.showNotification(payload.title, {
+    body: payload.body,
+    icon: "/gastodehoy-favicon-192.png",
+    badge: "/gastodehoy-favicon-192.png",
+    tag: payload.tag || "gdh-push",
+    data: { url: "/" },
+  });
+
+  // Set app icon badge (red dot / counter) when push arrives
+  const badge = self.navigator?.setAppBadge?.(1);
+  const tasks = badge ? Promise.all([show, badge]) : show;
+
+  event.waitUntil(tasks);
 });
 
 self.addEventListener("notificationclick", (event) => {

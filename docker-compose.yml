@@ -19,7 +19,7 @@ services:
       # Web Push (PWA notifications)
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
-      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@gastodehoy.local}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@gastodehoy.kyadigital.es}
     volumes:
       # Persistencia: el archivo .db vive en ./data/ del host.
       - ./data:/app/data
