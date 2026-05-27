@@ -39,10 +39,13 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
     "manifest.webmanifest": "application/manifest+json",
     "sw.js": "application/javascript; charset=utf-8",
     "registerSW.js": "application/javascript; charset=utf-8",
+    "gastodehoy-favicon-16.png": "image/png",
+    "gastodehoy-favicon-32.png": "image/png",
     "gastodehoy-favicon-192.png": "image/png",
     "gastodehoy-app-icon.png": "image/png",
     "gastodehoy-apple-touch-180.png": "image/png",
     "gastodehoy-app-icon-maskable.png": "image/png",
+    "gastodehoy-app-icon-maskable-192.png": "image/png",
 }
 
 
@@ -242,6 +245,20 @@ def pwa_icon_192() -> FileResponse | JSONResponse:
     )
 
 
+@app.get("/gastodehoy-favicon-32.png", response_model=None)
+def pwa_favicon_32() -> FileResponse | JSONResponse:
+    return _dist_root_file(
+        "gastodehoy-favicon-32.png", DIST_ROOT_STATIC_FILES["gastodehoy-favicon-32.png"]
+    )
+
+
+@app.get("/gastodehoy-favicon-16.png", response_model=None)
+def pwa_favicon_16() -> FileResponse | JSONResponse:
+    return _dist_root_file(
+        "gastodehoy-favicon-16.png", DIST_ROOT_STATIC_FILES["gastodehoy-favicon-16.png"]
+    )
+
+
 @app.get("/gastodehoy-app-icon.png", response_model=None)
 def pwa_icon_512() -> FileResponse | JSONResponse:
     return _dist_root_file(
@@ -262,6 +279,14 @@ def pwa_icon_maskable() -> FileResponse | JSONResponse:
     return _dist_root_file(
         "gastodehoy-app-icon-maskable.png",
         DIST_ROOT_STATIC_FILES["gastodehoy-app-icon-maskable.png"],
+    )
+
+
+@app.get("/gastodehoy-app-icon-maskable-192.png", response_model=None)
+def pwa_icon_maskable_192() -> FileResponse | JSONResponse:
+    return _dist_root_file(
+        "gastodehoy-app-icon-maskable-192.png",
+        DIST_ROOT_STATIC_FILES["gastodehoy-app-icon-maskable-192.png"],
     )
 
 

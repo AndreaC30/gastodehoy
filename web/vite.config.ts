@@ -69,7 +69,7 @@ export default defineConfig(({ mode }) => {
               purpose: "maskable",
             },
             {
-              src: "/gastodehoy-app-icon-maskable.png",
+              src: "/gastodehoy-app-icon-maskable-192.png",
               sizes: "192x192",
               type: "image/png",
               purpose: "maskable",
