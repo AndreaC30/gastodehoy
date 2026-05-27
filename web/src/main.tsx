@@ -77,12 +77,3 @@ createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </StrictMode>,
 );
-
-// Hide splash screen once React mounts
-const splash = document.getElementById("splash");
-if (splash) {
-  splash.classList.add("fade");
-  splash.addEventListener("transitionend", () => splash.remove(), { once: true });
-  // Fallback: remove after 400ms if transitionend doesn't fire
-  setTimeout(() => splash.remove(), 400);
-}
