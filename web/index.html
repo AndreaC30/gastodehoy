@@ -40,8 +40,50 @@
     <script defer src="https://umami.kyadigital.es/u/script.js"
       data-website-id="cac1b7e0-0363-4df4-b76f-fda83fcf935b"
       data-host-url="https://umami.kyadigital.es/u"></script>
+    <style>
+      /* ── Splash / loading screen (inline, before React mounts) ── */
+      body {
+        margin: 0;
+        background: #0f172a;
+        font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      }
+      #splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        background: #0f172a;
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+      }
+      #splash.fade { opacity: 0; pointer-events: none; }
+      #splash-spinner {
+        width: 32px; height: 32px;
+        border: 3px solid rgb(30 41 59);
+        border-top-color: rgb(34 211 238);
+        border-radius: 50%;
+        animation: gdh-spin 0.7s linear infinite;
+      }
+      @keyframes gdh-spin { to { transform: rotate(360deg); } }
+      #splash-msg {
+        max-width: 260px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 500;
+        color: rgb(148 163 184); /* slate-400 */
+        line-height: 1.5;
+        padding: 0 1rem;
+      }
+    </style>
   </head>
   <body class="antialiased">
+    <div id="splash">
+      <div id="splash-spinner"></div>
+      <p id="splash-msg">Cada euro que controlas<br>es un paso hacia tu libertad</p>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
