@@ -317,9 +317,12 @@ def spa_index() -> FileResponse | JSONResponse:
         )
     # El HTML debe revalidarse: los JS/CSS llevan hash en nombre; si el HTML cachea en
     # cliente, la producción muestra bundles viejos aunque la imagen esté actualizada.
+    # no-store + no-cache + must-revalidate: prohibe todo tipo de caché HTTP
     return FileResponse(
         index_path,
         headers={
-            "Cache-Control": "no-cache",
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
         },
     )
