@@ -49,6 +49,20 @@ export default function App() {
   const [meBootstrapError, setMeBootstrapError] = useState<string | null>(null);
   const [meRetryToken, setMeRetryToken] = useState(0);
 
+  // Replace inline HTML splash with React content once we mount
+  useEffect(() => {
+    const splash = document.getElementById("splash");
+    if (!splash) return;
+    // Small delay so the browser has painted the splash at least once
+    const frame = requestAnimationFrame(() => {
+      splash.classList.add("fade");
+      splash.addEventListener("transitionend", () => splash.remove(), { once: true });
+      // Safety: remove after transition duration + buffer if event doesn't fire
+      setTimeout(() => splash.remove(), 400);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   // Legal page overlay (privacy policy / legal notice)
   const [legalPage, setLegalPage] = useState<LegalPage>(getLegalPage);
   useEffect(() => subscribeToLegalPage(setLegalPage), []);
