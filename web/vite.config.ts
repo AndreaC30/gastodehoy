@@ -42,6 +42,16 @@ export default defineConfig(({ mode }) => {
           lang: "es",
           icons: [
             {
+              src: "/gastodehoy-favicon-16.png",
+              sizes: "16x16",
+              type: "image/png",
+            },
+            {
+              src: "/gastodehoy-favicon-32.png",
+              sizes: "32x32",
+              type: "image/png",
+            },
+            {
               src: "/gastodehoy-favicon-192.png",
               sizes: "192x192",
               type: "image/png",
@@ -55,6 +65,12 @@ export default defineConfig(({ mode }) => {
             {
               src: "/gastodehoy-app-icon-maskable.png",
               sizes: "512x512",
+              type: "image/png",
+              purpose: "maskable",
+            },
+            {
+              src: "/gastodehoy-app-icon-maskable.png",
+              sizes: "192x192",
               type: "image/png",
               purpose: "maskable",
             },
