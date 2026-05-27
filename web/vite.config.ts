@@ -82,13 +82,27 @@ export default defineConfig(({ mode }) => {
           ],
         },
         workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+          // Don't precache HTML — always fetch fresh so splash is never stale
+          globPatterns: ["**/*.{js,css,ico,png,svg,woff2}"],
+          // Disable automatic navigation fallback (we use runtimeCaching instead)
+          navigateFallback: null,
           importScripts: ["push-handler.js"],
-          navigateFallback: "index.html",
+          // Take control immediately on update (no waiting for tabs to close)
+          skipWaiting: true,
+          clientsClaim: true,
           runtimeCaching: [
             {
               urlPattern: /^\/api\//,
               handler: "NetworkOnly",
+            },
+            {
+              // HTML: network-first so we always get the latest splash/markup
+              urlPattern: ({ request }) => request.destination === "document",
+              handler: "NetworkFirst",
+              options: {
+                cacheName: "html-cache",
+                expiration: { maxEntries: 3, maxAgeSeconds: 300 },
+              },
             },
           ],
         },
