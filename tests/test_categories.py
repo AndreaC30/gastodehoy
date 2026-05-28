@@ -351,7 +351,10 @@ def test_insights_high_spending_warning(client) -> None:
     data = r.json()
 
     warning_titles = [i["title"] for i in data["insights"]]
-    assert any("ingreso" in t.lower() for t in warning_titles)
+    # After the fix, the warning references "presupuesto disponible" (real budget)
+    # instead of raw "ingreso". Just verify a high-spend warning is present.
+    assert len(warning_titles) >= 1
+    assert any("gastas" in t.lower() or "gastado" in t.lower() or "presupuesto" in t.lower() for t in warning_titles)
 
 
 def test_insights_requires_auth(anon_client) -> None:

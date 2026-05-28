@@ -149,6 +149,12 @@ def compute_insights(
     )
     monthly_income = us.monthly_income if us else Decimal("0")
 
+    # Compute budget summary early so real-budget insights can use it.
+    # (Previously only computed on-demand for insights #6/#7.)
+    today = today_in_app_timezone()
+    if monthly_income > 0 and summary is None:
+        summary = compute_summary(session, user_id, today)
+
     # 0. Month-over-month variable spending
     prev_start, prev_end = _previous_month_bounds(month_start)
     prev_spent = session.scalar(
@@ -213,48 +219,73 @@ def compute_insights(
             }
         )
 
-    # 2. Income vs spending ratio
-    if monthly_income > 0:
-        spend_pct = _safe_pct(total_spent, monthly_income)
-        if spend_pct > 80:
+    # 2. Real budget pace (available budget = income - savings - fixed costs)
+    if summary is not None:
+        available_budget: Decimal = summary["monthly_budget_after_fixed_and_savings"]
+        remaining: Decimal = summary["remaining_this_month"]
+
+        if available_budget > 0:
+            spend_pct = _safe_pct(total_spent, available_budget)
+
+            if remaining < 0:
+                # Already overspent the real available budget
+                insights.append(
+                    {
+                        "type": INSIGHT_TYPE_WARNING,
+                        "title": TITLE_BUDGET_EXHAUSTED,
+                        "message": (
+                            f"Has superado tu presupuesto disponible en "
+                            f"{abs(remaining)}€. Tus gastos fijos y ahorro suman "
+                            f"{summary['fixed_expenses_total'] + summary['savings_amount']}€, "
+                            f"y ya has gastado {total_spent}€ en variables."
+                        ),
+                        "icon": "alert_circle",
+                    }
+                )
+            elif spend_pct >= 85:
+                insights.append(
+                    {
+                        "type": INSIGHT_TYPE_WARNING,
+                        "title": TITLE_HIGH_SPENDING_RATIO,
+                        "message": (
+                            f"Llevas gastado el {spend_pct}% de tu presupuesto "
+                            f"disponible ({available_budget}€) tras descontar fijos "
+                            f"y ahorro. Te quedan {remaining}€."
+                        ),
+                        "icon": "alert_circle",
+                    }
+                )
+            elif spend_pct < 50 and elapsed > 15:
+                insights.append(
+                    {
+                        "type": INSIGHT_TYPE_SUCCESS,
+                        "title": TITLE_GOOD_PACE,
+                        "message": (
+                            f"Solo has gastado el {spend_pct}% de tu presupuesto "
+                            f"disponible ({available_budget}€). "
+                            f"Te quedan {remaining}€ para el resto del mes."
+                        ),
+                        "icon": "check_circle",
+                    }
+                )
+
+    # 3. Projection warning (against real available budget, not gross income)
+    if summary is not None:
+        available_budget = summary["monthly_budget_after_fixed_and_savings"]
+        if available_budget > 0 and projected > available_budget:
+            over = projected - available_budget
             insights.append(
                 {
                     "type": INSIGHT_TYPE_WARNING,
-                    "title": TITLE_HIGH_SPENDING_RATIO,
+                    "title": TITLE_PROJECTED_OVERSPEND,
                     "message": (
-                        f"Llevas gastado el {spend_pct}% de tu ingreso mensual. "
-                        f"Intenta dejar al menos un 20% para ahorro."
+                        f"A este ritmo, gastarás ~{projected}€ este mes "
+                        f"({over}€ más que tu presupuesto disponible de "
+                        f"{available_budget}€). Ajusta tu ritmo."
                     ),
-                    "icon": "alert_circle",
+                    "icon": "trending_up",
                 }
             )
-        elif spend_pct < 40 and elapsed > 15:
-            insights.append(
-                {
-                    "type": INSIGHT_TYPE_SUCCESS,
-                    "title": TITLE_GOOD_PACE,
-                    "message": (
-                        f"Solo has gastado el {spend_pct}% de tu ingreso. "
-                        f"Sigue así y tendrás buen margen para ahorrar."
-                    ),
-                    "icon": "check_circle",
-                }
-            )
-
-    # 3. Projection warning
-    if monthly_income > 0 and projected > monthly_income:
-        over = projected - monthly_income
-        insights.append(
-            {
-                "type": INSIGHT_TYPE_WARNING,
-                "title": TITLE_PROJECTED_OVERSPEND,
-                "message": (
-                    f"A este ritmo, gastarás ~{projected}€ este mes "
-                    f"({over}€ más que tu ingreso). Ajusta tu ritmo."
-                ),
-                "icon": "trending_up",
-            }
-        )
 
     # 4. Category monthly budget exceeded
     for item in breakdown:
@@ -331,18 +362,8 @@ def compute_insights(
                     "icon": "calendar",
                 }
             )
-        else:
-            insights.append(
-                {
-                    "type": INSIGHT_TYPE_WARNING,
-                    "title": TITLE_BUDGET_EXHAUSTED,
-                    "message": (
-                        f"Has superado tu presupuesto mensual. "
-                        f"Te quedan {remaining}€ para {days_left} días."
-                    ),
-                    "icon": "alert_circle",
-                }
-            )
+        # When remaining < 0, insight #2 already covers it with TITLE_BUDGET_EXHAUSTED.
+        # Skip here to avoid a duplicate.
 
     # Fallback if no insights generated
     if not insights:
