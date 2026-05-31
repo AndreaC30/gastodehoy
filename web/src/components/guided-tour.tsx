@@ -135,6 +135,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
   return (
     <div
       className="fixed inset-0 z-[90] isolate"
+      style={{ width: "100vw", height: "100dvh" }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="guided-tour-title"
