@@ -43,7 +43,7 @@ export function VariableExpensesSection({
   return (
     <section
       data-tour="variable-expenses"
-      className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20"
+      className="rounded-2xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/20"
     >
       <div className="border-b border-slate-800 px-5 py-4">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">
@@ -78,7 +78,7 @@ export function VariableExpensesSection({
                 return (
                   <li
                     key={it.id}
-                    className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                    className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-center gap-2">
@@ -125,7 +125,7 @@ export function VariableExpensesSection({
               <button
                 type="button"
                 onClick={onToggleExpand}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950/40 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
                 aria-expanded={expanded}
               >
                 <ChevronInCircle expanded={expanded} />

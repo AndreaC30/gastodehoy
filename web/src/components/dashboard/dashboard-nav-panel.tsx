@@ -163,7 +163,7 @@ export function DashboardNavPanel({
                     type="button"
                     disabled={disabled}
                     onClick={() => pick(id)}
-                    className="flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition-colors hover:border-slate-700 hover:bg-slate-900/90 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-transparent disabled:hover:bg-transparent"
+                    className="flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition-colors hover:border-slate-700 hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-transparent disabled:hover:bg-transparent"
                   >
                     <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-teal-400">
                       <Icon className="h-[1.15rem] w-[1.15rem]" aria-hidden />
@@ -219,7 +219,7 @@ export function DashboardNavPanel({
                   onClose();
                   void logout();
                 }}
-                className={`flex w-full items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-3 text-left text-sm font-medium text-slate-300 transition-colors hover:bg-slate-800 ${FOCUS_RING}`}
+                className={`flex w-full items-center gap-3 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-left text-sm font-medium text-slate-300 transition-colors hover:bg-slate-800 ${FOCUS_RING}`}
               >
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-950">
                   <IoLogOutOutline className="h-[1.15rem] w-[1.15rem]" aria-hidden />

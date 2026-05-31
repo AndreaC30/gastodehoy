@@ -30,7 +30,7 @@ function cardClass(months: MonthCount, isCurrentMonth: boolean): string {
     "rounded-xl border px-2.5 py-2.5 text-center sm:px-3 shrink-0 min-w-[4.5rem] sm:min-w-0";
   const tone = isCurrentMonth
     ? "border-teal-500/35 bg-teal-500/10"
-    : "border-slate-800 bg-slate-900/90";
+    : "border-slate-800 bg-slate-900";
   if (months === 12) return `${base} w-[4.75rem] sm:w-auto sm:shrink ${tone}`;
   return `${base} ${tone}`;
 }
@@ -45,7 +45,7 @@ export function MonthHistoryStrip() {
 
   if (error) {
     return (
-      <p className="rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3 text-sm text-slate-500">
+      <p className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-slate-500">
         No se pudo cargar el historial mensual.
       </p>
     );
@@ -60,7 +60,7 @@ export function MonthHistoryStrip() {
         {Array.from({ length: months }, (_, i) => (
           <div
             key={i}
-            className="h-[4.5rem] animate-pulse rounded-xl border border-slate-800 bg-slate-900/50"
+            className="h-[4.5rem] animate-pulse rounded-xl border border-slate-800 bg-slate-900"
           />
         ))}
       </div>
@@ -72,7 +72,7 @@ export function MonthHistoryStrip() {
 
   return (
     <section
-      className="rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-4 shadow-lg shadow-black/20"
+      className="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-4 shadow-lg shadow-black/20"
       aria-label={t("monthHistory.ariaLabel")}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -83,7 +83,7 @@ export function MonthHistoryStrip() {
           <p className={`mt-0.5 ${TYPE_CAPTION}`}>Gasto variable por mes</p>
         </div>
         <div
-          className="inline-flex rounded-lg border border-slate-700 bg-slate-900/80 p-0.5"
+          className="inline-flex rounded-lg border border-slate-700 bg-slate-900 p-0.5"
           role="group"
           aria-label="Meses a mostrar"
         >
