@@ -22,9 +22,106 @@ body {
   scroll-margin-bottom: 18rem;
 }
 
-img,
-svg {
+img {
   max-width: 100%;
+}
+
+/*
+ * Iconos UI (react-icons): max-width:100% en svg hace que en Android WebView
+ * crezcan al ancho del contenedor flex y tapen el contenido como un bloque oscuro.
+ */
+svg {
+  display: inline-block;
+  flex-shrink: 0;
+  max-width: none;
+  max-height: none;
+}
+
+.insights-panel {
+  position: relative;
+  border-radius: 1rem;
+  border: 1px solid rgb(30 41 59);
+  background-color: rgb(15 23 42);
+  padding: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .insights-panel {
+    padding: 1.25rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+  }
+}
+
+.insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.insights-card {
+  border-radius: 0.75rem;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.625;
+}
+
+@media (min-width: 640px) {
+  .insights-card {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+.insights-card--warning {
+  border-color: rgb(245 158 11 / 0.4);
+  background-color: rgb(28 24 16);
+  color: rgb(253 230 138);
+}
+
+.insights-card--tip {
+  border-color: rgb(14 165 233 / 0.4);
+  background-color: rgb(16 28 36);
+  color: rgb(186 230 253);
+}
+
+.insights-card--success {
+  border-color: rgb(16 185 129 / 0.4);
+  background-color: rgb(15 28 24);
+  color: rgb(167 243 208);
+}
+
+.insights-card--info {
+  border-color: rgb(71 85 105 / 0.4);
+  background-color: rgb(30 41 59);
+  color: rgb(203 213 225);
+}
+
+.insights-card__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.insights-card__title svg {
+  width: 1rem;
+  height: 1rem;
+  min-width: 1rem;
+  min-height: 1rem;
+  margin-top: 0.125rem;
+}
+
+.insights-card__message {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  opacity: 0.9;
+  overflow-wrap: anywhere;
 }
 
 /* Scroll en modales: fino y oscuro (evita la barra gris/blanca del sistema). */

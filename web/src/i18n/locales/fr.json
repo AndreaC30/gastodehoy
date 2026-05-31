@@ -21,7 +21,7 @@
     "subtitle": "Analyse de vos dépenses ce mois",
     "avgDaily": "Dépense variable moyenne/jour",
     "projection": "Projection mensuelle (variables)",
-    "projectionDetail": "Vous avez dépensé {{spent}}€. À ce rythme, ~{{projected}}€/mois.",
+    "projectionDetail": "Vous avez dépensé {{spent}}. À ce rythme, ~{{projected}}/mois.",
     "error": "Impossible de charger les aperçus."
   },
   "rule503020": {

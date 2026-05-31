@@ -21,7 +21,7 @@
     "subtitle": "Análisis de tus gastos este mes",
     "avgDaily": "Gasto variable medio/día",
     "projection": "Proyección mensual (solo variables)",
-    "projectionDetail": "Llevas {{spent}}€. A este ritmo, ~{{projected}}€ al mes.",
+    "projectionDetail": "Llevas {{spent}}. A este ritmo, ~{{projected}} al mes.",
     "error": "No se pudieron cargar los insights."
   },
   "rule503020": {

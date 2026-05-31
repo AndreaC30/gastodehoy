@@ -21,7 +21,7 @@
     "subtitle": "Analyse deiner Ausgaben diesen Monat",
     "avgDaily": "Ø tägliche variable Ausgaben",
     "projection": "Monatsprognose (nur Variable)",
-    "projectionDetail": "Du hast {{spent}}€ ausgegeben. Bei diesem Tempo ~{{projected}}€/Monat.",
+    "projectionDetail": "Du hast {{spent}} ausgegeben. Bei diesem Tempo ~{{projected}}/Monat.",
     "error": "Einblicke konnten nicht geladen werden."
   },
   "rule503020": {

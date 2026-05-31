@@ -24,11 +24,11 @@ type Props = {
   error: Error | null;
 };
 
-const TYPE_STYLES: Record<string, string> = {
-  warning: "border-amber-500/40 bg-amber-950/30 text-amber-200",
-  tip: "border-sky-500/40 bg-sky-950/30 text-sky-200",
-  success: "border-emerald-500/40 bg-emerald-950/30 text-emerald-200",
-  info: "border-slate-600/40 bg-slate-800/40 text-slate-300",
+const TYPE_CARD_CLASS: Record<string, string> = {
+  warning: "insights-card--warning",
+  tip: "insights-card--tip",
+  success: "insights-card--success",
+  info: "insights-card--info",
 };
 
 const TYPE_ICON_COLORS: Record<string, string> = {
@@ -107,7 +107,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
     return (
       <section
         data-tour="insights"
-        className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5"
+        className="insights-panel"
         aria-busy="true"
         aria-label={t("insights.title")}
       >
@@ -122,7 +122,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
     return (
       <section
         data-tour="insights"
-        className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-5 text-sm text-rose-300"
+        className="rounded-2xl border border-rose-500/30 bg-rose-950 p-5 text-sm text-rose-300"
       >
         {t("insights.error")} {error.message}
       </section>
@@ -134,7 +134,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
   return (
     <section
       data-tour="insights"
-      className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3 shadow-lg shadow-black/20 sm:p-5"
+      className="insights-panel"
       aria-labelledby="insights-panel-title"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -143,7 +143,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
             id="insights-panel-title"
             className="flex items-center gap-2 text-lg font-bold tracking-tight"
           >
-            <IoBulbOutline className="h-5 w-5 text-sky-400" aria-hidden />
+            <IoBulbOutline className="text-sky-400" size={20} aria-hidden />
             {t("insights.title")}
           </h2>
           <p className={`mt-1 ${TYPE_CAPTION}`}>{t("insights.subtitle")}</p>
@@ -156,19 +156,20 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         </div>
       </div>
 
-      <ul className="mt-4 list-none space-y-3 p-0">
+      <ul className="insights-list">
         {data.insights.map((insight) => {
           const { Icon, colorClass } = getInsightIcon(insight);
+          const cardClass = TYPE_CARD_CLASS[insight.type] ?? TYPE_CARD_CLASS.info;
           return (
             <li
               key={`${insight.type}-${insight.title}`}
-              className={`rounded-xl border px-3 py-2.5 text-sm leading-relaxed sm:px-4 sm:py-3 sm:text-base ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
+              className={`insights-card ${cardClass}`}
             >
-              <p className="flex items-start gap-2 font-semibold">
-                <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${colorClass}`} aria-hidden />
-                <span className="min-w-0 flex-1 break-words">{insight.title}</span>
+              <p className="insights-card__title">
+                <Icon className={colorClass} size={16} aria-hidden />
+                <span>{insight.title}</span>
               </p>
-              <p className="mt-1 break-words text-sm opacity-90">{insight.message}</p>
+              <p className="insights-card__message">{insight.message}</p>
             </li>
           );
         })}
