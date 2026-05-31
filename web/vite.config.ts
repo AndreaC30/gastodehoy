@@ -41,27 +41,21 @@ export default defineConfig(({ mode }) => {
           start_url: "/",
           lang: "es",
           icons: [
-            /* Android cold start: wordmark + tagline (no calendar icon in manifest). */
+            /* Launcher / app drawer: 3D calendar (not the wordmark splash image). */
             {
-              src: "/pwa-launch-512.png",
+              src: "/gastodehoy-app-icon.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "any",
             },
             {
-              src: "/pwa-launch-192.png",
-              sizes: "192x192",
-              type: "image/png",
-              purpose: "any",
-            },
-            {
-              src: "/pwa-launch-maskable-512.png",
+              src: "/gastodehoy-app-icon-maskable.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "maskable",
             },
             {
-              src: "/pwa-launch-maskable-192.png",
+              src: "/gastodehoy-app-icon-maskable-192.png",
               sizes: "192x192",
               type: "image/png",
               purpose: "maskable",

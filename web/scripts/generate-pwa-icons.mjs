@@ -79,17 +79,24 @@ console.log(
 );
 console.log(`Background: #0f172a (slate-900 — app theme)\n`);
 
-// "any" icon — 512px, content at 88% (favicon bundle only; app-icon.png is set by generate-pwa-splash.mjs)
+// Launcher + manifest "any" icon — 512px calendar (home screen / app drawer)
 const any512 = await squareIcon(512, 0.88);
+writeAsset("gastodehoy-app-icon.png", any512);
 writeAsset("gastodehoy-favicon.png", any512);
-console.log("  favicon 512px    (content @ 88%)");
+console.log("  app-icon 512px   (launcher @ 88%)");
 
 // "any" icon — 192px
 const any192 = await squareIcon(192, 0.88);
 writeAsset("gastodehoy-favicon-192.png", any192);
-console.log("  any 192px        (content @ 88%)");
+console.log("  favicon 192px    (content @ 88%)");
 
-// maskable launcher icons: written by generate-pwa-splash.mjs (wordmark, for Android OS splash)
+const maskable512 = await squareIcon(512, 0.72);
+writeAsset("gastodehoy-app-icon-maskable.png", maskable512);
+console.log("  app-icon maskable 512px");
+
+const maskable192 = await squareIcon(192, 0.72);
+writeAsset("gastodehoy-app-icon-maskable-192.png", maskable192);
+console.log("  app-icon maskable 192px");
 
 // apple-touch-icon — 180px
 const apple180 = await squareIcon(180, 0.85);
