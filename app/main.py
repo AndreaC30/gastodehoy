@@ -47,6 +47,13 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
     "gastodehoy-app-icon-maskable.png": "image/png",
     "gastodehoy-app-icon-maskable-192.png": "image/png",
     "gastodehoy-logo.png": "image/png",
+    "pwa-launch-512.png": "image/png",
+    "pwa-launch-192.png": "image/png",
+    "pwa-launch-1290x2796.png": "image/png",
+    "pwa-launch-1179x2556.png": "image/png",
+    "pwa-launch-1170x2532.png": "image/png",
+    "pwa-launch-1125x2436.png": "image/png",
+    "pwa-launch-828x1792.png": "image/png",
 }
 
 
@@ -222,6 +229,18 @@ def og_image() -> FileResponse | JSONResponse:
 def brand_logo_png() -> FileResponse | JSONResponse:
     """Wordmark for boot splash (also in ``web/public``)."""
     return _dist_root_file("gastodehoy-logo.png", DIST_ROOT_STATIC_FILES["gastodehoy-logo.png"])
+
+
+@app.get("/pwa-launch-{asset}.png", response_model=None)
+def pwa_launch_png(asset: str) -> FileResponse | JSONResponse:
+    """Branded PWA cold-start images (iOS startup / Android splash source)."""
+    allowed = {k.removesuffix(".png") for k in DIST_ROOT_STATIC_FILES if k.startswith("pwa-launch-")}
+    if asset not in allowed:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": "Not Found"},
+        )
+    return _dist_root_file(f"pwa-launch-{asset}.png", "image/png")
 
 
 @app.get("/manifest.webmanifest", response_model=None)
