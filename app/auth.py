@@ -139,7 +139,19 @@ def decode_session_token(token: str) -> tuple[int, datetime]:
 
 
 def set_session_cookie(response: Response, token: str) -> None:
-    """Attach the signed session cookie (HttpOnly, Lax, Secure in prod)."""
+    """Attach the signed session cookie (HttpOnly, Lax, Secure in prod).
+
+    Also clears any old cookie that had an explicit domain (from before
+    we removed the domain parameter) so stale cookies don't accumulate
+    on Android/iOS PWAs.
+    """
+    # Purge old cookie that had an explicit domain
+    if settings.cookie_domain:
+        response.delete_cookie(
+            key=SESSION_COOKIE,
+            domain=settings.cookie_domain,
+            path="/",
+        )
     response.set_cookie(
         key=SESSION_COOKIE,
         value=token,
@@ -152,11 +164,21 @@ def set_session_cookie(response: Response, token: str) -> None:
 
 
 def clear_session_cookie(response: Response) -> None:
-    """Tell the browser to drop the session cookie (logout / reset)."""
+    """Tell the browser to drop the session cookie (logout / reset).
+
+    Clears both the current host-only cookie and any legacy cookie that
+    had an explicit domain (from before the domain-removal fix).
+    """
     response.delete_cookie(
         key=SESSION_COOKIE,
         path="/",
     )
+    if settings.cookie_domain:
+        response.delete_cookie(
+            key=SESSION_COOKIE,
+            domain=settings.cookie_domain,
+            path="/",
+        )
 
 
 def get_current_user(
