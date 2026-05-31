@@ -18,7 +18,8 @@
     "bannerNewMonthTitle": "¡Nuevo mes!",
     "bannerNewMonthBody": "Los gastos variables empiezan de cero. Tus fijos siguen igual cada mes.",
     "bannerEndMonthTitle": "Últimos días de {{month}}",
-    "bannerEndMonthBody": "Quedan {{daysLeft}} días. Revisa lo que llevas antes de que empiece el mes siguiente.",
+    "bannerEndMonthBody_one": "Queda {{count}} día. Revisa lo que llevas antes de que empiece el mes siguiente.",
+    "bannerEndMonthBody_other": "Quedan {{count}} días. Revisa lo que llevas antes de que empiece el mes siguiente.",
     "bannerDismiss": "Entendido"
   },
   "metrics": {

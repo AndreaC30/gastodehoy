@@ -5,6 +5,12 @@ export function todayDate(): Date {
   return new Date();
 }
 
+/** First letter uppercased only (avoid CSS capitalize on every word). */
+export function capitalizeFirstLetter(text: string): string {
+  if (!text) return text;
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 /** Localized month name and year, e.g. "May 2026". */
 export function formatMonthYear(date: Date, locale: string): string {
   return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(

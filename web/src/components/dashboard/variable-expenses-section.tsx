@@ -54,7 +54,7 @@ export function VariableExpensesSection({
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">
           {t("variableExpenses.title")}
         </h2>
-        <p className={`mt-1 capitalize ${TYPE_CAPTION}`}>
+        <p className={`mt-1 normal-case ${TYPE_CAPTION}`}>
           {t("monthContext.variableSubtitle", { month })}
         </p>
       </div>

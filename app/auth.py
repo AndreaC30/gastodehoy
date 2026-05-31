@@ -255,6 +255,9 @@ def check_login_rate(request: Request, db: Session) -> None:
     Uses SQLite-backed storage so rate limits survive restarts and work
     across multiple workers.
     """
+    if settings.environment == "development":
+        return
+
     ip = _client_ip(request)
     now = datetime.now(timezone.utc)
 

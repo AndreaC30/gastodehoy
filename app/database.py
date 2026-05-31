@@ -328,6 +328,13 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                     "ALTER TABLE user_settings ADD COLUMN language VARCHAR(5)"
                 )
             )
+        if "dashboard_tour_completed" not in us_colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE user_settings ADD COLUMN dashboard_tour_completed "
+                    "BOOLEAN NOT NULL DEFAULT 0"
+                )
+            )
 
         conn.execute(
             text(

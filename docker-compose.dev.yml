@@ -1,11 +1,10 @@
-# Overlay explícito: expone el puerto 8000 (misma idea que docker-compose.override.yml).
-#
-# Preferencia local: copia `docker-compose.override.example.yml` a
-# `docker-compose.override.yml` y usa solo `docker compose up` (override se fusiona solo).
-#
-# Uso de este archivo (sin override):
-#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+# Local dev: expose API on host :8001 (matches VITE_API_PROXY_TARGET in .env).
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#   cd web && npm run dev
 services:
   app:
     ports:
-      - "8000:8000"
+      - "8001:8000"
+    environment:
+      ENV: development
