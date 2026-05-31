@@ -30,10 +30,12 @@ const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
 /** Tolerance when removing the baked-in export background from the calendar PNG. */
 const SOURCE_BG_TOLERANCE = 6;
 
-/** How much of the canvas the calendar fills (higher = larger icon). */
-const FAVICON_FILL = 0.94;
+/** PWA / iOS home screen — more margin (~65–70% of tile, like the old install). */
+const PWA_LAUNCHER_FILL = 0.70;
+/** Browser tab favicons — slightly larger for legibility at 16–32px. */
+const FAVICON_TAB_FILL = 0.86;
 /** Maskable safe zone (Android adaptive icon spec). */
-const MASKABLE_FILL = 0.72;
+const MASKABLE_FILL = 0.66;
 /** Extra shift up after centroid (fraction of canvas) — optical balance on all OS launchers. */
 const OPTICAL_NUDGE_UP = 0.028;
 
@@ -198,13 +200,13 @@ async function compositeCenteredArt(canvasSize, artBuffer, background) {
 }
 
 /** Browser tab favicon: calendar only, transparent (OS paints the bar). */
-async function faviconIcon(canvasSize, contentFraction = FAVICON_FILL) {
+async function faviconIcon(canvasSize, contentFraction = FAVICON_TAB_FILL) {
   const art = await prepareCalendarArt(canvasSize, contentFraction);
   return compositeCenteredArt(canvasSize, art, TRANSPARENT);
 }
 
 /** PWA install / iOS home screen: calendar on #0f172a (never transparent — avoids white tiles). */
-async function pwaLauncherIcon(canvasSize, contentFraction = FAVICON_FILL) {
+async function pwaLauncherIcon(canvasSize, contentFraction = PWA_LAUNCHER_FILL) {
   const art = await prepareCalendarArt(canvasSize, contentFraction);
   return compositeCenteredArt(canvasSize, art, BG);
 }
@@ -237,7 +239,7 @@ const maskable192 = await pwaLauncherIcon(192, MASKABLE_FILL);
 writeAsset("gastodehoy-app-icon-maskable-192.png", maskable192);
 console.log("  app-icon maskable 192px");
 
-const apple180 = await pwaLauncherIcon(180, FAVICON_FILL);
+const apple180 = await pwaLauncherIcon(180);
 writeAsset("gastodehoy-apple-touch-180.png", apple180);
 console.log("  apple-touch 180px (#0f172a, iOS home screen)");
 
