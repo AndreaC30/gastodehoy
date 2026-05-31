@@ -22,6 +22,21 @@
     "bannerEndMonthBody_other": "{{count}} days left. Review your spending before the next month begins.",
     "bannerDismiss": "Got it"
   },
+  "monthIncomeCheck": {
+    "incomeQuestionTitle": "Same income as last month?",
+    "incomeQuestionBody": "This month, were your earnings the same as last month?",
+    "incomeQuestionHint": "Not paid yet? Update it anytime from Menu → Your income.",
+    "savingsQuestionTitle": "Same savings as last month?",
+    "savingsQuestionBody": "Do you want to keep the same savings amount as last month?",
+    "sameYes": "Yes, same",
+    "sameNo": "No, change",
+    "incomeModalTitle": "This month's income",
+    "incomeModalSubtitle": "Enter your net monthly income. Your budget will be calculated from this amount.",
+    "saveIncome": "Save income",
+    "incomeSaved": "New income saved successfully",
+    "savingsModalTitle": "This month's savings",
+    "savingsModalSubtitle": "Choose how much you want to set aside for savings each month."
+  },
   "metrics": {
     "savings": "Reserved savings",
     "fixedExpenses": "Fixed expenses",
@@ -338,10 +353,14 @@
       "body": "Rent, utilities… once a month."
     },
     "step4": {
+      "title": "Monthly budget",
+      "body": "The badge shows the active month. Variable expenses are for this month only; on the 1st they start fresh. Fixed costs repeat each month. On the 1st we also ask if your income changed."
+    },
+    "step5": {
       "title": "Insights",
       "body": "Tips if you overspend or cut it close."
     },
-    "step5": {
+    "step6": {
       "title": "Menu",
       "body": "Income, categories and more."
     }

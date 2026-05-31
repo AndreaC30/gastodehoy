@@ -36,6 +36,9 @@ import type { Settings, User } from "./api/types";
 import { getStoredAnonPhase, setStoredAnonPhase } from "@/lib/anon-phase-session";
 import { APP_SHELL_CLASS } from "@/lib/app-layout";
 import { hasSeenLanding, markLandingSeen } from "@/lib/landing-preference";
+import { markIncomeCheckAnswered } from "@/lib/income-check-preference";
+import { isFirstDayOfMonth } from "@/lib/month-income-check";
+import { todayDate } from "@/lib/month-context";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import {
   subscribeToLegalPage,
@@ -199,6 +202,9 @@ function Authed({ userName }: { userName: string }) {
           userName={userName}
           onSkip={() => setSkipped(true)}
           onDone={() => {
+            if (isFirstDayOfMonth(todayDate())) {
+              void markIncomeCheckAnswered(todayDate());
+            }
             void invalidateBudgetQueries(qc);
             setSkipped(false);
           }}

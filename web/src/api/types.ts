@@ -46,6 +46,8 @@ export type Settings = {
   savings_percent: string | number;
   savings_amount: string | number;
   dashboard_tour_completed?: boolean;
+  /** YYYY-MM — last month the user completed the day-1 income check. */
+  income_check_month?: string | null;
   language?: string | null;
 };
 

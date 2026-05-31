@@ -16,6 +16,7 @@ export function MonthContextBadge({ referenceDate }: Props) {
   return (
     <div
       className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-xl border border-slate-800/80 bg-slate-900/60 px-3 py-2 sm:px-4"
+      data-tour="month-context"
       aria-label={`${monthYear}, ${t("monthContext.badgeSubtitle")}`}
     >
       <p className="text-base font-bold tracking-tight text-slate-100 normal-case sm:text-lg">

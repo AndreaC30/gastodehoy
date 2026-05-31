@@ -114,6 +114,8 @@ def update_settings(
     row.savings_amount = payload.savings_amount
     if payload.dashboard_tour_completed:
         row.dashboard_tour_completed = True
+    if payload.income_check_month:
+        row.income_check_month = payload.income_check_month
     if payload.language is not None:
         row.language = payload.language
     db.commit()

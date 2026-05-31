@@ -33,6 +33,11 @@ type Props = {
   onBackToMenu?: () => void;
   onSaved: (next: Settings) => void;
   onExtrasChanged: () => void;
+  /** Defaults to full settings modal with both tabs. */
+  focus?: SettingsFocus;
+  title?: string;
+  subtitle?: string;
+  saveLabel?: string;
 };
 
 const inputClass = `${INPUT_CLASS} py-2.5`;
@@ -40,6 +45,9 @@ const inputClass = `${INPUT_CLASS} py-2.5`;
 const inputClassSm = `${INPUT_CLASS} text-sm`;
 
 type SettingsTab = "monthly" | "extra";
+
+/** Which fields to show: full settings, income-only, or savings-only (monthly check flow). */
+export type SettingsFocus = "full" | "incomeOnly" | "savingsOnly";
 
 function describeExtraSavings(it: ExtraIncome, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const mode = it.savings_mode ?? "none";
@@ -69,8 +77,13 @@ export function SettingsModal({
   onBackToMenu,
   onSaved,
   onExtrasChanged,
+  focus = "full",
+  title,
+  subtitle,
+  saveLabel,
 }: Props) {
   const { t } = useTranslation();
+  const isFocused = focus !== "full";
   const [income, setIncome] = useState(String(initial.monthly_income ?? ""));
   const [mode, setMode] = useState<SavingsMode>(initial.savings_mode);
   const [percent, setPercent] = useState(String(initial.savings_percent ?? "0"));
@@ -205,10 +218,10 @@ export function SettingsModal({
               id="settings-modal-title"
               className="text-lg font-bold tracking-tight"
             >
-              {t("incomeSettings.title")}
+              {title ?? t("incomeSettings.title")}
             </h2>
             <p className="text-sm text-slate-500">
-              {t("incomeSettings.subtitle")}
+              {subtitle ?? t("incomeSettings.subtitle")}
             </p>
           </div>
           <button
@@ -231,30 +244,32 @@ export function SettingsModal({
           </div>
         )}
 
-        <div
-          className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
-          role="tablist"
-          aria-label={t("incomeSettings.tabsLabel")}
-        >
-          <TabBtn
-            active={tab === "monthly"}
-            onClick={() => setTab("monthly")}
-            id="settings-tab-monthly"
-            controls="settings-panel-monthly"
+        {!isFocused && (
+          <div
+            className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
+            role="tablist"
+            aria-label={t("incomeSettings.tabsLabel")}
           >
-            {t("incomeSettings.tabMonthly")}
-          </TabBtn>
-          <TabBtn
-            active={tab === "extra"}
-            onClick={() => setTab("extra")}
-            id="settings-tab-extra"
-            controls="settings-panel-extra"
-          >
-            {t("incomeSettings.tabExtra")}
-          </TabBtn>
-        </div>
+            <TabBtn
+              active={tab === "monthly"}
+              onClick={() => setTab("monthly")}
+              id="settings-tab-monthly"
+              controls="settings-panel-monthly"
+            >
+              {t("incomeSettings.tabMonthly")}
+            </TabBtn>
+            <TabBtn
+              active={tab === "extra"}
+              onClick={() => setTab("extra")}
+              id="settings-tab-extra"
+              controls="settings-panel-extra"
+            >
+              {t("incomeSettings.tabExtra")}
+            </TabBtn>
+          </div>
+        )}
 
-        {tab === "monthly" ? (
+        {tab === "monthly" || isFocused ? (
           <form
             id="settings-panel-monthly"
             role="tabpanel"
@@ -262,19 +277,23 @@ export function SettingsModal({
             onSubmit={submit}
             className="space-y-4"
           >
-            <FormField id="settings-income" label={t("incomeSettings.monthlyIncome")}>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                min={0}
-                required
-                value={income}
-                onChange={(e) => setIncome(e.target.value)}
-                className={inputClass}
-              />
-            </FormField>
+            {focus !== "savingsOnly" && (
+              <FormField id="settings-income" label={t("incomeSettings.monthlyIncome")}>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min={0}
+                  required
+                  autoFocus={focus === "incomeOnly"}
+                  value={income}
+                  onChange={(e) => setIncome(e.target.value)}
+                  className={inputClass}
+                />
+              </FormField>
+            )}
 
+            {focus !== "incomeOnly" && (
             <div>
               <p
                 id="settings-savings-label"
@@ -322,7 +341,9 @@ export function SettingsModal({
                 />
               )}
             </div>
+            )}
 
+            {!isFocused && (
             <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3">
               <input
                 type="checkbox"
@@ -354,10 +375,11 @@ export function SettingsModal({
                 </span>
               </span>
             </label>
+            )}
 
             <ModalMenuFooter
               className="pt-2"
-              onBackToMenu={onBackToMenu}
+              onBackToMenu={isFocused ? undefined : onBackToMenu}
               onClose={onClose}
               closeLabel={t("common.cancel")}
             >
@@ -366,11 +388,11 @@ export function SettingsModal({
                 disabled={busy}
                 className="min-h-11 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
               >
-                {busy ? t("incomeSettings.saving") : t("common.save")}
+                {busy ? t("incomeSettings.saving") : (saveLabel ?? t("common.save"))}
               </button>
             </ModalMenuFooter>
           </form>
-        ) : (
+        ) : !isFocused ? (
           <div
             id="settings-panel-extra"
             role="tabpanel"
@@ -518,7 +540,7 @@ export function SettingsModal({
               onClose={onClose}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

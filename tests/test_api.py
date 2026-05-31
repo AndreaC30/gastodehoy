@@ -296,6 +296,28 @@ def test_settings_put_fixed_mode(client) -> None:
     assert Decimal(str(s["monthly_budget_after_fixed_and_savings"])) == Decimal("1700.00")
 
 
+def test_settings_income_check_month(client) -> None:
+    """Day-1 income check month is stored and survives unrelated PUTs."""
+    r = client.put(
+        "/api/settings",
+        json={
+            "monthly_income": "2000.00",
+            "savings_percent": "10",
+            "income_check_month": "2026-05",
+        },
+    )
+    assert r.status_code == 200
+    assert r.json()["income_check_month"] == "2026-05"
+
+    # PUT without income_check_month must not clear it
+    r2 = client.put(
+        "/api/settings",
+        json={"monthly_income": "2100.00", "savings_percent": "10"},
+    )
+    assert r2.status_code == 200
+    assert r2.json()["income_check_month"] == "2026-05"
+
+
 def test_fixed_expense_whitespace_name_rejected(client) -> None:
     r = client.post(
         "/api/fixed-expenses",

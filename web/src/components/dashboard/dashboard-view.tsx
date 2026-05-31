@@ -18,6 +18,7 @@ import { InsightsPanel } from "@/components/dashboard/insights-panel";
 import { MonthHistoryStrip } from "@/components/dashboard/month-history-strip";
 import { MonthContextBadge } from "@/components/dashboard/month-context-badge";
 import { MonthContextBanner } from "@/components/dashboard/month-context-banner";
+import { MonthlyIncomeCheckFlow } from "@/components/dashboard/monthly-income-check-flow";
 import { Rule503020Panel } from "@/components/dashboard/rule-503020-panel";
 import { SavingsGoalsModal } from "@/components/savings-goals-modal";
 import { api, downloadCsv } from "@/api/client";
@@ -99,6 +100,7 @@ export function Dashboard({ profileName }: Props) {
   );
   const [exportBusy, setExportBusy] = useState(false);
   const [showTour, setShowTour] = useState(false);
+  const [tourClosedSignal, setTourClosedSignal] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
   function returnToMenu(closePanel: () => void) {
@@ -152,12 +154,14 @@ export function Dashboard({ profileName }: Props) {
   function finishTour() {
     void markDashboardTourCompleted();
     setShowTour(false);
+    setTourClosedSignal((n) => n + 1);
     setToastMsg(t("toasts.tourComplete"));
   }
 
   function skipTour() {
     void markDashboardTourCompleted();
     setShowTour(false);
+    setTourClosedSignal((n) => n + 1);
   }
 
   const error =
@@ -461,9 +465,29 @@ export function Dashboard({ profileName }: Props) {
       {showTour && (
         <GuidedTour
           steps={DASHBOARD_TOUR_STEPS}
-          onBackToMenu={() => returnToMenu(() => setShowTour(false))}
+          onBackToMenu={() =>
+            returnToMenu(() => {
+              setShowTour(false);
+              setTourClosedSignal((n) => n + 1);
+            })
+          }
           onComplete={finishTour}
           onSkip={skipTour}
+        />
+      )}
+
+      {settings && (
+        <MonthlyIncomeCheckFlow
+          settings={settings}
+          extras={extraIncomeQ.data ?? []}
+          showTour={showTour}
+          tourClosedSignal={tourClosedSignal}
+          onSettingsSaved={() => {
+            void invalidateAll();
+          }}
+          onExtrasChanged={() => void invalidateAll()}
+          onToast={setToastMsg}
+          onFlowComplete={() => void invalidateAll()}
         />
       )}
 

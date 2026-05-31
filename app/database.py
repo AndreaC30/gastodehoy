@@ -335,6 +335,12 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                     "BOOLEAN NOT NULL DEFAULT 0"
                 )
             )
+        if "income_check_month" not in us_colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE user_settings ADD COLUMN income_check_month VARCHAR(7)"
+                )
+            )
 
         conn.execute(
             text(
