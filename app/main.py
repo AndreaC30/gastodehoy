@@ -236,7 +236,12 @@ def brand_logo_png() -> FileResponse | JSONResponse:
 @app.get("/pwa-launch-{asset}.png", response_model=None)
 def pwa_launch_png(asset: str) -> FileResponse | JSONResponse:
     """Branded PWA cold-start images (iOS startup / Android splash source)."""
-    allowed = {k.removesuffix(".png") for k in DIST_ROOT_STATIC_FILES if k.startswith("pwa-launch-")}
+    # URL is /pwa-launch-{asset}.png → asset is "512", "maskable-512", "1290x2796", etc.
+    allowed = {
+        k.removeprefix("pwa-launch-").removesuffix(".png")
+        for k in DIST_ROOT_STATIC_FILES
+        if k.startswith("pwa-launch-")
+    }
     if asset not in allowed:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
