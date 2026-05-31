@@ -22,6 +22,21 @@
     "bannerEndMonthBody_other": "Quedan {{count}} días. Revisa lo que llevas antes de que empiece el mes siguiente.",
     "bannerDismiss": "Entendido"
   },
+  "monthIncomeCheck": {
+    "incomeQuestionTitle": "¿Sigues con el mismo ingreso?",
+    "incomeQuestionBody": "Este mes, ¿tus ingresos han sido los mismos que el mes pasado?",
+    "incomeQuestionHint": "¿Aún no cobraste? Cuando lo sepas, actualízalo en Menú → Tus ingresos.",
+    "savingsQuestionTitle": "¿Mantienes el mismo ahorro?",
+    "savingsQuestionBody": "¿Quieres reservar la misma cantidad para ahorro que el mes pasado?",
+    "sameYes": "Sí, igual",
+    "sameNo": "No, cambiar",
+    "incomeModalTitle": "Tu ingreso de este mes",
+    "incomeModalSubtitle": "Indica tu ingreso mensual neto. El resto del presupuesto se calculará con esta cifra.",
+    "saveIncome": "Guardar ingreso",
+    "incomeSaved": "Nuevo ingreso guardado correctamente",
+    "savingsModalTitle": "Tu ahorro de este mes",
+    "savingsModalSubtitle": "Elige cuánto quieres reservar para ahorro cada mes."
+  },
   "metrics": {
     "savings": "Ahorro reservado",
     "fixedExpenses": "Gastos fijos",
@@ -338,10 +353,14 @@
       "body": "Alquiler, luz… una vez al mes."
     },
     "step4": {
+      "title": "Presupuesto mensual",
+      "body": "Arriba ves el mes activo. Los gastos variables son solo de este mes; el día 1 empiezan de cero. Los fijos se repiten igual. El día 1 también te preguntamos si tu ingreso ha cambiado."
+    },
+    "step5": {
       "title": "Avisos",
       "body": "Consejos si te pasas o vas justo."
     },
-    "step5": {
+    "step6": {
       "title": "Menú",
       "body": "Ingresos, categorías y más."
     }

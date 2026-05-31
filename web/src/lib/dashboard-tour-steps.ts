@@ -22,13 +22,18 @@ export const DASHBOARD_TOUR_STEPS: TourStep[] = [
     body: "tour.step3.body",
   },
   {
-    target: "insights",
+    target: "month-context",
     title: "tour.step4.title",
     body: "tour.step4.body",
   },
   {
-    target: "menu",
+    target: "insights",
     title: "tour.step5.title",
     body: "tour.step5.body",
+  },
+  {
+    target: "menu",
+    title: "tour.step6.title",
+    body: "tour.step6.body",
   },
 ];

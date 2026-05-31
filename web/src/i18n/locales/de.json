@@ -22,6 +22,21 @@
     "bannerEndMonthBody_other": "Noch {{count}} Tage. Schau dir an, was du ausgegeben hast, bevor der nächste Monat beginnt.",
     "bannerDismiss": "Verstanden"
   },
+  "monthIncomeCheck": {
+    "incomeQuestionTitle": "Gleiches Einkommen wie letzten Monat?",
+    "incomeQuestionBody": "War dein Einkommen diesen Monat dasselbe wie im Vormonat?",
+    "incomeQuestionHint": "Noch nicht ausgezahlt? Später anpassen unter Menü → Dein Einkommen.",
+    "savingsQuestionTitle": "Gleiche Ersparnisse wie letzten Monat?",
+    "savingsQuestionBody": "Möchtest du denselben Sparbetrag wie im Vormonat beibehalten?",
+    "sameYes": "Ja, gleich",
+    "sameNo": "Nein, ändern",
+    "incomeModalTitle": "Dein Einkommen diesen Monat",
+    "incomeModalSubtitle": "Gib dein monatliches Nettoeinkommen an. Dein Budget wird daraus berechnet.",
+    "saveIncome": "Einkommen speichern",
+    "incomeSaved": "Neues Einkommen erfolgreich gespeichert",
+    "savingsModalTitle": "Deine Ersparnisse diesen Monat",
+    "savingsModalSubtitle": "Wähle, wie viel du jeden Monat zum Sparen reservieren möchtest."
+  },
   "metrics": {
     "savings": "Reservierte Ersparnisse",
     "fixedExpenses": "Fixkosten",
@@ -340,10 +355,14 @@
       "body": "Miete, Strom… einmal im Monat."
     },
     "step4": {
+      "title": "Monatsbudget",
+      "body": "Oben siehst du den aktiven Monat. Variable Ausgaben gelten nur für diesen Monat; am 1. starten sie bei null. Fixkosten wiederholen sich. Am 1. fragen wir auch, ob sich dein Einkommen geändert hat."
+    },
+    "step5": {
       "title": "Hinweise",
       "body": "Tipps, wenn du zu viel ausgibst oder es knapp wird."
     },
-    "step5": {
+    "step6": {
       "title": "Menü",
       "body": "Einkommen, Kategorien und mehr."
     }

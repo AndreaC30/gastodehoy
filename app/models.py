@@ -107,6 +107,10 @@ class UserSettings(Base):
     dashboard_tour_completed: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, default=False, server_default="0"
     )
+    # YYYY-MM of last monthly income check the user completed (cross-device).
+    income_check_month: Mapped[str | None] = mapped_column(
+        String(7), nullable=True, default=None
+    )
     language: Mapped[str | None] = mapped_column(
         String(5), nullable=True, default=None
     )

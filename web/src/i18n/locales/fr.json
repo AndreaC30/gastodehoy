@@ -22,6 +22,21 @@
     "bannerEndMonthBody_other": "Il reste {{count}} jours. Faites le point avant le mois prochain.",
     "bannerDismiss": "Compris"
   },
+  "monthIncomeCheck": {
+    "incomeQuestionTitle": "Même revenu que le mois dernier ?",
+    "incomeQuestionBody": "Ce mois-ci, vos revenus ont-ils été les mêmes que le mois passé ?",
+    "incomeQuestionHint": "Pas encore payé ? Mettez à jour quand vous voulez via Menu → Vos revenus.",
+    "savingsQuestionTitle": "Même épargne que le mois dernier ?",
+    "savingsQuestionBody": "Voulez-vous réserver le même montant d'épargne que le mois passé ?",
+    "sameYes": "Oui, pareil",
+    "sameNo": "Non, changer",
+    "incomeModalTitle": "Votre revenu ce mois-ci",
+    "incomeModalSubtitle": "Indiquez votre revenu mensuel net. Votre budget sera calculé à partir de ce montant.",
+    "saveIncome": "Enregistrer le revenu",
+    "incomeSaved": "Nouveau revenu enregistré avec succès",
+    "savingsModalTitle": "Votre épargne ce mois-ci",
+    "savingsModalSubtitle": "Choisissez combien vous souhaitez mettre de côté chaque mois."
+  },
   "metrics": {
     "savings": "Épargne réservée",
     "fixedExpenses": "Dépenses fixes",
@@ -340,10 +355,14 @@
       "body": "Loyer, électricité… une fois par mois."
     },
     "step4": {
+      "title": "Budget mensuel",
+      "body": "Le badge indique le mois actif. Les dépenses variables ne comptent que pour ce mois ; le 1er, elles repartent de zéro. Les charges fixes se répètent. Le 1er, nous vous demandons aussi si vos revenus ont changé."
+    },
+    "step5": {
       "title": "Alertes",
       "body": "Conseils si vous dépensez trop ou êtes juste."
     },
-    "step5": {
+    "step6": {
       "title": "Menu",
       "body": "Revenus, catégories et plus."
     }

@@ -115,6 +115,11 @@ class BudgetSettings(BaseModel):
     savings_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100, decimal_places=2)
     savings_amount: Decimal = Field(default=Decimal("0"), ge=0, decimal_places=2)
     dashboard_tour_completed: bool = False
+    income_check_month: str | None = Field(
+        default=None,
+        pattern=r"^\d{4}-\d{2}$",
+        description="YYYY-MM when the user last completed the day-1 income check",
+    )
     language: str | None = Field(default=None, max_length=5)
 
 
