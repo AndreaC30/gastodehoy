@@ -10,8 +10,7 @@
  *   - favicons (16, 32, 192px)
  *   - og-image (512px)
  *
- * - Favicons / tabs: transparent PNG, calendar only (like YouTube/Bitwarden in the URL bar).
- * - Launcher / Android splash: #0f172a fill, export background keyed out.
+ * - Favicons, PWA launcher (Android/iOS), apple-touch: transparent PNG, calendar only.
  * - og-image: solid #0f172a for social previews.
  */
 import { copyFileSync, writeFileSync } from "node:fs";
@@ -28,6 +27,11 @@ const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
 
 /** Tolerance when removing the baked-in export background from the calendar PNG. */
 const SOURCE_BG_TOLERANCE = 6;
+
+/** How much of the canvas the calendar fills (higher = larger icon). */
+const FAVICON_FILL = 0.97;
+/** Maskable safe zone (Android adaptive icon spec). */
+const MASKABLE_FILL = 0.72;
 
 let calendarSourcePrepared = null;
 
@@ -125,8 +129,8 @@ async function squareIcon(canvasSize, contentFraction = 0.88, opts = {}) {
     .toBuffer();
 }
 
-/** Tab / bookmark favicon: calendar only, no dark square (trim + transparent canvas). */
-async function faviconIcon(canvasSize, contentFraction = 0.92) {
+/** Calendar-only transparent icon (tabs, PWA install, apple-touch). */
+async function faviconIcon(canvasSize, contentFraction = FAVICON_FILL) {
   const src = await calendarSourceRgba();
   const maxArt = Math.round(canvasSize * contentFraction);
 
@@ -174,31 +178,27 @@ console.log(
 );
 console.log(`Background: #0f172a (slate-900 — app theme)\n`);
 
-// Launcher / Android splash — strip export background so it matches #0f172a
-const any512 = await squareIcon(512, 0.88, { stripExportBg: true });
-writeAsset("gastodehoy-app-icon.png", any512);
-console.log("  app-icon 512px   (launcher @ 88%, bg keyed)");
+// PWA install + manifest (Android WebAPK / iOS) — same transparent calendar as favicon
+const pwa512 = await faviconIcon(512);
+writeAsset("gastodehoy-app-icon.png", pwa512);
+writeAsset("gastodehoy-favicon.png", pwa512);
+console.log("  app-icon / favicon 512px (transparent, PWA + tabs)");
 
-const maskable512 = await squareIcon(512, 0.72, { stripExportBg: true });
+const maskable512 = await faviconIcon(512, MASKABLE_FILL);
 writeAsset("gastodehoy-app-icon-maskable.png", maskable512);
-console.log("  app-icon maskable 512px");
+console.log("  app-icon maskable 512px (transparent)");
 
-const maskable192 = await squareIcon(192, 0.72, { stripExportBg: true });
+const maskable192 = await faviconIcon(192, MASKABLE_FILL);
 writeAsset("gastodehoy-app-icon-maskable-192.png", maskable192);
-console.log("  app-icon maskable 192px");
-
-// Favicons / tabs / apple-touch — transparent, calendar art only
-const fav512 = await faviconIcon(512);
-writeAsset("gastodehoy-favicon.png", fav512);
-console.log("  favicon 512px    (transparent)");
+console.log("  app-icon maskable 192px (transparent)");
 
 const any192 = await faviconIcon(192);
 writeAsset("gastodehoy-favicon-192.png", any192);
 console.log("  favicon 192px    (transparent)");
 
-const apple180 = await faviconIcon(180, 0.9);
+const apple180 = await faviconIcon(180, FAVICON_FILL);
 writeAsset("gastodehoy-apple-touch-180.png", apple180);
-console.log("  apple-touch 180px (transparent)");
+console.log("  apple-touch 180px (transparent, iOS home screen)");
 
 const fav32 = await faviconIcon(32);
 writeAsset("gastodehoy-favicon-32.png", fav32);
