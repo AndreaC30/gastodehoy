@@ -41,10 +41,16 @@ export default defineConfig(({ mode }) => {
           start_url: "/",
           lang: "es",
           icons: [
-            /* Launcher / app drawer: 3D calendar (not the wordmark splash image). */
+            /* PWA install: transparent calendar (background_color fills the rest). */
             {
               src: "/gastodehoy-app-icon.png",
               sizes: "512x512",
+              type: "image/png",
+              purpose: "any",
+            },
+            {
+              src: "/gastodehoy-favicon-192.png",
+              sizes: "192x192",
               type: "image/png",
               purpose: "any",
             },
@@ -68,11 +74,6 @@ export default defineConfig(({ mode }) => {
             {
               src: "/gastodehoy-favicon-32.png",
               sizes: "32x32",
-              type: "image/png",
-            },
-            {
-              src: "/gastodehoy-favicon-192.png",
-              sizes: "192x192",
               type: "image/png",
             },
             {
