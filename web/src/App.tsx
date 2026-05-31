@@ -15,6 +15,7 @@ import { LandingPage } from "@/components/landing-page";
 import { BootSplashContent } from "@/components/boot-splash-content";
 import { LoadingSplash } from "@/components/loading-splash";
 import { removeHtmlBootSplash } from "@/lib/boot-splash";
+import { useBootSplashGate } from "@/lib/use-boot-splash-gate";
 import {
   LoginScreen,
   type AuthEntryTab,
@@ -56,11 +57,14 @@ export default function App() {
   const [legalPage, setLegalPage] = useState<LegalPage>(getLegalPage);
   useEffect(() => subscribeToLegalPage(setLegalPage), []);
 
+  const authSettled = auth.status !== "loading";
+  const isAnon = auth.status === "anon" || !auth.user;
+  const anonContentReady = authSettled && isAnon;
+  const holdAnonSplash = useBootSplashGate(anonContentReady && !legalPage);
+
   useEffect(() => {
-    if (legalPage || auth.status !== "loading") {
-      removeHtmlBootSplash();
-    }
-  }, [legalPage, auth.status]);
+    if (legalPage) removeHtmlBootSplash();
+  }, [legalPage]);
 
   useEffect(() => {
     if (auth.status !== "loading") return;
@@ -117,7 +121,10 @@ export default function App() {
         }}
       />
     );
-  } else if (auth.status === "loading") {
+  } else if (
+    auth.status === "loading" ||
+    (holdAnonSplash && isAnon && !legalPage)
+  ) {
     content = <LoadingSplash />;
   } else if (auth.status === "anon" || !auth.user) {
     content = (
@@ -172,7 +179,10 @@ function Authed({ userName }: { userName: string }) {
     );
   }
 
-  if (settingsQ.isPending) {
+  const settingsReady = mustChange || !settingsQ.isPending;
+  const holdAuthedSplash = useBootSplashGate(settingsReady);
+
+  if (settingsQ.isPending || holdAuthedSplash) {
     return <LoadingSplash />;
   }
 
@@ -214,9 +224,11 @@ function BootstrapErrorSplash({
   message: string;
   onRetry: () => void;
 }) {
-  useEffect(() => {
-    removeHtmlBootSplash();
-  }, []);
+  const holdSplash = useBootSplashGate(true);
+
+  if (holdSplash) {
+    return <LoadingSplash />;
+  }
 
   return (
     <div className="boot-splash" role="alert">

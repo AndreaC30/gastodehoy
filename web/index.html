@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <!-- MUST be first — blocks paint and prevents white flash on any refresh -->
-    <script>document.documentElement.style.backgroundColor="#0f172a"</script>
+    <script>document.documentElement.style.backgroundColor="#0f172a";window.__gdhSplashStart=Date.now();</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="GastoDeHoy: descubre cuánto puedes gastar hoy, controla tus gastos diarios y gestiona tu presupuesto con ingresos, egresos y finanzas personales en un solo lugar." />
@@ -19,6 +19,13 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/gastodehoy-app-icon.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/gastodehoy-favicon-192.png" />
     <link rel="apple-touch-icon" href="/gastodehoy-apple-touch-180.png" sizes="180x180" />
+    <!-- iOS PWA: branded launch screen (replaces default square app icon flash) -->
+    <link rel="apple-touch-startup-image" href="/pwa-launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/pwa-launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/pwa-launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/pwa-launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/pwa-launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/pwa-launch-1290x2796.png" media="(orientation: portrait)" />
     <link rel="preload" href="/gastodehoy-logo.png" as="image" type="image/png" />
     <link rel="canonical" href="/" />
 

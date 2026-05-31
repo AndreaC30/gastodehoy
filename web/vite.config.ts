@@ -42,6 +42,18 @@ export default defineConfig(({ mode }) => {
           lang: "es",
           icons: [
             {
+              src: "/pwa-launch-512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "any",
+            },
+            {
+              src: "/pwa-launch-192.png",
+              sizes: "192x192",
+              type: "image/png",
+              purpose: "any",
+            },
+            {
               src: "/gastodehoy-favicon-16.png",
               sizes: "16x16",
               type: "image/png",
