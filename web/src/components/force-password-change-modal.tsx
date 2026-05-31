@@ -1,16 +1,19 @@
 /**
  * Pantalla bloqueante tras login con contraseña temporal (recuperación por correo).
  */
+import { useTranslation } from "react-i18next";
 import { type FormEvent, useState } from "react";
 import { api } from "@/api/client";
 import type { User } from "@/api/types";
 import { logout } from "@/lib/session";
+import { translateBackendError } from "@/lib/backend-errors";
 
 type Props = {
   onDone: (user: User) => void;
 };
 
 export function ForcePasswordChangeModal({ onDone }: Props) {
+  const { t } = useTranslation();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPassword2, setNewPassword2] = useState("");
@@ -21,11 +24,11 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
     e.preventDefault();
     setError(null);
     if (newPassword.length < 8) {
-      setError("La nueva contraseña debe tener al menos 8 caracteres");
+      setError(t("forcePassword.passwordError"));
       return;
     }
     if (newPassword !== newPassword2) {
-      setError("Las contraseñas nuevas no coinciden");
+      setError(t("forcePassword.mismatchError"));
       return;
     }
     setBusy(true);
@@ -39,7 +42,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
       });
       onDone(u);
     } catch (err) {
-      setError((err as Error).message);
+      setError(translateBackendError((err as Error).message, t));
     } finally {
       setBusy(false);
     }
@@ -49,11 +52,10 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
     <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl shadow-black/30">
         <h2 className="text-xl font-bold tracking-tight">
-          Elige una contraseña nueva
+          {t("forcePassword.title")}
         </h2>
         <p className="mt-2 text-sm text-slate-400">
-          Has entrado con la contraseña temporal del correo. Por seguridad,
-          define ahora una contraseña que solo tú conozcas.
+          {t("forcePassword.description")}
         </p>
 
         {error && (
@@ -64,7 +66,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
 
         <form onSubmit={submit} className="mt-5 space-y-3">
           <label className="block text-sm font-medium text-slate-400">
-            Contraseña temporal (la del correo)
+            {t("forcePassword.tempPassword")}
             <input
               type="password"
               autoComplete="current-password"
@@ -74,7 +76,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
             />
           </label>
           <label className="block text-sm font-medium text-slate-400">
-            Nueva contraseña
+            {t("forcePassword.newPassword")}
             <input
               type="password"
               autoComplete="new-password"
@@ -84,7 +86,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
             />
           </label>
           <label className="block text-sm font-medium text-slate-400">
-            Repite la nueva contraseña
+            {t("forcePassword.repeatPassword")}
             <input
               type="password"
               autoComplete="new-password"
@@ -104,7 +106,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
             }
             className="mt-2 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
           >
-            {busy ? "Guardando…" : "Guardar y continuar"}
+            {busy ? t("forcePassword.saving") : t("forcePassword.save")}
           </button>
         </form>
 
@@ -113,7 +115,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
           onClick={() => void logout()}
           className="mt-4 w-full text-center text-xs text-slate-500 hover:text-slate-300"
         >
-          Cerrar sesión
+          {t("forcePassword.logout")}
         </button>
       </div>
     </div>

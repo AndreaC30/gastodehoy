@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { IoMenu } from "react-icons/io5";
 import { BrandLogo } from "@/components/brand-logo";
 import {
@@ -31,6 +32,7 @@ export function DashboardHeader({
   onStartTour,
   exportBusy = false,
 }: Props) {
+  const { t } = useTranslation();
   function handleNavigate(action: DashboardNavAction) {
     switch (action) {
       case "settings":
@@ -60,7 +62,7 @@ export function DashboardHeader({
               <BrandLogo variant="header" />
             </h1>
             <p className="mt-1.5 max-w-md text-base text-slate-400 sm:mt-2">
-              Tu margen para hoy, claro y al instante.
+              {t("header.tagline")}
             </p>
           </div>
 
@@ -69,7 +71,7 @@ export function DashboardHeader({
             className="flex shrink-0 flex-col items-end gap-2"
           >
             <p className="hidden text-xs uppercase tracking-widest text-slate-500 sm:block sm:text-sm">
-              Perfil
+              {t("header.profile")}
             </p>
             <p className="hidden max-w-[10rem] truncate text-sm font-semibold text-teal-300 sm:block">
               {profileName}
@@ -83,7 +85,7 @@ export function DashboardHeader({
               aria-haspopup="dialog"
             >
               <IoMenu className="h-5 w-5 shrink-0" aria-hidden />
-              <span>Menú</span>
+              <span>{t("header.menu")}</span>
             </button>
             <p className="max-w-[8.5rem] truncate text-xs font-medium text-teal-300/90 sm:hidden">
               {profileName}

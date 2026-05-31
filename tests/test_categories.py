@@ -31,7 +31,9 @@ def test_supermercado_backfill_for_legacy_user(db_session) -> None:
     )
     db_session.add(user)
     db_session.commit()
-    legacy_defaults = [c for c in DEFAULT_CATEGORIES if c["name"] != "Supermercado"]
+    # DEFAULT_CATEGORIES is now a dict keyed by language; use Spanish defaults
+    default_cats = DEFAULT_CATEGORIES["es"] if isinstance(DEFAULT_CATEGORIES, dict) else DEFAULT_CATEGORIES
+    legacy_defaults = [c for c in default_cats if c["name"] != "Supermercado"]
     for c in legacy_defaults:
         db_session.add(
             ExpenseCategory(

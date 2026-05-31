@@ -9,6 +9,9 @@ from typing import Literal
 from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Module-level constant — keep in sync with the Field default below
+DEFAULT_APP_SECRET = "change-me-in-prod"
+
 
 class Settings(BaseSettings):
     """Strongly-typed view of the environment variables we care about."""
@@ -29,7 +32,7 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("TIMEZONE", "TZ"),
     )
     app_secret: str = Field(
-        default="change-me-in-prod",
+        default=DEFAULT_APP_SECRET,
         validation_alias=AliasChoices("APP_SECRET"),
         description="Clave para firmar la cookie de sesión. Cámbiala en producción.",
     )

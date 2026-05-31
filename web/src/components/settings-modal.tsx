@@ -5,6 +5,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
+import { useTranslation } from "react-i18next";
 import { api } from "@/api/client";
 import type {
   ExtraIncome,
@@ -40,16 +41,16 @@ const inputClassSm = `${INPUT_CLASS} text-sm`;
 
 type SettingsTab = "monthly" | "extra";
 
-function describeExtraSavings(it: ExtraIncome): string {
+function describeExtraSavings(it: ExtraIncome, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const mode = it.savings_mode ?? "none";
-  if (mode === "all") return "Todo reservado · no suma al margen";
+  if (mode === "all") return t("incomeSettings.extraSavingsAll");
   if (mode === "percent") {
-    return `Ahorro ${it.savings_percent}% de este ingreso`;
+    return t("incomeSettings.extraSavingsPercent", { pct: it.savings_percent });
   }
   if (mode === "fixed") {
-    return `Ahorro fijo ${money(it.savings_fixed)}`;
+    return t("incomeSettings.extraSavingsFixed", { amount: money(it.savings_fixed) });
   }
-  return "Todo disponible para gastar";
+  return t("incomeSettings.extraSavingsNone");
 }
 
 function todayIsoLocal(): string {
@@ -69,6 +70,7 @@ export function SettingsModal({
   onSaved,
   onExtrasChanged,
 }: Props) {
+  const { t } = useTranslation();
   const [income, setIncome] = useState(String(initial.monthly_income ?? ""));
   const [mode, setMode] = useState<SavingsMode>(initial.savings_mode);
   const [percent, setPercent] = useState(String(initial.savings_percent ?? "0"));
@@ -152,24 +154,24 @@ export function SettingsModal({
     setError(null);
     const n = Number(extraAmount.replace(",", "."));
     if (!Number.isFinite(n) || n <= 0) {
-      setError("Indica una cantidad mayor que cero para el ingreso extra.");
+      setError(t("incomeSettings.extraError"));
       return;
     }
     if (extraSavingsMode === "percent") {
       const pct = Number(extraSavingsPercent.replace(",", "."));
       if (!Number.isFinite(pct) || pct < 0 || pct > 100) {
-        setError("El porcentaje a ahorrar debe estar entre 0 y 100.");
+        setError(t("incomeSettings.pctError"));
         return;
       }
     }
     if (extraSavingsMode === "fixed") {
       const fixed = Number(extraSavingsFixed.replace(",", "."));
       if (!Number.isFinite(fixed) || fixed < 0) {
-        setError("Indica una cantidad fija a ahorrar válida.");
+        setError(t("incomeSettings.fixedError"));
         return;
       }
       if (fixed > n) {
-        setError("No puedes ahorrar más que el importe del ingreso extra.");
+        setError(t("incomeSettings.savingsExceedError"));
         return;
       }
     }
@@ -203,16 +205,16 @@ export function SettingsModal({
               id="settings-modal-title"
               className="text-lg font-bold tracking-tight"
             >
-              Configura tus ingresos
+              {t("incomeSettings.title")}
             </h2>
             <p className="text-sm text-slate-500">
-              Ingreso mensual, ahorro del sueldo e ingresos extra del mes.
+              {t("incomeSettings.subtitle")}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t("common.close")}
             className="rounded-lg border border-slate-800 p-1.5 text-slate-400 hover:bg-slate-800/60"
           >
             <IoClose className="h-5 w-5" aria-hidden />
@@ -232,7 +234,7 @@ export function SettingsModal({
         <div
           className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
           role="tablist"
-          aria-label="Secciones de ingresos"
+          aria-label={t("incomeSettings.tabsLabel")}
         >
           <TabBtn
             active={tab === "monthly"}
@@ -240,7 +242,7 @@ export function SettingsModal({
             id="settings-tab-monthly"
             controls="settings-panel-monthly"
           >
-            Ingreso mensual
+            {t("incomeSettings.tabMonthly")}
           </TabBtn>
           <TabBtn
             active={tab === "extra"}
@@ -248,7 +250,7 @@ export function SettingsModal({
             id="settings-tab-extra"
             controls="settings-panel-extra"
           >
-            Ingresos extra
+            {t("incomeSettings.tabExtra")}
           </TabBtn>
         </div>
 
@@ -260,7 +262,7 @@ export function SettingsModal({
             onSubmit={submit}
             className="space-y-4"
           >
-            <FormField id="settings-income" label="Ingreso mensual (€)">
+            <FormField id="settings-income" label={t("incomeSettings.monthlyIncome")}>
               <input
                 type="number"
                 inputMode="decimal"
@@ -278,7 +280,7 @@ export function SettingsModal({
                 id="settings-savings-label"
                 className="text-sm font-medium text-slate-400"
               >
-                Ahorro del sueldo
+                {t("incomeSettings.savingsLabel")}
               </p>
               <div
                 className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
@@ -289,22 +291,22 @@ export function SettingsModal({
                   active={mode === "percent"}
                   onClick={() => setMode("percent")}
                 >
-                  % del sueldo
+                  {t("incomeSettings.savingsPercent")}
                 </ModeBtn>
                 <ModeBtn
                   active={mode === "fixed"}
                   onClick={() => setMode("fixed")}
                 >
-                  Cantidad fija
+                  {t("incomeSettings.savingsFixed")}
                 </ModeBtn>
               </div>
 
               {mode === "percent" ? (
                 <SavingsInputRow
                   id="settings-savings-percent"
-                  label="Porcentaje de ahorro"
+                  label={t("incomeSettings.savingsPercentLabel")}
                   suffix="%"
-                  hint="Solo sobre el ingreso mensual. Los extras tienen su propia regla en la otra pestaña."
+                  hint={t("incomeSettings.savingsPercentHint")}
                   value={percent}
                   onChange={setPercent}
                   max={100}
@@ -312,9 +314,9 @@ export function SettingsModal({
               ) : (
                 <SavingsInputRow
                   id="settings-savings-amount"
-                  label="Cantidad fija al mes (€)"
+                  label={t("incomeSettings.savingsFixedLabel")}
                   suffix="€"
-                  hint="Fija cada mes, aparte del ingreso mensual."
+                  hint={t("incomeSettings.savingsFixedHint")}
                   value={amount}
                   onChange={setAmount}
                 />
@@ -333,7 +335,7 @@ export function SettingsModal({
                     const perm = await requestNotificationPermission();
                     if (perm !== "granted") {
                       setError(
-                        "Activa las notificaciones en los ajustes del navegador o del sistema para recibir el aviso diario.",
+                        t("incomeSettings.notifyError"),
                       );
                       return;
                     }
@@ -346,10 +348,9 @@ export function SettingsModal({
                 }}
               />
               <span className="text-sm text-slate-300">
-                <span className="font-medium text-slate-100">Aviso diario</span>
+                <span className="font-medium text-slate-100">{t("incomeSettings.dailyNotifyTitle")}</span>
                 <span className="mt-0.5 block text-slate-400">
-                  Mensaje positivo al abrir la app y, si el servidor tiene VAPID, también por
-                  push con la app cerrada (cron diario). Máximo uno por día al abrir.
+                  {t("incomeSettings.dailyNotifyDesc")}
                 </span>
               </span>
             </label>
@@ -358,14 +359,14 @@ export function SettingsModal({
               className="pt-2"
               onBackToMenu={onBackToMenu}
               onClose={onClose}
-              closeLabel="Cancelar"
+              closeLabel={t("common.cancel")}
             >
               <button
                 type="submit"
                 disabled={busy}
                 className="min-h-11 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
               >
-                {busy ? "Guardando…" : "Guardar"}
+                {busy ? t("incomeSettings.saving") : t("common.save")}
               </button>
             </ModalMenuFooter>
           </form>
@@ -377,14 +378,13 @@ export function SettingsModal({
             className="space-y-4"
           >
             <p className="text-sm leading-relaxed text-slate-400">
-              Bonus, nómina extra… Solo cuentan si la fecha cae en este mes. Lo que
-              reserves aquí no suma a «Hoy puedes gastar»; el resto sí.
+              {t("incomeSettings.extraDesc")}
             </p>
 
             <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap">
               <FormField
                 id="settings-extra-amount"
-                label="Cantidad (€)"
+                label={t("incomeSettings.extraAmount")}
                 className="w-full min-w-0 lg:flex-1"
               >
                 <input
@@ -392,7 +392,7 @@ export function SettingsModal({
                   inputMode="decimal"
                   step="0.01"
                   min="0.01"
-                  placeholder="Ej. 150"
+                  placeholder={t("incomeSettings.extraAmountPlaceholder")}
                   value={extraAmount}
                   onChange={(e) => setExtraAmount(e.target.value)}
                   className={inputClassSm}
@@ -400,7 +400,7 @@ export function SettingsModal({
               </FormField>
               <FormField
                 id="settings-extra-date"
-                label="Fecha de cobro"
+                label={t("incomeSettings.extraDate")}
                 className="w-full lg:w-auto"
               >
                 <input
@@ -417,7 +417,7 @@ export function SettingsModal({
                 id="settings-extra-savings-label"
                 className="text-sm font-medium text-slate-400"
               >
-                ¿Cuánto ahorrar de este ingreso?
+                {t("incomeSettings.extraSavingsQuestion")}
               </p>
               <div
                 className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
@@ -428,34 +428,34 @@ export function SettingsModal({
                   active={extraSavingsMode === "none"}
                   onClick={() => setExtraSavingsMode("none")}
                 >
-                  Gastar todo
+                  {t("incomeSettings.extraSpendAll")}
                 </ModeBtn>
                 <ModeBtn
                   active={extraSavingsMode === "all"}
                   onClick={() => setExtraSavingsMode("all")}
                 >
-                  Ahorrar todo
+                  {t("incomeSettings.extraSaveAll")}
                 </ModeBtn>
                 <ModeBtn
                   active={extraSavingsMode === "percent"}
                   onClick={() => setExtraSavingsMode("percent")}
                 >
-                  Un %
+                  {t("incomeSettings.extraPercent")}
                 </ModeBtn>
                 <ModeBtn
                   active={extraSavingsMode === "fixed"}
                   onClick={() => setExtraSavingsMode("fixed")}
                 >
-                  Cantidad fija
+                  {t("incomeSettings.extraFixed")}
                 </ModeBtn>
               </div>
 
               {extraSavingsMode === "percent" && (
                 <SavingsInputRow
                   id="settings-extra-savings-percent"
-                  label="Porcentaje a reservar"
+                  label={t("incomeSettings.extraPercentLabel")}
                   suffix="%"
-                  hint="Ese porcentaje del ingreso extra no entra en tu margen de gasto."
+                  hint={t("incomeSettings.extraPercentHint")}
                   value={extraSavingsPercent}
                   onChange={setExtraSavingsPercent}
                   max={100}
@@ -464,9 +464,9 @@ export function SettingsModal({
               {extraSavingsMode === "fixed" && (
                 <SavingsInputRow
                   id="settings-extra-savings-fixed"
-                  label="Cantidad a reservar (€)"
+                  label={t("incomeSettings.extraFixedLabel")}
                   suffix="€"
-                  hint="No puede superar el importe del ingreso extra."
+                  hint={t("incomeSettings.extraFixedHint")}
                   value={extraSavingsFixed}
                   onChange={setExtraSavingsFixed}
                 />
@@ -479,12 +479,12 @@ export function SettingsModal({
               disabled={addExtra.isPending}
               className="w-full rounded-lg border border-teal-500/50 bg-teal-500/15 px-3 py-2 text-sm font-semibold text-teal-200 hover:bg-teal-500/25 disabled:opacity-60"
             >
-              {addExtra.isPending ? "Añadiendo…" : "Añadir ingreso extra"}
+              {addExtra.isPending ? t("incomeSettings.adding") : t("incomeSettings.addExtra")}
             </button>
 
             <ul className="space-y-2">
               {extras.length === 0 ? (
-                <li className="text-sm text-slate-600">Ninguno este mes.</li>
+                <li className="text-sm text-slate-600">{t("incomeSettings.extraEmpty")}</li>
               ) : (
                 extras.map((it) => (
                   <li
@@ -496,7 +496,7 @@ export function SettingsModal({
                         {money(it.amount)}
                       </p>
                       <p className="truncate text-xs text-slate-500">
-                        {it.received_at} · {describeExtraSavings(it)}
+                        {it.received_at} · {describeExtraSavings(it, t)}
                       </p>
                     </div>
                     <button
@@ -505,7 +505,7 @@ export function SettingsModal({
                       disabled={delExtra.isPending}
                       className="shrink-0 rounded-lg border border-rose-500/40 px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
                     >
-                      Quitar
+                      {t("incomeSettings.extraDelete")}
                     </button>
                   </li>
                 ))

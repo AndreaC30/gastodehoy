@@ -9,6 +9,8 @@ import {
   IoPricetagsOutline,
   IoWalletOutline,
 } from "react-icons/io5";
+import { useTranslation } from "react-i18next";
+import { api } from "@/api/client";
 import { AccountModal } from "@/components/account-modal";
 import { DeleteAccountModal } from "@/components/delete-account-modal";
 import { logout } from "@/lib/session";
@@ -52,6 +54,7 @@ export function DashboardNavPanel({
 }: Props) {
   const [accountOpen, setAccountOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const { t, i18n } = useTranslation();
   useBodyScrollLock(open || accountOpen || deleteOpen);
 
   useEffect(() => {
@@ -66,40 +69,40 @@ export function DashboardNavPanel({
   const items: NavItem[] = [
     {
       id: "settings",
-      label: "Tus ingresos",
-      description: "Ingreso mensual, ahorro e ingresos extra",
+      label: t("nav.yourIncome"),
+      description: t("nav.yourIncomeDesc"),
       Icon: IoWalletOutline,
       disabled: !settingsReady,
     },
     {
       id: "categories",
-      label: "Categorías",
-      description: "Etiquetas y presupuesto por categoría",
+      label: t("nav.categories"),
+      description: t("nav.categoriesDesc"),
       Icon: IoPricetagsOutline,
     },
     {
       id: "savings-goals",
-      label: "Metas de ahorro",
-      description: "Objetivos y progreso ahorrado",
+      label: t("nav.savingsGoals"),
+      description: t("nav.savingsGoalsDesc"),
       Icon: IoFlagOutline,
     },
     {
       id: "export",
-      label: exportBusy ? "Exportando…" : "Exportar CSV",
-      description: "Ajustes, gastos fijos y variables del mes",
+      label: exportBusy ? t("nav.exporting") : t("nav.exportCsv"),
+      description: t("nav.exportDesc"),
       Icon: IoDownloadOutline,
       disabled: exportBusy,
     },
     {
       id: "guided-tour",
-      label: "Guía paso a paso",
-      description: "Tutorial: qué es cada zona del panel",
+      label: t("nav.guidedTour"),
+      description: t("nav.guidedTourDesc"),
       Icon: IoHelpCircleOutline,
     },
     {
       id: "account",
-      label: "Cuenta",
-      description: "Sesión y eliminación de cuenta",
+      label: t("nav.account"),
+      description: t("nav.accountDesc"),
       Icon: IoPersonOutline,
     },
   ];
@@ -123,21 +126,21 @@ export function DashboardNavPanel({
           <button
             type="button"
             className="absolute inset-0 bg-black/60 backdrop-blur-[1px]"
-            aria-label="Cerrar menú"
+            aria-label={t("nav.closeMenu")}
             onClick={onClose}
           />
 
           <nav
             id="dashboard-nav-panel"
             className="relative flex h-full w-full max-w-[min(100%,20rem)] flex-col border-l border-slate-800 bg-slate-950 shadow-2xl shadow-black/50 sm:max-w-xs"
-            aria-label="Menú de cuenta"
+            aria-label={t("nav.accountMenu")}
             role="dialog"
             aria-modal="true"
           >
             <div className="flex items-start justify-between gap-3 border-b border-slate-800 px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
               <div className="min-w-0">
                 <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-slate-500">
-                  Cuenta
+                  {t("nav.account")}
                 </p>
                 <p className="mt-0.5 truncate text-base font-semibold text-teal-300">
                   {profileName}
@@ -147,7 +150,7 @@ export function DashboardNavPanel({
                 type="button"
                 onClick={onClose}
                 className={`shrink-0 min-h-11 min-w-11 rounded-lg border border-slate-800 p-2 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200 ${FOCUS_RING}`}
-                aria-label="Cerrar menú"
+                aria-label={t("nav.closeMenu")}
               >
                 <IoClose className="h-5 w-5" aria-hidden />
               </button>
@@ -178,6 +181,37 @@ export function DashboardNavPanel({
               ))}
             </ul>
 
+            {/* Language selector */}
+            <div className="border-t border-slate-800 px-3 py-3">
+              <p className="mb-2 text-[0.6rem] font-semibold uppercase tracking-widest text-slate-500">
+                {t("nav.language")}
+              </p>
+              <div className="flex gap-1.5">
+                {(["es", "en", "fr", "de"] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => {
+                      i18n.changeLanguage(lang);
+                      // Save to backend for cross-device sync (fire-and-forget)
+                      api("/api/settings/language", {
+                        method: "PUT",
+                        body: JSON.stringify({ language: lang }),
+                      }).catch(() => {});
+                    }}
+                    className={`min-h-9 min-w-[2.75rem] rounded-lg border px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                      (i18n.language?.startsWith(lang) ?? false) || (lang === "es" && !i18n.language)
+                        ? "border-teal-500/40 bg-teal-500/15 text-teal-300"
+                        : "border-slate-700 text-slate-500 hover:border-slate-500 hover:text-slate-300"
+                    }`}
+                    title={t(`nav.lang_${lang}`)}
+                  >
+                    {lang}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="border-t border-slate-800 px-3 py-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <button
                 type="button"
@@ -190,7 +224,7 @@ export function DashboardNavPanel({
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-950">
                   <IoLogOutOutline className="h-[1.15rem] w-[1.15rem]" aria-hidden />
                 </span>
-                Cerrar sesión
+                {t("nav.logout")}
               </button>
             </div>
           </nav>

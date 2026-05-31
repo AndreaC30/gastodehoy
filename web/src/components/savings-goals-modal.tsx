@@ -2,6 +2,7 @@
  * Modal for savings goals (same pattern as SettingsModal).
  */
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { IoClose } from "react-icons/io5";
 import { SavingsGoalsContent } from "@/components/dashboard/savings-goals-panel";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
@@ -21,6 +22,7 @@ export function SavingsGoalsModal({
   onBackToMenu,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
   useBodyScrollLock(true);
   useDialogA11y(true, panelRef);
 
@@ -52,10 +54,10 @@ export function SavingsGoalsModal({
               id="savings-goals-modal-title"
               className="text-lg font-bold tracking-tight"
             >
-              Metas de ahorro
+              {t("savingsGoals.title")}
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Objetivos con nombre y cantidad; actualiza lo que llevas ahorrado.
+              {t("savingsGoals.subtitle")}
             </p>
           </div>
           <button

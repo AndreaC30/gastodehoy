@@ -1,4 +1,5 @@
 /** Spending breakdown by category: donut + progress-bar legend (all viewports). */
+import { useTranslation } from "react-i18next";
 import type { CategorySpending } from "@/api/types";
 import { money } from "@/lib/format";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
@@ -60,6 +61,7 @@ function MiniDonut({
 /* ── main component ────────────────────────────────────────────── */
 
 export function SpendingChart({ breakdown, total }: Props) {
+  const { t } = useTranslation();
   const totalNum = Number(total);
   if (totalNum === 0) return null;
 
@@ -76,10 +78,10 @@ export function SpendingChart({ breakdown, total }: Props) {
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 shadow-lg shadow-black/20 sm:p-5">
       <h2 className="text-lg font-bold tracking-tight">
-        Gastos por categoría
+        {t("spendingChart.title")}
       </h2>
       <p className="mt-1 text-sm text-slate-500">
-        Distribución de tus gastos este mes
+        {t("spendingChart.subtitle")}
       </p>
 
       <div className="mt-5 flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">

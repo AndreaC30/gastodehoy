@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { type FormEvent } from "react";
 import type { ExpenseCategory } from "@/api/types";
 import { FormField } from "@/components/ui/form-field";
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props) {
+  const { t } = useTranslation();
   return (
     <form
       className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-2"
@@ -19,7 +21,7 @@ export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props)
     >
       <FormField
         id="var-expense-amount"
-        label="Cantidad (€)"
+        label={t("addVariableExpense.amount")}
         className="w-full min-w-0 lg:flex-1"
         labelClassName="sr-only"
       >
@@ -29,19 +31,19 @@ export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props)
           inputMode="decimal"
           step="0.01"
           min="0.01"
-          placeholder="Cantidad (€)"
+          placeholder={t("addVariableExpense.amountPlaceholder")}
           required
           className={inputClass}
         />
       </FormField>
       <FormField
         id="var-expense-category"
-        label="Categoría"
+        label={t("addVariableExpense.category")}
         className="w-full min-w-0 lg:flex-1"
         labelClassName="sr-only"
       >
         <select name="category_id" defaultValue="" className={inputClass}>
-          <option value="">Sin categoría</option>
+          <option value="">{t("addVariableExpense.uncategorized")}</option>
           {categories.map((cat) => (
             <option key={cat.id} value={cat.id}>
               {cat.name}
@@ -51,14 +53,14 @@ export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props)
       </FormField>
       <FormField
         id="var-expense-note"
-        label="Nota (opcional)"
+        label={t("addVariableExpense.note")}
         className="w-full min-w-0 lg:flex-1"
         labelClassName="sr-only"
       >
         <input
           name="note"
           type="text"
-          placeholder="Nota (opcional)"
+          placeholder={t("addVariableExpense.notePlaceholder")}
           className={inputClass}
         />
       </FormField>
@@ -67,7 +69,7 @@ export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props)
         disabled={pending}
         className={`w-full lg:w-auto lg:self-end ${BTN_PRIMARY}`}
       >
-        Registrar
+        {t("addVariableExpense.register")}
       </button>
     </form>
   );

@@ -52,6 +52,7 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     name: NameStr
     password: PasswordStr
+    language: str | None = Field(default=None, max_length=5)
 
 
 class LoginRequest(BaseModel):
@@ -113,6 +114,8 @@ class BudgetSettings(BaseModel):
     savings_mode: SavingsMode = "percent"
     savings_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100, decimal_places=2)
     savings_amount: Decimal = Field(default=Decimal("0"), ge=0, decimal_places=2)
+    dashboard_tour_completed: bool = False
+    language: str | None = Field(default=None, max_length=5)
 
 
 class FixedExpenseCreate(BaseModel):
@@ -315,6 +318,11 @@ class PushConfigRead(BaseModel):
     public_key: str | None = None
 
 
+class LanguageUpdate(BaseModel):
+    """Request body for updating only the language preference."""
+    language: str | None = Field(default=None, max_length=5)
+
+
 class PushKeysCreate(BaseModel):
     p256dh: str = Field(min_length=1)
     auth: str = Field(min_length=1)
@@ -424,6 +432,11 @@ class MonthHistoryRead(BaseModel):
     months: list[MonthHistoryItem]
 
 
+class Rule503020Insight(BaseModel):
+    type: Literal["ok", "warn", "info"]
+    text: str
+
+
 class Rule503020Read(BaseModel):
     year: int
     month: int
@@ -438,4 +451,4 @@ class Rule503020Read(BaseModel):
     target_needs_pct: Decimal
     target_wants_pct: Decimal
     target_savings_pct: Decimal
-    insights: list[str]
+    insights: list[Rule503020Insight]

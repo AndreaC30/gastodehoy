@@ -18,6 +18,7 @@ class User(Base):
     """Account: email + bcrypt password + recovery code."""
 
     __tablename__ = "users"
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(
@@ -102,6 +103,12 @@ class UserSettings(Base):
     )
     savings_amount: Mapped[Decimal] = mapped_column(
         Numeric(14, 2), default=Decimal("0"), nullable=False
+    )
+    dashboard_tour_completed: Mapped[bool] = mapped_column(
+        Boolean(), nullable=False, default=False, server_default="0"
+    )
+    language: Mapped[str | None] = mapped_column(
+        String(5), nullable=True, default=None
     )
 
     user: Mapped[User] = relationship(back_populates="settings")

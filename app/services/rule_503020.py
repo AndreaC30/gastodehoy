@@ -57,52 +57,50 @@ def _build_insights(
     wants_pct: Decimal,
     savings_pct: Decimal,
     income: Decimal,
-) -> list[str]:
-    messages: list[str] = []
+    lang: str = "es",
+) -> list[dict]:
+    from app.services.insight_i18n import get_insight_text
+
+    _t = lambda key, **kw: get_insight_text(lang, "r503020_" + key, **kw)
+
+    messages: list[dict] = []
     if income <= 0:
-        messages.append(
-            "Configura tu ingreso mensual en Tus ingresos para ver cómo encajas en la regla 50/30/20."
-        )
+        messages.append({"type": "info", "text": _t("no_income")})
         return messages
 
     if needs_pct > TARGET_NEEDS_PCT + Decimal("5"):
         messages.append(
-            f"Tus necesidades representan el {needs_pct}% del ingreso; "
-            f"la regla 50/30/20 sugiere no superar el {TARGET_NEEDS_PCT}%."
+            {"type": "warn", "text": _t("needs_over", needs=needs_pct, target=TARGET_NEEDS_PCT)}
         )
     elif needs_pct <= TARGET_NEEDS_PCT:
         messages.append(
-            f"Bien en necesidades: llevas el {needs_pct}% frente al objetivo del {TARGET_NEEDS_PCT}%."
+            {"type": "ok", "text": _t("needs_ok", needs=needs_pct, target=TARGET_NEEDS_PCT)}
         )
 
     if wants_pct > TARGET_WANTS_PCT + Decimal("5"):
         messages.append(
-            f"El gasto en deseos llega al {wants_pct}%; "
-            f"intenta mantenerlo cerca del {TARGET_WANTS_PCT}%."
+            {"type": "warn", "text": _t("wants_over", wants=wants_pct, target=TARGET_WANTS_PCT)}
         )
     elif wants_pct > 0 and wants_pct <= TARGET_WANTS_PCT:
         messages.append(
-            f"Tus deseos están en el {wants_pct}%, dentro del margen del {TARGET_WANTS_PCT}%."
+            {"type": "ok", "text": _t("wants_ok", wants=wants_pct, target=TARGET_WANTS_PCT)}
         )
 
     if savings_pct < TARGET_SAVINGS_PCT - Decimal("5"):
         messages.append(
-            f"El ahorro planificado es el {savings_pct}% del ingreso; "
-            f"la regla recomienda al menos un {TARGET_SAVINGS_PCT}%."
+            {"type": "warn", "text": _t("savings_under", savings=savings_pct, target=TARGET_SAVINGS_PCT)}
         )
     elif savings_pct >= TARGET_SAVINGS_PCT:
         messages.append(
-            f"Tu ahorro planificado ({savings_pct}%) cumple el objetivo del {TARGET_SAVINGS_PCT}%."
+            {"type": "ok", "text": _t("savings_ok", savings=savings_pct, target=TARGET_SAVINGS_PCT)}
         )
 
     if not messages:
-        messages.append(
-            "Sigue registrando gastos para afinar la comparación con la regla 50/30/20."
-        )
+        messages.append({"type": "info", "text": _t("fallback")})
     return messages
 
 
-def compute_rule_503020(session: Session, user_id: int, month: date) -> dict:
+def compute_rule_503020(session: Session, user_id: int, month: date, lang: str = "es") -> dict:
     """Return 50/30/20 breakdown for the calendar month containing ``month``."""
     month_start, month_end = month_bounds(month)
 
@@ -191,5 +189,5 @@ def compute_rule_503020(session: Session, user_id: int, month: date) -> dict:
         "target_needs_pct": TARGET_NEEDS_PCT,
         "target_wants_pct": TARGET_WANTS_PCT,
         "target_savings_pct": TARGET_SAVINGS_PCT,
-        "insights": _build_insights(needs_pct, wants_pct, savings_pct, income),
+        "insights": _build_insights(needs_pct, wants_pct, savings_pct, income, lang),
     }

@@ -22,6 +22,7 @@ from app.schemas import (
     FixedExpenseCreate,
     FixedExpenseRead,
     FixedExpenseUpdate,
+    LanguageUpdate,
     MonthHistoryRead,
     PaginatedMeta,
     PaginatedVariableExpenses,
@@ -68,11 +69,22 @@ def _calendar_month_bounds(year: int | None, month: int | None) -> tuple[date, d
 
 
 def _get_or_create_settings(db: Session, user: User) -> UserSettings:
-    """Return the user's settings row; lazily create defaults on first read."""
+    """Return the user's settings row; lazily create defaults on first read.
+
+    Uses a try/except IntegrityError to handle the race where two concurrent
+    requests both find ``user.settings is None`` and try to insert.
+    """
     if user.settings is None:
+        from sqlalchemy.exc import IntegrityError
         row = UserSettings(user_id=user.id)
         db.add(row)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            # Another request won the race — reload the relationship
+            db.refresh(user)
+            return user.settings
         db.refresh(row)
         return row
     return user.settings
@@ -100,8 +112,34 @@ def update_settings(
     row.savings_mode = payload.savings_mode
     row.savings_percent = payload.savings_percent
     row.savings_amount = payload.savings_amount
+    if payload.language is not None:
+        row.language = payload.language
     db.commit()
     db.refresh(row)
+    return BudgetSettings.model_validate(row)
+
+
+@settings_router.put("/settings/language", response_model=BudgetSettings)
+def update_language(
+    payload: LanguageUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> BudgetSettings:
+    """Update only the user's language preference (cross-device sync)."""
+    from app.services.categories import rename_default_categories
+    
+    lang = payload.language
+    if lang not in ("es", "en", "de", "fr", None):
+        raise HTTPException(status_code=400, detail="Idioma no soportado")
+    row = _get_or_create_settings(db, user)
+    row.language = lang
+    db.commit()
+    db.refresh(row)
+    
+    # Rename default categories to match the new language
+    if lang:
+        rename_default_categories(db, user.id, lang)
+    
     return BudgetSettings.model_validate(row)
 
 

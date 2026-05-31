@@ -9,6 +9,7 @@
  * before handing control back to the parent.
  */
 import { type FormEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { IoArrowBack, IoArrowForward } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { FixedExpense, SavingsMode, Settings } from "@/api/types";
@@ -32,6 +33,7 @@ type LocalFixed = { name: string; amount: string; icon: string };
 
 /** Public wrapper: orchestrates the three steps and the final save. */
 export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>(1);
   const [income, setIncome] = useState("");
   const [fixed, setFixed] = useState<LocalFixed[]>([]);
@@ -87,13 +89,13 @@ export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
     <div className="relative z-10 mx-auto flex min-h-screen max-w-xl flex-col justify-center px-4 py-12">
       <header className="mb-6 text-center">
         <p className="text-xs uppercase tracking-widest text-slate-500">
-          Hola, {userName}
+          {t("onboarding.greeting", { name: userName })}
         </p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
-          Vamos a configurar tu mes
+          {t("onboarding.title")}
         </h1>
         <p className="mt-2 text-sm text-slate-400">
-          Tres preguntas y listo. Podrás cambiarlo cuando quieras desde Tus ingresos.
+          {t("onboarding.subtitle")}
         </p>
       </header>
 
@@ -188,6 +190,7 @@ function StepIncome({
   disabled: boolean;
   onSkip: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <form
       onSubmit={(e: FormEvent) => {
@@ -198,19 +201,17 @@ function StepIncome({
     >
       <div>
         <h2 className="text-lg font-bold tracking-tight">
-          ¿Cuál es tu ingreso mensual?
+          {t("onboarding.incomeQuestion")}
         </h2>
         <p className="mt-1 text-sm text-slate-400">
-          Lo que entra cada mes después de impuestos. Es la base de todos los
-          cálculos.
+          {t("onboarding.incomeDescription")}
         </p>
         <p className="mt-2 rounded-lg border border-slate-800/80 bg-slate-950/50 px-3 py-2 text-xs leading-relaxed text-slate-500">
-          Ejemplos: nómina 1.800€, autónomo 2.400€, pensión 950€. Usa tu media
-          real si varía un poco cada mes.
+          {t("onboarding.incomeExamples")}
         </p>
       </div>
       <label htmlFor="onboarding-income" className="block text-sm font-medium text-slate-400">
-        Ingreso mensual (€)
+        {t("onboarding.incomeLabel")}
         <input
           id="onboarding-income"
           type="number"
@@ -230,14 +231,14 @@ function StepIncome({
           onClick={onSkip}
           className="text-sm text-slate-500 underline decoration-slate-700 underline-offset-4 hover:text-slate-300"
         >
-          Configurar luego
+          {t("onboarding.configureLater")}
         </button>
         <button
           type="submit"
           disabled={disabled}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
         >
-          Siguiente
+          {t("onboarding.next")}
           <IoArrowForward className="h-4 w-4 shrink-0" aria-hidden />
         </button>
       </div>
@@ -257,6 +258,7 @@ function StepFixed({
   onBack: () => void;
   onNext: () => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [icon, setIcon] = useState(DEFAULT_FIXED_EXPENSE_ICON);
@@ -281,15 +283,13 @@ function StepFixed({
     <div className="space-y-4">
       <div>
         <h2 className="text-lg font-bold tracking-tight">
-          ¿Cuáles son tus gastos fijos?
+          {t("onboarding.fixedQuestion")}
         </h2>
         <p className="mt-1 text-sm text-slate-400">
-          Alquiler, seguros, suscripciones, lo que se paga igual cada mes.
+          {t("onboarding.fixedDescription")}
         </p>
         <p className="mt-2 rounded-lg border border-dashed border-slate-700/80 px-3 py-2 text-xs leading-relaxed text-slate-500">
-          Este paso es opcional: si no tienes los importes a mano, pulsa
-          Siguiente sin añadir nada y complétalo luego desde el panel de gastos
-          fijos.
+          {t("onboarding.fixedOptional")}
         </p>
       </div>
 
@@ -301,8 +301,8 @@ function StepFixed({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ej. Alquiler"
-            aria-label="Nombre del gasto fijo"
+            placeholder={t("fixedExpenses.placeholder")}
+            aria-label={t("onboarding.fixedNameLabel")}
             className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
           />
         </div>
@@ -314,15 +314,15 @@ function StepFixed({
           min={0}
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="€"
-          aria-label="Importe del gasto fijo"
+          placeholder={t("onboarding.fixedAmountPlaceholder")}
+          aria-label={t("onboarding.fixedAmountLabel")}
           className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:w-24"
         />
         <button
           type="submit"
           className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 sm:w-auto"
         >
-          Añadir
+          {t("fixedExpenses.add")}
         </button>
       </form>
 
@@ -347,7 +347,7 @@ function StepFixed({
                 onClick={() => remove(i)}
                 className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10"
               >
-                Quitar
+                {t("common.remove")}
               </button>
             </li>
             );
@@ -355,13 +355,13 @@ function StepFixed({
         </ul>
       ) : (
         <p className="rounded-lg border border-dashed border-slate-800 px-4 py-3 text-center text-sm text-slate-500">
-          Aún no has añadido ninguno. No pasa nada, puedes seguir.
+          {t("onboarding.fixedEmpty")}
         </p>
       )}
 
       {items.length > 0 && (
         <p className="text-right text-xs text-slate-500">
-          Total fijos: <strong className="text-slate-300">{money(total)}</strong>
+          {t("onboarding.fixedTotal", { total: money(total) })}
         </p>
       )}
 
@@ -372,14 +372,14 @@ function StepFixed({
           className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
-          Atrás
+          {t("common.back")}
         </button>
         <button
           type="button"
           onClick={onNext}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110"
         >
-          Siguiente
+          {t("onboarding.next")}
           <IoArrowForward className="h-4 w-4 shrink-0" aria-hidden />
         </button>
       </div>
@@ -416,6 +416,7 @@ function StepSavings({
   disabled: boolean;
   busy: boolean;
 }) {
+  const { t } = useTranslation();
   const incomeNum = Number(income) || 0;
   const previewAmount =
     mode === "percent"
@@ -432,31 +433,28 @@ function StepSavings({
     >
       <div>
         <h2 className="text-lg font-bold tracking-tight">
-          ¿Cuánto quieres ahorrar al mes?
+          {t("onboarding.savingsQuestion")}
         </h2>
         <p className="mt-1 text-sm text-slate-400">
-          Elige cómo prefieres definir tu ahorro.
+          {t("onboarding.savingsSubtitle")}
         </p>
         <p className="mt-2 rounded-lg border border-teal-500/25 bg-teal-950/25 px-3 py-2 text-xs leading-relaxed text-teal-200/90">
-          Consejo: muchas personas empiezan con un{" "}
-          <strong className="font-semibold text-teal-300">10%</strong> del sueldo
-          y lo suben poco a poco. La regla 50/30/20 apunta a un 20% a largo
-          plazo.
+          {t("onboarding.savingsTip")}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/50 p-1 text-sm">
         <ModeBtn active={mode === "percent"} onClick={() => setMode("percent")}>
-          % del sueldo
+          {t("incomeSettings.savingsPercent")}
         </ModeBtn>
         <ModeBtn active={mode === "fixed"} onClick={() => setMode("fixed")}>
-          Cantidad fija (€)
+          {t("incomeSettings.savingsFixed")}
         </ModeBtn>
       </div>
 
       {mode === "percent" ? (
         <label htmlFor="onboarding-savings-percent" className="block text-sm font-medium text-slate-400">
-          Porcentaje de ahorro
+          {t("onboarding.savingsPercent")}
           <div className="mt-1.5 flex min-w-0 items-center gap-2">
             <input
               id="onboarding-savings-percent"
@@ -475,7 +473,7 @@ function StepSavings({
         </label>
       ) : (
         <label htmlFor="onboarding-savings-amount" className="block text-sm font-medium text-slate-400">
-          Cantidad fija al mes
+          {t("onboarding.savingsFixedLabel")}
           <div className="mt-1.5 flex min-w-0 items-center gap-2">
             <input
               id="onboarding-savings-amount"
@@ -495,14 +493,13 @@ function StepSavings({
       )}
 
       <div className="rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm">
-        <p className="text-slate-500">Resumen</p>
+        <p className="text-slate-500">{t("onboarding.summary")}</p>
         <p className="mt-1 text-slate-300">
-          Apartarás <strong className="text-teal-300">{money(previewAmount)}</strong>{" "}
-          al mes
+          {t("onboarding.savePrefix")}<strong className="text-teal-300">{money(previewAmount)}</strong>{t("onboarding.saveSuffix")}
           {mode === "percent" && incomeNum > 0
-            ? ` (${percent}% de ${money(incomeNum)})`
+            ? ` (${percent}% ${t("onboarding.saveOf")} ${money(incomeNum)})`
             : ""}
-          {mode === "fixed" ? " (fijo, no escala con el ingreso)" : ""}.
+          {mode === "fixed" ? ` ${t("onboarding.saveFixedNote")}` : ""}.
         </p>
       </div>
 
@@ -513,14 +510,14 @@ function StepSavings({
           className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
-          Atrás
+          {t("tour.back")}
         </button>
         <button
           type="submit"
           disabled={disabled}
           className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
         >
-          {busy ? "Guardando…" : "Empezar"}
+          {busy ? t("incomeSettings.saving") : t("onboarding.start")}
         </button>
       </div>
     </form>

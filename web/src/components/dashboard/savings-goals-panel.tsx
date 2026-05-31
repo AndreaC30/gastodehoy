@@ -1,4 +1,5 @@
 /** Named savings targets with progress tracking. */
+import { useTranslation } from "react-i18next";
 import { type FormEvent, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { IoAdd, IoRemove, IoTrashOutline } from "react-icons/io5";
@@ -32,6 +33,7 @@ type GoalRowProps = {
 };
 
 function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [draft, setDraft] = useState(String(goal.current_amount ?? "0"));
 
@@ -76,7 +78,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-slate-100">{goal.name}</p>
           <p className="mt-0.5 text-xs text-slate-500">
-            Objetivo {money(goal.target_amount)}
+            {t("savingsGoals.target", { amount: money(goal.target_amount) })}
             {goal.target_date ? (
               <span className="text-slate-600"> · {goal.target_date}</span>
             ) : null}
@@ -87,7 +89,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
           onClick={() => onDelete(goal.id)}
           disabled={deleting}
           className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-800 hover:text-rose-400 disabled:opacity-40"
-          aria-label={`Eliminar meta ${goal.name}`}
+          aria-label={t("savingsGoals.deleteLabel", { name: goal.name })}
         >
           <IoTrashOutline className="h-4 w-4" aria-hidden />
         </button>
@@ -99,7 +101,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
         aria-valuenow={pct}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={`Progreso de ${goal.name}`}
+        aria-label={t("savingsGoals.progress", { name: goal.name })}
       >
         <div
           className="h-full rounded-full bg-teal-500 transition-[width] duration-300"
@@ -108,14 +110,14 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-slate-500">Ahorrado</span>
+        <span className="text-xs text-slate-500">{t("savingsGoals.saved")}</span>
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => adjust(-10)}
             disabled={patchMut.isPending}
             className="rounded-lg border border-slate-700 bg-slate-900 p-1.5 text-slate-300 hover:border-slate-600 disabled:opacity-40"
-            aria-label="Restar 10 euros"
+            aria-label={t("savingsGoals.subtract10")}
           >
             <IoRemove className="h-4 w-4" aria-hidden />
           </button>
@@ -129,14 +131,14 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
             onBlur={commitDraft}
             disabled={patchMut.isPending}
             className="w-24 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-right text-sm outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/30"
-            aria-label={`Cantidad ahorrada en ${goal.name}`}
+            aria-label={t("savingsGoals.savedAmount", { name: goal.name })}
           />
           <button
             type="button"
             onClick={() => adjust(10)}
             disabled={patchMut.isPending}
             className="rounded-lg border border-slate-700 bg-slate-900 p-1.5 text-slate-300 hover:border-slate-600 disabled:opacity-40"
-            aria-label="Sumar 10 euros"
+            aria-label={t("savingsGoals.add10")}
           >
             <IoAdd className="h-4 w-4" aria-hidden />
           </button>
@@ -155,6 +157,7 @@ type PanelProps = {
 };
 
 export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [target, setTarget] = useState("");
@@ -193,11 +196,11 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
     const trimmed = name.trim();
     const targetN = parseAmount(target);
     if (!trimmed) {
-      setFormError("Escribe un nombre para la meta");
+      setFormError(t("savingsGoals.nameError"));
       return;
     }
     if (targetN === null || targetN <= 0) {
-      setFormError("Indica un objetivo mayor que 0");
+      setFormError(t("savingsGoals.amountError"));
       return;
     }
     setFormError(null);
@@ -210,7 +213,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
     <div className="space-y-4">
       {reservedSavings != null && Number(reservedSavings) > 0 && (
         <p className="rounded-xl border border-teal-500/25 bg-teal-500/10 px-3 py-2 text-sm text-slate-300">
-          Ahorro reservado este mes:{" "}
+          {t("savingsGoals.reservedThisMonth")}{" "}
           <span className="font-semibold text-teal-300">{money(reservedSavings)}</span>
         </p>
       )}
@@ -236,7 +239,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
         )}
         {!goalsQ.isPending && goals.length === 0 && !goalsQ.error && (
           <p className="text-sm text-slate-500">
-            Aún no tienes metas. Añade una con nombre y objetivo en euros.
+            {t("savingsGoals.empty")}
           </p>
         )}
 
@@ -247,7 +250,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
           <input
             type="text"
             maxLength={80}
-            placeholder="Nombre (ej. Vacaciones)"
+            placeholder={t("savingsGoals.namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full min-w-0 max-w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/30 sm:min-w-0 sm:flex-1"
@@ -257,7 +260,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
             inputMode="decimal"
             step="0.01"
             min="0.01"
-            placeholder="Objetivo (€)"
+            placeholder={t("savingsGoals.targetPlaceholder")}
             value={target}
             onChange={(e) => setTarget(e.target.value)}
             className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/30 sm:w-32"
@@ -267,7 +270,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
             disabled={createMut.isPending}
             className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
           >
-            Añadir meta
+            {t("savingsGoals.addGoal")}
           </button>
         </form>
         {formError && (

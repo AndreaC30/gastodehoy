@@ -4,31 +4,31 @@ export type TourStep = {
   body: string;
 };
 
-/** Textos breves para la guía del panel. */
+/** I18n key‑based steps for the dashboard guided tour. */
 export const DASHBOARD_TOUR_STEPS: TourStep[] = [
   {
     target: "hero",
-    title: "Cuánto gastar hoy",
-    body: "El número grande es tu margen de hoy.",
+    title: "tour.step1.title",
+    body: "tour.step1.body",
   },
   {
     target: "variable-expenses",
-    title: "Gastos del día",
-    body: "Cantidad + Registrar. Listo.",
+    title: "tour.step2.title",
+    body: "tour.step2.body",
   },
   {
     target: "fixed-expenses",
-    title: "Gastos fijos",
-    body: "Alquiler, luz… una vez al mes.",
+    title: "tour.step3.title",
+    body: "tour.step3.body",
   },
   {
     target: "insights",
-    title: "Avisos",
-    body: "Consejos si te pasas o vas justo.",
+    title: "tour.step4.title",
+    body: "tour.step4.body",
   },
   {
     target: "menu",
-    title: "Menú",
-    body: "Ingresos, categorías y más.",
+    title: "tour.step5.title",
+    body: "tour.step5.body",
   },
 ];

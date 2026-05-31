@@ -1,4 +1,5 @@
 import { type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import type { FixedExpense } from "@/api/types";
 import { IconSelectDropdown } from "@/components/dashboard/icon-select-dropdown";
 import { ChevronInCircle } from "@/components/dashboard/chevron-expand";
@@ -43,18 +44,19 @@ export function FixedExpensesSection({
   onEdit,
   onDelete,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <section
       data-tour="fixed-expenses"
       className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20"
     >
       <div className="border-b border-slate-800 px-5 py-4">
-        <h2 className="text-lg font-bold tracking-tight sm:text-xl">Gastos fijos</h2>
-        <p className={`mt-1 ${TYPE_CAPTION}`}>Lo que pagas igual cada mes</p>
+        <h2 className="text-lg font-bold tracking-tight sm:text-xl">{t("fixedExpenses.title")}</h2>
+        <p className={`mt-1 ${TYPE_CAPTION}`}>{t("fixedExpenses.subtitle")}</p>
       </div>
       <div className="p-5">
         <p className={`mb-4 ${TYPE_BODY}`}>
-          Vivienda, seguros, suscripciones… suman aquí.
+          {t("fixedExpenses.description")}
         </p>
         <form
           className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-2"
@@ -64,13 +66,13 @@ export function FixedExpensesSection({
             <IconSelectDropdown value={formIcon} onChange={onFormIconChange} />
             <FormField
               id="fixed-expense-name"
-              label="Concepto"
+              label={t("fixedExpenses.concept")}
               className="min-w-0 flex-1"
               labelClassName="sr-only"
             >
               <input
                 name="name"
-                placeholder="Ej. Alquiler"
+                placeholder={t("fixedExpenses.placeholder")}
                 required
                 className={inputClass}
               />
@@ -78,7 +80,7 @@ export function FixedExpensesSection({
           </div>
           <FormField
             id="fixed-expense-amount"
-            label="Importe (€)"
+            label={t("fixedExpenses.amount")}
             className="w-full lg:w-28"
             labelClassName="sr-only"
           >
@@ -98,11 +100,11 @@ export function FixedExpensesSection({
             disabled={pending}
             className={`w-full lg:w-auto ${BTN_PRIMARY}`}
           >
-            Añadir
+            {t("fixedExpenses.add")}
           </button>
         </form>
         {isLoading ? (
-          <p className="mt-4 text-sm text-slate-500">Cargando gastos fijos…</p>
+          <p className="mt-4 text-sm text-slate-500">{t("fixedExpenses.loading")}</p>
         ) : (
           <>
             <ul className="mt-4 space-y-2">
@@ -125,18 +127,18 @@ export function FixedExpensesSection({
                         type="button"
                         onClick={() => onEdit(it)}
                         className={`min-h-11 rounded-lg border border-slate-600 px-2.5 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800 ${FOCUS_RING}`}
-                        aria-label={`Editar gasto fijo ${it.name}`}
+                        aria-label={t("fixedExpenses.editLabel", { name: it.name })}
                       >
-                        Editar
+                        {t("common.edit")}
                       </button>
                       <button
                         type="button"
                         onClick={() => onDelete(it.id)}
                         disabled={deletePending}
                         className={`min-h-11 rounded-lg border border-rose-500/40 px-2.5 py-1.5 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
-                        aria-label={`Quitar gasto fijo ${it.name}`}
+                        aria-label={t("fixedExpenses.removeLabel", { name: it.name })}
                       >
-                        Quitar
+                        {t("common.remove")}
                       </button>
                     </div>
                   </li>
@@ -152,12 +154,12 @@ export function FixedExpensesSection({
               >
                 <ChevronInCircle expanded={expanded} />
                 {expanded
-                  ? "Mostrar menos"
-                  : `Ver ${hiddenCount} gasto${hiddenCount === 1 ? "" : "s"} fijo${hiddenCount === 1 ? "" : "s"} más`}
+                  ? t("fixedExpenses.showLess")
+                  : t("fixedExpenses.showMore", { count: hiddenCount })}
               </button>
             )}
             {items.length === 0 && !isLoading && (
-              <p className="mt-4 text-sm text-slate-600">Ningún gasto fijo aún.</p>
+              <p className="mt-4 text-sm text-slate-600">{t("fixedExpenses.empty")}</p>
             )}
           </>
         )}

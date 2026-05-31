@@ -35,8 +35,22 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (res.status === 401) {
+    let message = "Sesión caducada";
+    try {
+      const body: unknown = await res.json();
+      if (
+        body &&
+        typeof body === "object" &&
+        "detail" in body &&
+        body.detail != null
+      ) {
+        message = String(body.detail);
+      }
+    } catch {
+      /* keep default */
+    }
     setAnonymous();
-    throw new UnauthorizedError();
+    throw new UnauthorizedError(message);
   }
 
   if (!res.ok) {
@@ -82,8 +96,22 @@ export async function downloadCsv(path: string, filename: string): Promise<void>
   });
 
   if (res.status === 401) {
+    let message = "Sesión caducada";
+    try {
+      const body: unknown = await res.json();
+      if (
+        body &&
+        typeof body === "object" &&
+        "detail" in body &&
+        body.detail != null
+      ) {
+        message = String(body.detail);
+      }
+    } catch {
+      /* keep default */
+    }
     setAnonymous();
-    throw new UnauthorizedError();
+    throw new UnauthorizedError(message);
   }
 
   if (!res.ok) {
@@ -105,6 +133,20 @@ export async function downloadCsv(path: string, filename: string): Promise<void>
   }
 
   const blob = await res.blob();
+  const file = new File([blob], filename, { type: "text/csv" });
+
+  // iOS / Android: usa el share sheet nativo (no saca la PWA del foreground)
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch (err: unknown) {
+      // usuario canceló o error — ignorar, no hacemos fallback para no duplicar
+      if (err instanceof DOMException && err.name === "AbortError") return;
+    }
+  }
+
+  // Fallback: descarga clásica con blob URL (escritorio / navegadores sin share)
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -113,5 +155,5 @@ export async function downloadCsv(path: string, filename: string): Promise<void>
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }

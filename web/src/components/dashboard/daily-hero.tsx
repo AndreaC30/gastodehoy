@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Summary } from "@/api/types";
 import { Metric } from "@/components/dashboard/metric";
 import { money, savingsLabel } from "@/lib/format";
@@ -11,6 +12,8 @@ type Props = {
 };
 
 export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
+  const { t } = useTranslation();
+
   return (
     <section
       data-tour="hero"
@@ -19,7 +22,7 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
     >
       <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_1.35fr] md:items-stretch md:gap-8">
         <div className="flex flex-col justify-center rounded-lg border border-slate-800 bg-slate-900/80 p-4 sm:rounded-xl sm:p-5">
-          <p className={TYPE_EYEBROW}>Hoy puedes gastar</p>
+          <p className={TYPE_EYEBROW}>{t("hero.dailyBudget")}</p>
           <div className="mt-1 min-h-[2.25rem] sm:min-h-[2.75rem] md:min-h-[3.5rem]">
             {summaryPending ? (
               <div
@@ -35,16 +38,16 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
           <button
             type="button"
             onClick={onRefresh}
-            aria-label="Actualizar números del presupuesto"
+            aria-label={t("hero.refresh")}
             className={`mt-2 min-h-11 w-fit px-1 text-sm font-medium text-slate-400 underline decoration-slate-600 underline-offset-4 hover:text-slate-300 sm:mt-3 ${FOCUS_RING}`}
           >
-            Actualizar números
+            {t("hero.refresh")}
           </button>
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5">
           <Metric
-            label="Ahorro reservado"
+            label={t("metrics.savings")}
             value={
               summary
                 ? savingsLabel(
@@ -55,22 +58,22 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
                 : "—"
             }
           />
-          <Metric label="Gastos fijos" value={money(summary?.fixed_expenses_total)} />
+          <Metric label={t("metrics.fixedExpenses")} value={money(summary?.fixed_expenses_total)} />
           <Metric
-            label="Variables este mes"
+            label={t("metrics.variableExpenses")}
             value={money(summary?.variable_spent_month)}
           />
           <Metric
-            label="Ingresos extra (mes)"
+            label={t("metrics.extraIncome")}
             value={money(summary?.extra_income_month)}
           />
           <Metric
-            label="Te queda este mes"
+            label={t("metrics.remaining")}
             value={money(summary?.remaining_this_month)}
             highlight
           />
           <Metric
-            label="Días que quedan"
+            label={t("metrics.daysLeft")}
             value={
               summary?.days_remaining_in_month != null
                 ? String(summary.days_remaining_in_month)
@@ -80,11 +83,7 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
         </div>
       </div>
       <p className={`mt-5 border-t border-slate-800 pt-4 ${TYPE_BODY}`}>
-        Es lo que te queda del mes repartido entre los días que faltan: ingreso y
-        extras, menos ahorro, gastos fijos y lo que ya registraste en gastos del día
-        a día. El ahorro (% o cantidad fija) solo se calcula sobre tu{" "}
-        <strong className="text-slate-300">ingreso mensual</strong>; los extras solo
-        te dan más margen.
+        {t("hero.explanation")}
       </p>
     </section>
   );

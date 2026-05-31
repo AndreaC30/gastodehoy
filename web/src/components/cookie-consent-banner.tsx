@@ -9,6 +9,7 @@
  * A subtle "Manage cookies" link lets users change their preference later.
  */
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const STORAGE_KEY = "gdh_cookie_consent";
 const UMAMI_SCRIPT_ID = "umami-analytics-script";
@@ -43,6 +44,7 @@ function removeUmamiScript() {
 }
 
 export function CookieConsentBanner() {
+  const { t } = useTranslation();
   // null = not decided yet, "all" | "necessary" = decided
   const [consent, setConsent] = useState<string | null>(() => {
     return localStorage.getItem(STORAGE_KEY);
@@ -85,7 +87,7 @@ export function CookieConsentBanner() {
             onClick={handleManageCookies}
             className="text-xs text-slate-500 underline-offset-2 hover:text-slate-300 hover:underline focus-visible:rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
           >
-            Gestionar cookies
+            {t("cookieConsent.manage")}
           </button>
         </div>
       </div>
@@ -100,11 +102,9 @@ export function CookieConsentBanner() {
           <span aria-hidden className="mr-1.5">
             🍪
           </span>
-          GastoDeHoy usa cookies técnicas necesarias para funcionar. Con tu
-          permiso, usamos analytics anónimo (sin cookies de terceros) para
-          mejorar la app.{" "}
+          {t("cookieConsent.message")}{" "}
           <span className="text-slate-500">
-            Más info en la política de privacidad.
+            {t("cookieConsent.privacyLink")}
           </span>
         </p>
 
@@ -115,14 +115,14 @@ export function CookieConsentBanner() {
             onClick={handleDecline}
             className="min-h-11 rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500 hover:bg-slate-800/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
           >
-            Solo necesarias
+            {t("cookieConsent.necessaryOnly")}
           </button>
           <button
             type="button"
             onClick={handleAccept}
             className="min-h-11 rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-black/20 transition-all hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
           >
-            Aceptar
+            {t("cookieConsent.accept")}
           </button>
         </div>
       </div>

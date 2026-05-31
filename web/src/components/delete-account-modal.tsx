@@ -1,12 +1,14 @@
 /**
  * Confirm account deletion with password (opened from dashboard menu).
  */
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import { setAnonymous } from "@/auth";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { translateBackendError } from "@/lib/backend-errors";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { FormField } from "@/components/ui/form-field";
 import { ModalMenuFooter } from "@/components/modal-menu-footer";
@@ -23,6 +25,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useBodyScrollLock(open);
   useDialogA11y(open, panelRef);
@@ -48,7 +51,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
 
   async function confirmDelete() {
     if (!password.trim()) {
-      setError("Escribe tu contraseña para confirmar la eliminación.");
+      setError(t("deleteAccount.errorEmpty"));
       return;
     }
     setBusy(true);
@@ -61,7 +64,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
       await logout();
       setAnonymous();
     } catch (e) {
-      setError((e as Error).message);
+      setError(translateBackendError((e as Error).message, t));
     } finally {
       setBusy(false);
     }
@@ -87,11 +90,10 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
               id="delete-account-title"
               className="text-lg font-bold tracking-tight text-rose-200"
             >
-              Eliminar cuenta
+              {t("deleteAccount.title")}
             </h2>
             <p className="mt-1 text-sm text-slate-400">
-              Paso final: se borran todos tus datos de forma permanente. No se puede
-              deshacer.
+              {t("deleteAccount.subtitle")}
             </p>
           </div>
           <button
@@ -116,8 +118,8 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
         <div className="mt-4">
           <FormField
             id="delete-account-password"
-            label="Contraseña actual"
-            hint="Confirma que eres tú."
+            label={t("deleteAccount.passwordLabel")}
+            hint={t("deleteAccount.passwordHint")}
           >
             <input
               type="password"
@@ -133,7 +135,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
           className="mt-4"
           onBackToMenu={onBackToMenu}
           onClose={onClose}
-          closeLabel="Cancelar"
+          closeLabel={t("deleteAccount.cancel")}
         >
           <button
             type="button"
@@ -141,7 +143,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
             disabled={busy}
             className={`min-h-11 w-full rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-60 sm:w-auto ${FOCUS_RING}`}
           >
-            {busy ? "Eliminando…" : "Confirmar eliminación"}
+            {busy ? t("deleteAccount.deleting") : t("deleteAccount.confirm")}
           </button>
         </ModalMenuFooter>
       </div>

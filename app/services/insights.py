@@ -38,6 +38,9 @@ TITLE_BUDGET_EXHAUSTED: str = "Presupuesto agotado"
 TITLE_KEEP_RECORDING: str = "Sigue registrando"
 
 
+from app.services.insight_i18n import get_insight_text
+
+
 def _previous_month_bounds(month_start: date) -> tuple[date, date]:
     """First and last day of the calendar month before ``month_start``."""
     if month_start.month == 1:
@@ -60,8 +63,11 @@ def compute_insights(
     month_start: date,
     month_end: date,
     summary: dict | None = None,
+    lang: str = "es",
 ) -> dict:
     """Analyse variable expenses for the period and return structured insights."""
+
+    _t = lambda key, **kw: get_insight_text(lang, key, **kw)
 
     # --- Category breakdown ---------------------------------------------------
     # Aggregate spending by category (including uncategorised)
@@ -113,7 +119,7 @@ def compute_insights(
         breakdown.append(
             {
                 "category_id": cat_id,
-                "category_name": cat_name or "Sin categoría",
+                "category_name": cat_name or _t("uncategorized_label"),
                 "category_color": cat_color or "#64748b",
                 "category_icon": cat_icon,
                 "total": cat_total,
@@ -172,11 +178,8 @@ def compute_insights(
             insights.append(
                 {
                     "type": INSIGHT_TYPE_WARNING,
-                    "title": TITLE_MORE_SPENDING,
-                    "message": (
-                        f"Este mes llevas {total_spent}€ en gastos variables, "
-                        f"{pct_change}% más que los {prev_spent}€ del mes anterior."
-                    ),
+                    "title": _t("more_spending"),
+                    "message": _t("msg_more", pct=pct_change, curr=total_spent, prev=prev_spent),
                     "icon": "trending_up",
                 }
             )
@@ -184,11 +187,8 @@ def compute_insights(
             insights.append(
                 {
                     "type": INSIGHT_TYPE_SUCCESS,
-                    "title": TITLE_LESS_SPENDING,
-                    "message": (
-                        f"Este mes llevas {total_spent}€ en gastos variables, "
-                        f"{pct_change}% menos que los {prev_spent}€ del mes anterior."
-                    ),
+                    "title": _t("less_spending"),
+                    "message": _t("msg_less", pct=pct_change, curr=total_spent, prev=prev_spent),
                     "icon": "trending_down",
                 }
             )
@@ -196,11 +196,8 @@ def compute_insights(
             insights.append(
                 {
                     "type": INSIGHT_TYPE_INFO,
-                    "title": TITLE_SIMILAR_PACE,
-                    "message": (
-                        f"Tus gastos variables ({total_spent}€) van parecidos "
-                        f"al mes anterior ({prev_spent}€)."
-                    ),
+                    "title": _t("similar_pace"),
+                    "message": _t("msg_similar", curr=total_spent, prev=prev_spent),
                     "icon": "calendar",
                 }
             )
@@ -210,11 +207,8 @@ def compute_insights(
         insights.append(
             {
                 "type": INSIGHT_TYPE_WARNING,
-                "title": TITLE_CONCENTRATED_SPENDING,
-                "message": (
-                    f"El {top_category['percentage']}% de tu gasto este mes fue en "
-                    f"{top_category['category_name']}. Considera si puedes reducirlo."
-                ),
+                "title": _t("concentrated_spending"),
+                "message": _t("msg_concentrated", pct=top_category["percentage"], name=top_category["category_name"]),
                 "icon": "alert_triangle",
             }
         )
@@ -232,13 +226,8 @@ def compute_insights(
                 insights.append(
                     {
                         "type": INSIGHT_TYPE_WARNING,
-                        "title": TITLE_BUDGET_EXHAUSTED,
-                        "message": (
-                            f"Has superado tu presupuesto disponible en "
-                            f"{abs(remaining)}€. Tus gastos fijos y ahorro suman "
-                            f"{summary['fixed_expenses_total'] + summary['savings_amount']}€, "
-                            f"y ya has gastado {total_spent}€ en variables."
-                        ),
+                        "title": _t("budget_exhausted"),
+                        "message": _t("msg_budget_exhausted", over=abs(remaining), fixed=summary['fixed_expenses_total'] + summary['savings_amount'], var=total_spent),
                         "icon": "alert_circle",
                     }
                 )
@@ -246,12 +235,8 @@ def compute_insights(
                 insights.append(
                     {
                         "type": INSIGHT_TYPE_WARNING,
-                        "title": TITLE_HIGH_SPENDING_RATIO,
-                        "message": (
-                            f"Llevas gastado el {spend_pct}% de tu presupuesto "
-                            f"disponible ({available_budget}€) tras descontar fijos "
-                            f"y ahorro. Te quedan {remaining}€."
-                        ),
+                        "title": _t("high_spending_ratio"),
+                        "message": _t("msg_high_ratio", pct=spend_pct, remaining=remaining, total=available_budget),
                         "icon": "alert_circle",
                     }
                 )
@@ -259,12 +244,8 @@ def compute_insights(
                 insights.append(
                     {
                         "type": INSIGHT_TYPE_SUCCESS,
-                        "title": TITLE_GOOD_PACE,
-                        "message": (
-                            f"Solo has gastado el {spend_pct}% de tu presupuesto "
-                            f"disponible ({available_budget}€). "
-                            f"Te quedan {remaining}€ para el resto del mes."
-                        ),
+                        "title": _t("good_pace"),
+                        "message": _t("msg_good_pace", pct=spend_pct, remaining=remaining),
                         "icon": "check_circle",
                     }
                 )
@@ -277,12 +258,8 @@ def compute_insights(
             insights.append(
                 {
                     "type": INSIGHT_TYPE_WARNING,
-                    "title": TITLE_PROJECTED_OVERSPEND,
-                    "message": (
-                        f"A este ritmo, gastarás ~{projected}€ este mes "
-                        f"({over}€ más que tu presupuesto disponible de "
-                        f"{available_budget}€). Ajusta tu ritmo."
-                    ),
+                    "title": _t("projected_overspend"),
+                    "message": _t("msg_projected", proj=projected, over=over, cap=available_budget),
                     "icon": "trending_up",
                 }
             )
@@ -295,11 +272,8 @@ def compute_insights(
         insights.append(
             {
                 "type": INSIGHT_TYPE_WARNING,
-                "title": f"Presupuesto superado: {item['category_name']}",
-                "message": (
-                    f"Has gastado {item['total']}€ de {budget}€ presupuestados "
-                    f"en {item['category_name']} este mes. Ajusta el ritmo o revisa el límite."
-                ),
+                "title": _t("budget_exceeded", name=item['category_name']),
+                "message": _t("msg_budget_exceeded", name=item['category_name'], spent=item['total'], budget=budget),
                 "icon": "alert_triangle",
             }
         )
@@ -312,11 +286,8 @@ def compute_insights(
         insights.append(
             {
                 "type": INSIGHT_TYPE_TIP,
-                "title": TITLE_CATEGORIZE_EXPENSES,
-                "message": (
-                    f"Tienes {uncategorised['transaction_count']} gasto(s) sin categoría. "
-                    f"Asignar categorías te ayuda a entender mejor en qué gastas."
-                ),
+                "title": _t("categorize_expenses"),
+                "message": _t("msg_uncategorized", count=uncategorised["transaction_count"]),
                 "icon": "tags",
             }
         )
@@ -336,11 +307,8 @@ def compute_insights(
             insights.append(
                 {
                     "type": INSIGHT_TYPE_INFO,
-                    "title": TITLE_HIGH_FIXED_COSTS,
-                    "message": (
-                        f"Tus gastos fijos representan el {fixed_pct}% de tu ingreso. "
-                        f"Lo recomendable es mantenerlos bajo el 50%."
-                    ),
+                    "title": _t("high_fixed_costs"),
+                    "message": _t("msg_fixed_ratio", pct=fixed_pct),
                     "icon": "home",
                 }
             )
@@ -354,11 +322,8 @@ def compute_insights(
             insights.append(
                 {
                     "type": INSIGHT_TYPE_INFO,
-                    "title": TITLE_DAILY_LIMIT,
-                    "message": (
-                        f"Te quedan {remaining}€ repartidos en {days_left} días "
-                        f"(hasta {daily_budget}€/día, igual que «Hoy puedes gastar»)."
-                    ),
+                    "title": _t("daily_limit"),
+                    "message": _t("msg_daily_tip", remaining=remaining, days=days_left, daily=daily_budget),
                     "icon": "calendar",
                 }
             )
@@ -370,11 +335,8 @@ def compute_insights(
         insights.append(
             {
                 "type": INSIGHT_TYPE_INFO,
-                "title": TITLE_KEEP_RECORDING,
-                "message": (
-                    "Registra más gastos para recibir insights personalizados "
-                    "sobre tus hábitos de consumo."
-                ),
+                "title": _t("keep_recording"),
+                "message": _t("msg_fallback"),
                 "icon": "lightbulb",
             }
         )

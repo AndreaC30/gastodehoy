@@ -1,5 +1,6 @@
 /** Modal to create, edit, and delete expense categories. */
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
@@ -33,6 +34,7 @@ export function CategoryManager({
   onChanged,
 }: Props) {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formName, setFormName] = useState("");
   const [formColor, setFormColor] = useState("#6366f1");
@@ -177,13 +179,13 @@ export function CategoryManager({
       >
         <div className="flex min-w-0 items-center justify-between gap-3">
           <h2 id="category-manager-title" className="min-w-0 flex-1 text-lg font-bold">
-            Categorías de gasto
+            {t("categoryManager.title")}
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-            aria-label="Cerrar"
+            aria-label={t("common.close")}
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
@@ -227,18 +229,18 @@ export function CategoryManager({
                     type="button"
                     onClick={() => startEdit(cat)}
                     className={`min-h-11 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200 ${FOCUS_RING}`}
-                    aria-label={`Editar categoría ${cat.name}`}
+                    aria-label={t("categoryManager.editCategory", { name: cat.name })}
                   >
-                    Editar
+                    {t("common.edit")}
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteMut.mutate(cat.id)}
                     disabled={deleteMut.isPending}
                     className={`min-h-11 rounded-lg px-2.5 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
-                    aria-label={`Borrar categoría ${cat.name}`}
+                    aria-label={t("categoryManager.deleteCategory", { name: cat.name })}
                   >
-                    Borrar
+                    {t("common.delete")}
                   </button>
                 </div>
               </li>
@@ -248,17 +250,17 @@ export function CategoryManager({
 
         <form className="mt-6 space-y-3" onSubmit={onSubmit}>
           <h3 className="text-sm font-semibold text-slate-300">
-            {editingId ? "Editar categoría" : "Nueva categoría"}
+            {editingId ? t("categoryManager.editForm") : t("categoryManager.newForm")}
           </h3>
           <div>
             <label htmlFor="cat-form-name" className="mb-1 block text-xs text-slate-500">
-              Nombre
+              {t("categoryManager.name")}
             </label>
             <input
               id="cat-form-name"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
-              placeholder="Ej. Ocio"
+              placeholder={t("categoryManager.namePlaceholder")}
               required
               maxLength={80}
               className={INPUT_CLASS}
@@ -267,7 +269,7 @@ export function CategoryManager({
 
           <div>
             <label htmlFor="cat-form-budget" className="mb-1 block text-xs text-slate-500">
-              Presupuesto mensual (opcional)
+              {t("categoryManager.budget")}
             </label>
             <input
               id="cat-form-budget"
@@ -275,16 +277,16 @@ export function CategoryManager({
               inputMode="decimal"
               value={formBudget}
               onChange={(e) => setFormBudget(e.target.value)}
-              placeholder="Ej. 80"
+              placeholder={t("categoryManager.budgetPlaceholder")}
               className={INPUT_CLASS}
             />
             <p className="mt-1 text-xs text-slate-600">
-              Si gastas más de este importe en el mes, la app te avisará.
+              {t("categoryManager.budgetHint")}
             </p>
           </div>
 
           <fieldset>
-            <legend className="mb-2 text-xs text-slate-500">Color</legend>
+            <legend className="mb-2 text-xs text-slate-500">{t("categoryManager.color")}</legend>
             <div className="flex flex-wrap gap-2">
               {PRESET_COLORS.map((c) => (
                 <button
@@ -295,14 +297,14 @@ export function CategoryManager({
                     formColor === c ? "border-white" : "border-transparent"
                   }`}
                   style={{ backgroundColor: c }}
-                  aria-label={`Color ${c}`}
+                  aria-label={t("categoryManager.color") + " " + c}
                 />
               ))}
             </div>
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-xs text-slate-500">Icono</legend>
+            <legend className="mb-2 text-xs text-slate-500">{t("categoryManager.icon")}</legend>
             <div className="flex flex-wrap gap-2">
               {CATEGORY_ICON_PICKER.map((opt) => {
                 const OptIcon = opt.Icon;
@@ -331,7 +333,7 @@ export function CategoryManager({
               disabled={createMut.isPending || updateMut.isPending}
               className={BTN_PRIMARY}
             >
-              {editingId ? "Guardar" : "Crear"}
+              {editingId ? t("common.save") : t("common.create")}
             </button>
             {editingId && (
               <button
@@ -339,7 +341,7 @@ export function CategoryManager({
                 onClick={resetForm}
                 className={BTN_SECONDARY}
               >
-                Cancelar
+                {t("common.cancel")}
               </button>
             )}
           </div>

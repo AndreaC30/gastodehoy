@@ -1,6 +1,7 @@
 /** Compact strip: variable spend for the last N calendar months (3, 6, or 12). */
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "@/api/client";
 import type { MonthHistoryRead } from "@/api/types";
 import { money } from "@/lib/format";
@@ -14,8 +15,8 @@ async function loadMonthHistory(months: MonthCount) {
   return api<MonthHistoryRead>(`/api/summary/history?months=${months}`);
 }
 
-function historyTitle(months: MonthCount): string {
-  return `Últimos ${months} meses`;
+function historyTitle(t: (key: string, opts?: any) => string, months: MonthCount): string {
+  return t("monthHistory.lastMonths", { months: String(months) });
 }
 
 function gridClass(months: MonthCount): string {
@@ -35,6 +36,7 @@ function cardClass(months: MonthCount, isCurrentMonth: boolean): string {
 }
 
 export function MonthHistoryStrip() {
+  const { t } = useTranslation();
   const [months, setMonths] = useState<MonthCount>(3);
   const { data, isPending, error } = useQuery({
     queryKey: ["history", months],
@@ -71,12 +73,12 @@ export function MonthHistoryStrip() {
   return (
     <section
       className="rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-4 shadow-lg shadow-black/20"
-      aria-label="Gasto variable últimos meses"
+      aria-label={t("monthHistory.ariaLabel")}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-semibold tracking-tight text-slate-200 sm:text-lg">
-            {historyTitle(months)}
+            {historyTitle(t, months)}
           </h2>
           <p className={`mt-0.5 ${TYPE_CAPTION}`}>Gasto variable por mes</p>
         </div>

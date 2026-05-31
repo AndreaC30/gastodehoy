@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { FixedExpense } from "@/api/types";
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
+  const { t } = useTranslation();
   const [name, setName] = useState(expense.name);
   const [amount, setAmount] = useState(String(expense.amount));
   const [icon, setIcon] = useState(expense.icon ?? DEFAULT_FIXED_EXPENSE_ICON);
@@ -51,7 +53,7 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
     setError(null);
     const trimmed = name.trim();
     if (!trimmed) {
-      setError("El nombre no puede estar vacío");
+      setError(t("fixedExpenses.nameError"));
       return;
     }
     saveMut.mutate({
@@ -78,13 +80,13 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
       >
         <div className="flex items-center justify-between gap-3">
           <h2 id="edit-fixed-title" className="text-lg font-bold">
-            Editar gasto fijo
+            Editar {t("fixedExpenses.title")}
           </h2>
           <button
             type="button"
             onClick={onClose}
             className={`min-h-11 min-w-11 rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200 ${FOCUS_RING}`}
-            aria-label="Cerrar"
+            aria-label={t("common.close")}
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
@@ -102,7 +104,7 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
         <form onSubmit={submit} className="mt-4 space-y-4">
           <div>
             <label htmlFor="edit-fixed-name" className="mb-1.5 block text-xs text-slate-500">
-              Concepto
+              {t("fixedExpenses.concept")}
             </label>
             <div className="flex min-w-0 gap-2">
               <IconSelectDropdown value={icon} onChange={setIcon} />
@@ -118,7 +120,7 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
           </div>
           <div>
             <label htmlFor="edit-fixed-amount" className="mb-1.5 block text-xs text-slate-500">
-              Importe mensual (€)
+              {t("fixedExpenses.amount")}
             </label>
             <input
               id="edit-fixed-amount"
@@ -138,14 +140,14 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
               onClick={onClose}
               className={`flex-1 ${BTN_SECONDARY}`}
             >
-              Cancelar
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={saveMut.isPending}
               className={`flex-1 ${BTN_PRIMARY}`}
             >
-              {saveMut.isPending ? "Guardando…" : "Guardar"}
+              {saveMut.isPending ? t("common.saving") : t("common.save")}
             </button>
           </div>
         </form>

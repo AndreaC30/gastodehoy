@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import "./i18n/index.js";
 import appleTouch180 from "./assets/gastodehoy-apple-touch-180.png";
 import faviconSvgUrl from "./assets/favicon.svg?url";
 import favicon16 from "./assets/gastodehoy-favicon-16.png";

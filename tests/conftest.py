@@ -8,6 +8,10 @@ os.environ["COOKIE_SECURE"] = "false"
 os.environ.pop("COOKIE_DOMAIN", None)
 os.environ["APP_SECRET"] = "test-secret-key-for-tests-only-12345678"
 os.environ["TIMEZONE"] = "Europe/Madrid"
+# Clear VAPID keys so push tests assert the correct disabled-by-default behavior
+# Must set to empty (not pop) because pydantic-settings falls back to .env file
+os.environ["VAPID_PUBLIC_KEY"] = ""
+os.environ["VAPID_PRIVATE_KEY"] = ""
 
 from collections.abc import Generator
 

@@ -3,6 +3,7 @@
  *
  * La recuperación envía una contraseña temporal por correo (requiere SMTP en el servidor).
  */
+import { useTranslation } from "react-i18next";
 import { type FormEvent, useId, useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IoArrowBack } from "react-icons/io5";
@@ -16,10 +17,11 @@ import { setUser } from "@/auth";
 import { BrandLogo } from "@/components/brand-logo";
 import { showLegalPage } from "@/lib/legal-pages-state";
 import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
+import { translateBackendError } from "@/lib/backend-errors";
 
 type Mode = "login" | "register" | "forgot";
 
-/** Pestaña inicial cuando se entra desde la landing (no aplica a “forgot”). */
+/** Pestaña inicial cuando se entra desde la landing (no aplica a "forgot"). */
 export type AuthEntryTab = "login" | "register";
 
 /** Public entry point: renders the right form. */
@@ -34,6 +36,7 @@ export function LoginScreen({
     initialMode === "register" ? "register" : "login",
   );
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   return (
     <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
@@ -44,7 +47,7 @@ export function LoginScreen({
               type="button"
               onClick={onBackToLanding}
               className="w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
-              aria-label="Volver al inicio"
+              aria-label={t("common.back")}
             >
               <BrandLogo variant="hero" />
             </button>
@@ -53,7 +56,7 @@ export function LoginScreen({
           )}
         </h1>
         <p className="mt-4 text-center text-sm text-slate-400">
-          Cada uno con su cuenta, sin pisarse.
+          {t("login.title")}
         </p>
         {onBackToLanding && (
           <div className="mt-3 flex justify-center">
@@ -63,7 +66,7 @@ export function LoginScreen({
               className={`inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-teal-300 ${FOCUS_RING}`}
             >
               <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
-              Volver al inicio
+              {t("common.back")}
             </button>
           </div>
         )}
@@ -81,7 +84,7 @@ export function LoginScreen({
                   setError(null);
                 }}
               >
-                Entrar
+                {t("login.tabLogin")}
               </TabButton>
               <TabButton
                 active={mode === "register"}
@@ -90,7 +93,7 @@ export function LoginScreen({
                   setError(null);
                 }}
               >
-                Crear cuenta
+                {t("login.tabRegister")}
               </TabButton>
             </div>
         )}
@@ -166,6 +169,7 @@ function LoginForm({
   onError: (m: string | null) => void;
   onForgot: () => void;
 }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -182,7 +186,7 @@ function LoginForm({
       const me = await api<User>("/api/auth/me");
       setUser(me);
     } catch (e) {
-      onError((e as Error).message);
+      onError(translateBackendError((e as Error).message, t));
     } finally {
       setBusy(false);
     }
@@ -192,7 +196,7 @@ function LoginForm({
     <form onSubmit={submit} className="space-y-3">
       <Field
         id="login-email"
-        label="Email"
+        label={t("login.email")}
         type="email"
         autoComplete="email"
         autoFocus
@@ -201,7 +205,7 @@ function LoginForm({
       />
       <Field
         id="login-password"
-        label="Contraseña"
+        label={t("login.password")}
         type="password"
         autoComplete="current-password"
         value={password}
@@ -212,14 +216,14 @@ function LoginForm({
         disabled={busy || !email || !password}
         className={`mt-2 w-full ${BTN_PRIMARY}`}
       >
-        {busy ? "Entrando…" : "Entrar"}
+        {busy ? t("login.loggingIn") : t("login.tabLogin")}
       </button>
       <button
         type="button"
         onClick={onForgot}
         className="mt-1 block w-full text-center text-xs font-medium text-slate-400 hover:text-teal-300"
       >
-        He olvidado mi contraseña
+        {t("login.forgotPassword")}
       </button>
     </form>
   );
@@ -230,6 +234,7 @@ function RegisterForm({
 }: {
   onError: (m: string | null) => void;
 }) {
+  const { t, i18n } = useTranslation();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -241,23 +246,23 @@ function RegisterForm({
     e.preventDefault();
     onError(null);
     if (password.length < 8) {
-      onError("La contraseña debe tener al menos 8 caracteres");
+      onError(t("login.passwordMinError"));
       return;
     }
     if (password !== password2) {
-      onError("Las contraseñas no coinciden");
+      onError(t("login.passwordMismatch"));
       return;
     }
     setBusy(true);
     try {
       await api<RegisterResponse>("/api/auth/register", {
         method: "POST",
-        body: JSON.stringify({ email, name: name.trim(), password }),
+        body: JSON.stringify({ email, name: name.trim(), password, language: i18n.language || "es" }),
       });
       const me = await api<User>("/api/auth/me");
       setUser(me);
     } catch (e) {
-      onError((e as Error).message);
+      onError(translateBackendError((e as Error).message, t));
     } finally {
       setBusy(false);
     }
@@ -267,7 +272,7 @@ function RegisterForm({
     <form onSubmit={submit} className="space-y-3">
       <Field
         id="register-email"
-        label="Email"
+        label={t("login.email")}
         type="email"
         autoComplete="email"
         autoFocus
@@ -276,7 +281,7 @@ function RegisterForm({
       />
       <Field
         id="register-name"
-        label="Tu nombre (lo verás en la cabecera)"
+        label={t("login.name")}
         type="text"
         autoComplete="name"
         maxLength={80}
@@ -285,7 +290,7 @@ function RegisterForm({
       />
       <Field
         id="register-password"
-        label="Contraseña (8–64 caracteres)"
+        label={t("login.passwordLength")}
         type="password"
         autoComplete="new-password"
         value={password}
@@ -293,7 +298,7 @@ function RegisterForm({
       />
       <Field
         id="register-password2"
-        label="Repite la contraseña"
+        label={t("login.passwordConfirm")}
         type="password"
         autoComplete="new-password"
         value={password2}
@@ -311,10 +316,10 @@ function RegisterForm({
           className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-600 bg-slate-800 accent-teal-500"
         />
         <span>
-          He leído y acepto la{" "}
-          <button type="button" onClick={() => showLegalPage("privacy")} className="text-teal-400 underline hover:text-teal-300">política de privacidad</button>
-          {" "}y las{" "}
-          <button type="button" onClick={() => showLegalPage("legal")} className="text-teal-400 underline hover:text-teal-300">condiciones de uso</button>
+          {t("login.acceptTerms")}{" "}
+          <button type="button" onClick={() => showLegalPage("privacy")} className="text-teal-400 underline hover:text-teal-300">{t("login.privacyPolicy")}</button>
+          {" "}{t("login.and")}{" "}
+          <button type="button" onClick={() => showLegalPage("legal")} className="text-teal-400 underline hover:text-teal-300">{t("login.termsOfUse")}</button>
         </span>
       </label>
       <button
@@ -322,7 +327,7 @@ function RegisterForm({
         disabled={busy || !email || !name || !password || !password2 || !acceptedTerms}
         className={`mt-2 w-full ${BTN_PRIMARY}`}
       >
-        {busy ? "Creando…" : "Crear cuenta"}
+        {busy ? t("login.creating") : t("login.tabRegister")}
       </button>
     </form>
   );
@@ -335,6 +340,7 @@ function ForgotForm({
   onError: (m: string | null) => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [doneMessage, setDoneMessage] = useState<string | null>(null);
@@ -353,7 +359,7 @@ function ForgotForm({
       );
       setDoneMessage(res.detail);
     } catch (e) {
-      onError((e as Error).message);
+      onError(translateBackendError((e as Error).message, t));
     } finally {
       setBusy(false);
     }
@@ -364,7 +370,7 @@ function ForgotForm({
       <div className="space-y-4">
         <div>
           <h2 className="text-lg font-bold tracking-tight">
-            Revisa tu correo
+            {t("login.checkEmail")}
           </h2>
           <p className="mt-2 text-sm text-teal-200/90">{doneMessage}</p>
         </div>
@@ -376,7 +382,7 @@ function ForgotForm({
           }}
           className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110"
         >
-          Volver a entrar
+          {t("login.backToLogin")}
         </button>
       </div>
     );
@@ -386,18 +392,16 @@ function ForgotForm({
     <form onSubmit={submit} className="space-y-3">
       <div>
         <h2 className="text-lg font-bold tracking-tight">
-          Recuperar contraseña
+          {t("login.forgotTitle")}
         </h2>
         <p className="mt-1 text-sm text-slate-400">
-          Te enviaremos una contraseña nueva al correo de tu cuenta. Si no
-          llega nada, revisa spam o contacta al administrador (hace falta correo
-          configurado en el servidor).
+          {t("login.forgotDesc")}
         </p>
       </div>
 
       <Field
         id="forgot-email"
-        label="Email"
+        label={t("login.email")}
         type="email"
         autoComplete="email"
         autoFocus
@@ -412,14 +416,14 @@ function ForgotForm({
           className="inline-flex w-full items-center justify-center gap-1 text-sm text-slate-400 hover:text-slate-200 sm:w-auto sm:justify-start"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
-          Volver a Entrar
+          {t("login.backToLogin")}
         </button>
         <button
           type="submit"
           disabled={busy || !email}
           className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
         >
-          {busy ? "Enviando…" : "Enviar correo"}
+          {busy ? t("login.sending") : t("login.sendEmail")}
         </button>
       </div>
     </form>
@@ -449,6 +453,7 @@ function Field({
   autoComplete?: string;
   maxLength?: number;
 }) {
+  const { t } = useTranslation();
   const fallbackId = useId();
   const id = idProp ?? fallbackId;
   const [visible, setVisible] = useState(false);
@@ -477,7 +482,7 @@ function Field({
           <button
             type="button"
             onClick={() => setVisible((v) => !v)}
-            aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
+            aria-label={visible ? t("login.hidePassword") : t("login.showPassword")}
             aria-pressed={visible}
             className={`absolute inset-y-0 right-0 flex min-h-11 min-w-11 items-center justify-center text-slate-500 hover:text-slate-300 ${FOCUS_RING}`}
           >
