@@ -21,7 +21,7 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
       aria-live="polite"
     >
       <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_1.35fr] md:items-stretch md:gap-8">
-        <div className="flex flex-col justify-center rounded-lg border border-slate-800 bg-slate-900/80 p-4 sm:rounded-xl sm:p-5">
+        <div className="flex flex-col justify-center rounded-lg border border-slate-800 bg-slate-900 p-4 sm:rounded-xl sm:p-5">
           <p className={TYPE_EYEBROW}>{t("hero.dailyBudget")}</p>
           <div className="mt-1 min-h-[2.25rem] sm:min-h-[2.75rem] md:min-h-[3.5rem]">
             {summaryPending ? (

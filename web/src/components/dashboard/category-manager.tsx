@@ -206,7 +206,7 @@ export function CategoryManager({
             return (
               <li
                 key={cat.id}
-                className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2.5 sm:flex-row sm:items-center sm:gap-3"
+                className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2.5 sm:flex-row sm:items-center sm:gap-3"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <span

@@ -73,7 +73,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
   const pct = progressPercent(goal.current_amount, goal.target_amount);
 
   return (
-    <li className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+    <li className="rounded-xl border border-slate-800 bg-slate-950 p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-slate-100">{goal.name}</p>

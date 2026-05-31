@@ -79,7 +79,7 @@ export function DashboardHeader({
             <button
               type="button"
               onClick={() => onMenuOpenChange(true)}
-              className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-base font-medium text-slate-200 shadow-sm transition-colors hover:border-teal-500/40 hover:bg-slate-800 hover:text-teal-200 ${FOCUS_RING}`}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-base font-medium text-slate-200 shadow-sm transition-colors hover:border-teal-500/40 hover:bg-slate-800 hover:text-teal-200 ${FOCUS_RING}`}
               aria-expanded={menuOpen}
               aria-controls="dashboard-nav-panel"
               aria-haspopup="dialog"

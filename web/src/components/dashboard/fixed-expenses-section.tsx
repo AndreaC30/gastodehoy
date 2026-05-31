@@ -48,7 +48,7 @@ export function FixedExpensesSection({
   return (
     <section
       data-tour="fixed-expenses"
-      className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-lg shadow-black/20"
+      className="rounded-2xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/20"
     >
       <div className="border-b border-slate-800 px-5 py-4">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">{t("fixedExpenses.title")}</h2>
@@ -113,7 +113,7 @@ export function FixedExpensesSection({
                 return (
                   <li
                     key={it.id}
-                    className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                    className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <FixedIcon className="h-4 w-4 shrink-0 text-sky-400/90" />
@@ -149,7 +149,7 @@ export function FixedExpensesSection({
               <button
                 type="button"
                 onClick={onToggleExpand}
-                className={`mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950/40 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 ${FOCUS_RING}`}
+                className={`mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 ${FOCUS_RING}`}
                 aria-expanded={expanded}
               >
                 <ChevronInCircle expanded={expanded} />

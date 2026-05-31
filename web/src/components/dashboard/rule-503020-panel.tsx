@@ -51,7 +51,7 @@ export function Rule503020Panel() {
 
   if (error) {
     return (
-      <p className="rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3 text-sm text-slate-500">
+      <p className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-slate-500">
         {t("rule503020.error")}
       </p>
     );
@@ -60,7 +60,7 @@ export function Rule503020Panel() {
   if (isPending) {
     return (
       <div
-        className="h-40 animate-pulse rounded-2xl border border-slate-800 bg-slate-900/50"
+        className="h-40 animate-pulse rounded-2xl border border-slate-800 bg-slate-900"
         aria-label={t("rule503020.title")}
       />
     );
@@ -70,7 +70,7 @@ export function Rule503020Panel() {
 
   return (
     <section
-      className="rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-4 shadow-lg shadow-black/20"
+      className="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-4 shadow-lg shadow-black/20"
       aria-label={t("rule503020.title")}
     >
       <div className="flex items-start gap-2">
@@ -140,7 +140,7 @@ export function Rule503020Panel() {
             return (
               <li
                 key={i}
-                className={`flex items-start gap-2 rounded-lg border border-slate-800/80 bg-slate-950/50 px-3 py-2.5 ${TYPE_BODY}`}
+                className={`flex items-start gap-2 rounded-lg border border-slate-800/80 bg-slate-950 px-3 py-2.5 ${TYPE_BODY}`}
               >
                 <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${iconColor}`} aria-hidden />
                 <span>{insight.text}</span>

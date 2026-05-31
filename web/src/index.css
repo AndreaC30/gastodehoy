@@ -6,14 +6,12 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  overflow-x: clip;
 }
 
 body {
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.5;
-  overflow-x: clip;
 }
 
 /* Guía paso a paso: deja hueco arriba/abajo al hacer scroll automático */
@@ -22,19 +20,9 @@ body {
   scroll-margin-bottom: 18rem;
 }
 
-img {
-  max-width: 100%;
-}
-
-/*
- * Iconos UI (react-icons): max-width:100% en svg hace que en Android WebView
- * crezcan al ancho del contenedor flex y tapen el contenido como un bloque oscuro.
- */
+img,
 svg {
-  display: inline-block;
-  flex-shrink: 0;
-  max-width: none;
-  max-height: none;
+  max-width: 100%;
 }
 
 .insights-panel {

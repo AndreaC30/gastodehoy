@@ -12,7 +12,7 @@ export function Metric({ label, value, highlight }: Props) {
       className={`rounded-xl border px-3 py-3 ${
         highlight
           ? "border-teal-500/35 bg-teal-500/10"
-          : "border-slate-800 bg-slate-900/90"
+          : "border-slate-800 bg-slate-900"
       }`}
     >
       <p className={`${TYPE_EYEBROW} line-clamp-2 leading-tight`}>{label}</p>
