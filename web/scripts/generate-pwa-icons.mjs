@@ -14,7 +14,7 @@
  * are consistent with the app UI on all platforms.
  * PNGs are RGBA so corners of the 3D design blend naturally into the background.
  */
-import { writeFileSync } from "node:fs";
+import { copyFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -118,5 +118,10 @@ console.log("  favicon 16px     (content @ 88%)");
 const og512 = await squareIcon(512, 0.88);
 writeFileSync(path.join(webDir, "public", "og-image.png"), og512);
 console.log("  og-image 512px   (content @ 88%)");
+
+// Wordmark for boot splash (stable URL /gastodehoy-logo.png in index.html)
+const logoSource = path.join(webDir, "src/assets/gastodehoy-logo.png");
+copyFileSync(logoSource, path.join(webDir, "public", "gastodehoy-logo.png"));
+console.log("  gastodehoy-logo.png (boot splash)");
 
 console.log("\nDone ✓");

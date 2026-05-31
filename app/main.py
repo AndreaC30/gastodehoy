@@ -46,6 +46,7 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
     "gastodehoy-apple-touch-180.png": "image/png",
     "gastodehoy-app-icon-maskable.png": "image/png",
     "gastodehoy-app-icon-maskable-192.png": "image/png",
+    "gastodehoy-logo.png": "image/png",
 }
 
 
@@ -215,6 +216,12 @@ def sitemap_xml() -> FileResponse | JSONResponse:
 @app.get("/og-image.png", response_model=None)
 def og_image() -> FileResponse | JSONResponse:
     return _dist_root_file("og-image.png", DIST_ROOT_STATIC_FILES["og-image.png"])
+
+
+@app.get("/gastodehoy-logo.png", response_model=None)
+def brand_logo_png() -> FileResponse | JSONResponse:
+    """Wordmark for boot splash (also in ``web/public``)."""
+    return _dist_root_file("gastodehoy-logo.png", DIST_ROOT_STATIC_FILES["gastodehoy-logo.png"])
 
 
 @app.get("/manifest.webmanifest", response_model=None)

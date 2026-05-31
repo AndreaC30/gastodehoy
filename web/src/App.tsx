@@ -12,7 +12,9 @@ import { useTranslation } from "react-i18next";
 import { Dashboard } from "@/components/dashboard/dashboard-view";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { LandingPage } from "@/components/landing-page";
+import { BootSplashContent } from "@/components/boot-splash-content";
 import { LoadingSplash } from "@/components/loading-splash";
+import { removeHtmlBootSplash } from "@/lib/boot-splash";
 import {
   LoginScreen,
   type AuthEntryTab,
@@ -53,6 +55,12 @@ export default function App() {
   // Legal page overlay (privacy policy / legal notice)
   const [legalPage, setLegalPage] = useState<LegalPage>(getLegalPage);
   useEffect(() => subscribeToLegalPage(setLegalPage), []);
+
+  useEffect(() => {
+    if (legalPage || auth.status !== "loading") {
+      removeHtmlBootSplash();
+    }
+  }, [legalPage, auth.status]);
 
   useEffect(() => {
     if (auth.status !== "loading") return;
@@ -100,22 +108,14 @@ export default function App() {
 
   if (auth.status === "loading" && meBootstrapError) {
     content = (
-      <div className={APP_SHELL_CLASS}>
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center text-slate-300">
-          <p className="max-w-md text-sm">{meBootstrapError}</p>
-          <button
-            type="button"
-            className="rounded-lg border border-slate-600 px-4 py-2 text-sm text-teal-300 hover:bg-slate-800"
-            onClick={() => {
-              setMeBootstrapError(null);
-              setLoading();
-              setMeRetryToken((n) => n + 1);
-            }}
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
+      <BootstrapErrorSplash
+        message={meBootstrapError}
+        onRetry={() => {
+          setMeBootstrapError(null);
+          setLoading();
+          setMeRetryToken((n) => n + 1);
+        }}
+      />
     );
   } else if (auth.status === "loading") {
     content = <LoadingSplash />;
@@ -204,6 +204,34 @@ function Authed({ userName }: { userName: string }) {
       </a>
       <Dashboard profileName={userName} />
     </>
+  );
+}
+
+function BootstrapErrorSplash({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  useEffect(() => {
+    removeHtmlBootSplash();
+  }, []);
+
+  return (
+    <div className="boot-splash" role="alert">
+      <div className="boot-splash__inner">
+        <BootSplashContent />
+        <p className="max-w-md text-sm text-rose-300">{message}</p>
+        <button
+          type="button"
+          className="rounded-lg border border-slate-600 px-4 py-2 text-sm text-teal-300 hover:bg-slate-800"
+          onClick={onRetry}
+        >
+          Reintentar
+        </button>
+      </div>
+    </div>
   );
 }
 

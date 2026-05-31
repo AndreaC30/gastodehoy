@@ -3,6 +3,9 @@
     "name": "GastoDeHoy",
     "tagline": "Suivi des Dépenses Quotidiennes"
   },
+  "splash": {
+    "tagline": "Chaque euro que vous maîtrisez est un pas vers votre liberté"
+  },
   "hero": {
     "dailyBudget": "Vous pouvez dépenser aujourd'hui",
     "refresh": "Actualiser",

@@ -19,6 +19,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/gastodehoy-app-icon.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/gastodehoy-favicon-192.png" />
     <link rel="apple-touch-icon" href="/gastodehoy-apple-touch-180.png" sizes="180x180" />
+    <link rel="preload" href="/gastodehoy-logo.png" as="image" type="image/png" />
     <link rel="canonical" href="/" />
 
     <meta property="og:title" content="GastoDeHoy - Control de Gastos Diarios" />
@@ -41,11 +42,71 @@
       data-website-id="cac1b7e0-0363-4df4-b76f-fda83fcf935b"
       data-host-url="https://umami.kyadigital.es/u"></script>
     <style>
-      /* Prevent white flash on refresh */
-      html, body { background: #0f172a !important; margin: 0; min-height: 100dvh; }
+      /* Critical CSS: splash before JS/CSS bundle (PWA + hard refresh) */
+      html, body {
+        background: #0f172a !important;
+        margin: 0;
+        min-height: 100dvh;
+        color: #e2e8f0;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: max(1.25rem, env(safe-area-inset-top))
+          max(1.25rem, env(safe-area-inset-right))
+          max(1.25rem, env(safe-area-inset-bottom))
+          max(1.25rem, env(safe-area-inset-left));
+        background: #0f172a;
+        box-sizing: border-box;
+      }
+      #boot-splash .boot-splash__inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 22rem;
+        text-align: center;
+        gap: 1.25rem;
+      }
+      #boot-splash .boot-splash__logo {
+        display: block;
+        width: 100%;
+        max-width: min(100%, 19rem);
+        height: auto;
+        object-fit: contain;
+      }
+      #boot-splash .boot-splash__tagline {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.5;
+        font-weight: 500;
+        color: #94a3b8;
+      }
     </style>
   </head>
   <body class="antialiased" style="background:#0f172a;margin:0;min-height:100dvh">
+    <div id="boot-splash" role="status" aria-live="polite" aria-busy="true">
+      <div class="boot-splash__inner">
+        <img
+          class="boot-splash__logo"
+          src="/gastodehoy-logo.png"
+          alt="GastoDeHoy"
+          width="607"
+          height="141"
+          decoding="async"
+          fetchpriority="high"
+        />
+        <p class="boot-splash__tagline">
+          Cada euro que controlas es un paso hacia tu libertad
+        </p>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

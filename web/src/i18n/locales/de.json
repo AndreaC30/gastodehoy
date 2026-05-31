@@ -3,6 +3,9 @@
     "name": "GastoDeHoy",
     "tagline": "Tägliche Ausgabenverwaltung"
   },
+  "splash": {
+    "tagline": "Jeder Euro, den du im Blick hast, ist ein Schritt in Richtung Freiheit"
+  },
   "hero": {
     "dailyBudget": "Heute kannst du ausgeben",
     "refresh": "Zahlen aktualisieren",

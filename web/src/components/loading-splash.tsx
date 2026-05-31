@@ -1,12 +1,17 @@
-import { AppBackdrop } from "@/components/app-backdrop";
-import { APP_SHELL_CLASS } from "@/lib/app-layout";
+import { useEffect } from "react";
+import { BootSplashContent } from "@/components/boot-splash-content";
+import { removeHtmlBootSplash } from "@/lib/boot-splash";
 
+/** Full-screen branded splash while auth/settings bootstrap. */
 export function LoadingSplash() {
+  useEffect(() => {
+    removeHtmlBootSplash();
+  }, []);
+
   return (
-    <div className={APP_SHELL_CLASS}>
-      <AppBackdrop />
-      <div className="relative z-10 flex min-h-screen items-center justify-center text-sm text-slate-500">
-        Cargando…
+    <div className="boot-splash" role="status" aria-live="polite" aria-busy="true">
+      <div className="boot-splash__inner">
+        <BootSplashContent showSpinner />
       </div>
     </div>
   );
