@@ -31,7 +31,7 @@ const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
 const SOURCE_BG_TOLERANCE = 6;
 
 /** How much of the canvas the calendar fills (higher = larger icon). */
-const FAVICON_FILL = 0.97;
+const FAVICON_FILL = 0.94;
 /** Maskable safe zone (Android adaptive icon spec). */
 const MASKABLE_FILL = 0.72;
 /** Extra shift up after centroid (fraction of canvas) — optical balance on all OS launchers. */
