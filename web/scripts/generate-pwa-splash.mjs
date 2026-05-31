@@ -1,10 +1,10 @@
 /**
- * PWA launch screens: iOS apple-touch-startup-image + Android manifest splash icon.
- * Matches the in-app boot splash (dark bg + wordmark + tagline).
+ * PWA launch screens: iOS apple-touch-startup-image (full screen, wordmark + tagline).
+ * Not used in the web manifest — launcher icons stay the 3D calendar from generate-pwa-icons.mjs.
  *
  * Run: node scripts/generate-pwa-splash.mjs (also via npm run icons)
  */
-import { copyFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -197,20 +197,7 @@ writePublic("pwa-launch-192.png", await squareLaunch(192));
 writePublic("pwa-launch-maskable-512.png", await maskableLaunch(512));
 writePublic("pwa-launch-maskable-192.png", await maskableLaunch(192));
 
-// Android WebAPK embeds these at install for the OS splash (before HTML loads).
-// Must match pwa-launch, NOT the calendar asset from generate-pwa-icons.mjs.
-copyFileSync(
-  path.join(publicDir, "pwa-launch-512.png"),
-  path.join(publicDir, "gastodehoy-app-icon.png"),
-);
-copyFileSync(
-  path.join(publicDir, "pwa-launch-maskable-512.png"),
-  path.join(publicDir, "gastodehoy-app-icon-maskable.png"),
-);
-copyFileSync(
-  path.join(publicDir, "pwa-launch-maskable-192.png"),
-  path.join(publicDir, "gastodehoy-app-icon-maskable-192.png"),
-);
-console.log("  gastodehoy-app-icon*.png ← synced from pwa-launch (Android OS splash)");
+// pwa-launch-* = iOS apple-touch-startup-image + optional direct URL only.
+// Launcher icons (gastodehoy-app-icon*) come from generate-pwa-icons.mjs (calendar).
 
 console.log("Done ✓");
