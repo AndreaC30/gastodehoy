@@ -151,6 +151,7 @@ def test_forgot_password_unknown_email_same_response(anon_client, monkeypatch) -
 
 
 def test_forgot_password_rate_limited(anon_client, monkeypatch) -> None:
+    monkeypatch.setattr(app_settings, "environment", "production")
     monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
     monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
     monkeypatch.setattr(
@@ -210,7 +211,8 @@ def test_login_and_logout_cycle(anon_client) -> None:
     assert anon_client.get("/api/auth/me").status_code == 200
 
 
-def test_login_rate_limit(anon_client) -> None:
+def test_login_rate_limit(anon_client, monkeypatch) -> None:
+    monkeypatch.setattr(app_settings, "environment", "production")
     anon_client.post(
         "/api/auth/register",
         json={"email": "r@e.com", "name": "R", "password": "supersecret1"},

@@ -18,7 +18,8 @@
     "bannerNewMonthTitle": "Neuer Monat",
     "bannerNewMonthBody": "Variable Ausgaben starten bei null. Deine Fixkosten bleiben gleich.",
     "bannerEndMonthTitle": "Letzte Tage im {{month}}",
-    "bannerEndMonthBody": "Noch {{daysLeft}} Tage. Schau dir an, was du ausgegeben hast, bevor der nächste Monat beginnt.",
+    "bannerEndMonthBody_one": "Noch {{count}} Tag. Schau dir an, was du ausgegeben hast, bevor der nächste Monat beginnt.",
+    "bannerEndMonthBody_other": "Noch {{count}} Tage. Schau dir an, was du ausgegeben hast, bevor der nächste Monat beginnt.",
     "bannerDismiss": "Verstanden"
   },
   "metrics": {

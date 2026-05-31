@@ -18,7 +18,8 @@
     "bannerNewMonthTitle": "New month",
     "bannerNewMonthBody": "Variable expenses start fresh. Your fixed costs stay the same.",
     "bannerEndMonthTitle": "Last days of {{month}}",
-    "bannerEndMonthBody": "{{daysLeft}} days left. Review your spending before the next month begins.",
+    "bannerEndMonthBody_one": "{{count}} day left. Review your spending before the next month begins.",
+    "bannerEndMonthBody_other": "{{count}} days left. Review your spending before the next month begins.",
     "bannerDismiss": "Got it"
   },
   "metrics": {

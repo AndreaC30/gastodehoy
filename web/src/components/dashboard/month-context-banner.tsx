@@ -5,7 +5,7 @@ import {
   budgetReferenceDate,
   daysLeftInMonth,
   dismissMonthTip,
-  formatMonthYear,
+  formatMonthLong,
   isMonthEndWindow,
   isMonthStartWindow,
   isMonthTipDismissed,
@@ -34,7 +34,7 @@ export function MonthContextBanner({ referenceDate }: Props) {
   if (!visible) return null;
 
   const showStart = inStart;
-  const month = formatMonthYear(today, i18n.language);
+  const monthLabel = formatMonthLong(today, i18n.language);
   const daysLeft = daysLeftInMonth(today);
 
   return (
@@ -44,15 +44,18 @@ export function MonthContextBanner({ referenceDate }: Props) {
     >
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-teal-200 sm:text-base">
+          <p className="text-sm font-semibold normal-case text-teal-200 sm:text-base">
             {showStart
               ? t("monthContext.bannerNewMonthTitle")
-              : t("monthContext.bannerEndMonthTitle")}
+              : t("monthContext.bannerEndMonthTitle", { month: monthLabel })}
           </p>
-          <p className={`mt-1 ${TYPE_CAPTION} text-teal-200/80`}>
+          <p className={`mt-1 normal-case ${TYPE_CAPTION} text-teal-200/80`}>
             {showStart
               ? t("monthContext.bannerNewMonthBody")
-              : t("monthContext.bannerEndMonthBody", { month, daysLeft })}
+              : t("monthContext.bannerEndMonthBody", {
+                  count: daysLeft,
+                  month: monthLabel,
+                })}
           </p>
         </div>
         <button

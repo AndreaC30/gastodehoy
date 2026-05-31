@@ -4,8 +4,8 @@
 export const TYPE_EYEBROW =
   "text-xs font-semibold uppercase tracking-wide text-slate-400 sm:text-sm";
 
-/** Secondary lines under headings. */
-export const TYPE_CAPTION = "text-sm text-slate-400 sm:text-base";
+/** Secondary lines under headings (never title-case every word). */
+export const TYPE_CAPTION = "text-sm text-slate-400 sm:text-base normal-case";
 
 /** Paragraphs and explanations. */
 export const TYPE_BODY = "text-base leading-relaxed text-slate-400";

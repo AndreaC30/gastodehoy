@@ -18,7 +18,8 @@
     "bannerNewMonthTitle": "Nouveau mois",
     "bannerNewMonthBody": "Les dépenses variables repartent de zéro. Vos charges fixes restent les mêmes.",
     "bannerEndMonthTitle": "Derniers jours de {{month}}",
-    "bannerEndMonthBody": "Il reste {{daysLeft}} jours. Faites le point avant le mois prochain.",
+    "bannerEndMonthBody_one": "Il reste {{count}} jour. Faites le point avant le mois prochain.",
+    "bannerEndMonthBody_other": "Il reste {{count}} jours. Faites le point avant le mois prochain.",
     "bannerDismiss": "Compris"
   },
   "metrics": {
