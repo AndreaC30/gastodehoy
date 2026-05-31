@@ -128,10 +128,19 @@ export function Dashboard({ profileName }: Props) {
   });
 
   useEffect(() => {
+    // Wait until settings are loaded AND the dashboard has rendered
+    // its key elements (summary, expenses, etc.) before starting the tour.
+    // On iOS PWA, WKWebView needs more time to layout the DOM.
     if (!settingsQ.data || settingsQ.data.dashboard_tour_completed) return;
-    const t = window.setTimeout(() => setShowTour(true), 1500);
+    if (summaryQ.isPending || fixedQ.isPending || expensesQ.isPending) return;
+
+    const isIOS = typeof navigator !== "undefined" &&
+      ("standalone" in navigator && (navigator as any).standalone === true);
+
+    const delay = isIOS ? 2500 : 1500;
+    const t = window.setTimeout(() => setShowTour(true), delay);
     return () => window.clearTimeout(t);
-  }, [settingsQ.data]);
+  }, [settingsQ.data, summaryQ.isPending, fixedQ.isPending, expensesQ.isPending]);
 
   useEffect(() => {
     if (!summaryQ.isSuccess) return;
