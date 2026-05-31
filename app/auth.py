@@ -147,7 +147,6 @@ def set_session_cookie(response: Response, token: str) -> None:
         httponly=True,
         secure=settings.cookie_secure,
         samesite="lax",
-        domain=settings.cookie_domain,
         path="/",
     )
 
@@ -156,7 +155,6 @@ def clear_session_cookie(response: Response) -> None:
     """Tell the browser to drop the session cookie (logout / reset)."""
     response.delete_cookie(
         key=SESSION_COOKIE,
-        domain=settings.cookie_domain,
         path="/",
     )
 
