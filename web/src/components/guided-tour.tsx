@@ -144,13 +144,20 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[90] isolate touch-none overscroll-none"
+      className="fixed inset-0 z-[90] isolate"
       role="dialog"
       aria-modal="true"
       aria-labelledby="guided-tour-title"
       aria-describedby="guided-tour-body"
     >
       <TourSpotlightOverlay rect={scrolling ? null : rect} />
+
+      {/* Fondo oscuro: tocar cierra el tour (escape de emergencia en móvil) */}
+      <div
+        className="absolute inset-0"
+        onClick={finishSkip}
+        aria-hidden
+      />
 
       {rect && !scrolling && (
         <div
@@ -167,7 +174,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
 
       <div
         data-guided-tour-controls
-        className="pointer-events-auto absolute inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[2] mx-auto max-w-md rounded-2xl border border-slate-600 bg-slate-900 p-4 shadow-2xl sm:inset-x-4 sm:p-5"
+        className="pointer-events-auto absolute inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[2] mx-auto max-h-[45vh] max-w-md overflow-y-auto rounded-2xl border border-slate-600 bg-slate-900 p-4 shadow-2xl sm:inset-x-4 sm:max-h-none sm:p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-2">
