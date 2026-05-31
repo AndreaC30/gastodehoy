@@ -10,8 +10,10 @@
  *   - favicons (16, 32, 192px)
  *   - og-image (512px)
  *
- * - Favicons, PWA launcher (Android/iOS), apple-touch: transparent PNG, calendar only.
- * - og-image: solid #0f172a for social previews.
+ * Two deliberate variants (do not mix):
+ *   - Favicons (browser tab): transparent, calendar only.
+ *   - PWA / apple-touch (install + home screen): #0f172a fill + calendar (matches app theme).
+ *   - og-image: solid #0f172a for social previews.
  */
 import { copyFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -129,7 +131,7 @@ async function squareIcon(canvasSize, contentFraction = 0.88, opts = {}) {
     .toBuffer();
 }
 
-/** Calendar-only transparent icon (tabs, PWA install, apple-touch). */
+/** Browser tab favicon: calendar only, transparent (OS paints the bar). */
 async function faviconIcon(canvasSize, contentFraction = FAVICON_FILL) {
   const src = await calendarSourceRgba();
   const maxArt = Math.round(canvasSize * contentFraction);
@@ -163,6 +165,40 @@ async function faviconIcon(canvasSize, contentFraction = FAVICON_FILL) {
     .toBuffer();
 }
 
+/** PWA install / iOS home screen: calendar on #0f172a (never transparent — avoids white tiles). */
+async function pwaLauncherIcon(canvasSize, contentFraction = FAVICON_FILL) {
+  const src = await calendarSourceRgba();
+  const maxArt = Math.round(canvasSize * contentFraction);
+
+  const art = await sharp(src.data, {
+    raw: { width: src.width, height: src.height, channels: 4 },
+  })
+    .trim()
+    .resize(maxArt, maxArt, {
+      fit: "inside",
+      withoutEnlargement: false,
+      kernel: sharp.kernel.lanczos3,
+    })
+    .png()
+    .toBuffer();
+
+  const meta = await sharp(art).metadata();
+  const left = Math.round((canvasSize - (meta.width ?? maxArt)) / 2);
+  const top = Math.round((canvasSize - (meta.height ?? maxArt)) / 2);
+
+  return sharp({
+    create: {
+      width: canvasSize,
+      height: canvasSize,
+      channels: 4,
+      background: BG,
+    },
+  })
+    .composite([{ input: art, left, top }])
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+}
+
 function writeAsset(name, png) {
   writeFileSync(path.join(webDir, "src", "assets", name), png);
   if (name.startsWith("gastodehoy-")) {
@@ -178,27 +214,31 @@ console.log(
 );
 console.log(`Background: #0f172a (slate-900 — app theme)\n`);
 
-// PWA install + manifest (Android WebAPK / iOS) — same transparent calendar as favicon
-const pwa512 = await faviconIcon(512);
+// PWA install (Android manifest / WebAPK, iOS apple-touch) — opaque #0f172a
+const pwa512 = await pwaLauncherIcon(512);
 writeAsset("gastodehoy-app-icon.png", pwa512);
-writeAsset("gastodehoy-favicon.png", pwa512);
-console.log("  app-icon / favicon 512px (transparent, PWA + tabs)");
+console.log("  app-icon 512px   (#0f172a, PWA install)");
 
-const maskable512 = await faviconIcon(512, MASKABLE_FILL);
+const maskable512 = await pwaLauncherIcon(512, MASKABLE_FILL);
 writeAsset("gastodehoy-app-icon-maskable.png", maskable512);
-console.log("  app-icon maskable 512px (transparent)");
+console.log("  app-icon maskable 512px");
 
-const maskable192 = await faviconIcon(192, MASKABLE_FILL);
+const maskable192 = await pwaLauncherIcon(192, MASKABLE_FILL);
 writeAsset("gastodehoy-app-icon-maskable-192.png", maskable192);
-console.log("  app-icon maskable 192px (transparent)");
+console.log("  app-icon maskable 192px");
+
+const apple180 = await pwaLauncherIcon(180, FAVICON_FILL);
+writeAsset("gastodehoy-apple-touch-180.png", apple180);
+console.log("  apple-touch 180px (#0f172a, iOS home screen)");
+
+// Browser tabs / bookmarks only — transparent
+const fav512 = await faviconIcon(512);
+writeAsset("gastodehoy-favicon.png", fav512);
+console.log("  favicon 512px    (transparent, tabs)");
 
 const any192 = await faviconIcon(192);
 writeAsset("gastodehoy-favicon-192.png", any192);
-console.log("  favicon 192px    (transparent)");
-
-const apple180 = await faviconIcon(180, FAVICON_FILL);
-writeAsset("gastodehoy-apple-touch-180.png", apple180);
-console.log("  apple-touch 180px (transparent, iOS home screen)");
+console.log("  favicon 192px    (transparent, tabs + push)");
 
 const fav32 = await faviconIcon(32);
 writeAsset("gastodehoy-favicon-32.png", fav32);

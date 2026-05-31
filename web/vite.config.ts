@@ -41,16 +41,10 @@ export default defineConfig(({ mode }) => {
           start_url: "/",
           lang: "es",
           icons: [
-            /* PWA install: transparent calendar (background_color fills the rest). */
+            /* PWA install: calendar on #0f172a (opaque — not the transparent tab favicons). */
             {
               src: "/gastodehoy-app-icon.png",
               sizes: "512x512",
-              type: "image/png",
-              purpose: "any",
-            },
-            {
-              src: "/gastodehoy-favicon-192.png",
-              sizes: "192x192",
               type: "image/png",
               purpose: "any",
             },
