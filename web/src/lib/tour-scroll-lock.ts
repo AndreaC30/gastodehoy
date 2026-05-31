@@ -1,9 +1,20 @@
 /**
  * Guía: bloquea rueda/dedo, desplaza con scrollIntoView (sin overflow:hidden).
+ * Ajustes específicos para iOS PWA standalone donde WKWebView maneja distinto
+ * el viewport y el scroll.
  */
 
 let active = false;
 let blockHandler: ((e: Event) => void) | null = null;
+
+/** True if running as iOS standalone PWA (WKWebView outside Safari). */
+function isIOSStandalone(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return (
+    ("standalone" in navigator && (navigator as any).standalone === true) ||
+    window.matchMedia("(display-mode: standalone)").matches
+  );
+}
 
 function waitMs(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -50,18 +61,20 @@ export async function tourScrollToTarget(selector: string): Promise<void> {
 
   const beforeY = window.scrollY;
 
+  // iOS needs longer timeout for smooth scroll to finish
+  const scrollTimeout = isIOSStandalone() ? 800 : 550;
+
   el.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
 
-  await waitMs(550);
+  await waitMs(scrollTimeout);
 
+  // If scrollIntoView didn't move (common on iOS standalone), force it
   if (Math.abs(window.scrollY - beforeY) < 4) {
     const rect = el.getBoundingClientRect();
-    const targetY = Math.max(
-      0,
-      window.scrollY + rect.top - 72,
-    );
+    // Leave 80px at top so the spotlight + controls panel don't cover the target
+    const targetY = Math.max(0, window.scrollY + rect.top - 80);
     window.scrollTo({ top: targetY, behavior: "auto" });
-    await waitMs(50);
+    await waitMs(isIOSStandalone() ? 150 : 50);
   }
 }
 
@@ -72,10 +85,14 @@ export function tourMeasureTarget(
   if (!el) return null;
   const r = el.getBoundingClientRect();
   const pad = 8;
+  // On iOS standalone, use screen.width/height instead of window.inner*
+  const maxW = isIOSStandalone()
+    ? Math.min(window.screen.width, window.innerWidth) - 16
+    : window.innerWidth - 16;
   return {
     top: Math.max(4, r.top - pad),
     left: Math.max(4, r.left - pad),
-    width: Math.min(window.innerWidth - 16, r.width + pad * 2),
+    width: Math.min(maxW, r.width + pad * 2),
     height: r.height + pad * 2,
   };
 }
