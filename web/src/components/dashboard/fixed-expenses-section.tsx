@@ -53,6 +53,9 @@ export function FixedExpensesSection({
       <div className="border-b border-slate-800 px-5 py-4">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">{t("fixedExpenses.title")}</h2>
         <p className={`mt-1 ${TYPE_CAPTION}`}>{t("fixedExpenses.subtitle")}</p>
+        <p className={`mt-1.5 ${TYPE_CAPTION} text-teal-200/70`}>
+          {t("monthContext.fixedRepeats")}
+        </p>
       </div>
       <div className="p-5">
         <p className={`mb-4 ${TYPE_BODY}`}>

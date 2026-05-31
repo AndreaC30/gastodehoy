@@ -11,6 +11,16 @@
     "refresh": "Actualizar números",
     "explanation": "Tu margen diario: lo que queda del mes ÷ los días que faltan."
   },
+  "monthContext": {
+    "badgeSubtitle": "Presupuesto de este mes",
+    "variableSubtitle": "Solo de {{month}}. El día 1 empieza una lista nueva.",
+    "fixedRepeats": "Se repiten cada mes, mismos importes.",
+    "bannerNewMonthTitle": "¡Nuevo mes!",
+    "bannerNewMonthBody": "Los gastos variables empiezan de cero. Tus fijos siguen igual cada mes.",
+    "bannerEndMonthTitle": "Últimos días de {{month}}",
+    "bannerEndMonthBody": "Quedan {{daysLeft}} días. Revisa lo que llevas antes de que empiece el mes siguiente.",
+    "bannerDismiss": "Entendido"
+  },
   "metrics": {
     "savings": "Ahorro reservado",
     "fixedExpenses": "Gastos fijos",
@@ -153,7 +163,7 @@
     "description": "Cada registro actualiza cuánto te queda y tu techo diario. Para gastos que se repiten cada mes, usa Gastos fijos.",
     "descriptionSuffixDesktop": " (columna de la derecha)",
     "descriptionSuffixMobile": " (bloque siguiente)",
-    "thisMonth": "Este mes",
+    "thisMonth": "Gastos de {{month}}",
     "loading": "Cargando gastos…",
     "edit": "Editar",
     "editLabel": "Editar gasto de {{amount}}",

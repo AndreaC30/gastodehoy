@@ -11,6 +11,16 @@
     "refresh": "Actualiser",
     "explanation": "Votre marge quotidienne : ce qu'il reste ce mois ÷ jours restants."
   },
+  "monthContext": {
+    "badgeSubtitle": "Budget de ce mois",
+    "variableSubtitle": "{{month}} uniquement. Le 1er, une nouvelle liste commence.",
+    "fixedRepeats": "Ils se répètent chaque mois, mêmes montants.",
+    "bannerNewMonthTitle": "Nouveau mois",
+    "bannerNewMonthBody": "Les dépenses variables repartent de zéro. Vos charges fixes restent les mêmes.",
+    "bannerEndMonthTitle": "Derniers jours de {{month}}",
+    "bannerEndMonthBody": "Il reste {{daysLeft}} jours. Faites le point avant le mois prochain.",
+    "bannerDismiss": "Compris"
+  },
   "metrics": {
     "savings": "Épargne réservée",
     "fixedExpenses": "Dépenses fixes",
@@ -153,7 +163,7 @@
     "description": "Chaque entrée met à jour ce qu'il vous reste et votre plafond quotidien. Pour les dépenses récurrentes, utilisez Dépenses fixes.",
     "descriptionSuffixDesktop": " (colonne de droite)",
     "descriptionSuffixMobile": " (bloc suivant)",
-    "thisMonth": "Ce mois",
+    "thisMonth": "Dépenses de {{month}}",
     "loading": "Chargement…",
     "edit": "Modifier",
     "editLabel": "Modifier la dépense de {{amount}}",
