@@ -22,8 +22,54 @@ import sharp from "sharp";
 const webDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourcePath = path.join(webDir, "src/assets/gastodehoy-calendar-icon-source.png");
 
-// App theme background color (slate-900)
+// App theme background color (slate-900) — must match manifest background_color / theme_color.
 const BG = { r: 15, g: 23, b: 42, alpha: 1 }; // #0f172a
+
+/** Tolerance when removing the baked-in export background from the calendar PNG. */
+const SOURCE_BG_TOLERANCE = 6;
+
+let calendarSourcePrepared = null;
+
+/**
+ * Calendar export includes its own dark blue fill (~#091421), not #0f172a.
+ * Key it out so only the 3D art is composited — avoids a visible square on Android splash.
+ */
+async function calendarSourceRgba() {
+  if (calendarSourcePrepared) return calendarSourcePrepared;
+
+  const { data, info } = await sharp(sourcePath)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const { width, height } = info;
+  const cornerOffsets = [0, (width - 1) * 4, (height - 1) * width * 4, ((height - 1) * width + (width - 1)) * 4];
+  let kr = 0;
+  let kg = 0;
+  let kb = 0;
+  for (const o of cornerOffsets) {
+    kr += data[o];
+    kg += data[o + 1];
+    kb += data[o + 2];
+  }
+  kr = Math.round(kr / 4);
+  kg = Math.round(kg / 4);
+  kb = Math.round(kb / 4);
+
+  const tol = SOURCE_BG_TOLERANCE;
+  for (let i = 0; i < data.length; i += 4) {
+    if (
+      Math.abs(data[i] - kr) <= tol &&
+      Math.abs(data[i + 1] - kg) <= tol &&
+      Math.abs(data[i + 2] - kb) <= tol
+    ) {
+      data[i + 3] = 0;
+    }
+  }
+
+  calendarSourcePrepared = { data, width, height };
+  return calendarSourcePrepared;
+}
 
 /**
  * Build a square PNG icon with the 3D calendar centered on theme-colored background.
@@ -36,13 +82,18 @@ const BG = { r: 15, g: 23, b: 42, alpha: 1 }; // #0f172a
 async function squareIcon(canvasSize, contentFraction = 0.88) {
   const contentSize = Math.round(canvasSize * contentFraction);
 
-  // Scale source to fit within contentSize while preserving aspect ratio
-  const content = await sharp(sourcePath)
+  const src = await calendarSourceRgba();
+
+  // Scale calendar art (transparent outside the 3D shape) onto #0f172a canvas
+  const content = await sharp(src.data, {
+    raw: { width: src.width, height: src.height, channels: 4 },
+  })
     .resize(contentSize, contentSize, {
       fit: "inside",
       withoutEnlargement: false,
       kernel: sharp.kernel.lanczos3,
     })
+    .png()
     .toBuffer();
 
   const contentMeta = await sharp(content).metadata();
