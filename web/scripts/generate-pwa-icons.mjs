@@ -79,26 +79,17 @@ console.log(
 );
 console.log(`Background: #0f172a (slate-900 — app theme)\n`);
 
-// "any" icon — 512px, content at 88%
+// "any" icon — 512px, content at 88% (favicon bundle only; app-icon.png is set by generate-pwa-splash.mjs)
 const any512 = await squareIcon(512, 0.88);
-writeAsset("gastodehoy-app-icon.png", any512);
 writeAsset("gastodehoy-favicon.png", any512);
-console.log("  any 512px        (content @ 88%)");
+console.log("  favicon 512px    (content @ 88%)");
 
 // "any" icon — 192px
 const any192 = await squareIcon(192, 0.88);
 writeAsset("gastodehoy-favicon-192.png", any192);
 console.log("  any 192px        (content @ 88%)");
 
-// maskable icon — 512px, content at 72% (safe zone)
-const mask512 = await squareIcon(512, 0.72);
-writeAsset("gastodehoy-app-icon-maskable.png", mask512);
-console.log("  maskable 512px   (content @ 72% — safe zone)");
-
-// maskable icon — 192px
-const mask192 = await squareIcon(192, 0.72);
-writeAsset("gastodehoy-app-icon-maskable-192.png", mask192);
-console.log("  maskable 192px   (content @ 72% — safe zone)");
+// maskable launcher icons: written by generate-pwa-splash.mjs (wordmark, for Android OS splash)
 
 // apple-touch-icon — 180px
 const apple180 = await squareIcon(180, 0.85);
