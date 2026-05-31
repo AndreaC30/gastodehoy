@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { ExpenseCategory, VariableExpense } from "@/api/types";
@@ -20,6 +21,7 @@ export function EditVariableExpenseModal({
   onClose,
   onSaved,
 }: Props) {
+  const { t } = useTranslation();
   const [amount, setAmount] = useState(String(expense.amount));
   const [occurredAt, setOccurredAt] = useState(expense.occurred_at);
   const [categoryId, setCategoryId] = useState(
@@ -140,7 +142,7 @@ export function EditVariableExpenseModal({
           </div>
           <div>
             <label htmlFor="edit-var-category" className="mb-1.5 block text-xs text-slate-500">
-              Categoría
+              {t("editVariableExpense.category")}
             </label>
             <select
               id="edit-var-category"
@@ -148,7 +150,7 @@ export function EditVariableExpenseModal({
               onChange={(e) => setCategoryId(e.target.value)}
               className={INPUT_CLASS}
             >
-              <option value="">Sin categoría</option>
+              <option value="">{t("editVariableExpense.uncategorized")}</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}

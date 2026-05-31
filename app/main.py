@@ -22,7 +22,7 @@ from fastapi import status
 from sqlalchemy import text
 
 from app import database as db
-from app.config import settings as app_settings
+from app.config import DEFAULT_APP_SECRET, settings as app_settings
 from app.database import Base
 from app.routers import auth, budget, budget_rules, categories, export, goals, push
 
@@ -49,7 +49,6 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
 }
 
 
-DEFAULT_APP_SECRET = "change-me-in-prod"
 MIN_APP_SECRET_LEN = 32
 
 _log = logging.getLogger(__name__)
@@ -106,7 +105,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=app_settings.cors_origins_list(),
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -129,12 +128,9 @@ async def csrf_protection(request: Request, call_next):
     X-Requested-With con valor XMLHttpRequest.
 
     Excepciones: GET, HEAD, OPTIONS, /health, y requests sin cookie de sesion.
-    Solo aplica en produccion (no en development).
+    Aplica en todos los entornos (los tests envían el header).
     """
-    # No aplicar en development (tests, desarrollo local)
-    if app_settings.environment != "production":
-        return await call_next(request)
-
+    # CSRF applies in all environments (tests send X-Requested-With header)
     # Permitir métodos seguros sin verificacion CSRF
     if request.url.path == "/health" or request.method in ("GET", "HEAD", "OPTIONS"):
         return await call_next(request)

@@ -1,9 +1,12 @@
+import { useTranslation } from "react-i18next";
 import { IoArrowBack } from "react-icons/io5";
 import { BrandLogo } from "@/components/brand-logo";
 
 type Props = { onBack: () => void };
 
 export function PrivacyPolicy({ onBack }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative z-10 flex min-h-screen flex-col px-4 py-12">
       {/* Top bar */}
@@ -14,7 +17,7 @@ export function PrivacyPolicy({ onBack }: Props) {
           className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-teal-300 focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
-          Volver
+          {t("common.back")}
         </button>
 
         <div className="mb-8">
@@ -23,86 +26,84 @@ export function PrivacyPolicy({ onBack }: Props) {
 
         {/* Content */}
         <div className="prose max-w-3xl leading-relaxed text-slate-300">
-          <h1 className="text-2xl font-bold text-slate-100">Política de Privacidad</h1>
+          <h1 className="text-2xl font-bold text-slate-100">{t("privacy.title")}</h1>
           <p className="text-sm text-slate-500">
-            <strong>Última actualización:</strong> Mayo 2026
+            <strong>{t("privacy.lastUpdatedLabel")}</strong> {t("privacy.lastUpdatedDate")}
           </p>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">1. Responsable del Tratamiento</h2>
+            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section1Title")}</h2>
             <ul className="list-none space-y-1 pl-0 text-base">
-              <li><strong>Titular:</strong> Andrea Cruz</li>
-              <li><strong>Email:</strong> gastodehoy@gmail.com</li>
-              <li><strong>Web:</strong> gastodehoy.kyadigital.es</li>
+              <li><strong>{t("privacy.section1Owner")}</strong> {t("privacy.section1OwnerValue")}</li>
+              <li><strong>{t("privacy.section1Email")}</strong> {t("privacy.section1EmailValue")}</li>
+              <li><strong>{t("privacy.section1Web")}</strong> {t("privacy.section1WebValue")}</li>
             </ul>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">2. Datos que Recogemos</h2>
+            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section2Title")}</h2>
             <ul className="list-disc space-y-1 pl-5 text-base">
-              <li>Email y nombre (al crear cuenta)</li>
-              <li>Datos de gastos e ingresos que introduces voluntariamente</li>
-              <li>Datos de uso anónimos (analytics, solo si aceptas cookies)</li>
+              <li>{t("privacy.section2Item1")}</li>
+              <li>{t("privacy.section2Item2")}</li>
+              <li>{t("privacy.section2Item3")}</li>
             </ul>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">3. Finalidad del Tratamiento</h2>
+            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section3Title")}</h2>
             <ul className="list-disc space-y-1 pl-5 text-base">
-              <li>Prestarte el servicio de gestión de gastos personales</li>
-              <li>Autenticarte y mantener tu sesión</li>
-              <li>Mejorar la aplicación mediante analytics anónimo (con tu consentimiento)</li>
+              <li>{t("privacy.section3Item1")}</li>
+              <li>{t("privacy.section3Item2")}</li>
+              <li>{t("privacy.section3Item3")}</li>
             </ul>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">4. Base Legal</h2>
+            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section4Title")}</h2>
             <ul className="list-disc space-y-1 pl-5 text-base">
               <li>
-                <strong>Ejecución del servicio (art. 6.1.b RGPD):</strong> para los datos necesarios para el funcionamiento
+                <strong>{t("privacy.section4Item1Label")}</strong> {t("privacy.section4Item1Text")}
               </li>
               <li>
-                <strong>Consentimiento (art. 6.1.a RGPD):</strong> para analytics
+                <strong>{t("privacy.section4Item2Label")}</strong> {t("privacy.section4Item2Text")}
               </li>
             </ul>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">5. Conservación de Datos</h2>
+            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section5Title")}</h2>
             <p className="text-base">
-              Tus datos se conservan mientras mantengas tu cuenta activa. Puedes eliminar tu cuenta y todos tus datos
-              en cualquier momento desde Ajustes &gt; Eliminar cuenta.
+              {t("privacy.section5Text")}
             </p>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">6. Cookies</h2>
+            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section6Title")}</h2>
             <p className="text-base">
-              Usamos una cookie técnica de sesión (<code className="rounded bg-slate-800 px-1 py-0.5 text-sm text-teal-300">gdh_session</code>)
-              necesaria para mantener tu inicio de sesión. No requiere consentimiento. Si aceptas, usamos analytics
-              anónimo (sin cookies de terceros).
+              {t("privacy.section6Part1")}
+              <code className="rounded bg-slate-800 px-1 py-0.5 text-sm text-teal-300">gdh_session</code>
+              {t("privacy.section6Part2")}
             </p>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">7. Tus Derechos</h2>
+            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section7Title")}</h2>
             <p className="text-base">
-              Tienes derecho a acceder, rectificar, suprimir, limitar y oponerte al tratamiento de tus datos.
-              Escríbenos a{' '}
+              {t("privacy.section7Part1")}{' '}
               <a
                 href="mailto:gastodehoy@gmail.com"
                 className="text-teal-400 underline decoration-teal-500/40 underline-offset-2 hover:text-teal-300"
               >
                 gastodehoy@gmail.com
-              </a>.
+              </a>
+              {t("privacy.section7Part2")}
             </p>
           </section>
 
           <section className="mt-6 mb-12">
-            <h2 className="text-lg font-semibold text-slate-100">8. Seguridad</h2>
+            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section8Title")}</h2>
             <p className="text-base">
-              Tus datos se almacenan en servidores dentro de la UE con HTTPS y cifrado. No compartimos tus datos
-              con terceros.
+              {t("privacy.section8Text")}
             </p>
           </section>
         </div>

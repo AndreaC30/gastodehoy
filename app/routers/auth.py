@@ -35,6 +35,7 @@ from app.auth import (
 from app.config import settings
 from app.database import get_db
 from app.mail import send_forgot_password_email, send_welcome_email
+from app.mail import SMTPNotConfiguredError
 from app.models import User, UserSettings
 from app.schemas import (
     ChangePassword,
@@ -138,22 +139,38 @@ def register(
         recovery_hash=None,
         must_change_password=False,
     )
-    user.settings = UserSettings()
+    user.settings = UserSettings(language=payload.language)
     db.add(user)
     try:
         db.commit()
     except IntegrityError as e:
         db.rollback()
+        orig_msg = str(e.orig).lower() if e.orig else str(e).lower()
+        if "users.email" in orig_msg or "ix_users_email" in orig_msg:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ya existe una cuenta con ese email",
+            ) from e
+        # Other UNIQUE violations (e.g., orphaned user_settings rows
+        # occupying a reused user_id) should not happen after the
+        # AUTOINCREMENT migration, but we log the real cause.
+        _log.error(
+            "register: IntegrityError inesperado para %s: %s",
+            email,
+            orig_msg,
+        )
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Ya existe una cuenta con ese email",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error interno al crear la cuenta. Inténtalo de nuevo.",
         ) from e
     db.refresh(user)
-    seed_default_categories(db, user.id)
+    seed_default_categories(db, user.id, lang=payload.language or "es")
     try:
         send_welcome_email(user.email, user.name)
+    except SMTPNotConfiguredError:
+        _log.info("welcome email skipped for %s: SMTP not configured", user.email)
     except Exception as exc:
-        _log.warning("welcome email failed for %s: %s", user.email, exc)
+        _log.error("welcome email failed for %s: %s", user.email, exc)
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(user)

@@ -35,8 +35,8 @@ import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { SiteFooter } from "@/components/site-footer";
 import { GuidedTour } from "@/components/guided-tour";
 import { DASHBOARD_TOUR_STEPS } from "@/lib/dashboard-tour-steps";
+import { useTranslation } from "react-i18next";
 import {
-  hasCompletedDashboardTour,
   markDashboardTourCompleted,
 } from "@/lib/guided-tour-preference";
 import { maybeShowDailyNotification } from "@/lib/daily-notification";
@@ -73,8 +73,8 @@ async function loadExtraIncome() {
 async function loadCategories() {
   return api<ExpenseCategory[]>("/api/categories");
 }
-async function loadInsights() {
-  return api<Insights>("/api/insights");
+async function loadInsights(lang: string) {
+  return api<Insights>(`/api/insights?lang=${lang}`);
 }
 type Props = { profileName: string };
 
@@ -82,6 +82,7 @@ const FIXED_LIST_PREVIEW = 3;
 const VARIABLE_LIST_PREVIEW = 2;
 
 export function Dashboard({ profileName }: Props) {
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -122,12 +123,12 @@ export function Dashboard({ profileName }: Props) {
     queryFn: loadCategories,
   });
   const insightsQ = useQuery({
-    queryKey: ["insights"],
-    queryFn: loadInsights,
+    queryKey: ["insights", i18n.language],
+    queryFn: () => loadInsights(i18n.language),
   });
 
   useEffect(() => {
-    if (!settingsQ.data || hasCompletedDashboardTour()) return;
+    if (!settingsQ.data || settingsQ.data.dashboard_tour_completed) return;
     const t = window.setTimeout(() => setShowTour(true), 1500);
     return () => window.clearTimeout(t);
   }, [settingsQ.data]);
@@ -138,13 +139,13 @@ export function Dashboard({ profileName }: Props) {
   }, [summaryQ.isSuccess]);
 
   function finishTour() {
-    markDashboardTourCompleted();
+    void markDashboardTourCompleted();
     setShowTour(false);
-    setToastMsg("Guía completada. Puedes volver a verla desde el menú.");
+    setToastMsg(t("toasts.tourComplete"));
   }
 
   function skipTour() {
-    markDashboardTourCompleted();
+    void markDashboardTourCompleted();
     setShowTour(false);
   }
 
@@ -167,7 +168,7 @@ export function Dashboard({ profileName }: Props) {
       }),
     onSuccess: () => {
       setFixedFormIcon(DEFAULT_FIXED_EXPENSE_ICON);
-      setToastMsg("Gasto fijo añadido");
+      setToastMsg(t("toasts.fixedAdded"));
       void invalidateAll();
     },
     onError: (e: Error) => setToastMsg(e.message),
@@ -184,7 +185,7 @@ export function Dashboard({ profileName }: Props) {
         body: JSON.stringify(body),
       }),
     onSuccess: () => {
-      setToastMsg("Gasto registrado");
+      setToastMsg(t("toasts.expenseRegistered"));
       void invalidateAll();
     },
     onError: (e: Error) => setToastMsg(e.message),
@@ -194,7 +195,7 @@ export function Dashboard({ profileName }: Props) {
     mutationFn: (id: number) =>
       api(`/api/fixed-expenses/${id}`, { method: "DELETE" }),
     onSuccess: () => {
-      setToastMsg("Gasto fijo quitado");
+      setToastMsg(t("toasts.fixedRemoved"));
       void invalidateAll();
     },
     onError: (e: Error) => setToastMsg(e.message),
@@ -204,7 +205,7 @@ export function Dashboard({ profileName }: Props) {
     mutationFn: (id: number) =>
       api(`/api/expenses/${id}`, { method: "DELETE" }),
     onSuccess: () => {
-      setToastMsg("Gasto borrado");
+      setToastMsg(t("toasts.expenseDeleted"));
       void invalidateAll();
     },
     onError: (e: Error) => setToastMsg(e.message),
@@ -318,7 +319,7 @@ export function Dashboard({ profileName }: Props) {
           summary={summaryQ.data}
           summaryPending={summaryQ.isPending}
           onRefresh={() => {
-            void invalidateAll().then(() => setToastMsg("Listo"));
+            void invalidateAll().then(() => setToastMsg(t("toasts.done")));
           }}
         />
 
@@ -327,13 +328,6 @@ export function Dashboard({ profileName }: Props) {
           isLoading={insightsQ.isPending}
           error={insightsQ.error as Error | null}
         />
-
-        {insightsQ.data && insightsQ.data.category_breakdown.length > 0 && (
-          <SpendingChart
-            breakdown={insightsQ.data.category_breakdown}
-            total={insightsQ.data.total_spent}
-          />
-        )}
 
         <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
           <div className="min-w-0">
@@ -373,6 +367,13 @@ export function Dashboard({ profileName }: Props) {
           </div>
         </div>
 
+        {insightsQ.data && insightsQ.data.category_breakdown.length > 0 && (
+          <SpendingChart
+            breakdown={insightsQ.data.category_breakdown}
+            total={insightsQ.data.total_spent}
+          />
+        )}
+
         <MonthHistoryStrip />
 
         <Rule503020Panel />
@@ -387,12 +388,12 @@ export function Dashboard({ profileName }: Props) {
           onBackToMenu={() => returnToMenu(() => setShowSettings(false))}
           onClose={() => setShowSettings(false)}
           onExtrasChanged={() => {
-            setToastMsg("Ingresos extra actualizados");
+            setToastMsg(t("toasts.extraIncomeUpdated"));
             void invalidateAll();
           }}
           onSaved={() => {
             setShowSettings(false);
-            setToastMsg("Cambios guardados");
+            setToastMsg(t("toasts.changesSaved"));
             void invalidateAll();
           }}
         />
@@ -412,7 +413,7 @@ export function Dashboard({ profileName }: Props) {
           onBackToMenu={() => returnToMenu(() => setShowCategoryManager(false))}
           onClose={() => setShowCategoryManager(false)}
           onChanged={() => {
-            setToastMsg("Categorías actualizadas");
+            setToastMsg(t("toasts.categoriesUpdated"));
             void invalidateAll();
           }}
         />
@@ -423,7 +424,7 @@ export function Dashboard({ profileName }: Props) {
           expense={editingFixed}
           onClose={() => setEditingFixed(null)}
           onSaved={() => {
-            setToastMsg("Gasto fijo actualizado");
+            setToastMsg(t("toasts.fixedUpdated"));
             void invalidateAll();
           }}
         />
@@ -435,7 +436,7 @@ export function Dashboard({ profileName }: Props) {
           categories={categories}
           onClose={() => setEditingVariable(null)}
           onSaved={() => {
-            setToastMsg("Gasto actualizado");
+            setToastMsg(t("toasts.expenseUpdated"));
             void invalidateAll();
           }}
         />

@@ -8,19 +8,22 @@ from typing import Any
 from app.services.insights import (
     INSIGHT_TYPE_INFO,
     INSIGHT_TYPE_SUCCESS,
-    TITLE_DAILY_LIMIT,
-    TITLE_SIMILAR_PACE,
 )
 
 
 def pick_daily_notification(
     insights_payload: dict[str, Any],
     summary: dict[str, Any] | None,
+    lang: str = "es",
 ) -> dict[str, str] | None:
     """Pick one encouraging notification from insights and/or budget summary.
 
     Returns ``None`` when there is nothing positive to say (avoids nagging).
     """
+    from app.services.insight_i18n import get_insight_text
+
+    _t = lambda key, **kw: get_insight_text(lang, "notif_" + key, **kw)
+
     insights = insights_payload.get("insights") or []
 
     for item in insights:
@@ -37,13 +40,14 @@ def pick_daily_notification(
         if suggested is not None and Decimal(suggested) > 0:
             amount = Decimal(suggested).quantize(Decimal("0.01"))
             remaining = summary.get("remaining_this_month")
-            body = f"Hoy puedes gastar hasta {amount}€."
             if remaining is not None:
                 rem = Decimal(remaining).quantize(Decimal("0.01"))
-                body = f"Hoy puedes gastar hasta {amount}€. Te quedan {rem}€ este mes."
+                body = _t("daily_budget_body_remaining", amount=amount, remaining=rem)
+            else:
+                body = _t("daily_budget_body", amount=amount)
             return {
                 "tag": "gdh-daily-budget",
-                "title": "Vas bien en GastoDeHoy",
+                "title": _t("daily_budget_title"),
                 "body": body,
             }
 
@@ -51,13 +55,13 @@ def pick_daily_notification(
         if item.get("type") != INSIGHT_TYPE_INFO:
             continue
         title = item.get("title") or ""
-        if title == TITLE_DAILY_LIMIT:
+        if title == get_insight_text(lang, "daily_limit"):
             return {
                 "tag": "gdh-insight-daily",
-                "title": "Tu tope de hoy",
+                "title": _t("daily_limit_title"),
                 "body": item["message"],
             }
-        if title == TITLE_SIMILAR_PACE:
+        if title == get_insight_text(lang, "similar_pace"):
             return {
                 "tag": "gdh-insight-steady",
                 "title": title,

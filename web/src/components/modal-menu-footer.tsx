@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { IoMenuOutline } from "react-icons/io5";
 import { BTN_SECONDARY, FOCUS_RING } from "@/lib/ui-a11y";
 
@@ -18,6 +19,7 @@ export function ModalMenuFooter({
   children,
   className = "",
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       className={`flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between ${className}`}
@@ -30,7 +32,7 @@ export function ModalMenuFooter({
             className={`inline-flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto ${BTN_SECONDARY}`}
           >
             <IoMenuOutline className="h-5 w-5 shrink-0" aria-hidden />
-            Volver al menú
+            {t("tour.backToMenu")}
           </button>
         )}
         {onClose && (

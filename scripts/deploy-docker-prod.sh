@@ -18,7 +18,7 @@ echo "==> parar y quitar contenedor app"
 "${COMPOSE[@]}" stop app 2>/dev/null || true
 "${COMPOSE[@]}" rm -f app 2>/dev/null || true
 
-APP_IMAGE="$("${COMPOSE[@]}" config --images 2>/dev/null | grep -v '^caddy' | head -n1 || true)"
+APP_IMAGE="$("${COMPOSE[@]}" config --images 2>/dev/null | head -n1 || true)"
 if [[ -n "${APP_IMAGE}" ]]; then
   echo "==> borrar imagen local de app: ${APP_IMAGE}"
   docker rmi -f "${APP_IMAGE}" 2>/dev/null || true
@@ -38,8 +38,8 @@ echo "==> build app (--no-cache --pull BUILD_REF/npm run build en imagen)"
 echo "==> recrear solo app"
 "${COMPOSE[@]}" up -d --force-recreate --no-deps app
 
-echo "==> reiniciar caddy (proxy al hostname app)"
-"${COMPOSE[@]}" restart caddy
+echo "==> recargar nginx (proxy inverso)"
+docker exec nginx-proxy nginx -s reload 2>/dev/null || true
 
 echo ""
 echo "==> hashes JS/CSS dentro del contenedor (deben coincidir con local tras npm run build):"

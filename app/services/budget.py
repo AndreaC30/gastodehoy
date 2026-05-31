@@ -67,10 +67,23 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
         select(UserSettings).where(UserSettings.user_id == user_id)
     )
     if us is None:
+        from sqlalchemy.exc import IntegrityError
         us = UserSettings(user_id=user_id)
         session.add(us)
-        session.commit()
-        session.refresh(us)
+        try:
+            session.commit()
+        except IntegrityError:
+            session.rollback()
+            # Another request won the race — reload what it committed
+            us = session.scalar(
+                select(UserSettings).where(UserSettings.user_id == user_id)
+            )
+            if us is None:
+                raise RuntimeError(
+                    f"Failed to create or retrieve UserSettings for user_id={user_id}"
+                )
+        else:
+            session.refresh(us)
 
     income = us.monthly_income
     pct = us.savings_percent

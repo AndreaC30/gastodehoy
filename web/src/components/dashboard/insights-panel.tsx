@@ -1,4 +1,5 @@
 /** Financial insights panel with actionable tips. */
+import { useTranslation } from "react-i18next";
 import type { IconType } from "react-icons";
 import {
   IoAlertCircleOutline,
@@ -15,7 +16,7 @@ import {
 } from "react-icons/io5";
 import type { InsightItem, Insights } from "@/api/types";
 import { money } from "@/lib/format";
-import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
+import { TYPE_CAPTION } from "@/lib/typography";
 
 type Props = {
   data: Insights | undefined;
@@ -37,7 +38,6 @@ const TYPE_ICON_COLORS: Record<string, string> = {
   info: "text-slate-400",
 };
 
-/** API `icon` slugs from `app/services/insights.py` (no emojis on wire). */
 const INSIGHT_ICON_BY_SLUG: Record<string, IconType> = {
   alert_triangle: IoWarningOutline,
   alert_circle: IoAlertCircleOutline,
@@ -101,13 +101,15 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
 }
 
 export function InsightsPanel({ data, isLoading, error }: Props) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <section
         data-tour="insights"
         className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5"
         aria-busy="true"
-        aria-label="Cargando insights"
+        aria-label={t("insights.title")}
       >
         <div className="h-6 w-40 animate-pulse rounded bg-slate-700/40" />
         <div className="mt-3 h-4 w-full animate-pulse rounded bg-slate-700/30" />
@@ -122,7 +124,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         data-tour="insights"
         className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-5 text-sm text-rose-300"
       >
-        No se pudieron cargar los insights. {error.message}
+        {t("insights.error")} {error.message}
       </section>
     );
   }
@@ -142,16 +144,12 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
             className="flex items-center gap-2 text-lg font-bold tracking-tight"
           >
             <IoBulbOutline className="h-5 w-5 text-sky-400" aria-hidden />
-            Insights financieros
+            {t("insights.title")}
           </h2>
-          <p className={`mt-1 ${TYPE_CAPTION}`}>Análisis de tus gastos este mes</p>
-          <p className={`mt-2 ${TYPE_BODY} text-slate-500`}>
-            El gasto variable medio/día es lo que ya has registrado; «Hoy puedes
-            gastar» arriba incluye ingreso, ahorro y fijos.
-          </p>
+          <p className={`mt-1 ${TYPE_CAPTION}`}>{t("insights.subtitle")}</p>
         </div>
         <div className="text-right sm:shrink-0">
-          <p className={TYPE_CAPTION}>Gasto variable medio/día</p>
+          <p className={TYPE_CAPTION}>{t("insights.avgDaily")}</p>
           <p className="text-base font-semibold text-slate-200">
             {money(data.avg_daily_spend)}
           </p>
@@ -179,7 +177,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
       {Number(data.projected_monthly) > 0 && (
         <div className="mt-5 border-t border-slate-800 pt-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">Si sigues así (solo variables)</span>
+            <span className="text-slate-400">{t("insights.projection")}</span>
             <span className="font-semibold text-slate-200">
               {money(data.projected_monthly)}
             </span>
@@ -193,9 +191,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
             />
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            Llevas {money(data.total_spent)} en variables; si mantienes este ritmo,
-            cerrarías el mes en unos {money(data.projected_monthly)} (sin contar
-            ingresos ni ahorro).
+            {t("insights.projectionDetail", { spent: money(data.total_spent), projected: money(data.projected_monthly) })}
           </p>
         </div>
       )}

@@ -1,4 +1,5 @@
 import type { ExpenseCategory, VariableExpense } from "@/api/types";
+import { useTranslation } from "react-i18next";
 import { AddVariableExpenseForm } from "@/components/dashboard/add-variable-expense-form";
 import { ChevronInCircle } from "@/components/dashboard/chevron-expand";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
@@ -38,6 +39,7 @@ export function VariableExpensesSection({
   onEdit,
   onDelete,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <section
       data-tour="variable-expenses"
@@ -45,19 +47,18 @@ export function VariableExpensesSection({
     >
       <div className="border-b border-slate-800 px-5 py-4">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">
-          Gastos del día a día
+          {t("variableExpenses.title")}
         </h2>
         <p className={`mt-1 ${TYPE_CAPTION}`}>
-          Suma aquí compras y gastos sueltos del mes
+          {t("variableExpenses.subtitle")}
         </p>
       </div>
       <div className="p-5">
         <p className={`mb-4 ${TYPE_BODY}`}>
-          Cada registro actualiza cuánto te queda y tu techo diario. Para gastos que
-          se repiten cada mes, usa{" "}
+          {t("variableExpenses.description")}
           <strong className="text-slate-400">Gastos fijos</strong>
-          <span className="hidden lg:inline"> (columna de la derecha)</span>
-          <span className="lg:hidden"> (bloque siguiente)</span>.
+          <span className="hidden lg:inline">{t("variableExpenses.descriptionSuffixDesktop")}</span>
+          <span className="lg:hidden">{t("variableExpenses.descriptionSuffixMobile")}</span>.
         </p>
         <AddVariableExpenseForm
           categories={categories}
@@ -65,10 +66,10 @@ export function VariableExpensesSection({
           onSubmit={onSubmit}
         />
         <h3 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-widest text-slate-500">
-          Este mes
+          {t("variableExpenses.thisMonth")}
         </h3>
         {isLoading ? (
-          <p className="text-sm text-slate-500">Cargando gastos…</p>
+          <p className="text-sm text-slate-500">{t("variableExpenses.loading")}</p>
         ) : (
           <>
             <ul className="space-y-2">
@@ -102,18 +103,18 @@ export function VariableExpensesSection({
                         type="button"
                         onClick={() => onEdit(it)}
                         className={`min-h-11 rounded-lg border border-slate-600 px-2.5 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800 ${FOCUS_RING}`}
-                        aria-label={`Editar gasto de ${money(it.amount)}${it.note ? `, ${it.note}` : ""}`}
+                        aria-label={t("variableExpenses.editLabel", { amount: `${money(it.amount)}${it.note ? `, ${it.note}` : ""}` })}
                       >
-                        Editar
+                        {t("common.edit")}
                       </button>
                       <button
                         type="button"
                         onClick={() => onDelete(it.id)}
                         disabled={deletePending}
                         className={`min-h-11 rounded-lg border border-rose-500/40 px-2.5 py-1.5 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
-                        aria-label={`Borrar gasto de ${money(it.amount)}`}
+                        aria-label={t("variableExpenses.deleteLabel", { amount: money(it.amount) })}
                       >
-                        Borrar
+                        {t("common.delete")}
                       </button>
                     </div>
                   </li>
@@ -129,12 +130,12 @@ export function VariableExpensesSection({
               >
                 <ChevronInCircle expanded={expanded} />
                 {expanded
-                  ? "Mostrar menos"
-                  : `Ver ${hiddenCount} gasto${hiddenCount === 1 ? "" : "s"} más del mes`}
+                  ? t("variableExpenses.showLess")
+                  : t("variableExpenses.showMore", { count: hiddenCount })}
               </button>
             )}
             {items.length === 0 && (
-              <p className="mt-2 text-sm text-slate-600">Ningún gasto este mes.</p>
+              <p className="mt-2 text-sm text-slate-600">{t("variableExpenses.empty")}</p>
             )}
           </>
         )}

@@ -45,6 +45,8 @@ export type Settings = {
   savings_mode: SavingsMode;
   savings_percent: string | number;
   savings_amount: string | number;
+  dashboard_tour_completed?: boolean;
+  language?: string | null;
 };
 
 export type FixedExpense = {
@@ -174,5 +176,5 @@ export type Rule503020 = {
   target_needs_pct: string | number;
   target_wants_pct: string | number;
   target_savings_pct: string | number;
-  insights: string[];
+  insights: { type: "ok" | "warn" | "info"; text: string }[];
 };

@@ -1,4 +1,4 @@
-# Overlay para producción: HTTPS por Caddy + cookies seguras.
+# Overlay para producción: proxy inverso con Nginx + cookies seguras.
 # Incluye los 3 proyectos: gastodehoy, kya-system-hermes, hermes-core
 #
 # Uso:
@@ -19,7 +19,7 @@ services:
       args:
         SITE_DOMAIN: ${SITE_DOMAIN}
         BUILD_REF: ${BUILD_REF:-prod}
-    # Solo expuesto a la red interna; Caddy hace de puerta.
+    # Solo expuesto a la red interna; Nginx hace de puerta.
     ports: []
     environment:
       DATABASE_URL: sqlite:////app/data/gastodehoy.db
@@ -74,26 +74,5 @@ services:
         aliases:
           - hermes-core
 
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    environment:
-      SITE_DOMAIN: ${SITE_DOMAIN}
-      ACME_EMAIL: ${ACME_EMAIL}
-    depends_on:
-      app:
-        condition: service_healthy
-    networks:
-      - backend
-
 volumes:
-  caddy_data:
-  caddy_config:
   kya-data:

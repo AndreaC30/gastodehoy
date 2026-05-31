@@ -3,7 +3,7 @@
 from datetime import date
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -113,31 +113,58 @@ def delete_category(
 
 @insights_router.get("", response_model=InsightsRead)
 def read_insights(
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
     year: int | None = Query(default=None, ge=2000, le=3000),
     month: int | None = Query(default=None, ge=1, le=12),
+    lang: str | None = Query(default=None),
 ) -> InsightsRead:
     """Return spending analysis and actionable insights for the given month."""
+    # Determine language: query param > Accept-Language header > default es
+    language = "es"
+    if lang and lang in ("en", "es", "fr", "de"):
+        language = lang
+    elif request.headers.get("accept-language"):
+        al = request.headers["accept-language"].split(",")[0].split(";")[0].strip()
+        if al.startswith("en"):
+            language = "en"
+        elif al.startswith("fr"):
+            language = "fr"
+        elif al.startswith("de"):
+            language = "de"
     ref = today_in_app_timezone()
     y = year if year is not None else ref.year
     m = month if month is not None else ref.month
     start, end = month_bounds(date(y, m, 1))
-    data = compute_insights(db, user.id, start, end)
+    data = compute_insights(db, user.id, start, end, lang=language)
     return InsightsRead(**data)
 
 
 @insights_router.get("/daily-notification", response_model=DailyNotificationRead | None)
 def read_daily_notification(
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
+    lang: str | None = Query(default=None),
 ) -> DailyNotificationRead | None:
     """Return one positive notification message for today, or null if none."""
+    language = "es"
+    if lang and lang in ("en", "es", "fr", "de"):
+        language = lang
+    elif request.headers.get("accept-language"):
+        al = request.headers["accept-language"].split(",")[0].split(";")[0].strip()
+        if al.startswith("en"):
+            language = "en"
+        elif al.startswith("fr"):
+            language = "fr"
+        elif al.startswith("de"):
+            language = "de"
     today = today_in_app_timezone()
     start, end = month_bounds(today)
     summary = compute_summary(db, user.id, today)
-    insights_data = compute_insights(db, user.id, start, end, summary=summary)
-    payload = pick_daily_notification(insights_data, summary)
+    insights_data = compute_insights(db, user.id, start, end, summary=summary, lang=language)
+    payload = pick_daily_notification(insights_data, summary, lang=language)
     if payload is None:
         return None
     return DailyNotificationRead(**payload)

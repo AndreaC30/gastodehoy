@@ -2,6 +2,7 @@
  * Guía paso a paso: sin scroll manual, desplazamiento automático por paso.
  */
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { IoClose } from "react-icons/io5";
 import type { TourStep } from "@/lib/dashboard-tour-steps";
 import {
@@ -59,6 +60,7 @@ function TourSpotlightOverlay({ rect }: { rect: SpotlightRect | null }) {
 }
 
 export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
+  const { t } = useTranslation();
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<{
     top: number;
@@ -171,13 +173,13 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-medium text-teal-400">
             {index + 1} / {steps.length}
-            {scrolling ? " · Moviendo vista…" : ""}
+            {scrolling ? " · " + t("tour.moving") : ""}
           </p>
           <button
             type="button"
             onClick={finishSkip}
             className={`shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 ${FOCUS_RING}`}
-            aria-label="Cerrar guía"
+            aria-label={t("tour.close")}
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
@@ -186,10 +188,10 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
           id="guided-tour-title"
           className="mt-1.5 text-lg font-bold text-slate-100"
         >
-          {step.title}
+          {t(step.title)}
         </h2>
         <p id="guided-tour-body" className="mt-1.5 break-words text-base text-slate-300">
-          {step.body}
+          {t(step.body)}
         </p>
         <div className="mt-4 flex flex-col gap-2">
           <div className="flex flex-wrap gap-2">
@@ -199,7 +201,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
               disabled={scrolling}
               className={`min-h-11 min-w-[7rem] flex-1 ${BTN_PRIMARY}`}
             >
-              {isLast ? "Listo" : "Siguiente"}
+              {isLast ? t("tour.done") : t("tour.next")}
             </button>
             {index > 0 && (
               <button
@@ -208,7 +210,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
                 disabled={scrolling}
                 className={`min-h-11 ${BTN_SECONDARY}`}
               >
-                Atrás
+                {t("tour.back")}
               </button>
             )}
             <button
@@ -216,7 +218,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
               onClick={finishSkip}
               className={`min-h-11 ${BTN_SECONDARY}`}
             >
-              Omitir
+              {t("tour.skip")}
             </button>
           </div>
           {onBackToMenu && (
@@ -226,7 +228,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
               disabled={scrolling}
               className={`min-h-11 w-full text-sm font-medium text-slate-400 underline decoration-slate-600 underline-offset-4 hover:text-slate-200 ${FOCUS_RING}`}
             >
-              Volver al menú
+              {t("tour.backToMenu")}
             </button>
           )}
         </div>

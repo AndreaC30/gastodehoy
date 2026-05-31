@@ -59,6 +59,130 @@ if _is_sqlite:
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+def _migrate_users_autoincrement(engine: Engine) -> None:
+    """Recreate the users table with AUTOINCREMENT so deleted IDs are never reused.
+
+    SQLite INTEGER PRIMARY KEY without AUTOINCREMENT reuses IDs after DELETE.
+    When orphaned rows remain in child tables (e.g. user_settings with UNIQUE
+    user_id), a new registration can get a reused ID and hit an IntegrityError
+    on the settings UNIQUE constraint — misleadingly reported as "email exists".
+
+    This migration creates the table with sqlite_autoincrement=True, which
+    guarantees IDs are never reused.
+    """
+    import logging
+
+    _log = logging.getLogger(__name__)
+
+    # Check if migration is already applied
+    with engine.connect() as check_conn:
+        sql = check_conn.execute(
+            text("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'")
+        ).scalar()
+    if sql and "AUTOINCREMENT" in (sql or ""):
+        return  # already migrated
+
+    _log.info("Migrating users table to AUTOINCREMENT…")
+
+    # Use a raw DBAPI connection so we can control PRAGMAs and transactions
+    # directly — SQLAlchemy's Connection auto-begins transactions, which
+    # conflicts with SQLite's requirement that PRAGMA foreign_keys be set
+    # outside any transaction.
+    raw = engine.raw_connection()
+    try:
+        cursor = raw.cursor()
+        cursor.execute("PRAGMA foreign_keys=OFF")
+        cursor.execute("BEGIN")
+        try:
+            cursor.execute(
+                "CREATE TABLE users_new ("
+                "  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                "  email VARCHAR(255) NOT NULL,"
+                "  name VARCHAR(80) NOT NULL,"
+                "  password_hash VARCHAR(255) NOT NULL,"
+                "  created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,"
+                "  last_login_at DATETIME,"
+                "  password_changed_at DATETIME,"
+                "  recovery_hash VARCHAR(255),"
+                "  must_change_password BOOLEAN DEFAULT '0' NOT NULL"
+                ")"
+            )
+            cursor.execute(
+                "INSERT INTO users_new (id, email, name, password_hash,"
+                "  created_at, last_login_at, password_changed_at,"
+                "  recovery_hash, must_change_password)"
+                " SELECT id, email, name, password_hash,"
+                "  created_at, last_login_at, password_changed_at,"
+                "  recovery_hash, must_change_password FROM users"
+            )
+            cursor.execute("DROP TABLE users")
+            cursor.execute("ALTER TABLE users_new RENAME TO users")
+            cursor.execute(
+                "CREATE UNIQUE INDEX ix_users_email ON users (email)"
+            )
+            raw.commit()
+            _log.info("users AUTOINCREMENT migration complete")
+        except Exception:
+            raw.rollback()
+            raise
+        finally:
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+    finally:
+        raw.close()
+
+
+def _cleanup_orphaned_rows(engine: Engine) -> None:
+    """Delete rows in child tables whose parent user no longer exists.
+
+    Safety net for cascading deletes that may have failed (e.g. if
+    foreign_keys pragma was off during a manual DELETE).  Without this,
+    orphaned user_settings rows with UNIQUE(user_id) can block new
+    registrations by occupying IDs that SQLite would reassign.
+    """
+    import logging
+
+    _log = logging.getLogger(__name__)
+
+    # Tables with user_id FK, ordered so children are cleaned before parents
+    _CHILD_TABLES = [
+        "push_subscriptions",
+        "savings_goals",
+        "variable_expenses",
+        "extra_incomes",
+        "fixed_expenses",
+        "expense_categories",
+        "user_settings",
+    ]
+
+    with engine.begin() as conn:
+        conn.execute(text("PRAGMA foreign_keys=ON"))
+        for table in _CHILD_TABLES:
+            # Only clean tables that exist (some may not be created yet
+            # on first run before migrations)
+            exists = conn.execute(
+                text(
+                    "SELECT 1 FROM sqlite_master "
+                    "WHERE type='table' AND name=:name"
+                ),
+                {"name": table},
+            ).scalar()
+            if not exists:
+                continue
+            result = conn.execute(
+                text(
+                    f"DELETE FROM {table} "
+                    "WHERE user_id NOT IN (SELECT id FROM users)"
+                )
+            )
+            if result.rowcount:
+                _log.warning(
+                    "startup integrity: removed %d orphaned rows from %s",
+                    result.rowcount,
+                    table,
+                )
+
+
 class Base(DeclarativeBase):
     """Base class for every ORM model in the project."""
 
@@ -67,6 +191,13 @@ def apply_sqlite_migrations(engine: Engine) -> None:
     """Anade columnas nuevas e indices en SQLite sin Alembic (BBDD ya existentes)."""
     if make_url(settings.database_url).get_backend_name() != "sqlite":
         return
+
+    # ── users AUTOINCREMENT migration (must run before main transaction) ──
+    _migrate_users_autoincrement(engine)
+
+    # ── startup integrity: clean orphaned rows ──
+    _cleanup_orphaned_rows(engine)
+
     with engine.begin() as conn:
         # Migraciones de columnas
         rows = conn.execute(text("PRAGMA table_info(users)")).fetchall()
@@ -117,7 +248,7 @@ def apply_sqlite_migrations(engine: Engine) -> None:
         )
 
         # Seed default categories for existing users that have none
-        from app.services.categories import DEFAULT_CATEGORIES
+        from app.services.categories import _LEGACY_DEFAULT_CATEGORIES
         user_rows = conn.execute(text("SELECT id FROM users")).fetchall()
         for (uid,) in user_rows:
             existing = conn.execute(
@@ -125,7 +256,7 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                 {"uid": uid},
             ).fetchone()
             if existing is None:
-                for cat in DEFAULT_CATEGORIES:
+                for cat in _LEGACY_DEFAULT_CATEGORIES:
                     conn.execute(
                         text(
                             "INSERT INTO expense_categories (user_id, name, color, icon, is_default) "
@@ -189,6 +320,15 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                 text("ALTER TABLE fixed_expenses ADD COLUMN icon VARCHAR(40)")
             )
 
+        us_rows = conn.execute(text("PRAGMA table_info(user_settings)")).fetchall()
+        us_colnames = {str(r[1]) for r in us_rows}
+        if "language" not in us_colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE user_settings ADD COLUMN language VARCHAR(5)"
+                )
+            )
+
         conn.execute(
             text(
                 "CREATE TABLE IF NOT EXISTS savings_goals ("
@@ -230,7 +370,7 @@ def apply_sqlite_migrations(engine: Engine) -> None:
         # Supermercado: usuarios ya registrados (sin tocar el resto de categorías ni gastos).
         # Solo INSERT si no existe ese nombre; nuevos usuarios ya la reciben vía DEFAULT_CATEGORIES.
         super_default = next(
-            (c for c in DEFAULT_CATEGORIES if c["name"] == "Supermercado"),
+            (c for c in _LEGACY_DEFAULT_CATEGORIES if c["name"] == "Supermercado"),
             None,
         )
         if super_default is not None:

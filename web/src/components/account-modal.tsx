@@ -1,6 +1,7 @@
 /**
  * Account hub: session logout and link to account deletion (step 1 of 2).
  */
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef } from "react";
 import { IoClose, IoLogOutOutline } from "react-icons/io5";
 import { logout } from "@/lib/session";
@@ -25,6 +26,7 @@ export function AccountModal({
   onRequestDelete,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useBodyScrollLock(open);
   useDialogA11y(open, panelRef);
@@ -60,7 +62,7 @@ export function AccountModal({
               id="account-modal-title"
               className="text-lg font-bold tracking-tight"
             >
-              Cuenta
+              {t("account.title")}
             </h2>
             <p className="mt-1 truncate text-sm text-teal-300">{profileName}</p>
           </div>
@@ -75,8 +77,7 @@ export function AccountModal({
         </header>
 
         <p className="mt-4 break-words text-sm leading-relaxed text-slate-400">
-          Ingresos, categorías y metas están en el menú principal. Aquí solo
-          gestionas la sesión y, si lo necesitas, el cierre de la cuenta.
+          {t("account.description")}
         </p>
 
         <button
@@ -88,23 +89,22 @@ export function AccountModal({
           className={`mt-5 flex w-full min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 ${FOCUS_RING}`}
         >
           <IoLogOutOutline className="h-5 w-5 shrink-0" aria-hidden />
-          Cerrar sesión
+          {t("account.logout")}
         </button>
 
         <div className="mt-6 rounded-xl border border-rose-500/20 bg-rose-950/15 p-4 sm:mt-8">
           <h3 className="text-xs font-semibold uppercase tracking-widest text-rose-400/90">
-            Zona de peligro
+            {t("account.dangerZone")}
           </h3>
           <p className="mt-2 break-words text-sm leading-relaxed text-slate-500">
-            Borrar la cuenta elimina gastos, categorías y ajustes de forma
-            permanente. Te pediremos la contraseña en un segundo paso.
+            {t("account.dangerDesc")}
           </p>
           <button
             type="button"
             onClick={onRequestDelete}
             className={`mt-3 min-h-11 text-left text-sm font-medium text-rose-400 underline decoration-rose-500/40 underline-offset-4 hover:text-rose-300 ${FOCUS_RING}`}
           >
-            Eliminar mi cuenta…
+            {t("account.deleteAccount")}
           </button>
         </div>
 
