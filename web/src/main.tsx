@@ -71,6 +71,37 @@ const queryClient = new QueryClient({
   },
 });
 
+// ── PWA update detection ──
+// When a new service worker is installed, show a reload button so the user
+// gets the latest version without manually closing and reopening the PWA.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistration().then((reg) => {
+    if (!reg) return;
+    reg.addEventListener("updatefound", () => {
+      const newWorker = reg.installing;
+      if (!newWorker) return;
+      newWorker.addEventListener("statechange", () => {
+        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+          // New version available — show reload banner
+          const banner = document.createElement("div");
+          banner.className =
+            "fixed bottom-4 left-4 right-4 z-[999] flex items-center justify-between gap-3 rounded-xl border border-teal-500/40 bg-teal-950/90 px-4 py-3 text-sm text-teal-100 shadow-2xl backdrop-blur sm:left-auto sm:right-4 sm:max-w-sm";
+          banner.innerHTML =
+            '<span>Nueva versión disponible.</span>' +
+            '<button class="shrink-0 rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-semibold text-slate-950 hover:bg-teal-400">Actualizar</button>';
+          banner.querySelector("button")!.addEventListener("click", () => {
+            newWorker.postMessage({ type: "SKIP_WAITING" });
+            window.location.reload();
+          });
+          document.body.appendChild(banner);
+        }
+      });
+    });
+    // Check for updates every 5 minutes
+    setInterval(() => reg.update(), 5 * 60 * 1000);
+  });
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
