@@ -16,6 +16,21 @@ export class UnauthorizedError extends Error {
   }
 }
 
+/** Clear stale session cookie when user no longer exists in DB. */
+async function clearStaleCookieIfNeeded(detail: string) {
+  if (detail === "Cuenta no encontrada") {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      });
+    } catch {
+      /* fire-and-forget */
+    }
+  }
+}
+
 /**
  * Call the API: same-origin in prod, Vite-proxied `/api` in dev.
  *
@@ -49,6 +64,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* keep default */
     }
+    clearStaleCookieIfNeeded(message);
     setAnonymous();
     throw new UnauthorizedError(message);
   }
@@ -110,6 +126,7 @@ export async function downloadCsv(path: string, filename: string): Promise<void>
     } catch {
       /* keep default */
     }
+    clearStaleCookieIfNeeded(message);
     setAnonymous();
     throw new UnauthorizedError(message);
   }

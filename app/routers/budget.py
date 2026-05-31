@@ -112,6 +112,8 @@ def update_settings(
     row.savings_mode = payload.savings_mode
     row.savings_percent = payload.savings_percent
     row.savings_amount = payload.savings_amount
+    if payload.dashboard_tour_completed:
+        row.dashboard_tour_completed = True
     if payload.language is not None:
         row.language = payload.language
     db.commit()
