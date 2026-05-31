@@ -75,26 +75,38 @@ async function calendarSourceRgba() {
  * Build a square PNG icon with the 3D calendar centered on theme-colored background.
  * @param {number} canvasSize - output square dimension in px
  * @param {number} contentFraction - fraction of canvas the content occupies (0–1)
- *   - 0.88 → "any" icon (small margin)
- *   - 0.72 → "maskable" icon (safe zone, per adaptive icon spec)
+ * @param {{ stripExportBg?: boolean }} opts
+ *   - stripExportBg: remove baked-in export fill (Android launcher / splash only).
+ *     Favicons keep the full export so 16–32px stay crisp.
  * @returns {Promise<Buffer>} RGBA PNG buffer
  */
-async function squareIcon(canvasSize, contentFraction = 0.88) {
+async function squareIcon(canvasSize, contentFraction = 0.88, opts = {}) {
+  const { stripExportBg = false } = opts;
   const contentSize = Math.round(canvasSize * contentFraction);
 
-  const src = await calendarSourceRgba();
-
-  // Scale calendar art (transparent outside the 3D shape) onto #0f172a canvas
-  const content = await sharp(src.data, {
-    raw: { width: src.width, height: src.height, channels: 4 },
-  })
-    .resize(contentSize, contentSize, {
-      fit: "inside",
-      withoutEnlargement: false,
-      kernel: sharp.kernel.lanczos3,
+  let content;
+  if (stripExportBg) {
+    const src = await calendarSourceRgba();
+    content = await sharp(src.data, {
+      raw: { width: src.width, height: src.height, channels: 4 },
     })
-    .png()
-    .toBuffer();
+      .resize(contentSize, contentSize, {
+        fit: "inside",
+        withoutEnlargement: false,
+        kernel: sharp.kernel.lanczos3,
+      })
+      .png()
+      .toBuffer();
+  } else {
+    content = await sharp(sourcePath)
+      .resize(contentSize, contentSize, {
+        fit: "inside",
+        withoutEnlargement: false,
+        kernel: sharp.kernel.lanczos3,
+      })
+      .png()
+      .toBuffer();
+  }
 
   const contentMeta = await sharp(content).metadata();
 
@@ -130,40 +142,40 @@ console.log(
 );
 console.log(`Background: #0f172a (slate-900 — app theme)\n`);
 
-// Launcher + manifest "any" icon — 512px calendar (home screen / app drawer)
-const any512 = await squareIcon(512, 0.88);
+// Launcher / Android splash — strip export background so it matches #0f172a
+const any512 = await squareIcon(512, 0.88, { stripExportBg: true });
 writeAsset("gastodehoy-app-icon.png", any512);
-writeAsset("gastodehoy-favicon.png", any512);
-console.log("  app-icon 512px   (launcher @ 88%)");
+console.log("  app-icon 512px   (launcher @ 88%, bg keyed)");
 
-// "any" icon — 192px
-const any192 = await squareIcon(192, 0.88);
-writeAsset("gastodehoy-favicon-192.png", any192);
-console.log("  favicon 192px    (content @ 88%)");
-
-const maskable512 = await squareIcon(512, 0.72);
+const maskable512 = await squareIcon(512, 0.72, { stripExportBg: true });
 writeAsset("gastodehoy-app-icon-maskable.png", maskable512);
 console.log("  app-icon maskable 512px");
 
-const maskable192 = await squareIcon(192, 0.72);
+const maskable192 = await squareIcon(192, 0.72, { stripExportBg: true });
 writeAsset("gastodehoy-app-icon-maskable-192.png", maskable192);
 console.log("  app-icon maskable 192px");
 
-// apple-touch-icon — 180px
+// Favicons / tabs / apple-touch — full export (unchanged look at 16–32px)
+const fav512 = await squareIcon(512, 0.88);
+writeAsset("gastodehoy-favicon.png", fav512);
+console.log("  favicon 512px");
+
+const any192 = await squareIcon(192, 0.88);
+writeAsset("gastodehoy-favicon-192.png", any192);
+console.log("  favicon 192px");
+
 const apple180 = await squareIcon(180, 0.85);
 writeAsset("gastodehoy-apple-touch-180.png", apple180);
-console.log("  apple-touch 180px (content @ 85%)");
+console.log("  apple-touch 180px");
 
-// favicons
 const fav32 = await squareIcon(32, 0.88);
 writeAsset("gastodehoy-favicon-32.png", fav32);
-console.log("  favicon 32px     (content @ 88%)");
+console.log("  favicon 32px");
 
 const fav16 = await squareIcon(16, 0.88);
 writeAsset("gastodehoy-favicon-16.png", fav16);
-console.log("  favicon 16px     (content @ 88%)");
+console.log("  favicon 16px");
 
-// og-image
 const og512 = await squareIcon(512, 0.88);
 writeFileSync(path.join(webDir, "public", "og-image.png"), og512);
 console.log("  og-image 512px   (content @ 88%)");
