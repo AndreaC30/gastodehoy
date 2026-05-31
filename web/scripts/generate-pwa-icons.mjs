@@ -34,6 +34,8 @@ const SOURCE_BG_TOLERANCE = 6;
 const FAVICON_FILL = 0.97;
 /** Maskable safe zone (Android adaptive icon spec). */
 const MASKABLE_FILL = 0.72;
+/** Extra shift up after centroid (fraction of canvas) — optical balance on all OS launchers. */
+const OPTICAL_NUDGE_UP = 0.028;
 
 let calendarSourcePrepared = null;
 
@@ -131,12 +133,12 @@ async function squareIcon(canvasSize, contentFraction = 0.88, opts = {}) {
     .toBuffer();
 }
 
-/** Browser tab favicon: calendar only, transparent (OS paints the bar). */
-async function faviconIcon(canvasSize, contentFraction = FAVICON_FILL) {
+/** Trim + resize calendar art for a square canvas. */
+async function prepareCalendarArt(canvasSize, contentFraction) {
   const src = await calendarSourceRgba();
   const maxArt = Math.round(canvasSize * contentFraction);
 
-  const art = await sharp(src.data, {
+  return sharp(src.data, {
     raw: { width: src.width, height: src.height, channels: 4 },
   })
     .trim()
@@ -147,56 +149,64 @@ async function faviconIcon(canvasSize, contentFraction = FAVICON_FILL) {
     })
     .png()
     .toBuffer();
+}
 
-  const meta = await sharp(art).metadata();
-  const left = Math.round((canvasSize - (meta.width ?? maxArt)) / 2);
-  const top = Math.round((canvasSize - (meta.height ?? maxArt)) / 2);
+/**
+ * Place art so its visual mass is centered (alpha centroid), not just the bounding box.
+ * Works across iOS, Android, Windows PWAs and browser favicons.
+ */
+async function compositeCenteredArt(canvasSize, artBuffer, background) {
+  const { data, info } = await sharp(artBuffer)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const { width, height } = info;
+  let sumX = 0;
+  let sumY = 0;
+  let sumA = 0;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const a = data[(y * width + x) * 4 + 3];
+      if (a > 24) {
+        sumX += x * a;
+        sumY += y * a;
+        sumA += a;
+      }
+    }
+  }
+
+  const cx = sumA > 0 ? sumX / sumA : width / 2;
+  const cy = sumA > 0 ? sumY / sumA : height / 2;
+  const nudgeUp = Math.round(canvasSize * OPTICAL_NUDGE_UP);
+
+  const left = Math.round(canvasSize / 2 - cx);
+  const top = Math.round(canvasSize / 2 - cy - nudgeUp);
 
   return sharp({
     create: {
       width: canvasSize,
       height: canvasSize,
       channels: 4,
-      background: TRANSPARENT,
+      background,
     },
   })
-    .composite([{ input: art, left, top }])
+    .composite([{ input: artBuffer, left, top }])
     .png({ compressionLevel: 9 })
     .toBuffer();
 }
 
+/** Browser tab favicon: calendar only, transparent (OS paints the bar). */
+async function faviconIcon(canvasSize, contentFraction = FAVICON_FILL) {
+  const art = await prepareCalendarArt(canvasSize, contentFraction);
+  return compositeCenteredArt(canvasSize, art, TRANSPARENT);
+}
+
 /** PWA install / iOS home screen: calendar on #0f172a (never transparent — avoids white tiles). */
 async function pwaLauncherIcon(canvasSize, contentFraction = FAVICON_FILL) {
-  const src = await calendarSourceRgba();
-  const maxArt = Math.round(canvasSize * contentFraction);
-
-  const art = await sharp(src.data, {
-    raw: { width: src.width, height: src.height, channels: 4 },
-  })
-    .trim()
-    .resize(maxArt, maxArt, {
-      fit: "inside",
-      withoutEnlargement: false,
-      kernel: sharp.kernel.lanczos3,
-    })
-    .png()
-    .toBuffer();
-
-  const meta = await sharp(art).metadata();
-  const left = Math.round((canvasSize - (meta.width ?? maxArt)) / 2);
-  const top = Math.round((canvasSize - (meta.height ?? maxArt)) / 2);
-
-  return sharp({
-    create: {
-      width: canvasSize,
-      height: canvasSize,
-      channels: 4,
-      background: BG,
-    },
-  })
-    .composite([{ input: art, left, top }])
-    .png({ compressionLevel: 9 })
-    .toBuffer();
+  const art = await prepareCalendarArt(canvasSize, contentFraction);
+  return compositeCenteredArt(canvasSize, art, BG);
 }
 
 function writeAsset(name, png) {
