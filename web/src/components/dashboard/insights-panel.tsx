@@ -134,7 +134,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
   return (
     <section
       data-tour="insights"
-      className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 shadow-lg shadow-black/20 sm:p-5"
+      className="rounded-2xl border border-slate-800 bg-slate-900/50 p-3 shadow-lg shadow-black/20 sm:p-5"
       aria-labelledby="insights-panel-title"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -162,7 +162,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
           return (
             <li
               key={`${insight.type}-${insight.title}`}
-              className={`rounded-xl border px-4 py-3 text-base ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
+              className={`rounded-xl border px-3 py-2.5 text-sm leading-relaxed sm:px-4 sm:py-3 sm:text-base ${TYPE_STYLES[insight.type] ?? TYPE_STYLES.info}`}
             >
               <p className="flex items-start gap-2 font-semibold">
                 <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${colorClass}`} aria-hidden />
