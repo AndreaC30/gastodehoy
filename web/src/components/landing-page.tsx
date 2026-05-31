@@ -14,7 +14,7 @@ export function LandingPage({ onEnter }: Props) {
   const { t } = useTranslation();
 
   return (
-    <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center px-4 py-12">
+    <main className="relative z-10 mx-auto flex w-full max-w-lg flex-col px-4 py-6 sm:min-h-screen sm:justify-center sm:py-12">
       <h1 className="m-0 leading-none">
         <button
           type="button"
