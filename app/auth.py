@@ -162,6 +162,7 @@ def clear_session_cookie(response: Response) -> None:
 
 
 def get_current_user(
+    response: Response,
     session: str | None = Cookie(default=None, alias=SESSION_COOKIE),
     db: Session = Depends(get_db),
 ) -> User:
@@ -178,6 +179,7 @@ def get_current_user(
     user_id, issued_at = decode_session_token(session)
     user = db.get(User, user_id)
     if user is None:
+        clear_session_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Cuenta no encontrada",
