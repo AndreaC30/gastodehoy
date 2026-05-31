@@ -24,11 +24,12 @@ type Props = {
   error: Error | null;
 };
 
-const TYPE_CARD_CLASS: Record<string, string> = {
-  warning: "insights-card--warning",
-  tip: "insights-card--tip",
-  success: "insights-card--success",
-  info: "insights-card--info",
+/** Misma estructura flex + shrink-0 que rule-503020 (no falla en Android). */
+const TYPE_STYLES: Record<string, string> = {
+  warning: "border-amber-500/40 bg-[#1c1810] text-amber-200",
+  tip: "border-sky-500/40 bg-[#101c24] text-sky-200",
+  success: "border-emerald-500/40 bg-[#0f1c18] text-emerald-200",
+  info: "border-slate-600/40 bg-slate-800 text-slate-300",
 };
 
 const TYPE_ICON_COLORS: Record<string, string> = {
@@ -100,6 +101,9 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
   }
 }
 
+const PANEL_CLASS =
+  "rounded-2xl border border-slate-800 bg-slate-900 p-3 sm:p-5 sm:shadow-lg sm:shadow-black/20";
+
 export function InsightsPanel({ data, isLoading, error }: Props) {
   const { t } = useTranslation();
 
@@ -107,7 +111,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
     return (
       <section
         data-tour="insights"
-        className="insights-panel"
+        className={PANEL_CLASS}
         aria-busy="true"
         aria-label={t("insights.title")}
       >
@@ -134,7 +138,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
   return (
     <section
       data-tour="insights"
-      className="insights-panel"
+      className={PANEL_CLASS}
       aria-labelledby="insights-panel-title"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -143,7 +147,10 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
             id="insights-panel-title"
             className="flex items-center gap-2 text-lg font-bold tracking-tight"
           >
-            <IoBulbOutline className="text-sky-400" size={20} aria-hidden />
+            <IoBulbOutline
+              className="h-5 w-5 shrink-0 text-sky-400"
+              aria-hidden
+            />
             {t("insights.title")}
           </h2>
           <p className={`mt-1 ${TYPE_CAPTION}`}>{t("insights.subtitle")}</p>
@@ -156,20 +163,27 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         </div>
       </div>
 
-      <ul className="insights-list">
+      <ul className="mt-4 list-none space-y-3 p-0">
         {data.insights.map((insight) => {
           const { Icon, colorClass } = getInsightIcon(insight);
-          const cardClass = TYPE_CARD_CLASS[insight.type] ?? TYPE_CARD_CLASS.info;
+          const cardStyle = TYPE_STYLES[insight.type] ?? TYPE_STYLES.info;
           return (
             <li
               key={`${insight.type}-${insight.title}`}
-              className={`insights-card ${cardClass}`}
+              className={`rounded-xl border px-3 py-2.5 text-sm leading-relaxed sm:px-4 sm:py-3 sm:text-base ${cardStyle}`}
             >
-              <p className="insights-card__title">
-                <Icon className={colorClass} size={16} aria-hidden />
-                <span>{insight.title}</span>
-              </p>
-              <p className="insights-card__message">{insight.message}</p>
+              <div className="flex items-start gap-2">
+                <Icon
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${colorClass}`}
+                  aria-hidden
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{insight.title}</p>
+                  <p className="mt-1 text-sm text-current/90">
+                    {insight.message}
+                  </p>
+                </div>
+              </div>
             </li>
           );
         })}
@@ -185,14 +199,17 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-sky-500 to-teal-500 transition-all duration-700"
+              className="h-full rounded-full bg-teal-500 sm:bg-gradient-to-r sm:from-sky-500 sm:to-teal-500"
               style={{
                 width: `${Math.min(100, (Number(data.total_spent) / Math.max(Number(data.projected_monthly), 1)) * 100)}%`,
               }}
             />
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            {t("insights.projectionDetail", { spent: money(data.total_spent), projected: money(data.projected_monthly) })}
+            {t("insights.projectionDetail", {
+              spent: money(data.total_spent),
+              projected: money(data.projected_monthly),
+            })}
           </p>
         </div>
       )}
