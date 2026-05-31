@@ -11,6 +11,16 @@
     "refresh": "Refresh numbers",
     "explanation": "Your daily margin: what's left this month ÷ days remaining."
   },
+  "monthContext": {
+    "badgeSubtitle": "This month's budget",
+    "variableSubtitle": "{{month}} only. On the 1st, a new list starts.",
+    "fixedRepeats": "They repeat every month, same amounts.",
+    "bannerNewMonthTitle": "New month",
+    "bannerNewMonthBody": "Variable expenses start fresh. Your fixed costs stay the same.",
+    "bannerEndMonthTitle": "Last days of {{month}}",
+    "bannerEndMonthBody": "{{daysLeft}} days left. Review your spending before the next month begins.",
+    "bannerDismiss": "Got it"
+  },
   "metrics": {
     "savings": "Reserved savings",
     "fixedExpenses": "Fixed expenses",
@@ -153,7 +163,7 @@
     "description": "Each entry updates how much you have left and your daily cap. For recurring monthly expenses, use Fixed expenses.",
     "descriptionSuffixDesktop": " (right column)",
     "descriptionSuffixMobile": " (next block)",
-    "thisMonth": "This month",
+    "thisMonth": "{{month}} expenses",
     "loading": "Loading expenses…",
     "edit": "Edit",
     "editLabel": "Edit expense of {{amount}}",

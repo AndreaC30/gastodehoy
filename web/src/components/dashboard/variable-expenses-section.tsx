@@ -4,6 +4,7 @@ import { AddVariableExpenseForm } from "@/components/dashboard/add-variable-expe
 import { ChevronInCircle } from "@/components/dashboard/chevron-expand";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { money } from "@/lib/format";
+import { budgetReferenceDate, formatMonthLong } from "@/lib/month-context";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
 import { type FormEvent } from "react";
@@ -22,6 +23,8 @@ type Props = {
   onToggleExpand: () => void;
   onEdit: (item: VariableExpense) => void;
   onDelete: (id: number) => void;
+  /** Summary `reference_date` — month scope for copy. */
+  referenceDate?: string;
 };
 
 export function VariableExpensesSection({
@@ -38,8 +41,10 @@ export function VariableExpensesSection({
   onToggleExpand,
   onEdit,
   onDelete,
+  referenceDate,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const month = formatMonthLong(budgetReferenceDate(referenceDate), i18n.language);
   return (
     <section
       data-tour="variable-expenses"
@@ -49,8 +54,8 @@ export function VariableExpensesSection({
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">
           {t("variableExpenses.title")}
         </h2>
-        <p className={`mt-1 ${TYPE_CAPTION}`}>
-          {t("variableExpenses.subtitle")}
+        <p className={`mt-1 capitalize ${TYPE_CAPTION}`}>
+          {t("monthContext.variableSubtitle", { month })}
         </p>
       </div>
       <div className="p-5">
@@ -66,7 +71,7 @@ export function VariableExpensesSection({
           onSubmit={onSubmit}
         />
         <h3 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-widest text-slate-500">
-          {t("variableExpenses.thisMonth")}
+          {t("variableExpenses.thisMonth", { month })}
         </h3>
         {isLoading ? (
           <p className="text-sm text-slate-500">{t("variableExpenses.loading")}</p>

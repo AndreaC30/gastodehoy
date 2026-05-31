@@ -11,6 +11,16 @@
     "refresh": "Zahlen aktualisieren",
     "explanation": "Deine tägliche Marge: was diesen Monat übrig bleibt ÷ verbleibende Tage."
   },
+  "monthContext": {
+    "badgeSubtitle": "Budget dieses Monats",
+    "variableSubtitle": "Nur {{month}}. Am 1. beginnt eine neue Liste.",
+    "fixedRepeats": "Sie wiederholen sich jeden Monat, gleiche Beträge.",
+    "bannerNewMonthTitle": "Neuer Monat",
+    "bannerNewMonthBody": "Variable Ausgaben starten bei null. Deine Fixkosten bleiben gleich.",
+    "bannerEndMonthTitle": "Letzte Tage im {{month}}",
+    "bannerEndMonthBody": "Noch {{daysLeft}} Tage. Schau dir an, was du ausgegeben hast, bevor der nächste Monat beginnt.",
+    "bannerDismiss": "Verstanden"
+  },
   "metrics": {
     "savings": "Reservierte Ersparnisse",
     "fixedExpenses": "Fixkosten",
@@ -153,7 +163,7 @@
     "description": "Jeder Eintrag aktualisiert, wie viel dir bleibt und deine Tagesobergrenze. Für wiederkehrende Ausgaben nutze Fixkosten.",
     "descriptionSuffixDesktop": " (rechte Spalte)",
     "descriptionSuffixMobile": " (nächster Block)",
-    "thisMonth": "Diesen Monat",
+    "thisMonth": "Ausgaben im {{month}}",
     "loading": "Lade Ausgaben…",
     "edit": "Bearbeiten",
     "editLabel": "Ausgabe von {{amount}} bearbeiten",

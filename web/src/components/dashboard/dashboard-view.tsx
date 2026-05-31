@@ -16,6 +16,8 @@ import { VariableExpensesSection } from "@/components/dashboard/variable-expense
 import { SpendingChart } from "@/components/dashboard/spending-chart";
 import { InsightsPanel } from "@/components/dashboard/insights-panel";
 import { MonthHistoryStrip } from "@/components/dashboard/month-history-strip";
+import { MonthContextBadge } from "@/components/dashboard/month-context-badge";
+import { MonthContextBanner } from "@/components/dashboard/month-context-banner";
 import { Rule503020Panel } from "@/components/dashboard/rule-503020-panel";
 import { SavingsGoalsModal } from "@/components/savings-goals-modal";
 import { api, downloadCsv } from "@/api/client";
@@ -324,6 +326,10 @@ export function Dashboard({ profileName }: Props) {
           </div>
         )}
 
+        <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
+
+        <MonthContextBanner referenceDate={summaryQ.data?.reference_date} />
+
         <DailyHero
           summary={summaryQ.data}
           summaryPending={summaryQ.isPending}
@@ -341,6 +347,7 @@ export function Dashboard({ profileName }: Props) {
         <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
           <div className="min-w-0">
           <VariableExpensesSection
+            referenceDate={summaryQ.data?.reference_date}
             categories={categories}
             items={variableExpenseItems}
             visibleItems={variableVisibleItems}
