@@ -64,7 +64,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* keep default */
     }
-    clearStaleCookieIfNeeded(message);
+    await clearStaleCookieIfNeeded(message);
     setAnonymous();
     throw new UnauthorizedError(message);
   }
@@ -126,7 +126,7 @@ export async function downloadCsv(path: string, filename: string): Promise<void>
     } catch {
       /* keep default */
     }
-    clearStaleCookieIfNeeded(message);
+    await clearStaleCookieIfNeeded(message);
     setAnonymous();
     throw new UnauthorizedError(message);
   }
