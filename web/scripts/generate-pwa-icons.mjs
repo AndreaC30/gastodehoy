@@ -10,9 +10,9 @@
  *   - favicons (16, 32, 192px)
  *   - og-image (512px)
  *
- * Background fill uses the app theme color (#0f172a / slate-900) so icons
- * are consistent with the app UI on all platforms.
- * PNGs are RGBA so corners of the 3D design blend naturally into the background.
+ * - Favicons / tabs: transparent PNG, calendar only (like YouTube/Bitwarden in the URL bar).
+ * - Launcher / Android splash: #0f172a fill, export background keyed out.
+ * - og-image: solid #0f172a for social previews.
  */
 import { copyFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -22,8 +22,9 @@ import sharp from "sharp";
 const webDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourcePath = path.join(webDir, "src/assets/gastodehoy-calendar-icon-source.png");
 
-// App theme background color (slate-900) — must match manifest background_color / theme_color.
+// App theme background (slate-900) — manifest background_color / Android splash only.
 const BG = { r: 15, g: 23, b: 42, alpha: 1 }; // #0f172a
+const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
 
 /** Tolerance when removing the baked-in export background from the calendar PNG. */
 const SOURCE_BG_TOLERANCE = 6;
@@ -75,13 +76,11 @@ async function calendarSourceRgba() {
  * Build a square PNG icon with the 3D calendar centered on theme-colored background.
  * @param {number} canvasSize - output square dimension in px
  * @param {number} contentFraction - fraction of canvas the content occupies (0–1)
- * @param {{ stripExportBg?: boolean }} opts
- *   - stripExportBg: remove baked-in export fill (Android launcher / splash only).
- *     Favicons keep the full export so 16–32px stay crisp.
+ * @param {{ stripExportBg?: boolean; transparentBg?: boolean }} opts
  * @returns {Promise<Buffer>} RGBA PNG buffer
  */
 async function squareIcon(canvasSize, contentFraction = 0.88, opts = {}) {
-  const { stripExportBg = false } = opts;
+  const { stripExportBg = false, transparentBg = false } = opts;
   const contentSize = Math.round(canvasSize * contentFraction);
 
   let content;
@@ -110,7 +109,6 @@ async function squareIcon(canvasSize, contentFraction = 0.88, opts = {}) {
 
   const contentMeta = await sharp(content).metadata();
 
-  // Center on theme-colored canvas
   const left = Math.round((canvasSize - contentMeta.width) / 2);
   const top = Math.round((canvasSize - contentMeta.height) / 2);
 
@@ -119,10 +117,44 @@ async function squareIcon(canvasSize, contentFraction = 0.88, opts = {}) {
       width: canvasSize,
       height: canvasSize,
       channels: 4,
-      background: BG,
+      background: transparentBg ? TRANSPARENT : BG,
     },
   })
     .composite([{ input: content, left, top }])
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+}
+
+/** Tab / bookmark favicon: calendar only, no dark square (trim + transparent canvas). */
+async function faviconIcon(canvasSize, contentFraction = 0.92) {
+  const src = await calendarSourceRgba();
+  const maxArt = Math.round(canvasSize * contentFraction);
+
+  const art = await sharp(src.data, {
+    raw: { width: src.width, height: src.height, channels: 4 },
+  })
+    .trim()
+    .resize(maxArt, maxArt, {
+      fit: "inside",
+      withoutEnlargement: false,
+      kernel: sharp.kernel.lanczos3,
+    })
+    .png()
+    .toBuffer();
+
+  const meta = await sharp(art).metadata();
+  const left = Math.round((canvasSize - (meta.width ?? maxArt)) / 2);
+  const top = Math.round((canvasSize - (meta.height ?? maxArt)) / 2);
+
+  return sharp({
+    create: {
+      width: canvasSize,
+      height: canvasSize,
+      channels: 4,
+      background: TRANSPARENT,
+    },
+  })
+    .composite([{ input: art, left, top }])
     .png({ compressionLevel: 9 })
     .toBuffer();
 }
@@ -155,26 +187,26 @@ const maskable192 = await squareIcon(192, 0.72, { stripExportBg: true });
 writeAsset("gastodehoy-app-icon-maskable-192.png", maskable192);
 console.log("  app-icon maskable 192px");
 
-// Favicons / tabs / apple-touch — full export (unchanged look at 16–32px)
-const fav512 = await squareIcon(512, 0.88);
+// Favicons / tabs / apple-touch — transparent, calendar art only
+const fav512 = await faviconIcon(512);
 writeAsset("gastodehoy-favicon.png", fav512);
-console.log("  favicon 512px");
+console.log("  favicon 512px    (transparent)");
 
-const any192 = await squareIcon(192, 0.88);
+const any192 = await faviconIcon(192);
 writeAsset("gastodehoy-favicon-192.png", any192);
-console.log("  favicon 192px");
+console.log("  favicon 192px    (transparent)");
 
-const apple180 = await squareIcon(180, 0.85);
+const apple180 = await faviconIcon(180, 0.9);
 writeAsset("gastodehoy-apple-touch-180.png", apple180);
-console.log("  apple-touch 180px");
+console.log("  apple-touch 180px (transparent)");
 
-const fav32 = await squareIcon(32, 0.88);
+const fav32 = await faviconIcon(32);
 writeAsset("gastodehoy-favicon-32.png", fav32);
-console.log("  favicon 32px");
+console.log("  favicon 32px     (transparent)");
 
-const fav16 = await squareIcon(16, 0.88);
+const fav16 = await faviconIcon(16);
 writeAsset("gastodehoy-favicon-16.png", fav16);
-console.log("  favicon 16px");
+console.log("  favicon 16px     (transparent)");
 
 const og512 = await squareIcon(512, 0.88);
 writeFileSync(path.join(webDir, "public", "og-image.png"), og512);
