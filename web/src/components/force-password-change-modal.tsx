@@ -49,7 +49,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
   }
 
   return (
-    <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
+    <div className="relative z-10 flex w-full flex-col items-center px-4 py-6 sm:min-h-screen sm:justify-center sm:py-12">
       <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl shadow-black/30">
         <h2 className="text-xl font-bold tracking-tight">
           {t("forcePassword.title")}
