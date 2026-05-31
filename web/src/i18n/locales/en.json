@@ -21,7 +21,7 @@
     "subtitle": "Your spending analysis this month",
     "avgDaily": "Avg daily variable spend",
     "projection": "Monthly projection (variables only)",
-    "projectionDetail": "You've spent {{spent}}€. At this pace, ~{{projected}}€/month.",
+    "projectionDetail": "You've spent {{spent}}. At this pace, ~{{projected}}/month.",
     "error": "Could not load insights."
   },
   "rule503020": {
