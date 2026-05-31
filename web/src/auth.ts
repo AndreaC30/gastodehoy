@@ -61,6 +61,16 @@ export function setUser(user: User): void {
 
 /** Mark the session as logged out (also called by the API client on 401). */
 export function setAnonymous(): void {
+  // Failsafe: unlock body scroll in case a modal's cleanup didn't run
+  if (typeof document !== "undefined") {
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.width = "";
+  }
   setSnapshot({ status: "anon", user: null });
 }
 
