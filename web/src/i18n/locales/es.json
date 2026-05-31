@@ -3,6 +3,9 @@
     "name": "GastoDeHoy",
     "tagline": "Control de Gastos Diarios"
   },
+  "splash": {
+    "tagline": "Cada euro que controlas es un paso hacia tu libertad"
+  },
   "hero": {
     "dailyBudget": "Hoy puedes gastar",
     "refresh": "Actualizar números",

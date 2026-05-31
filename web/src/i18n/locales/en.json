@@ -3,6 +3,9 @@
     "name": "GastoDeHoy",
     "tagline": "Daily Expense Tracker"
   },
+  "splash": {
+    "tagline": "Every euro you track is a step toward your freedom"
+  },
   "hero": {
     "dailyBudget": "You can spend today",
     "refresh": "Refresh numbers",

@@ -24,6 +24,68 @@ img {
   max-width: 100%;
 }
 
+/* Branded boot / loading splash (HTML #boot-splash + React LoadingSplash) */
+.boot-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(1.25rem, env(safe-area-inset-top))
+    max(1.25rem, env(safe-area-inset-right))
+    max(1.25rem, env(safe-area-inset-bottom))
+    max(1.25rem, env(safe-area-inset-left));
+  background-color: #0f172a;
+}
+
+.boot-splash__inner {
+  display: flex;
+  width: 100%;
+  max-width: 22rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  text-align: center;
+}
+
+.boot-splash__logo {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 19rem);
+  height: auto;
+  object-fit: contain;
+}
+
+.boot-splash__logo--pulse {
+  animation: boot-splash-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes boot-splash-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+.boot-splash__tagline {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 500;
+  color: rgb(148 163 184);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-splash__logo--pulse {
+    animation: none;
+  }
+}
+
 /*
  * Iconos UI (react-icons): NO usar max-width:100% global en svg.
  * En Android Chrome el viewBox 512×512 + flex hace que el SVG ocupe
