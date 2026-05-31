@@ -22,79 +22,6 @@ function writePublic(name, buffer) {
   console.log(`  ${name}`);
 }
 
-/** Full-screen portrait splash (iOS startup). */
-async function portraitLaunch(width, height) {
-  const logoMaxW = Math.round(width * 0.72);
-  const logoBuf = await sharp(logoPath)
-    .resize({ width: logoMaxW, withoutEnlargement: true })
-    .toBuffer();
-  const logoMeta = await sharp(logoBuf).metadata();
-  const logoW = logoMeta.width ?? logoMaxW;
-  const logoH = logoMeta.height ?? Math.round(logoMaxW * 0.23);
-
-  const fontSize = Math.max(14, Math.round(width * 0.036));
-  const lineHeight = Math.round(fontSize * 1.45);
-  const taglineLines = wrapTagline(TAGLINE, 28);
-  const taglineH = taglineLines.length * lineHeight + 8;
-
-  const gap = Math.round(height * 0.035);
-  const blockH = logoH + gap + taglineH;
-  const top = Math.round((height - blockH) / 2);
-
-  const taglineSvg = Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${taglineH}">
-      ${taglineLines
-        .map(
-          (line, i) =>
-            `<text x="50%" y="${lineHeight * (i + 1)}" text-anchor="middle" fill="${TAGLINE_COLOR}" font-family="system-ui,-apple-system,sans-serif" font-size="${fontSize}" font-weight="500">${escapeXml(line)}</text>`,
-        )
-        .join("")}
-    </svg>`,
-  );
-
-  return sharp({
-    create: { width, height, channels: 4, background: BG },
-  })
-    .composite([
-      {
-        input: logoBuf,
-        left: Math.round((width - logoW) / 2),
-        top,
-      },
-      {
-        input: taglineSvg,
-        left: 0,
-        top: top + logoH + gap,
-      },
-    ])
-    .png()
-    .toBuffer();
-}
-
-/** Square splash icon (Android PWA cold start — wordmark only, no tiny tagline). */
-async function squareLaunch(size) {
-  const logoMaxW = Math.round(size * 0.82);
-  const logoBuf = await sharp(logoPath)
-    .resize({ width: logoMaxW, withoutEnlargement: true })
-    .toBuffer();
-  const logoMeta = await sharp(logoBuf).metadata();
-  const logoW = logoMeta.width ?? logoMaxW;
-  const logoH = logoMeta.height ?? logoMaxW;
-
-  return sharp({
-    create: { width: size, height: size, channels: 4, background: BG },
-  })
-    .composite([
-      {
-        input: logoBuf,
-        left: Math.round((size - logoW) / 2),
-        top: Math.round((size - logoH) / 2),
-      },
-    ])
-    .png()
-    .toBuffer();
-}
-
 function escapeXml(s) {
   return s
     .replace(/&/g, "&amp;")
@@ -120,6 +47,137 @@ function wrapTagline(text, maxChars) {
   return lines;
 }
 
+function taglineSvg(width, taglineLines, fontSize) {
+  const lineHeight = Math.round(fontSize * 1.35);
+  const taglineH = taglineLines.length * lineHeight + 4;
+  return {
+    buffer: Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${taglineH}">
+        ${taglineLines
+          .map(
+            (line, i) =>
+              `<text x="50%" y="${lineHeight * (i + 1)}" text-anchor="middle" fill="${TAGLINE_COLOR}" font-family="system-ui,-apple-system,sans-serif" font-size="${fontSize}" font-weight="500">${escapeXml(line)}</text>`,
+          )
+          .join("")}
+      </svg>`,
+    ),
+    height: taglineH,
+  };
+}
+
+/** Full-screen portrait splash (iOS startup). */
+async function portraitLaunch(width, height) {
+  const logoMaxW = Math.round(width * 0.72);
+  const logoBuf = await sharp(logoPath)
+    .resize({ width: logoMaxW, withoutEnlargement: true })
+    .toBuffer();
+  const logoMeta = await sharp(logoBuf).metadata();
+  const logoW = logoMeta.width ?? logoMaxW;
+  const logoH = logoMeta.height ?? Math.round(logoMaxW * 0.23);
+
+  const fontSize = Math.max(14, Math.round(width * 0.036));
+  const taglineLines = wrapTagline(TAGLINE, 28);
+  const { buffer: taglineBuf, height: taglineH } = taglineSvg(
+    width,
+    taglineLines,
+    fontSize,
+  );
+
+  const gap = Math.round(height * 0.035);
+  const blockH = logoH + gap + taglineH;
+  const top = Math.round((height - blockH) / 2);
+
+  return sharp({
+    create: { width, height, channels: 4, background: BG },
+  })
+    .composite([
+      {
+        input: logoBuf,
+        left: Math.round((width - logoW) / 2),
+        top,
+      },
+      {
+        input: taglineBuf,
+        left: 0,
+        top: top + logoH + gap,
+      },
+    ])
+    .png()
+    .toBuffer();
+}
+
+/**
+ * Square splash for Android cold start (logo + tagline in one image).
+ * Android 12+ centers this on background_color — matches the HTML boot splash.
+ */
+async function squareLaunch(size) {
+  const pad = Math.round(size * 0.08);
+  const innerW = size - pad * 2;
+
+  const logoMaxW = Math.round(innerW * 0.92);
+  const logoBuf = await sharp(logoPath)
+    .resize({ width: logoMaxW, withoutEnlargement: true })
+    .toBuffer();
+  const logoMeta = await sharp(logoBuf).metadata();
+  const logoW = logoMeta.width ?? logoMaxW;
+  const logoH = logoMeta.height ?? Math.round(logoMaxW * 0.23);
+
+  const fontSize = Math.max(9, Math.round(size * 0.028));
+  const taglineLines = wrapTagline(TAGLINE, size >= 256 ? 32 : 22);
+  const { buffer: taglineBuf, height: taglineH } = taglineSvg(
+    innerW,
+    taglineLines,
+    fontSize,
+  );
+
+  const gap = Math.round(size * 0.04);
+  const blockH = logoH + gap + taglineH;
+  const top = Math.round((size - blockH) / 2);
+
+  return sharp({
+    create: { width: size, height: size, channels: 4, background: BG },
+  })
+    .composite([
+      {
+        input: logoBuf,
+        left: pad + Math.round((innerW - logoW) / 2),
+        top,
+      },
+      {
+        input: taglineBuf,
+        left: pad,
+        top: top + logoH + gap,
+      },
+    ])
+    .png()
+    .toBuffer();
+}
+
+/** Maskable icon with wordmark (Android launcher + splash use maskable on many devices). */
+async function maskableLaunch(size) {
+  const contentFraction = 0.72;
+  const contentSize = Math.round(size * contentFraction);
+  const logoBuf = await sharp(logoPath)
+    .resize({ width: contentSize, withoutEnlargement: true })
+    .toBuffer();
+  const logoMeta = await sharp(logoBuf).metadata();
+  const logoW = logoMeta.width ?? contentSize;
+  const logoH = logoMeta.height ?? contentSize;
+
+  return sharp({
+    create: { width: size, height: size, channels: 4, background: BG },
+  })
+    .composite([
+      {
+        input: logoBuf,
+        left: Math.round((size - logoW) / 2),
+        top: Math.round((size - logoH) / 2),
+      },
+    ])
+    .png()
+    .toBuffer();
+}
+
 console.log("Generating PWA launch screens…");
 
 const iosSizes = [
@@ -136,5 +194,7 @@ for (const [name, w, h] of iosSizes) {
 
 writePublic("pwa-launch-512.png", await squareLaunch(512));
 writePublic("pwa-launch-192.png", await squareLaunch(192));
+writePublic("pwa-launch-maskable-512.png", await maskableLaunch(512));
+writePublic("pwa-launch-maskable-192.png", await maskableLaunch(192));
 
 console.log("Done ✓");

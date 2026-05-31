@@ -54,6 +54,8 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
     "pwa-launch-1170x2532.png": "image/png",
     "pwa-launch-1125x2436.png": "image/png",
     "pwa-launch-828x1792.png": "image/png",
+    "pwa-launch-maskable-512.png": "image/png",
+    "pwa-launch-maskable-192.png": "image/png",
 }
 
 
