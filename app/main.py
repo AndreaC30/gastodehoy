@@ -24,7 +24,7 @@ from sqlalchemy import text
 from app import database as db
 from app.config import DEFAULT_APP_SECRET, settings as app_settings
 from app.database import Base
-from app.routers import auth, budget, budget_rules, categories, export, goals, push
+from app.routers import admin, auth, budget, budget_rules, categories, export, goals, push
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST_DIR = ROOT / "web" / "dist"
@@ -158,6 +158,7 @@ async def csrf_protection(request: Request, call_next):
 
     return await call_next(request)
 
+app.include_router(admin.router)
 app.include_router(auth.router)
 app.include_router(budget.settings_router)
 app.include_router(budget.summary_router)
@@ -217,12 +218,12 @@ def robots_txt() -> FileResponse | JSONResponse:
     return _dist_root_file("robots.txt", DIST_ROOT_STATIC_FILES["robots.txt"])
 
 
-@app.get("/sitemap.xml", response_model=None)
+@app.api_route("/sitemap.xml", methods=["GET", "HEAD"], response_model=None)
 def sitemap_xml() -> FileResponse | JSONResponse:
     return _dist_root_file("sitemap.xml", DIST_ROOT_STATIC_FILES["sitemap.xml"])
 
 
-@app.get("/og-image.png", response_model=None)
+@app.api_route("/og-image.png", methods=["GET", "HEAD"], response_model=None)
 def og_image() -> FileResponse | JSONResponse:
     return _dist_root_file("og-image.png", DIST_ROOT_STATIC_FILES["og-image.png"])
 

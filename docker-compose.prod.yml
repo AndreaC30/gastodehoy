@@ -7,7 +7,7 @@
 #   docker compose -f /root/hermes-core/docker-compose.yml -f docker-compose.prod.yml up -d --build hermes-core
 #
 # Requiere en .env:
-#   SITE_DOMAIN=gastodehoy.kyadigital.es
+#   SITE_DOMAIN=gastodehoy.es
 #   ACME_EMAIL=tu-email@ejemplo.com
 #   APP_SECRET=<openssl rand -hex 32>
 #   COOKIE_SECURE=true

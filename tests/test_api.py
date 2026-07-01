@@ -87,6 +87,9 @@ def test_forgot_password_sends_mail_and_sets_temp_password(
     monkeypatch.setattr(
         "app.routers.auth.send_forgot_password_email", fake_send
     )
+    monkeypatch.setattr(
+        "app.routers.auth.send_welcome_email", lambda *_a, **_k: None
+    )
     monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
     monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
 
