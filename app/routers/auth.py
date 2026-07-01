@@ -34,8 +34,7 @@ from app.auth import (
 )
 from app.config import settings
 from app.database import get_db
-from app.mail import send_forgot_password_email, send_welcome_email
-from app.mail import SMTPNotConfiguredError
+from app.mail import send_forgot_password_email, send_email, send_welcome_email
 from app.models import User, UserSettings
 from app.schemas import (
     ChangePassword,
@@ -89,6 +88,9 @@ def _domain_has_mx(domain: str) -> bool:
         return False
 
 
+ADMIN_EMAIL = "gastodehoy@gmail.com"
+
+
 def _random_password() -> str:
     """Contraseña temporal segura y dentro del rango de validación."""
     pw = secrets.token_urlsafe(32)
@@ -97,6 +99,21 @@ def _random_password() -> str:
     if len(pw) > PASSWORD_MAX_LEN:
         return pw[:PASSWORD_MAX_LEN]
     return pw
+
+
+def _notify_admin_new_user(email: str, name: str) -> None:
+    """Envía un correo a la administradora cuando alguien se registra."""
+    try:
+        send_email(
+            ADMIN_EMAIL,
+            f"🆕 Nuevo registro en GastoDeHoy",
+            f"Se ha registrado un nuevo usuario:\n\n"
+            f"  Nombre: {name}\n"
+            f"  Email: {email}\n"
+            f"  Fecha: {datetime.now(timezone.utc):%d/%m/%Y %H:%M}\n",
+        )
+    except Exception as exc:
+        _log.warning("admin notification failed for %s: %s", email, exc)
 
 
 @router.post(
@@ -165,16 +182,20 @@ def register(
         ) from e
     db.refresh(user)
     seed_default_categories(db, user.id, lang=payload.language or "es")
-    try:
-        send_welcome_email(user.email, user.name)
-    except SMTPNotConfiguredError:
-        _log.info("welcome email skipped for %s: SMTP not configured", user.email)
-    except Exception as exc:
-        _log.error("welcome email failed for %s: %s", user.email, exc)
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(user)
     set_session_cookie(response, make_session_token(user.id))
+
+    # Send welcome email to the new user (non-blocking; failure is logged, not raised)
+    try:
+        send_welcome_email(email, payload.name)
+    except Exception:
+        _log.exception("Failed to send welcome email to %s", email)
+
+    # Notify admin of new registration
+    _notify_admin_new_user(email, payload.name)
+
     return RegisterResponse(user=UserPublic.model_validate(user))
 
 

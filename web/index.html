@@ -5,7 +5,7 @@
     <script>document.documentElement.style.backgroundColor="#0f172a";window.__gdhSplashStart=Date.now();</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="description" content="GastoDeHoy: descubre cuánto puedes gastar hoy, controla tus gastos diarios y gestiona tu presupuesto con ingresos, egresos y finanzas personales en un solo lugar." />
+    <meta name="description" content="App de presupuesto personal gratis. Calcula cuánto puedes gastar hoy, controla tus gastos diarios, organiza tus finanzas y ahorra más cada mes." />
     <meta name="keywords" content="gastos, control de gastos, presupuesto, finanzas personales, ahorro, dinero, gestión financiera, gastos diarios" />
     <meta name="author" content="GastoDeHoy" />
     <meta name="robots" content="index, follow" />
@@ -29,21 +29,22 @@
     <link rel="apple-touch-startup-image" href="/pwa-launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
     <link rel="apple-touch-startup-image" href="/pwa-launch-1290x2796.png" media="(orientation: portrait)" />
     <link rel="preload" href="/gastodehoy-logo.png" as="image" type="image/png" />
-    <link rel="canonical" href="/" />
+    <link rel="canonical" href="https://gastodehoy.es/" />
 
-    <meta property="og:title" content="GastoDeHoy - Control de Gastos Diarios" />
-    <meta property="og:description" content="GastoDeHoy: descubre cuánto puedes gastar hoy, controla tus gastos diarios y gestiona tu presupuesto con ingresos, egresos y finanzas personales en un solo lugar." />
-    <meta property="og:image" content="/og-image.png" />
-    <meta property="og:url" content="/" />
+    <meta property="og:title" content="GastoDeHoy — App de Presupuesto Personal | Controla tus Gastos" />
+    <meta property="og:description" content="App de presupuesto personal gratis. Calcula cuánto puedes gastar hoy, controla tus gastos diarios, organiza tus finanzas y ahorra más cada mes." />
+    <meta property="og:image" content="https://gastodehoy.es/og-image.png" />
+    <meta property="og:url" content="https://gastodehoy.es/" />
+    <meta property="og:site_name" content="GastoDeHoy" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_ES" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="GastoDeHoy - Control de Gastos Diarios" />
-    <meta name="twitter:description" content="GastoDeHoy: descubre cuánto puedes gastar hoy, controla tus gastos diarios y gestiona tu presupuesto con ingresos, egresos y finanzas personales en un solo lugar." />
-    <meta name="twitter:image" content="/og-image.png" />
+    <meta name="twitter:title" content="GastoDeHoy — App de Presupuesto Personal | Controla tus Gastos" />
+    <meta name="twitter:description" content="App de presupuesto personal gratis. Calcula cuánto puedes gastar hoy, controla tus gastos diarios, organiza tus finanzas y ahorra más cada mes." />
+    <meta name="twitter:image" content="https://gastodehoy.es/og-image.png" />
 
-    <title>GastoDeHoy - Control de Gastos Diarios</title>
+    <title>GastoDeHoy — App de Presupuesto Personal | Controla tus Gastos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
@@ -98,7 +99,24 @@
         color: #94a3b8;
       }
     </style>
-  </head>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "GastoDeHoy",
+      "url": "https://gastodehoy.es",
+      "description": "Controla tus gastos diarios y gestiona tu presupuesto personal. Descubre cuánto puedes gastar hoy.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "inLanguage": "es"
+    }
+    </script>
+</head>
   <body class="antialiased" style="background:#0f172a;margin:0;min-height:100dvh">
     <div id="boot-splash" role="status" aria-live="polite" aria-busy="true">
       <div class="boot-splash__inner">
@@ -116,6 +134,14 @@
         </p>
       </div>
     </div>
+    <noscript>
+      <main style="font-family:sans-serif;max-width:600px;margin:2rem auto;padding:1rem">
+        <h1>GastoDeHoy - Control de Gastos Diarios</h1>
+        <p>Descubre cuánto puedes gastar hoy. Controla tus gastos fijos, variables y ahorro en un solo lugar.</p>
+        <p>App gratuita de finanzas personales para gestionar tu presupuesto mensual. Disponible como PWA en web, iOS y Android.</p>
+        <p>Visita <a href="https://gastodehoy.es">gastodehoy.es</a> para empezar gratis.</p>
+      </main>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
