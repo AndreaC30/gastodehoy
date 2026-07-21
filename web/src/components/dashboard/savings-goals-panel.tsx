@@ -1,11 +1,12 @@
 /** Named savings targets with progress tracking. */
 import { useTranslation } from "react-i18next";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { IoAdd, IoRemove, IoTrashOutline } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { SavingsGoal } from "@/api/types";
 import { money } from "@/lib/format";
+import { hapticSuccess } from "@/lib/haptics";
 
 async function loadGoals() {
   return api<SavingsGoal[]>("/api/savings-goals");
@@ -36,6 +37,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [draft, setDraft] = useState(String(goal.current_amount ?? "0"));
+  const prevPct = useRef(0);
 
   useEffect(() => {
     setDraft(String(goal.current_amount ?? "0"));
@@ -71,6 +73,14 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
   }
 
   const pct = progressPercent(goal.current_amount, goal.target_amount);
+
+  // Haptic pulse when goal reaches 100%
+  useEffect(() => {
+    if (prevPct.current < 100 && pct >= 100) {
+      hapticSuccess();
+    }
+    prevPct.current = pct;
+  }, [pct]);
 
   return (
     <li className="rounded-xl border border-slate-800 bg-slate-950 p-4">

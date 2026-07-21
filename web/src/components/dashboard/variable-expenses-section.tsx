@@ -3,11 +3,16 @@ import { useTranslation } from "react-i18next";
 import { AddVariableExpenseForm } from "@/components/dashboard/add-variable-expense-form";
 import { ChevronInCircle } from "@/components/dashboard/chevron-expand";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SwipeableRow } from "@/components/ui/swipeable-row";
 import { money } from "@/lib/format";
 import { budgetReferenceDate, formatMonthLong } from "@/lib/month-context";
+import { getDensity } from "@/lib/density-preference";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
 import { type FormEvent } from "react";
+import { IoReceiptOutline } from "react-icons/io5";
 
 type Props = {
   categories: ExpenseCategory[];
@@ -45,6 +50,7 @@ export function VariableExpensesSection({
 }: Props) {
   const { t, i18n } = useTranslation();
   const month = formatMonthLong(budgetReferenceDate(referenceDate), i18n.language);
+  const density = getDensity();
   return (
     <section
       data-tour="variable-expenses"
@@ -74,16 +80,42 @@ export function VariableExpensesSection({
           {t("variableExpenses.thisMonth", { month })}
         </h3>
         {isLoading ? (
-          <p className="text-sm text-slate-500">{t("variableExpenses.loading")}</p>
+          <div className="space-y-2" aria-label={t("common.loading")}>
+            <Skeleton className="h-16 w-full rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-lg" />
+          </div>
         ) : (
           <>
             <ul className="space-y-2">
-              {visibleItems.map((it) => {
+              {visibleItems.length > 0 ? (
+                visibleItems.map((it) => {
                 const CatIcon = getCategoryIcon(it.category_icon);
                 return (
-                  <li
+                  <SwipeableRow
                     key={it.id}
-                    className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                    density={density}
+                    actions={
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => onEdit(it)}
+                          className={`min-h-11 rounded-lg border border-slate-600 px-2.5 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800 ${FOCUS_RING}`}
+                          aria-label={t("variableExpenses.editLabel", { amount: `${money(it.amount)}${it.note ? `, ${it.note}` : ""}` })}
+                        >
+                          {t("common.edit")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDelete(it.id)}
+                          disabled={deletePending}
+                          className={`min-h-11 rounded-lg border border-rose-500/40 px-2.5 py-1.5 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
+                          aria-label={t("variableExpenses.deleteLabel", { amount: money(it.amount) })}
+                        >
+                          {t("common.delete")}
+                        </button>
+                      </>
+                    }
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-center gap-2">
@@ -95,7 +127,7 @@ export function VariableExpensesSection({
                           {money(it.amount)}
                         </p>
                       </div>
-                      <p className="truncate text-sm text-slate-500">
+                      <p className="truncate text-sm text-slate-500 data-[density=compact]:text-xs" data-density={density}>
                         {it.occurred_at}
                         {it.note ? ` · ${it.note}` : ""}
                         {it.category_name && !it.note
@@ -103,28 +135,10 @@ export function VariableExpensesSection({
                           : ""}
                       </p>
                     </div>
-                    <div className="flex shrink-0 gap-1.5 self-end sm:self-center">
-                      <button
-                        type="button"
-                        onClick={() => onEdit(it)}
-                        className={`min-h-11 rounded-lg border border-slate-600 px-2.5 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800 ${FOCUS_RING}`}
-                        aria-label={t("variableExpenses.editLabel", { amount: `${money(it.amount)}${it.note ? `, ${it.note}` : ""}` })}
-                      >
-                        {t("common.edit")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDelete(it.id)}
-                        disabled={deletePending}
-                        className={`min-h-11 rounded-lg border border-rose-500/40 px-2.5 py-1.5 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
-                        aria-label={t("variableExpenses.deleteLabel", { amount: money(it.amount) })}
-                      >
-                        {t("common.delete")}
-                      </button>
-                    </div>
-                  </li>
+                  </SwipeableRow>
                 );
-              })}
+              })
+              ) : null}
             </ul>
             {needsToggle && (
               <button
@@ -140,7 +154,11 @@ export function VariableExpensesSection({
               </button>
             )}
             {items.length === 0 && (
-              <p className="mt-2 text-sm text-slate-600">{t("variableExpenses.empty")}</p>
+              <EmptyState
+                icon={<IoReceiptOutline className="h-12 w-12" />}
+                title={t("emptyStates.noVariableExpenses")}
+                description={t("emptyStates.noVariableExpensesDesc")}
+              />
             )}
           </>
         )}

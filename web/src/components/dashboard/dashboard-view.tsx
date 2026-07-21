@@ -43,6 +43,9 @@ import {
   markDashboardTourCompleted,
 } from "@/lib/guided-tour-preference";
 import { maybeShowDailyNotification } from "@/lib/daily-notification";
+import { hapticTick } from "@/lib/haptics";
+import { useUndoableDelete } from "@/lib/use-undoable-delete";
+import { getDensity } from "@/lib/density-preference";
 
 async function loadSummary() {
   return api<Summary>("/api/summary");
@@ -88,6 +91,10 @@ export function Dashboard({ profileName }: Props) {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [toastUndo, setToastUndo] = useState<{
+    label: string;
+    action: () => void;
+  } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [showSavingsGoals, setShowSavingsGoals] = useState(false);
@@ -110,9 +117,13 @@ export function Dashboard({ profileName }: Props) {
 
   useEffect(() => {
     if (!toastMsg) return;
-    const t = window.setTimeout(() => setToastMsg(null), 2800);
-    return () => window.clearTimeout(t);
-  }, [toastMsg]);
+    const duration = toastUndo ? 5000 : 2800;
+    const timer = window.setTimeout(() => {
+      setToastMsg(null);
+      setToastUndo(null);
+    }, duration);
+    return () => window.clearTimeout(timer);
+  }, [toastMsg, toastUndo]);
 
   const summaryQ = useQuery({ queryKey: ["summary"], queryFn: loadSummary });
   const settingsQ = useQuery({ queryKey: ["settings"], queryFn: loadSettings });
@@ -200,30 +211,43 @@ export function Dashboard({ profileName }: Props) {
         body: JSON.stringify(body),
       }),
     onSuccess: () => {
+      hapticTick();
       setToastMsg(t("toasts.expenseRegistered"));
       void invalidateAll();
     },
     onError: (e: Error) => setToastMsg(e.message),
   });
 
-  const delFixed = useMutation({
-    mutationFn: (id: number) =>
-      api(`/api/fixed-expenses/${id}`, { method: "DELETE" }),
-    onSuccess: () => {
-      setToastMsg(t("toasts.fixedRemoved"));
+  const expenseUndo = useUndoableDelete<VariableExpense>({
+    deleteFn: (id) =>
+      api(`/api/expenses/${id}`, { method: "DELETE" }),
+    getItems: () => qc.getQueryData<VariableExpense[]>(["expenses"]) ?? [],
+    setItems: (items) => qc.setQueryData(["expenses"], items),
+    onRemoved: () => {
+      setToastMsg(t("toasts.expenseDeletedUndo"));
+      setToastUndo(null);
       void invalidateAll();
     },
-    onError: (e: Error) => setToastMsg(e.message),
+    onRestored: () => {
+      setToastMsg(null);
+      setToastUndo(null);
+    },
   });
 
-  const delExpense = useMutation({
-    mutationFn: (id: number) =>
-      api(`/api/expenses/${id}`, { method: "DELETE" }),
-    onSuccess: () => {
-      setToastMsg(t("toasts.expenseDeleted"));
+  const fixedUndo = useUndoableDelete<FixedExpense>({
+    deleteFn: (id) =>
+      api(`/api/fixed-expenses/${id}`, { method: "DELETE" }),
+    getItems: () => qc.getQueryData<FixedExpense[]>(["fixed"]) ?? [],
+    setItems: (items) => qc.setQueryData(["fixed"], items),
+    onRemoved: () => {
+      setToastMsg(t("toasts.fixedRemovedUndo"));
+      setToastUndo(null);
       void invalidateAll();
     },
-    onError: (e: Error) => setToastMsg(e.message),
+    onRestored: () => {
+      setToastMsg(null);
+      setToastUndo(null);
+    },
   });
 
   const settings = settingsQ.data;
@@ -319,6 +343,7 @@ export function Dashboard({ profileName }: Props) {
       <main
         id="main-content"
         tabIndex={-1}
+        data-density={getDensity()}
         className="relative z-10 mx-auto max-w-4xl space-y-4 px-3 py-5 pb-20 sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl"
       >
         {error && (
@@ -360,11 +385,18 @@ export function Dashboard({ profileName }: Props) {
             expanded={expandVariableList}
             hiddenCount={variableHiddenCount}
             addPending={addExpense.isPending}
-            deletePending={delExpense.isPending}
+            deletePending={expenseUndo.isPending}
             onSubmit={onExpenseSubmit}
             onToggleExpand={() => setExpandVariableList((v) => !v)}
             onEdit={setEditingVariable}
-            onDelete={(id) => delExpense.mutate(id)}
+            onDelete={(id) => {
+              expenseUndo.perform(id);
+              setToastMsg(t("toasts.undoDelete"));
+              setToastUndo({
+                label: t("toasts.undoAction"),
+                action: () => expenseUndo.undo(),
+              });
+            }}
           />
           </div>
           <div className="min-w-0">
@@ -377,12 +409,19 @@ export function Dashboard({ profileName }: Props) {
             hiddenCount={fixedHiddenCount}
             formIcon={fixedFormIcon}
             pending={addFixed.isPending}
-            deletePending={delFixed.isPending}
+            deletePending={fixedUndo.isPending}
             onToggleExpand={() => setExpandFixedList((v) => !v)}
             onFormIconChange={setFixedFormIcon}
             onSubmit={onFixedSubmit}
             onEdit={setEditingFixed}
-            onDelete={(id) => delFixed.mutate(id)}
+            onDelete={(id) => {
+              fixedUndo.perform(id);
+              setToastMsg(t("toasts.undoDelete"));
+              setToastUndo({
+                label: t("toasts.undoAction"),
+                action: () => fixedUndo.undo(),
+              });
+            }}
           />
           </div>
         </div>
@@ -494,11 +533,25 @@ export function Dashboard({ profileName }: Props) {
       <div
         className={`pointer-events-none fixed bottom-5 left-4 right-4 z-50 mx-auto max-w-md break-words rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-center text-base text-slate-100 shadow-2xl transition-all duration-200 ${
           toastMsg ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-        }`}
+        } ${toastUndo ? "pointer-events-auto" : ""}`}
         role="status"
         aria-live="polite"
       >
-        {toastMsg}
+        <span>{toastMsg}</span>
+        {toastUndo && (
+          <>{" "}
+          <button
+            type="button"
+            onClick={() => {
+              toastUndo.action();
+              setToastMsg(null);
+              setToastUndo(null);
+            }}
+            className="font-semibold text-teal-400 underline decoration-teal-500/50 underline-offset-2 hover:text-teal-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+          >
+            {toastUndo.label}
+          </button></>
+        )}
       </div>
     </div>
   );

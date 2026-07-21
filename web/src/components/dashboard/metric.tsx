@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import { TYPE_EYEBROW } from "@/lib/typography";
 
 type Props = {
   label: string;
-  value: string;
+  value: ReactNode;
   highlight?: boolean;
 };
 

@@ -173,6 +173,13 @@
     "lang_fr": "Français",
     "lang_de": "Deutsch"
   },
+  "emptyStates": {
+    "noVariableExpenses": "Sin gastos este mes",
+    "noVariableExpensesDesc": "Aún no has registrado ningún gasto variable. Añade el primero para empezar a seguir tu presupuesto.",
+    "noFixedExpenses": "Sin gastos fijos",
+    "noFixedExpensesDesc": "No tienes gastos fijos registrados. Añade alquiler, suscripciones o seguros para un cálculo más preciso.",
+    "ctaAdd": "Añadir"
+  },
   "variableExpenses": {
     "title": "Gastos del día a día",
     "subtitle": "Suma aquí compras y gastos sueltos del mes",
@@ -243,6 +250,10 @@
     "dailyNotifyTitle": "Aviso diario",
     "dailyNotifyDesc": "Mensaje positivo al abrir la app y, si el servidor tiene VAPID, también por push con la app cerrada (cron diario). Máximo uno por día al abrir.",
     "notifyError": "Activa las notificaciones en los ajustes del navegador o del sistema para recibir el aviso diario.",
+    "densityTitle": "Vista compacta",
+    "densityDesc": "Reduce el espacio entre elementos para ver más contenido en pantalla",
+    "densityComfortable": "Confortable",
+    "densityCompact": "Compacta",
     "extraDesc": "Bonus, nómina extra… Solo cuentan si la fecha cae en este mes. Lo que reserves aquí no suma a «Hoy puedes gastar»; el resto sí.",
     "extraAmount": "Cantidad (€)",
     "extraAmountPlaceholder": "Ej. 150",
@@ -452,6 +463,10 @@
     "expenseRegistered": "Gasto registrado",
     "fixedRemoved": "Gasto fijo quitado",
     "expenseDeleted": "Gasto borrado",
+    "undoDelete": "Gasto eliminado",
+    "undoAction": "Deshacer",
+    "expenseDeletedUndo": "Gasto borrado",
+    "fixedRemovedUndo": "Gasto fijo quitado",
     "done": "Listo",
     "extraIncomeUpdated": "Ingresos extra actualizados",
     "changesSaved": "Cambios guardados",
