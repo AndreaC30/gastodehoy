@@ -2,6 +2,8 @@ import { useTranslation } from "react-i18next";
 import type { Summary } from "@/api/types";
 import { Metric } from "@/components/dashboard/metric";
 import { money, savingsLabel } from "@/lib/format";
+import { useAnimatedNumber } from "@/lib/use-animated-number";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 import { TYPE_BODY, TYPE_EYEBROW } from "@/lib/typography";
 
@@ -13,6 +15,9 @@ type Props = {
 
 export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
   const { t } = useTranslation();
+  const animatedSpend = useAnimatedNumber(
+    summary?.suggested_spend_today != null ? Number(summary.suggested_spend_today) : undefined,
+  );
 
   return (
     <section
@@ -30,8 +35,15 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
                 aria-hidden
               />
             ) : (
-              <p className="break-words text-2xl font-bold tabular-nums tracking-tight text-teal-400 min-[375px]:text-3xl sm:text-4xl md:text-5xl">
-                {money(summary?.suggested_spend_today)}
+              <p
+                className="break-words text-2xl font-bold tabular-nums tracking-tight text-teal-400 min-[375px]:text-3xl sm:text-4xl md:text-5xl"
+                aria-label={
+                  summary?.suggested_spend_today != null
+                    ? money(summary.suggested_spend_today)
+                    : undefined
+                }
+              >
+                {animatedSpend}
               </p>
             )}
           </div>
@@ -49,35 +61,70 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
           <Metric
             label={t("metrics.savings")}
             value={
-              summary
-                ? savingsLabel(
-                    summary.savings_amount,
-                    summary.savings_percent,
-                    summary.savings_mode,
-                  )
-                : "—"
+              summaryPending ? (
+                <Skeleton className="h-5 w-20" />
+              ) : summary ? (
+                savingsLabel(
+                  summary.savings_amount,
+                  summary.savings_percent,
+                  summary.savings_mode,
+                )
+              ) : (
+                "—"
+              )
             }
           />
-          <Metric label={t("metrics.fixedExpenses")} value={money(summary?.fixed_expenses_total)} />
+          <Metric
+            label={t("metrics.fixedExpenses")}
+            value={
+              summaryPending ? (
+                <Skeleton className="h-5 w-16" />
+              ) : (
+                money(summary?.fixed_expenses_total)
+              )
+            }
+          />
           <Metric
             label={t("metrics.variableExpenses")}
-            value={money(summary?.variable_spent_month)}
+            value={
+              summaryPending ? (
+                <Skeleton className="h-5 w-16" />
+              ) : (
+                money(summary?.variable_spent_month)
+              )
+            }
           />
           <Metric
             label={t("metrics.extraIncome")}
-            value={money(summary?.extra_income_month)}
+            value={
+              summaryPending ? (
+                <Skeleton className="h-5 w-16" />
+              ) : (
+                money(summary?.extra_income_month)
+              )
+            }
           />
           <Metric
             label={t("metrics.remaining")}
-            value={money(summary?.remaining_this_month)}
+            value={
+              summaryPending ? (
+                <Skeleton className="h-5 w-16" />
+              ) : (
+                money(summary?.remaining_this_month)
+              )
+            }
             highlight
           />
           <Metric
             label={t("metrics.daysLeft")}
             value={
-              summary?.days_remaining_in_month != null
-                ? String(summary.days_remaining_in_month)
-                : "—"
+              summaryPending ? (
+                <Skeleton className="h-5 w-8" />
+              ) : summary?.days_remaining_in_month != null ? (
+                String(summary.days_remaining_in_month)
+              ) : (
+                "—"
+              )
             }
           />
         </div>

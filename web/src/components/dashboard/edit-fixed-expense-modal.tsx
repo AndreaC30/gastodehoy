@@ -24,6 +24,9 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const panelRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+  const [dragging, setDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
   useBodyScrollLock(true);
   useDialogA11y(true, panelRef);
 
@@ -34,6 +37,31 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  function onTouchStart(e: React.TouchEvent) {
+    const panel = panelRef.current;
+    if (!panel) return;
+    if (panel.scrollTop > 5) return;
+    touchStartY.current = e.touches[0].clientY;
+    setDragging(true);
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (!dragging) return;
+    const delta = e.touches[0].clientY - touchStartY.current;
+    if (delta < 0) return;
+    const clamped = Math.min(delta, 120);
+    setDragOffset(clamped);
+  }
+
+  function onTouchEnd() {
+    if (!dragging) return;
+    setDragging(false);
+    if (dragOffset > 80) {
+      onClose();
+    }
+    setDragOffset(0);
+  }
 
   const saveMut = useMutation({
     mutationFn: (body: { name: string; amount: string; icon: string }) =>
@@ -76,8 +104,14 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5"
+        style={{ transform: `translateY(${dragOffset}px)` }}
+        className={`modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl transition-transform duration-300 sm:rounded-2xl sm:p-5 ${dragging ? "transition-none" : ""}`}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
+        {/* Drag handle – visible only on mobile */}
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-slate-600 sm:hidden" />
         <div className="flex items-center justify-between gap-3">
           <h2 id="edit-fixed-title" className="text-lg font-bold">
             Editar {t("fixedExpenses.title")}

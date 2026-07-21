@@ -25,6 +25,7 @@ import {
 } from "@/lib/daily-notification-preference";
 import { requestNotificationPermission } from "@/lib/daily-notification";
 import { registerWebPush, unregisterWebPush } from "@/lib/push-subscription";
+import { getDensity, setDensity, type Density } from "@/lib/density-preference";
 
 type Props = {
   initial: Settings;
@@ -98,7 +99,11 @@ export function SettingsModal({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [dailyNotify, setDailyNotify] = useState(isDailyNotificationEnabled);
+  const [density, setDensityState] = useState<Density>(getDensity);
   const panelRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+  const [dragging, setDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
 
   useBodyScrollLock(true);
   useDialogA11y(true, panelRef);
@@ -140,6 +145,31 @@ export function SettingsModal({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  function onTouchStart(e: React.TouchEvent) {
+    const panel = panelRef.current;
+    if (!panel) return;
+    if (panel.scrollTop > 5) return;
+    touchStartY.current = e.touches[0].clientY;
+    setDragging(true);
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (!dragging) return;
+    const delta = e.touches[0].clientY - touchStartY.current;
+    if (delta < 0) return;
+    const clamped = Math.min(delta, 120);
+    setDragOffset(clamped);
+  }
+
+  function onTouchEnd() {
+    if (!dragging) return;
+    setDragging(false);
+    if (dragOffset > 80) {
+      onClose();
+    }
+    setDragOffset(0);
+  }
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -209,9 +239,15 @@ export function SettingsModal({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 pr-3 shadow-2xl shadow-black/50 sm:rounded-2xl sm:p-5 sm:pr-4"
+        style={{ transform: `translateY(${dragOffset}px)` }}
+        className={`modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 pr-3 shadow-2xl shadow-black/50 transition-transform duration-300 sm:rounded-2xl sm:p-5 sm:pr-4 ${dragging ? "transition-none" : ""}`}
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
+        {/* Drag handle – visible only on mobile */}
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-slate-600 sm:hidden" />
         <header className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h2
@@ -372,6 +408,27 @@ export function SettingsModal({
                 <span className="font-medium text-slate-100">{t("incomeSettings.dailyNotifyTitle")}</span>
                 <span className="mt-0.5 block text-slate-400">
                   {t("incomeSettings.dailyNotifyDesc")}
+                </span>
+              </span>
+            </label>
+            )}
+
+            {!isFocused && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3">
+              <input
+                type="checkbox"
+                checked={density === "compact"}
+                className="mt-1 h-4 w-4 rounded border-slate-600 text-sky-500 focus:ring-sky-500"
+                onChange={(e) => {
+                  const next: Density = e.target.checked ? "compact" : "comfortable";
+                  setDensity(next);
+                  setDensityState(next);
+                }}
+              />
+              <span className="text-sm text-slate-300">
+                <span className="font-medium text-slate-100">{t("incomeSettings.densityTitle")}</span>
+                <span className="mt-0.5 block text-slate-400">
+                  {t("incomeSettings.densityDesc")}
                 </span>
               </span>
             </label>
