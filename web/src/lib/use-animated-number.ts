@@ -17,10 +17,17 @@ export function useAnimatedNumber(
   );
 
   const animRef = useRef<number | null>(null);
-  const startValueRef = useRef(0);
-  const startTimeRef = useRef(0);
+  const displayedRef = useRef(displayed);
+  displayedRef.current = displayed;
+
+  // Track previous target to detect actual changes
+  const prevTargetRef = useRef(target);
 
   useEffect(() => {
+    // Only animate if target genuinely changed
+    if (target === prevTargetRef.current) return;
+    prevTargetRef.current = target;
+
     if (target === undefined || target === null || target === "") {
       setDisplayed(undefined);
       return;
@@ -32,13 +39,17 @@ export function useAnimatedNumber(
       return;
     }
 
-    // Start from whatever is currently displayed (or 0 for the very first render).
-    const start = displayed ?? 0;
-    startValueRef.current = start;
-    startTimeRef.current = performance.now();
+    // Start from the current displayed value (via ref to avoid stale closure)
+    const start = displayedRef.current ?? 0;
+    const startTime = performance.now();
+
+    // If start and target are the same, skip animation
+    if (Math.abs(numericTarget - start) < 0.001) return;
+
+    if (animRef.current) cancelAnimationFrame(animRef.current);
 
     const tick = (now: number) => {
-      const elapsed = now - startTimeRef.current;
+      const elapsed = now - startTime;
       const t = Math.min(elapsed / duration, 1);
       // ease-out cubic
       const eased = 1 - Math.pow(1 - t, 3);
@@ -50,7 +61,6 @@ export function useAnimatedNumber(
       }
     };
 
-    if (animRef.current) cancelAnimationFrame(animRef.current);
     animRef.current = requestAnimationFrame(tick);
 
     return () => {
