@@ -14,3 +14,10 @@ tools/pillow_pkg/
 
 .env.test
 PLIEGO.md
+
+# Secrets & tokens
+*.pickle
+*.token
+*.pem
+*.key
+youtube_uploader.py
