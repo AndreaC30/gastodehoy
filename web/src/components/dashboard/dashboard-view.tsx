@@ -8,7 +8,8 @@ import { AppBackdrop } from "@/components/app-backdrop";
 import { SettingsModal } from "@/components/settings-modal";
 import { CategoryManager } from "@/components/dashboard/category-manager";
 import { DailyHero } from "@/components/dashboard/daily-hero";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { Sidebar, type DashboardNavAction } from "@/components/dashboard/sidebar-nav";
+import { BrandLogo } from "@/components/brand-logo";
 import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
 import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
 import { FixedExpensesSection } from "@/components/dashboard/fixed-expenses-section";
@@ -108,11 +109,9 @@ export function Dashboard({ profileName }: Props) {
   const [exportBusy, setExportBusy] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   function returnToMenu(closePanel: () => void) {
     closePanel();
-    setMenuOpen(true);
   }
 
   useEffect(() => {
@@ -309,43 +308,46 @@ export function Dashboard({ profileName }: Props) {
     }
   }
 
+  function handleNavigate(action: DashboardNavAction) {
+    switch (action) {
+      case "settings": setShowSettings(true); break;
+      case "categories": setShowCategoryManager(true); break;
+      case "savings-goals": setShowSavingsGoals(true); break;
+      case "guided-tour": setShowTour(true); break;
+    }
+  }
+
   return (
-    <div className={APP_SHELL_CLASS}>
-      <AppBackdrop />
-      <DashboardHeader
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar
         profileName={profileName}
         settingsReady={!!settingsQ.data}
-        menuOpen={menuOpen}
-        onMenuOpenChange={setMenuOpen}
-        onOpenSettings={() => {
-          setMenuOpen(false);
-          setShowSettings(true);
-        }}
-        onOpenCategories={() => {
-          setMenuOpen(false);
-          setShowCategoryManager(true);
-        }}
-        onOpenSavingsGoals={() => {
-          setMenuOpen(false);
-          setShowSavingsGoals(true);
-        }}
-        onExport={() => {
-          setMenuOpen(false);
-          void handleExport();
-        }}
-        onStartTour={() => {
-          setMenuOpen(false);
-          setShowTour(true);
-        }}
         exportBusy={exportBusy}
+        onNavigate={handleNavigate}
+        onExport={() => void handleExport()}
       />
 
-      <main
-        id="main-content"
-        tabIndex={-1}
-        data-density={getDensity()}
-        className="relative z-10 mx-auto max-w-4xl space-y-4 px-3 py-5 pb-20 sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl"
-      >
+      <div className={`flex-1 min-w-0 flex flex-col ${APP_SHELL_CLASS} overflow-y-auto`}>
+        <AppBackdrop />
+
+        {/* Simplified header — branding only */}
+        <header className="relative z-10 border-b border-slate-800/80 px-3 py-4 sm:px-4 sm:py-5">
+          <div className="mx-auto max-w-4xl lg:max-w-6xl">
+            <h1 className="m-0 leading-none">
+              <BrandLogo variant="header" />
+            </h1>
+            <p className="mt-1.5 max-w-md text-sm text-slate-400 sm:text-base">
+              {t("header.tagline")}
+            </p>
+          </div>
+        </header>
+
+        <main
+          id="main-content"
+          tabIndex={-1}
+          data-density={getDensity()}
+          className="relative z-10 mx-auto w-full max-w-4xl space-y-4 px-3 py-5 pb-20 sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl"
+        >
         {error && (
           <div
             className="rounded-xl border border-rose-500/40 bg-rose-950/40 px-3 py-2.5 text-xs text-rose-200 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
@@ -552,6 +554,7 @@ export function Dashboard({ profileName }: Props) {
             {toastUndo.label}
           </button></>
         )}
+      </div>
       </div>
     </div>
   );
