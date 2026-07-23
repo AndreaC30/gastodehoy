@@ -206,7 +206,7 @@ export function Sidebar({
         type="button"
         onClick={() => setMobileOpen(true)}
         data-tour="menu"
-        className={`md:hidden fixed top-3 right-3 z-30 min-h-11 min-w-11 flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900/95 backdrop-blur text-slate-200 shadow-lg ${FOCUS_RING}`}
+        className={`md:hidden fixed top-3 left-3 z-30 min-h-11 min-w-11 flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900/95 backdrop-blur text-slate-200 shadow-lg ${FOCUS_RING}`}
         aria-label={t("header.menu")}
         aria-expanded={mobileOpen}
         aria-haspopup="dialog"
