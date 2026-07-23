@@ -1,4 +1,5 @@
 import { type ReactNode, useRef, useState, useEffect, useCallback } from "react";
+import { INNER_CARD } from "@/lib/ui-a11y";
 
 const SWIPE_THRESHOLD = 80; // px to reveal actions
 const MAX_SWIPE = 140; // maximum swipe distance
@@ -69,7 +70,7 @@ export function SwipeableRow({ children, actions, density }: Props) {
     return (
       <li
         {...densityAttr}
-        className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 data-[density=compact]:py-1.5"
+        className={`flex flex-col gap-2 ${INNER_CARD} px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 data-[density=compact]:py-1.5`}
       >
         {children}
         <div className="flex shrink-0 gap-1.5 self-end sm:self-center">
@@ -85,7 +86,7 @@ export function SwipeableRow({ children, actions, density }: Props) {
   return (
     <li
       {...densityAttr}
-      className="relative overflow-hidden rounded-lg border border-slate-800 bg-slate-900"
+      className={`relative overflow-hidden ${INNER_CARD}`}
       onClick={isRevealed ? dismissSwipe : undefined}
     >
       {/* Action buttons behind (absolute, right side) */}

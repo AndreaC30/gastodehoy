@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
+import { BTN_SECONDARY } from "@/lib/ui-a11y";
 
 type Props = {
-  icon: ReactNode; // inline SVG or icon component
+  icon: ReactNode;
   title: string;
   description: string;
   action?: { label: string; onClick: () => void };
@@ -17,7 +18,7 @@ export function EmptyState({ icon, title, description, action }: Props) {
         <button
           type="button"
           onClick={action.onClick}
-          className="mt-4 rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700"
+          className={`mt-4 ${BTN_SECONDARY}`}
         >
           {action.label}
         </button>

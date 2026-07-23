@@ -7,6 +7,7 @@ import { api } from "@/api/client";
 import type { SavingsGoal } from "@/api/types";
 import { money } from "@/lib/format";
 import { hapticSuccess } from "@/lib/haptics";
+import { FOCUS_RING, BTN_PRIMARY } from "@/lib/ui-a11y";
 
 async function loadGoals() {
   return api<SavingsGoal[]>("/api/savings-goals");
@@ -140,7 +141,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commitDraft}
             disabled={patchMut.isPending}
-            className="w-24 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-right text-sm outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/30"
+            className={`w-24 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-right text-sm ${FOCUS_RING}`}
             aria-label={t("savingsGoals.savedAmount", { name: goal.name })}
           />
           <button
@@ -263,7 +264,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
             placeholder={t("savingsGoals.namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full min-w-0 max-w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/30 sm:min-w-0 sm:flex-1"
+            className={`w-full min-w-0 max-w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm sm:min-w-0 sm:flex-1 ${FOCUS_RING}`}
           />
           <input
             type="number"
@@ -273,12 +274,12 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
             placeholder={t("savingsGoals.targetPlaceholder")}
             value={target}
             onChange={(e) => setTarget(e.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/30 sm:w-32"
+            className={`w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm sm:w-32 ${FOCUS_RING}`}
           />
           <button
             type="submit"
             disabled={createMut.isPending}
-            className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
+            className={BTN_PRIMARY}
           >
             {t("savingsGoals.addGoal")}
           </button>
