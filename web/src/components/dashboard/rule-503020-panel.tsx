@@ -60,7 +60,7 @@ export function Rule503020Panel() {
   if (isPending) {
     return (
       <div
-        className="h-40 animate-pulse rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)]"
+        className="h-40 animate-pulse rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]"
         aria-label={t("rule503020.title")}
       />
     );
@@ -70,7 +70,7 @@ export function Rule503020Panel() {
 
   return (
     <section
-      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-4 shadow-lg shadow-black/20"
+      className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] px-4 py-4"
       aria-label={t("rule503020.title")}
     >
       <div className="flex items-start gap-2">
@@ -97,7 +97,7 @@ export function Rule503020Panel() {
           data.needs_pct,
           data.target_needs_pct,
           data.needs_spent,
-          "bg-teal-500/70",
+          "bg-[var(--color-ok)]/70",
           t("rule503020.of"),
         )}
         {pctBar(
@@ -105,7 +105,7 @@ export function Rule503020Panel() {
           data.wants_pct,
           data.target_wants_pct,
           data.wants_spent,
-          "bg-sky-500/70",
+          "bg-[var(--color-accent)]/70",
           t("rule503020.of"),
         )}
         {pctBar(
@@ -113,7 +113,7 @@ export function Rule503020Panel() {
           data.savings_pct,
           data.target_savings_pct,
           data.savings_amount,
-          "bg-emerald-500/70",
+          "bg-[var(--color-warn)]/70",
           t("rule503020.of"),
         )}
       </div>

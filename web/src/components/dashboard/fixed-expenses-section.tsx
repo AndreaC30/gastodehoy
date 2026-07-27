@@ -54,7 +54,7 @@ export function FixedExpensesSection({
   return (
     <section
       data-tour="fixed-expenses"
-      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-lg shadow-black/20"
+      className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]"
     >
       <div className="border-b border-[var(--color-border)] px-5 py-4">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">{t("fixedExpenses.title")}</h2>

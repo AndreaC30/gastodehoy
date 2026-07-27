@@ -62,7 +62,7 @@ export function DashboardHeader({
             <h1 className={`m-0 leading-none ${TYPE_DISPLAY}`} style={{ fontFamily: 'var(--font-display)' }}>
               <BrandLogo variant="header" />
             </h1>
-            <p className="mt-1.5 max-w-md text-base text-slate-400 sm:mt-2">
+            <p className="mt-1.5 max-w-md text-base text-[var(--color-text-muted)] sm:mt-2">
               {t("header.tagline")}
             </p>
           </div>
@@ -71,7 +71,7 @@ export function DashboardHeader({
             data-tour="menu"
             className="flex shrink-0 flex-col items-end gap-2"
           >
-            <p className="hidden text-xs uppercase tracking-widest text-slate-500 sm:block sm:text-sm">
+            <p className="hidden text-xs uppercase tracking-widest text-[var(--color-text-dim)] sm:block sm:text-sm">
               {t("header.profile")}
             </p>
             <p className="hidden max-w-[10rem] truncate text-sm font-semibold text-[var(--color-accent)] sm:block">
@@ -80,7 +80,7 @@ export function DashboardHeader({
             <button
               type="button"
               onClick={() => onMenuOpenChange(true)}
-              className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-3 py-2 text-base font-medium text-slate-200 shadow-sm transition-colors hover:border-[var(--color-accent-border)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-accent)] ${FOCUS_RING}`}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-3 py-2 text-base font-medium text-[var(--color-text)] shadow-sm transition-colors hover:border-[var(--color-accent-border)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-accent)] ${FOCUS_RING}`}
               aria-expanded={menuOpen}
               aria-controls="dashboard-nav-panel"
               aria-haspopup="dialog"

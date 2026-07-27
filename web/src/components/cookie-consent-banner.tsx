@@ -80,12 +80,12 @@ export function CookieConsentBanner() {
   // Banner already dismissed
   if (consent !== null) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-800 bg-slate-950/95 backdrop-blur-sm">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-3xl items-center justify-end px-4 py-1.5">
           <button
             type="button"
             onClick={handleManageCookies}
-            className="text-xs text-slate-500 underline-offset-2 hover:text-slate-300 hover:underline focus-visible:rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
+            className="text-xs text-[var(--color-text-dim)] underline-offset-2 hover:text-[var(--color-text-muted)] hover:underline focus-visible:rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
           >
             {t("cookieConsent.manage")}
           </button>
@@ -95,15 +95,15 @@ export function CookieConsentBanner() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-700/80 bg-slate-900/95 shadow-lg shadow-black/30 backdrop-blur-md">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border-subtle)] bg-[var(--color-panel)]/95 shadow-[var(--shadow-surface)] backdrop-blur-md">
       <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-4 sm:py-3">
         {/* Message */}
-        <p className="flex-1 text-sm leading-relaxed text-slate-300">
+        <p className="flex-1 text-sm leading-relaxed text-[var(--color-text-muted)]">
           <span aria-hidden className="mr-1.5">
             🍪
           </span>
           {t("cookieConsent.message")}{" "}
-          <span className="text-slate-500">
+          <span className="text-[var(--color-text-dim)]">
             {t("cookieConsent.privacyLink")}
           </span>
         </p>
@@ -113,14 +113,14 @@ export function CookieConsentBanner() {
           <button
             type="button"
             onClick={handleDecline}
-            className="min-h-11 rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:border-slate-500 hover:bg-slate-800/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
+            className="min-h-11 rounded-lg border border-[var(--color-border-subtle)] px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-panel-elevated)]/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
           >
             {t("cookieConsent.necessaryOnly")}
           </button>
           <button
             type="button"
             onClick={handleAccept}
-            className="min-h-11 rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-black/20 transition-all hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
+            className="min-h-11 rounded-xl bg-[var(--color-accent)] px-5 py-2 text-sm font-semibold text-[var(--color-accent-ink)] shadow-[var(--shadow-surface)] transition-all hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
           >
             {t("cookieConsent.accept")}
           </button>

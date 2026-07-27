@@ -76,7 +76,7 @@ export function SpendingChart({ breakdown, total }: Props) {
   );
 
   return (
-    <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-lg shadow-black/20 sm:p-5">
+    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] p-4 sm:p-5">
       <h2 className="text-lg font-bold tracking-tight text-[var(--color-text)]">
         {t("spendingChart.title")}
       </h2>

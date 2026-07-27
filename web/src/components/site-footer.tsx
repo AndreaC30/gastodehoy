@@ -11,8 +11,8 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="rounded-xl border border-slate-800 bg-slate-900/30 px-4 py-4 text-center text-xs leading-relaxed text-slate-500">
-      <p className="text-slate-400">
+    <footer className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/30 px-4 py-4 text-center text-xs leading-relaxed text-[var(--color-text-dim)]">
+      <p className="text-[var(--color-text-muted)]">
         {t("footer.copyright", { year })}
       </p>
       <p className="mt-2">
@@ -22,7 +22,7 @@ export function SiteFooter() {
         <button
           type="button"
           onClick={() => showLegalPage("privacy")}
-          className="text-teal-400/80 underline decoration-teal-500/40 underline-offset-2 hover:text-teal-300"
+          className="text-[var(--color-accent)]/80 underline decoration-[var(--color-accent-border)] underline-offset-2 hover:text-[var(--color-accent)]"
         >
           {t("footer.privacy")}
         </button>
@@ -30,7 +30,7 @@ export function SiteFooter() {
         <button
           type="button"
           onClick={() => showLegalPage("legal")}
-          className="text-teal-400/80 underline decoration-teal-500/40 underline-offset-2 hover:text-teal-300"
+          className="text-[var(--color-accent)]/80 underline decoration-[var(--color-accent-border)] underline-offset-2 hover:text-[var(--color-accent)]"
         >
           {t("footer.legalLink")}
         </button>
@@ -40,7 +40,7 @@ export function SiteFooter() {
           {t("footer.contact")}:{" "}
           <a
             href={`mailto:${CONTACT_EMAIL}`}
-            className="text-teal-400/90 underline decoration-teal-500/40 underline-offset-2 hover:text-teal-300"
+            className="text-[var(--color-accent)]/90 underline decoration-[var(--color-accent-border)] underline-offset-2 hover:text-[var(--color-accent)]"
           >
             {CONTACT_EMAIL}
           </a>

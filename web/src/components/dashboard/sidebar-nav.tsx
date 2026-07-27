@@ -66,12 +66,12 @@ export function Sidebar({
 
   const sidebarContent = (
     <nav
-      className="flex h-full w-64 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-soft)]"
+      className="flex h-full w-[230px] flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-soft)]"
       aria-label={t("nav.accountMenu")}
     >
       {/* Section navigation */}
       <div className="border-b border-[var(--color-border)] px-1.5 py-2">
-        <p className="mb-1.5 px-2 text-[0.6rem] font-semibold uppercase tracking-widest text-[var(--color-text-dim)]">
+        <p className="mb-1.5 px-2 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--color-text-dim)]">
           Navegación
         </p>
         <ul className="space-y-0.5">

@@ -53,7 +53,7 @@ export function AccountModal({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5"
+        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-4 shadow-2xl sm:rounded-2xl sm:p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-start justify-between gap-3">
@@ -64,19 +64,19 @@ export function AccountModal({
             >
               {t("account.title")}
             </h2>
-            <p className="mt-1 truncate text-sm text-teal-300">{profileName}</p>
+            <p className="mt-1 truncate text-sm text-[var(--color-accent)]">{profileName}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className={`shrink-0 rounded-lg border border-slate-800 p-1.5 text-slate-400 hover:bg-slate-800/60 ${FOCUS_RING}`}
+            className={`shrink-0 rounded-lg border border-[var(--color-border)] p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)]/60 ${FOCUS_RING}`}
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
         </header>
 
-        <p className="mt-4 break-words text-sm leading-relaxed text-slate-400">
+        <p className="mt-4 break-words text-sm leading-relaxed text-[var(--color-text-muted)]">
           {t("account.description")}
         </p>
 
@@ -86,7 +86,7 @@ export function AccountModal({
             onClose();
             void logout();
           }}
-          className={`mt-5 flex w-full min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 ${FOCUS_RING}`}
+          className={`mt-5 flex w-full min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 px-4 py-3 text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
         >
           <IoLogOutOutline className="h-5 w-5 shrink-0" aria-hidden />
           {t("account.logout")}
@@ -96,7 +96,7 @@ export function AccountModal({
           <h3 className="text-xs font-semibold uppercase tracking-widest text-rose-400/90">
             {t("account.dangerZone")}
           </h3>
-          <p className="mt-2 break-words text-sm leading-relaxed text-slate-500">
+          <p className="mt-2 break-words text-sm leading-relaxed text-[var(--color-text-dim)]">
             {t("account.dangerDesc")}
           </p>
           <button

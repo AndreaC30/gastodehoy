@@ -30,7 +30,7 @@ type SpotlightRect = {
 
 /** Oscurece todo menos el recuadro objetivo. Las zonas oscuras cierran el tour al tocarlas. */
 function TourSpotlightOverlay({ rect, onDismiss }: { rect: SpotlightRect | null; onDismiss: () => void }) {
-  const dim = "absolute bg-slate-950/50 backdrop-blur-[1px]";
+  const dim = "absolute bg-[var(--color-bg)]/50 backdrop-blur-[1px]";
 
   if (!rect) {
     return <div className={`inset-0 ${dim}`} aria-hidden onClick={onDismiss} />;
@@ -161,7 +161,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
       {/* Spotlight highlight ring (visual only) */}
       {rect && !scrolling && (
         <div
-          className="pointer-events-none absolute z-[2] rounded-xl ring-2 ring-teal-400 shadow-[0_0_0_1px_rgba(45,212,191,0.35),0_0_28px_rgba(45,212,191,0.2)]"
+          className="pointer-events-none absolute z-[2] rounded-xl ring-2 ring-[var(--color-accent)] shadow-[0_0_0_1px_rgb(34_211_238_/_0.35),0_0_28px_rgb(34_211_238_/_0.2)]"
           style={{
             top: rect.top,
             left: rect.left,
@@ -175,28 +175,28 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
       {/* Controls panel: fixed to bottom, scrollable on small screens */}
       <div
         data-guided-tour-controls
-        className="absolute inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[3] mx-auto max-h-[45vh] max-w-md overflow-y-auto rounded-2xl border border-slate-600 bg-slate-900 p-4 shadow-2xl sm:inset-x-4 sm:max-h-none sm:p-5"
+        className="absolute inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[3] mx-auto max-h-[45vh] max-w-md overflow-y-auto rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-4 shadow-2xl sm:inset-x-4 sm:max-h-none sm:p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-medium text-teal-400">
+          <p className="text-sm font-medium text-[var(--color-accent)]">
             {index + 1} / {steps.length}
             {scrolling ? " · " + t("tour.moving") : ""}
           </p>
           <button
             type="button"
             onClick={finishSkip}
-            className={`shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 ${FOCUS_RING}`}
+            className={`shrink-0 rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
             aria-label={t("tour.close")}
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
         </div>
 
-        <h2 id="guided-tour-title" className="mt-1.5 text-lg font-bold text-slate-100">
+        <h2 id="guided-tour-title" className="mt-1.5 text-lg font-bold text-[var(--color-text)]">
           {t(step.title)}
         </h2>
-        <p id="guided-tour-body" className="mt-1.5 break-words text-base text-slate-300">
+        <p id="guided-tour-body" className="mt-1.5 break-words text-base text-[var(--color-text-muted)]">
           {t(step.body)}
         </p>
 
@@ -233,7 +233,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
               type="button"
               onClick={onBackToMenu}
               disabled={scrolling}
-              className={`min-h-11 w-full text-sm font-medium text-slate-400 underline decoration-slate-600 underline-offset-4 hover:text-slate-200 ${FOCUS_RING}`}
+              className={`min-h-11 w-full text-sm font-medium text-[var(--color-text-muted)] underline decoration-[var(--color-border-subtle)] underline-offset-4 hover:text-[var(--color-text)] ${FOCUS_RING}`}
             >
               {t("tour.backToMenu")}
             </button>

@@ -14,7 +14,7 @@ export function LegalNotice({ onBack }: Props) {
         <button
           type="button"
           onClick={onBack}
-          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-teal-300 focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)] focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)]"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           {t("common.back")}
@@ -25,14 +25,14 @@ export function LegalNotice({ onBack }: Props) {
         </div>
 
         {/* Content */}
-        <div className="prose max-w-3xl leading-relaxed text-slate-300">
-          <h1 className="text-2xl font-bold text-slate-100">{t("legal.title")}</h1>
-          <p className="text-sm text-slate-500">
+        <div className="prose max-w-3xl leading-relaxed text-[var(--color-text-muted)]">
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">{t("legal.title")}</h1>
+          <p className="text-sm text-[var(--color-text-dim)]">
             <strong>{t("legal.lastUpdatedLabel")}</strong> {t("legal.lastUpdatedDate")}
           </p>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("legal.section1Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("legal.section1Title")}</h2>
             <ul className="list-none space-y-1 pl-0 text-base">
               <li><strong>{t("legal.section1Owner")}</strong> {t("legal.section1OwnerValue")}</li>
               <li><strong>{t("legal.section1Email")}</strong> {t("legal.section1EmailValue")}</li>
@@ -40,14 +40,14 @@ export function LegalNotice({ onBack }: Props) {
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("legal.section2Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("legal.section2Title")}</h2>
             <p className="text-base">
               {t("legal.section2Text")}
             </p>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("legal.section3Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("legal.section3Title")}</h2>
             <p className="text-base">
               {t("legal.section3Intro")}
             </p>
@@ -59,28 +59,28 @@ export function LegalNotice({ onBack }: Props) {
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("legal.section4Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("legal.section4Title")}</h2>
             <p className="text-base">
               {t("legal.section4Text")}
             </p>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("legal.section5Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("legal.section5Title")}</h2>
             <p className="text-base">
               {t("legal.section5Text")}
             </p>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("legal.section6Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("legal.section6Title")}</h2>
             <p className="text-base">
               {t("legal.section6Text")}
             </p>
           </section>
 
           <section className="mt-6 mb-12">
-            <h2 className="text-lg font-semibold text-slate-100">{t("legal.section7Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("legal.section7Title")}</h2>
             <p className="text-base">
               {t("legal.section7Text")}
             </p>

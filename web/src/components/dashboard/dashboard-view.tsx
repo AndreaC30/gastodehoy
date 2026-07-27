@@ -597,7 +597,7 @@ export function Dashboard({ profileName }: Props) {
       )}
 
       <div
-        className={`pointer-events-none fixed bottom-5 left-4 right-4 z-50 mx-auto max-w-md break-words rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-center text-base text-slate-100 shadow-2xl transition-all duration-200 ${
+        className={`pointer-events-none fixed bottom-5 left-4 right-4 z-50 mx-auto max-w-md break-words rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-4 py-3 text-center text-base text-[var(--color-text)] shadow-2xl transition-all duration-200 ${
           toastMsg ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         } ${toastUndo ? "pointer-events-auto" : ""}`}
         role="status"
@@ -613,7 +613,7 @@ export function Dashboard({ profileName }: Props) {
               setToastMsg(null);
               setToastUndo(null);
             }}
-            className="font-semibold text-teal-400 underline decoration-teal-500/50 underline-offset-2 hover:text-teal-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+            className="font-semibold text-[var(--color-accent)] underline decoration-[var(--color-accent-border)] underline-offset-2 hover:text-[var(--color-accent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
           >
             {toastUndo.label}
           </button></>

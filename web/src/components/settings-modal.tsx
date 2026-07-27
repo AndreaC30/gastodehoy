@@ -240,7 +240,7 @@ export function SettingsModal({
         ref={panelRef}
         tabIndex={-1}
         style={{ transform: `translateY(${dragOffset}px)` }}
-        className={`modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 pr-3 shadow-2xl shadow-black/50 transition-transform duration-300 sm:rounded-2xl sm:p-5 sm:pr-4 ${dragging ? "transition-none" : ""}`}
+        className={`modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-4 pr-3 shadow-2xl shadow-black/50 transition-transform duration-300 sm:rounded-2xl sm:p-5 sm:pr-4 ${dragging ? "transition-none" : ""}`}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -256,7 +256,7 @@ export function SettingsModal({
             >
               {title ?? t("incomeSettings.title")}
             </h2>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[var(--color-text-dim)]">
               {subtitle ?? t("incomeSettings.subtitle")}
             </p>
           </div>
@@ -264,7 +264,7 @@ export function SettingsModal({
             type="button"
             onClick={onClose}
             aria-label={t("common.close")}
-            className="rounded-lg border border-slate-800 p-1.5 text-slate-400 hover:bg-slate-800/60"
+            className="rounded-lg border border-[var(--color-border)] p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)]/60"
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
@@ -282,7 +282,7 @@ export function SettingsModal({
 
         {!isFocused && (
           <div
-            className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
+            className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 p-1 text-sm"
             role="tablist"
             aria-label={t("incomeSettings.tabsLabel")}
           >
@@ -333,12 +333,12 @@ export function SettingsModal({
             <div>
               <p
                 id="settings-savings-label"
-                className="text-sm font-medium text-slate-400"
+                className="text-sm font-medium text-[var(--color-text-muted)]"
               >
                 {t("incomeSettings.savingsLabel")}
               </p>
               <div
-                className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
+                className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 p-1 text-sm"
                 role="group"
                 aria-labelledby="settings-savings-label"
               >
@@ -380,11 +380,11 @@ export function SettingsModal({
             )}
 
             {!isFocused && (
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 px-3 py-3">
               <input
                 type="checkbox"
                 checked={dailyNotify}
-                className="mt-1 h-4 w-4 rounded border-slate-600 text-sky-500 focus:ring-sky-500"
+                className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
                 onChange={async (e) => {
                   const on = e.target.checked;
                   setError(null);
@@ -404,9 +404,9 @@ export function SettingsModal({
                   setDailyNotify(on);
                 }}
               />
-              <span className="text-sm text-slate-300">
-                <span className="font-medium text-slate-100">{t("incomeSettings.dailyNotifyTitle")}</span>
-                <span className="mt-0.5 block text-slate-400">
+              <span className="text-sm text-[var(--color-text-muted)]">
+                <span className="font-medium text-[var(--color-text)]">{t("incomeSettings.dailyNotifyTitle")}</span>
+                <span className="mt-0.5 block text-[var(--color-text-muted)]">
                   {t("incomeSettings.dailyNotifyDesc")}
                 </span>
               </span>
@@ -414,20 +414,20 @@ export function SettingsModal({
             )}
 
             {!isFocused && (
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 px-3 py-3">
               <input
                 type="checkbox"
                 checked={density === "compact"}
-                className="mt-1 h-4 w-4 rounded border-slate-600 text-sky-500 focus:ring-sky-500"
+                className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
                 onChange={(e) => {
                   const next: Density = e.target.checked ? "compact" : "comfortable";
                   setDensity(next);
                   setDensityState(next);
                 }}
               />
-              <span className="text-sm text-slate-300">
-                <span className="font-medium text-slate-100">{t("incomeSettings.densityTitle")}</span>
-                <span className="mt-0.5 block text-slate-400">
+              <span className="text-sm text-[var(--color-text-muted)]">
+                <span className="font-medium text-[var(--color-text)]">{t("incomeSettings.densityTitle")}</span>
+                <span className="mt-0.5 block text-[var(--color-text-muted)]">
                   {t("incomeSettings.densityDesc")}
                 </span>
               </span>
@@ -443,7 +443,7 @@ export function SettingsModal({
               <button
                 type="submit"
                 disabled={busy}
-                className="min-h-11 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
+                className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60 sm:w-auto"
               >
                 {busy ? t("incomeSettings.saving") : (saveLabel ?? t("common.save"))}
               </button>
@@ -456,7 +456,7 @@ export function SettingsModal({
             aria-labelledby="settings-tab-extra"
             className="space-y-4"
           >
-            <p className="text-sm leading-relaxed text-slate-400">
+            <p className="text-sm leading-relaxed text-[var(--color-text-muted)]">
               {t("incomeSettings.extraDesc")}
             </p>
 
@@ -494,12 +494,12 @@ export function SettingsModal({
             <div>
               <p
                 id="settings-extra-savings-label"
-                className="text-sm font-medium text-slate-400"
+                className="text-sm font-medium text-[var(--color-text-muted)]"
               >
                 {t("incomeSettings.extraSavingsQuestion")}
               </p>
               <div
-                className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/60 p-1 text-sm"
+                className="mt-1.5 grid grid-cols-2 gap-2 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 p-1 text-sm"
                 role="group"
                 aria-labelledby="settings-extra-savings-label"
               >
@@ -556,25 +556,25 @@ export function SettingsModal({
               type="button"
               onClick={addExtraIncomeRow}
               disabled={addExtra.isPending}
-              className="w-full rounded-lg border border-teal-500/50 bg-teal-500/15 px-3 py-2 text-sm font-semibold text-teal-200 hover:bg-teal-500/25 disabled:opacity-60"
+              className="w-full rounded-lg border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-2 text-sm font-semibold text-[var(--color-accent)] hover:bg-[var(--color-accent-dim)] disabled:opacity-60"
             >
               {addExtra.isPending ? t("incomeSettings.adding") : t("incomeSettings.addExtra")}
             </button>
 
             <ul className="space-y-2">
               {extras.length === 0 ? (
-                <li className="text-sm text-slate-600">{t("incomeSettings.extraEmpty")}</li>
+                <li className="text-sm text-[var(--color-text-dim)]">{t("incomeSettings.extraEmpty")}</li>
               ) : (
                 extras.map((it) => (
                   <li
                     key={it.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/80 px-3 py-2"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold tabular-nums text-teal-300/90">
+                      <p className="truncate font-semibold tabular-nums text-[var(--color-accent)]/90">
                         {money(it.amount)}
                       </p>
-                      <p className="truncate text-xs text-slate-500">
+                      <p className="truncate text-xs text-[var(--color-text-dim)]">
                         {it.received_at} · {describeExtraSavings(it, t)}
                       </p>
                     </div>
@@ -623,7 +623,7 @@ function SavingsInputRow({
   const hintId = `${id}-hint`;
   return (
     <div className="mt-3">
-      <label htmlFor={id} className="text-sm font-medium text-slate-400">
+      <label htmlFor={id} className="text-sm font-medium text-[var(--color-text-muted)]">
         {label}
       </label>
       <div className="mt-1.5 flex min-w-0 items-center gap-2">
@@ -639,9 +639,9 @@ function SavingsInputRow({
           aria-describedby={hintId}
           className={INPUT_FLEX_CLASS}
         />
-        <span className="shrink-0 text-slate-500">{suffix}</span>
+        <span className="shrink-0 text-[var(--color-text-dim)]">{suffix}</span>
       </div>
-      <p id={hintId} className="mt-2 text-xs leading-relaxed text-slate-500">
+      <p id={hintId} className="mt-2 text-xs leading-relaxed text-[var(--color-text-dim)]">
         {hint}
       </p>
     </div>
@@ -671,8 +671,8 @@ function TabBtn({
       onClick={onClick}
       className={`min-h-11 rounded-lg px-3 py-2 font-medium transition ${
         active
-          ? "bg-slate-900 text-slate-100 shadow-inner"
-          : "text-slate-500 hover:text-slate-300"
+          ? "bg-[var(--color-panel)] text-[var(--color-text)] shadow-inner"
+          : "text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
       }`}
     >
       {children}
@@ -696,8 +696,8 @@ function ModeBtn({
       onClick={onClick}
       className={`rounded-lg px-3 py-2 font-medium transition ${
         active
-          ? "bg-slate-900 text-slate-100 shadow-inner"
-          : "text-slate-500 hover:text-slate-300"
+          ? "bg-[var(--color-panel)] text-[var(--color-text)] shadow-inner"
+          : "text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
       }`}
     >
       {children}

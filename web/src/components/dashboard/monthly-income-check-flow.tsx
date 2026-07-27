@@ -106,7 +106,7 @@ function ChoiceDialog({
           <button
             type="button"
             onClick={onYes}
-            className="min-h-11 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 sm:w-auto"
+            className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 sm:w-auto"
           >
             {yesLabel}
           </button>

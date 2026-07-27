@@ -11,7 +11,7 @@ export function TourSection({ onStart }: Props) {
   const { t } = useTranslation();
 
   return (
-    <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 sm:p-6">
+    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-[var(--color-text)]">{t("nav.guidedTour")}</h2>
         <button

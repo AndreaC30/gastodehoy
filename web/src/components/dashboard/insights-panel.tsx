@@ -102,7 +102,7 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
 }
 
 const PANEL_CLASS =
-  "rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-3 sm:p-5 sm:shadow-lg sm:shadow-black/20";
+  "rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] p-3 sm:p-5";
 
 export function InsightsPanel({ data, isLoading, error }: Props) {
   const { t } = useTranslation();
@@ -199,7 +199,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--color-border)]">
             <div
-              className="h-full rounded-full bg-[var(--color-accent)] sm:bg-gradient-to-r sm:from-sky-500 sm:to-teal-500"
+              className="h-full rounded-full bg-[var(--color-accent)]"
               style={{
                 width: `${Math.min(100, (Number(data.total_spent) / Math.max(Number(data.projected_monthly), 1)) * 100)}%`,
               }}

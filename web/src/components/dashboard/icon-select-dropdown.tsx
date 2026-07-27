@@ -46,14 +46,14 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex h-11 min-w-11 items-center justify-center gap-0.5 rounded-lg border border-slate-700 bg-slate-950 px-1.5 hover:border-slate-500 ${FOCUS_RING}`}
+        className={`flex h-11 min-w-11 items-center justify-center gap-0.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-1.5 hover:border-[var(--color-border-subtle)] ${FOCUS_RING}`}
         aria-label="Elegir icono"
         aria-expanded={open}
         aria-haspopup="listbox"
       >
         <SelectedIcon className="h-5 w-5 shrink-0 text-sky-400/90" />
         <IoChevronDown
-          className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition ${open ? "rotate-180" : ""}`}
+          className={`h-3.5 w-3.5 shrink-0 text-[var(--color-text-dim)] transition ${open ? "rotate-180" : ""}`}
           aria-hidden
         />
       </button>
@@ -61,7 +61,7 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
         <div
           role="listbox"
           aria-label="Iconos"
-          className="modal-scroll absolute left-0 top-[calc(100%+4px)] z-30 max-h-44 w-[min(14rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-slate-700 bg-slate-950 p-2 shadow-xl shadow-black/40"
+          className="modal-scroll absolute left-0 top-[calc(100%+4px)] z-30 max-h-44 w-[min(14rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] p-2 shadow-xl shadow-black/40"
         >
           <div className="grid grid-cols-5 gap-1">
             {CATEGORY_ICON_PICKER.map((opt) => {
@@ -76,12 +76,12 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
                   onClick={() => pick(opt.name)}
                   className={`rounded-md p-2 ${
                     selected
-                      ? "bg-sky-500/25 ring-1 ring-sky-500/60"
-                      : "hover:bg-slate-800"
+                      ? "bg-[var(--color-accent-dim)] ring-1 ring-[var(--color-accent-border)]"
+                      : "hover:bg-[var(--color-panel-elevated)]"
                   }`}
                   aria-label={opt.name}
                 >
-                  <OptIcon className="mx-auto h-4 w-4 text-slate-300" />
+                  <OptIcon className="mx-auto h-4 w-4 text-[var(--color-text-muted)]" />
                 </button>
               );
             })}

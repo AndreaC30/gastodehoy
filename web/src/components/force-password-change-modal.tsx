@@ -50,11 +50,11 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
 
   return (
     <div className="relative z-10 flex w-full flex-col items-center px-4 py-6 sm:min-h-screen sm:justify-center sm:py-12">
-      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl shadow-black/30">
+      <div className="w-full max-w-md rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/80 p-6 shadow-xl shadow-black/30">
         <h2 className="text-xl font-bold tracking-tight">
           {t("forcePassword.title")}
         </h2>
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
           {t("forcePassword.description")}
         </p>
 
@@ -65,34 +65,34 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
         )}
 
         <form onSubmit={submit} className="mt-5 space-y-3">
-          <label className="block text-sm font-medium text-slate-400">
+          <label className="block text-sm font-medium text-[var(--color-text-muted)]">
             {t("forcePassword.tempPassword")}
             <input
               type="password"
               autoComplete="current-password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className="mt-1.5 w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
           </label>
-          <label className="block text-sm font-medium text-slate-400">
+          <label className="block text-sm font-medium text-[var(--color-text-muted)]">
             {t("forcePassword.newPassword")}
             <input
               type="password"
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className="mt-1.5 w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
           </label>
-          <label className="block text-sm font-medium text-slate-400">
+          <label className="block text-sm font-medium text-[var(--color-text-muted)]">
             {t("forcePassword.repeatPassword")}
             <input
               type="password"
               autoComplete="new-password"
               value={newPassword2}
               onChange={(e) => setNewPassword2(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className="mt-1.5 w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
           </label>
 
@@ -104,7 +104,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
               !newPassword ||
               !newPassword2
             }
-            className="mt-2 w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+            className="mt-2 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60"
           >
             {busy ? t("forcePassword.saving") : t("forcePassword.save")}
           </button>
@@ -113,7 +113,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
         <button
           type="button"
           onClick={() => void logout()}
-          className="mt-4 w-full text-center text-xs text-slate-500 hover:text-slate-300"
+          className="mt-4 w-full text-center text-xs text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
         >
           {t("forcePassword.logout")}
         </button>

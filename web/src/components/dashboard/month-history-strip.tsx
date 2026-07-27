@@ -72,7 +72,7 @@ export function MonthHistoryStrip() {
 
   return (
     <section
-      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-4 shadow-lg shadow-black/20"
+      className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] px-4 py-4"
       aria-label={t("monthHistory.ariaLabel")}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">

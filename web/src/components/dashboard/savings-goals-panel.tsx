@@ -223,7 +223,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
   return (
     <div className="space-y-4">
       {reservedSavings != null && Number(reservedSavings) > 0 && (
-        <p className="rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-2 text-sm text-slate-300">
+        <p className="rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-2 text-sm text-[var(--color-text-muted)]">
           {t("savingsGoals.reservedThisMonth")}{" "}
           <span className="font-semibold text-[var(--color-accent)]">{money(reservedSavings)}</span>
         </p>

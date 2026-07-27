@@ -19,20 +19,20 @@ export function LandingPage({ onEnter }: Props) {
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+          className="w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)]"
           aria-label={t("common.back")}
         >
           <BrandLogo variant="hero" />
         </button>
       </h1>
-      <p className="mt-4 text-center text-base text-slate-300">
+      <p className="mt-4 text-center text-base text-[var(--color-text-muted)]">
         {t("landing.hero")}
       </p>
 
-      <ul className="mt-8 space-y-3 text-sm text-slate-400">
+      <ul className="mt-8 space-y-3 text-sm text-[var(--color-text-muted)]">
         <li className="flex gap-3">
           <span
-            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300"
+            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-dim)] text-[var(--color-accent)]"
             aria-hidden
           >
             <IoCheckmark className="h-3.5 w-3.5" aria-hidden />
@@ -41,7 +41,7 @@ export function LandingPage({ onEnter }: Props) {
         </li>
         <li className="flex gap-3">
           <span
-            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300"
+            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-dim)] text-[var(--color-accent)]"
             aria-hidden
           >
             <IoCheckmark className="h-3.5 w-3.5" aria-hidden />
@@ -50,7 +50,7 @@ export function LandingPage({ onEnter }: Props) {
         </li>
         <li className="flex gap-3">
           <span
-            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-teal-300"
+            className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-dim)] text-[var(--color-accent)]"
             aria-hidden
           >
             <IoCheckmark className="h-3.5 w-3.5" aria-hidden />
@@ -63,19 +63,19 @@ export function LandingPage({ onEnter }: Props) {
         <button
           type="button"
           onClick={() => onEnter("register")}
-          className="rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-black/20 hover:brightness-110"
+          className="rounded-xl bg-[var(--color-accent)] px-5 py-3 text-sm font-semibold text-[var(--color-accent-ink)] shadow-[var(--shadow-surface)] hover:brightness-110"
         >
           {t("landing.ctaRegister")}
         </button>
         <button
           type="button"
           onClick={() => onEnter("login")}
-          className="rounded-xl border border-slate-600 bg-slate-900/60 px-5 py-3 text-sm font-semibold text-slate-100 hover:border-slate-500 hover:bg-slate-800/60"
+          className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/60 px-5 py-3 text-sm font-semibold text-[var(--color-text)] hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-panel-elevated)]/60"
         >
           {t("landing.ctaLogin")}
         </button>
       </div>
-      <p className="mt-6 text-center text-xs text-slate-500">
+      <p className="mt-6 text-center text-xs text-[var(--color-text-dim)]">
         {t("landing.footer")}
       </p>
     </main>

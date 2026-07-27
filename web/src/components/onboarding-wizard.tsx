@@ -88,20 +88,20 @@ export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-xl flex-col px-4 py-6 sm:min-h-screen sm:justify-center sm:py-12">
       <header className="mb-6 text-center">
-        <p className="text-xs uppercase tracking-widest text-slate-500">
+        <p className="text-xs uppercase tracking-widest text-[var(--color-text-dim)]">
           {t("onboarding.greeting", { name: userName })}
         </p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
           {t("onboarding.title")}
         </h1>
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
           {t("onboarding.subtitle")}
         </p>
       </header>
 
       <Stepper step={step} />
 
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-xl shadow-black/30 md:p-6">
+      <section className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/70 p-5 shadow-xl shadow-black/30 md:p-6">
         {error && (
           <div className="mb-4 rounded-xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-sm text-rose-200">
             {error}
@@ -150,21 +150,21 @@ export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
 /** Three-dot progress indicator at the top of the wizard. */
 function Stepper({ step }: { step: Step }) {
   return (
-    <ol className="mb-6 flex items-center justify-center gap-2 text-xs text-slate-500">
+    <ol className="mb-6 flex items-center justify-center gap-2 text-xs text-[var(--color-text-dim)]">
       {[1, 2, 3].map((n) => (
         <li
           key={n}
           className={`flex items-center gap-2 ${
-            step === n ? "text-teal-300" : ""
+            step === n ? "text-[var(--color-accent)]" : ""
           }`}
         >
           <span
             className={`flex h-6 w-6 items-center justify-center rounded-full border ${
               step === n
-                ? "border-teal-400/60 bg-teal-500/15 text-teal-200"
+                ? "border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] text-[var(--color-accent)]"
                 : step > n
-                  ? "border-slate-700 bg-slate-800 text-slate-400"
-                  : "border-slate-800 text-slate-600"
+                  ? "border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] text-[var(--color-text-muted)]"
+                  : "border-[var(--color-border)] text-[var(--color-text-dim)]"
             }`}
           >
             {n}
@@ -203,14 +203,14 @@ function StepIncome({
         <h2 className="text-lg font-bold tracking-tight">
           {t("onboarding.incomeQuestion")}
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           {t("onboarding.incomeDescription")}
         </p>
-        <p className="mt-2 rounded-lg border border-slate-800/80 bg-slate-950/50 px-3 py-2 text-xs leading-relaxed text-slate-500">
+        <p className="mt-2 rounded-lg border border-slate-800/80 bg-[var(--color-bg)]/50 px-3 py-2 text-xs leading-relaxed text-[var(--color-text-dim)]">
           {t("onboarding.incomeExamples")}
         </p>
       </div>
-      <label htmlFor="onboarding-income" className="block text-sm font-medium text-slate-400">
+      <label htmlFor="onboarding-income" className="block text-sm font-medium text-[var(--color-text-muted)]">
         {t("onboarding.incomeLabel")}
         <input
           id="onboarding-income"
@@ -222,21 +222,21 @@ function StepIncome({
           value={income}
           onChange={(e) => setIncome(e.target.value)}
           placeholder="2000.00"
-          className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-slate-100 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+          className="mt-1.5 w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 text-[var(--color-text)] outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
         />
       </label>
       <div className="flex items-center justify-between gap-3 pt-2">
         <button
           type="button"
           onClick={onSkip}
-          className="text-sm text-slate-500 underline decoration-slate-700 underline-offset-4 hover:text-slate-300"
+          className="text-sm text-[var(--color-text-dim)] underline decoration-[var(--color-border-subtle)] underline-offset-4 hover:text-[var(--color-text-muted)]"
         >
           {t("onboarding.configureLater")}
         </button>
         <button
           type="submit"
           disabled={disabled}
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60"
         >
           {t("onboarding.next")}
           <IoArrowForward className="h-4 w-4 shrink-0" aria-hidden />
@@ -285,10 +285,10 @@ function StepFixed({
         <h2 className="text-lg font-bold tracking-tight">
           {t("onboarding.fixedQuestion")}
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           {t("onboarding.fixedDescription")}
         </p>
-        <p className="mt-2 rounded-lg border border-dashed border-slate-700/80 px-3 py-2 text-xs leading-relaxed text-slate-500">
+        <p className="mt-2 rounded-lg border border-dashed border-slate-700/80 px-3 py-2 text-xs leading-relaxed text-[var(--color-text-dim)]">
           {t("onboarding.fixedOptional")}
         </p>
       </div>
@@ -303,7 +303,7 @@ function StepFixed({
             onChange={(e) => setName(e.target.value)}
             placeholder={t("fixedExpenses.placeholder")}
             aria-label={t("onboarding.fixedNameLabel")}
-            className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+            className="min-w-0 flex-1 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
           />
         </div>
         <input
@@ -316,11 +316,11 @@ function StepFixed({
           onChange={(e) => setAmount(e.target.value)}
           placeholder={t("onboarding.fixedAmountPlaceholder")}
           aria-label={t("onboarding.fixedAmountLabel")}
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40 sm:w-24"
+          className="w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)] sm:w-24"
         />
         <button
           type="submit"
-          className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:brightness-110 sm:w-auto"
+          className="w-full rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 sm:w-auto"
         >
           {t("fixedExpenses.add")}
         </button>
@@ -333,13 +333,13 @@ function StepFixed({
             return (
             <li
               key={`${it.name}-${i}`}
-              className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
+              className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/80 px-3 py-2.5"
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <FixedIcon className="h-4 w-4 shrink-0 text-sky-400/90" />
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-slate-200">{it.name}</p>
-                  <p className="truncate text-sm tabular-nums text-slate-500">{money(it.amount)}</p>
+                  <p className="truncate font-semibold text-[var(--color-text)]">{it.name}</p>
+                  <p className="truncate text-sm tabular-nums text-[var(--color-text-dim)]">{money(it.amount)}</p>
                 </div>
               </div>
               <button
@@ -354,13 +354,13 @@ function StepFixed({
           })}
         </ul>
       ) : (
-        <p className="rounded-lg border border-dashed border-slate-800 px-4 py-3 text-center text-sm text-slate-500">
+        <p className="rounded-lg border border-dashed border-[var(--color-border)] px-4 py-3 text-center text-sm text-[var(--color-text-dim)]">
           {t("onboarding.fixedEmpty")}
         </p>
       )}
 
       {items.length > 0 && (
-        <p className="text-right text-xs text-slate-500">
+        <p className="text-right text-xs text-[var(--color-text-dim)]">
           {t("onboarding.fixedTotal", { total: money(total) })}
         </p>
       )}
@@ -369,7 +369,7 @@ function StepFixed({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200"
+          className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           {t("common.back")}
@@ -377,7 +377,7 @@ function StepFixed({
         <button
           type="button"
           onClick={onNext}
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110"
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110"
         >
           {t("onboarding.next")}
           <IoArrowForward className="h-4 w-4 shrink-0" aria-hidden />
@@ -435,15 +435,15 @@ function StepSavings({
         <h2 className="text-lg font-bold tracking-tight">
           {t("onboarding.savingsQuestion")}
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           {t("onboarding.savingsSubtitle")}
         </p>
-        <p className="mt-2 rounded-lg border border-teal-500/25 bg-teal-950/25 px-3 py-2 text-xs leading-relaxed text-teal-200/90">
+        <p className="mt-2 rounded-lg border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-2 text-xs leading-relaxed text-[var(--color-accent)]">
           {t("onboarding.savingsTip")}
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-slate-950/50 p-1 text-sm">
+      <div className="grid grid-cols-2 gap-2 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/50 p-1 text-sm">
         <ModeBtn active={mode === "percent"} onClick={() => setMode("percent")}>
           {t("incomeSettings.savingsPercent")}
         </ModeBtn>
@@ -453,7 +453,7 @@ function StepSavings({
       </div>
 
       {mode === "percent" ? (
-        <label htmlFor="onboarding-savings-percent" className="block text-sm font-medium text-slate-400">
+        <label htmlFor="onboarding-savings-percent" className="block text-sm font-medium text-[var(--color-text-muted)]">
           {t("onboarding.savingsPercent")}
           <div className="mt-1.5 flex min-w-0 items-center gap-2">
             <input
@@ -466,13 +466,13 @@ function StepSavings({
               value={percent}
               onChange={(e) => setPercent(e.target.value)}
               autoFocus
-              className="min-w-0 flex-1 max-w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className="min-w-0 flex-1 max-w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
-            <span className="shrink-0 text-slate-500">%</span>
+            <span className="shrink-0 text-[var(--color-text-dim)]">%</span>
           </div>
         </label>
       ) : (
-        <label htmlFor="onboarding-savings-amount" className="block text-sm font-medium text-slate-400">
+        <label htmlFor="onboarding-savings-amount" className="block text-sm font-medium text-[var(--color-text-muted)]">
           {t("onboarding.savingsFixedLabel")}
           <div className="mt-1.5 flex min-w-0 items-center gap-2">
             <input
@@ -485,17 +485,17 @@ function StepSavings({
               onChange={(e) => setAmount(e.target.value)}
               autoFocus
               placeholder="200.00"
-              className="min-w-0 flex-1 max-w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/40"
+              className="min-w-0 flex-1 max-w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
-            <span className="shrink-0 text-slate-500">€</span>
+            <span className="shrink-0 text-[var(--color-text-dim)]">€</span>
           </div>
         </label>
       )}
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm">
-        <p className="text-slate-500">{t("onboarding.summary")}</p>
-        <p className="mt-1 text-slate-300">
-          {t("onboarding.savePrefix")}<strong className="text-teal-300">{money(previewAmount)}</strong>{t("onboarding.saveSuffix")}
+      <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/60 px-4 py-3 text-sm">
+        <p className="text-[var(--color-text-dim)]">{t("onboarding.summary")}</p>
+        <p className="mt-1 text-[var(--color-text-muted)]">
+          {t("onboarding.savePrefix")}<strong className="text-[var(--color-accent)]">{money(previewAmount)}</strong>{t("onboarding.saveSuffix")}
           {mode === "percent" && incomeNum > 0
             ? ` (${percent}% ${t("onboarding.saveOf")} ${money(incomeNum)})`
             : ""}
@@ -507,7 +507,7 @@ function StepSavings({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200"
+          className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           {t("tour.back")}
@@ -515,7 +515,7 @@ function StepSavings({
         <button
           type="submit"
           disabled={disabled}
-          className="rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60"
+          className="rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60"
         >
           {busy ? t("incomeSettings.saving") : t("onboarding.start")}
         </button>
@@ -540,8 +540,8 @@ function ModeBtn({
       onClick={onClick}
       className={`rounded-lg px-3 py-2 font-medium transition ${
         active
-          ? "bg-slate-900 text-slate-100 shadow-inner"
-          : "text-slate-500 hover:text-slate-300"
+          ? "bg-[var(--color-panel)] text-[var(--color-text)] shadow-inner"
+          : "text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
       }`}
     >
       {children}

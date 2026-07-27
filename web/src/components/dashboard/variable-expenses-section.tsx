@@ -54,7 +54,7 @@ export function VariableExpensesSection({
   return (
     <section
       data-tour="variable-expenses"
-      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-lg shadow-black/20"
+      className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]"
     >
       <div className="border-b border-[var(--color-border)] px-5 py-4">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">
@@ -76,7 +76,7 @@ export function VariableExpensesSection({
           pending={addPending}
           onSubmit={onSubmit}
         />
-        <h3 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-widest text-slate-500">
+        <h3 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-dim)]">
           {t("variableExpenses.thisMonth", { month })}
         </h3>
         {isLoading ? (

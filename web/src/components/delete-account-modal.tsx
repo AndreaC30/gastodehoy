@@ -81,7 +81,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-rose-500/30 bg-slate-900 p-4 shadow-2xl sm:rounded-2xl sm:p-5"
+        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-rose-500/30 bg-[var(--color-panel)] p-4 shadow-2xl sm:rounded-2xl sm:p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-start justify-between gap-3">
@@ -92,7 +92,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
             >
               {t("deleteAccount.title")}
             </h2>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
               {t("deleteAccount.subtitle")}
             </p>
           </div>
@@ -100,7 +100,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className={`shrink-0 rounded-lg border border-slate-800 p-1.5 text-slate-400 hover:bg-slate-800/60 ${FOCUS_RING}`}
+            className={`shrink-0 rounded-lg border border-[var(--color-border)] p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)]/60 ${FOCUS_RING}`}
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
@@ -126,7 +126,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full min-w-0 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 outline-none focus:border-rose-500/50 focus:ring-2 focus:ring-rose-500/40"
+              className="w-full min-w-0 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-rose-500/50 focus:ring-2 focus:ring-rose-500/40"
             />
           </FormField>
         </div>

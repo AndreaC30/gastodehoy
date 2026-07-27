@@ -46,7 +46,7 @@ export function LoginScreen({
             <button
               type="button"
               onClick={onBackToLanding}
-              className="w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+              className="w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)]"
               aria-label={t("common.back")}
             >
               <BrandLogo variant="hero" />
@@ -55,7 +55,7 @@ export function LoginScreen({
             <BrandLogo variant="hero" />
           )}
         </h1>
-        <p className="mt-4 text-center text-sm text-slate-400">
+        <p className="mt-4 text-center text-sm text-[var(--color-text-muted)]">
           {t("login.title")}
         </p>
         {onBackToLanding && (
@@ -63,7 +63,7 @@ export function LoginScreen({
             <button
               type="button"
               onClick={onBackToLanding}
-              className={`inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-teal-300 ${FOCUS_RING}`}
+              className={`inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)] ${FOCUS_RING}`}
             >
               <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
               {t("common.back")}
@@ -73,7 +73,7 @@ export function LoginScreen({
 
         {mode !== "forgot" && (
           <div
-            className="mt-6 flex rounded-xl border border-slate-800 bg-slate-900/60 p-1 text-sm"
+            className="mt-6 flex rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/60 p-1 text-sm"
             role="tablist"
             aria-label="Acceso a la cuenta"
           >
@@ -108,7 +108,7 @@ export function LoginScreen({
           </div>
         )}
 
-        <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-xl shadow-black/30">
+        <div className="mt-4 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/70 p-5 shadow-xl shadow-black/30">
           {mode === "login" && (
             <LoginForm
               onError={setError}
@@ -152,8 +152,8 @@ function TabButton({
       onClick={onClick}
       className={`min-h-11 flex-1 rounded-lg px-3 py-2 font-medium transition ${FOCUS_RING} ${
         active
-          ? "bg-slate-950 text-slate-100 shadow-inner"
-          : "text-slate-500 hover:text-slate-300"
+          ? "bg-[var(--color-bg)] text-[var(--color-text)] shadow-inner"
+          : "text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
       }`}
     >
       {children}
@@ -221,7 +221,7 @@ function LoginForm({
       <button
         type="button"
         onClick={onForgot}
-        className="mt-1 block w-full text-center text-xs font-medium text-slate-400 hover:text-teal-300"
+        className="mt-1 block w-full text-center text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
       >
         {t("login.forgotPassword")}
       </button>
@@ -306,20 +306,20 @@ function RegisterForm({
       />
       <label
         htmlFor="register-accept-terms"
-        className="flex cursor-pointer items-start gap-2 text-xs text-slate-400"
+        className="flex cursor-pointer items-start gap-2 text-xs text-[var(--color-text-muted)]"
       >
         <input
           id="register-accept-terms"
           type="checkbox"
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
-          className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-600 bg-slate-800 accent-teal-500"
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
         />
         <span>
           {t("login.acceptTerms")}{" "}
-          <button type="button" onClick={() => showLegalPage("privacy")} className="text-teal-400 underline hover:text-teal-300">{t("login.privacyPolicy")}</button>
+          <button type="button" onClick={() => showLegalPage("privacy")} className="text-[var(--color-accent)] underline hover:text-[var(--color-accent)]">{t("login.privacyPolicy")}</button>
           {" "}{t("login.and")}{" "}
-          <button type="button" onClick={() => showLegalPage("legal")} className="text-teal-400 underline hover:text-teal-300">{t("login.termsOfUse")}</button>
+          <button type="button" onClick={() => showLegalPage("legal")} className="text-[var(--color-accent)] underline hover:text-[var(--color-accent)]">{t("login.termsOfUse")}</button>
         </span>
       </label>
       <button
@@ -372,7 +372,7 @@ function ForgotForm({
           <h2 className="text-lg font-bold tracking-tight">
             {t("login.checkEmail")}
           </h2>
-          <p className="mt-2 text-sm text-teal-200/90">{doneMessage}</p>
+          <p className="mt-2 text-sm text-[var(--color-accent)]">{doneMessage}</p>
         </div>
         <button
           type="button"
@@ -380,7 +380,7 @@ function ForgotForm({
             setDoneMessage(null);
             onCancel();
           }}
-          className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110"
+          className="w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110"
         >
           {t("login.backToLogin")}
         </button>
@@ -394,7 +394,7 @@ function ForgotForm({
         <h2 className="text-lg font-bold tracking-tight">
           {t("login.forgotTitle")}
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           {t("login.forgotDesc")}
         </p>
       </div>
@@ -413,7 +413,7 @@ function ForgotForm({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex w-full items-center justify-center gap-1 text-sm text-slate-400 hover:text-slate-200 sm:w-auto sm:justify-start"
+          className="inline-flex w-full items-center justify-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] sm:w-auto sm:justify-start"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           {t("login.backToLogin")}
@@ -421,7 +421,7 @@ function ForgotForm({
         <button
           type="submit"
           disabled={busy || !email}
-          className="w-full rounded-lg bg-gradient-to-br from-sky-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:brightness-110 disabled:opacity-60 sm:w-auto"
+          className="w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60 sm:w-auto"
         >
           {busy ? t("login.sending") : t("login.sendEmail")}
         </button>
@@ -462,7 +462,7 @@ function Field({
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-300 sm:text-base">
+      <label htmlFor={id} className="block text-sm font-medium text-[var(--color-text-muted)] sm:text-base">
         {label}
       </label>
       <div className="relative mt-1.5">
@@ -484,7 +484,7 @@ function Field({
             onClick={() => setVisible((v) => !v)}
             aria-label={visible ? t("login.hidePassword") : t("login.showPassword")}
             aria-pressed={visible}
-            className={`absolute inset-y-0 right-0 flex min-h-11 min-w-11 items-center justify-center text-slate-500 hover:text-slate-300 ${FOCUS_RING}`}
+            className={`absolute inset-y-0 right-0 flex min-h-11 min-w-11 items-center justify-center text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)] ${FOCUS_RING}`}
           >
             {visible ? (
               <FiEyeOff className="h-[18px] w-[18px]" aria-hidden />

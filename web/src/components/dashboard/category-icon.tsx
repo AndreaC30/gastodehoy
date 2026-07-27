@@ -97,13 +97,13 @@ export function CategoryIconPickerStrip({
               onClick={() => onChange(opt.name)}
               className={`rounded-lg border p-1.5 ${
                 selected
-                  ? "border-sky-500 bg-sky-500/20"
-                  : "border-slate-700 hover:border-slate-500"
+                  ? "border-[var(--color-accent)] bg-[var(--color-accent-dim)]"
+                  : "border-[var(--color-border-subtle)] hover:border-[var(--color-border-subtle)]"
               }`}
               aria-label={opt.name}
               aria-pressed={selected}
             >
-              <OptIcon className="h-4 w-4 text-slate-300" />
+              <OptIcon className="h-4 w-4 text-[var(--color-text-muted)]" />
             </button>
           );
         })}

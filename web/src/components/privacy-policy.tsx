@@ -14,7 +14,7 @@ export function PrivacyPolicy({ onBack }: Props) {
         <button
           type="button"
           onClick={onBack}
-          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-teal-300 focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)] focus-visible:rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)]"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           {t("common.back")}
@@ -25,14 +25,14 @@ export function PrivacyPolicy({ onBack }: Props) {
         </div>
 
         {/* Content */}
-        <div className="prose max-w-3xl leading-relaxed text-slate-300">
-          <h1 className="text-2xl font-bold text-slate-100">{t("privacy.title")}</h1>
-          <p className="text-sm text-slate-500">
+        <div className="prose max-w-3xl leading-relaxed text-[var(--color-text-muted)]">
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">{t("privacy.title")}</h1>
+          <p className="text-sm text-[var(--color-text-dim)]">
             <strong>{t("privacy.lastUpdatedLabel")}</strong> {t("privacy.lastUpdatedDate")}
           </p>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section1Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("privacy.section1Title")}</h2>
             <ul className="list-none space-y-1 pl-0 text-base">
               <li><strong>{t("privacy.section1Owner")}</strong> {t("privacy.section1OwnerValue")}</li>
               <li><strong>{t("privacy.section1Email")}</strong> {t("privacy.section1EmailValue")}</li>
@@ -41,7 +41,7 @@ export function PrivacyPolicy({ onBack }: Props) {
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section2Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("privacy.section2Title")}</h2>
             <ul className="list-disc space-y-1 pl-5 text-base">
               <li>{t("privacy.section2Item1")}</li>
               <li>{t("privacy.section2Item2")}</li>
@@ -50,7 +50,7 @@ export function PrivacyPolicy({ onBack }: Props) {
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section3Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("privacy.section3Title")}</h2>
             <ul className="list-disc space-y-1 pl-5 text-base">
               <li>{t("privacy.section3Item1")}</li>
               <li>{t("privacy.section3Item2")}</li>
@@ -59,7 +59,7 @@ export function PrivacyPolicy({ onBack }: Props) {
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section4Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("privacy.section4Title")}</h2>
             <ul className="list-disc space-y-1 pl-5 text-base">
               <li>
                 <strong>{t("privacy.section4Item1Label")}</strong> {t("privacy.section4Item1Text")}
@@ -71,28 +71,28 @@ export function PrivacyPolicy({ onBack }: Props) {
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section5Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("privacy.section5Title")}</h2>
             <p className="text-base">
               {t("privacy.section5Text")}
             </p>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section6Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("privacy.section6Title")}</h2>
             <p className="text-base">
               {t("privacy.section6Part1")}
-              <code className="rounded bg-slate-800 px-1 py-0.5 text-sm text-teal-300">gdh_session</code>
+              <code className="rounded bg-[var(--color-panel-elevated)] px-1 py-0.5 text-sm text-[var(--color-accent)]">gdh_session</code>
               {t("privacy.section6Part2")}
             </p>
           </section>
 
           <section className="mt-6">
-            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section7Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("privacy.section7Title")}</h2>
             <p className="text-base">
               {t("privacy.section7Part1")}{' '}
               <a
                 href="mailto:gastodehoy@gmail.com"
-                className="text-teal-400 underline decoration-teal-500/40 underline-offset-2 hover:text-teal-300"
+                className="text-[var(--color-accent)] underline decoration-[var(--color-accent-border)] underline-offset-2 hover:text-[var(--color-accent)]"
               >
                 gastodehoy@gmail.com
               </a>
@@ -101,7 +101,7 @@ export function PrivacyPolicy({ onBack }: Props) {
           </section>
 
           <section className="mt-6 mb-12">
-            <h2 className="text-lg font-semibold text-slate-100">{t("privacy.section8Title")}</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">{t("privacy.section8Title")}</h2>
             <p className="text-base">
               {t("privacy.section8Text")}
             </p>

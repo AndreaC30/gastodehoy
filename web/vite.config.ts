@@ -36,8 +36,8 @@ export default defineConfig(({ mode }) => {
           short_name: "GastoDeHoy",
           description:
             "Descubre cuánto puedes gastar hoy y controla tus gastos diarios con tu presupuesto personal.",
-          theme_color: "#0f172a",
-          background_color: "#0f172a",
+          theme_color: "#070A0D",
+          background_color: "#070A0D",
           display: "standalone",
           start_url: "/",
           lang: "es",

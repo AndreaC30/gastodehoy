@@ -45,7 +45,7 @@ export function SavingsGoalsModal({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 pr-3 shadow-2xl shadow-black/50 sm:rounded-2xl sm:p-5 sm:pr-4"
+        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-4 pr-3 shadow-2xl shadow-black/50 sm:rounded-2xl sm:p-5 sm:pr-4"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="mb-4 flex items-start justify-between gap-3">
@@ -56,7 +56,7 @@ export function SavingsGoalsModal({
             >
               {t("savingsGoals.title")}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-[var(--color-text-dim)]">
               {t("savingsGoals.subtitle")}
             </p>
           </div>
@@ -64,7 +64,7 @@ export function SavingsGoalsModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className={`min-h-11 min-w-11 rounded-lg border border-slate-800 p-1.5 text-slate-400 hover:bg-slate-800/60 ${FOCUS_RING}`}
+            className={`min-h-11 min-w-11 rounded-lg border border-[var(--color-border)] p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)]/60 ${FOCUS_RING}`}
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
