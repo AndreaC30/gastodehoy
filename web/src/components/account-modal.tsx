@@ -1,14 +1,26 @@
 /**
- * Account hub: session logout and link to account deletion (step 1 of 2).
+ * Account hub: app preferences, session logout, and account deletion.
  */
 import { useTranslation } from "react-i18next";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { IoClose, IoLogOutOutline } from "react-icons/io5";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { FOCUS_RING } from "@/lib/ui-a11y";
+import {
+  isDailyNotificationEnabled,
+  setDailyNotificationEnabled,
+} from "@/lib/daily-notification-preference";
+import { requestNotificationPermission } from "@/lib/daily-notification";
+import { registerWebPush, unregisterWebPush } from "@/lib/push-subscription";
+import {
+  getDensity,
+  setDensity,
+  subscribeDensity,
+  type Density,
+} from "@/lib/density-preference";
 
 type Props = {
   open: boolean;
@@ -27,12 +39,21 @@ export function AccountModal({
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
+  const [dailyNotify, setDailyNotify] = useState(isDailyNotificationEnabled);
+  const [prefError, setPrefError] = useState<string | null>(null);
+  const density = useSyncExternalStore(
+    subscribeDensity,
+    getDensity,
+    () => "comfortable" as Density,
+  );
 
   useBodyScrollLock(open);
   useDialogA11y(open, panelRef);
 
   useEffect(() => {
     if (!open) return;
+    setDailyNotify(isDailyNotificationEnabled());
+    setPrefError(null);
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
@@ -69,7 +90,7 @@ export function AccountModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t("common.close")}
             className={`shrink-0 rounded-lg border border-[var(--color-border)] p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)]/60 ${FOCUS_RING}`}
           >
             <IoClose className="h-5 w-5" aria-hidden />
@@ -79,6 +100,72 @@ export function AccountModal({
         <p className="mt-4 break-words text-sm leading-relaxed text-[var(--color-text-muted)]">
           {t("account.description")}
         </p>
+
+        <div className="mt-5 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-dim)]">
+            {t("account.prefsTitle")}
+          </p>
+
+          {prefError && (
+            <div
+              className="rounded-xl border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200"
+              role="alert"
+            >
+              {prefError}
+            </div>
+          )}
+
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 px-3 py-3">
+            <input
+              type="checkbox"
+              checked={dailyNotify}
+              className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
+              onChange={async (e) => {
+                const on = e.target.checked;
+                setPrefError(null);
+                if (on) {
+                  const perm = await requestNotificationPermission();
+                  if (perm !== "granted") {
+                    setPrefError(t("account.notifyError"));
+                    return;
+                  }
+                  await registerWebPush();
+                } else {
+                  await unregisterWebPush();
+                }
+                setDailyNotificationEnabled(on);
+                setDailyNotify(on);
+              }}
+            />
+            <span className="text-sm text-[var(--color-text-muted)]">
+              <span className="font-medium text-[var(--color-text)]">
+                {t("account.dailyNotifyTitle")}
+              </span>
+              <span className="mt-0.5 block text-[var(--color-text-muted)]">
+                {t("account.dailyNotifyDesc")}
+              </span>
+            </span>
+          </label>
+
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 px-3 py-3">
+            <input
+              type="checkbox"
+              checked={density === "compact"}
+              className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
+              onChange={(e) => {
+                setDensity(e.target.checked ? "compact" : "comfortable");
+              }}
+            />
+            <span className="text-sm text-[var(--color-text-muted)]">
+              <span className="font-medium text-[var(--color-text)]">
+                {t("account.densityTitle")}
+              </span>
+              <span className="mt-0.5 block text-[var(--color-text-muted)]">
+                {t("account.densityDesc")}
+              </span>
+            </span>
+          </label>
+        </div>
 
         <button
           type="button"

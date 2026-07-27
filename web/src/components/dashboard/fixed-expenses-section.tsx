@@ -1,4 +1,4 @@
-import { type FormEvent } from "react";
+import { type FormEvent, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import type { FixedExpense } from "@/api/types";
 import { IconSelectDropdown } from "@/components/dashboard/icon-select-dropdown";
@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SwipeableRow } from "@/components/ui/swipeable-row";
 import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
-import { getDensity } from "@/lib/density-preference";
+import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
 import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
 import { IoWalletOutline } from "react-icons/io5";
@@ -50,7 +50,11 @@ export function FixedExpensesSection({
   onDelete,
 }: Props) {
   const { t } = useTranslation();
-  const density = getDensity();
+  const density = useSyncExternalStore(
+    subscribeDensity,
+    getDensity,
+    () => "comfortable" as const,
+  );
   return (
     <section
       data-tour="fixed-expenses"

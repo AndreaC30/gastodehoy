@@ -15,13 +15,6 @@ import { FormField } from "@/components/ui/form-field";
 import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { money } from "@/lib/format";
 import { INPUT_CLASS, INPUT_FLEX_CLASS } from "@/lib/ui-a11y";
-import {
-  isDailyNotificationEnabled,
-  setDailyNotificationEnabled,
-} from "@/lib/daily-notification-preference";
-import { requestNotificationPermission } from "@/lib/daily-notification";
-import { registerWebPush, unregisterWebPush } from "@/lib/push-subscription";
-import { getDensity, setDensity, type Density } from "@/lib/density-preference";
 
 export type SettingsFocus = "full" | "incomeOnly" | "savingsOnly";
 
@@ -96,8 +89,6 @@ export function IncomeSettingsContent({
   const [extraSavingsFixed, setExtraSavingsFixed] = useState("0");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [dailyNotify, setDailyNotify] = useState(isDailyNotificationEnabled);
-  const [density, setDensityState] = useState<Density>(getDensity);
 
   const pid = (name: string) => `${idPrefix}-${name}`;
 
@@ -307,63 +298,6 @@ export function IncomeSettingsContent({
                 />
               )}
             </div>
-          )}
-
-          {!isFocused && (
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 px-3 py-3">
-              <input
-                type="checkbox"
-                checked={dailyNotify}
-                className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
-                onChange={async (e) => {
-                  const on = e.target.checked;
-                  setError(null);
-                  if (on) {
-                    const perm = await requestNotificationPermission();
-                    if (perm !== "granted") {
-                      setError(t("incomeSettings.notifyError"));
-                      return;
-                    }
-                    await registerWebPush();
-                  } else {
-                    await unregisterWebPush();
-                  }
-                  setDailyNotificationEnabled(on);
-                  setDailyNotify(on);
-                }}
-              />
-              <span className="text-sm text-[var(--color-text-muted)]">
-                <span className="font-medium text-[var(--color-text)]">
-                  {t("incomeSettings.dailyNotifyTitle")}
-                </span>
-                <span className="mt-0.5 block text-[var(--color-text-muted)]">
-                  {t("incomeSettings.dailyNotifyDesc")}
-                </span>
-              </span>
-            </label>
-          )}
-
-          {!isFocused && (
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 px-3 py-3">
-              <input
-                type="checkbox"
-                checked={density === "compact"}
-                className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
-                onChange={(e) => {
-                  const next: Density = e.target.checked ? "compact" : "comfortable";
-                  setDensity(next);
-                  setDensityState(next);
-                }}
-              />
-              <span className="text-sm text-[var(--color-text-muted)]">
-                <span className="font-medium text-[var(--color-text)]">
-                  {t("incomeSettings.densityTitle")}
-                </span>
-                <span className="mt-0.5 block text-[var(--color-text-muted)]">
-                  {t("incomeSettings.densityDesc")}
-                </span>
-              </span>
-            </label>
           )}
 
           {isModal ? (

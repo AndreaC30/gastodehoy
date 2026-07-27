@@ -8,10 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SwipeableRow } from "@/components/ui/swipeable-row";
 import { money } from "@/lib/format";
 import { budgetReferenceDate, formatMonthLong } from "@/lib/month-context";
-import { getDensity } from "@/lib/density-preference";
+import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
-import { type FormEvent } from "react";
+import { type FormEvent, useSyncExternalStore } from "react";
 import { IoReceiptOutline } from "react-icons/io5";
 
 type Props = {
@@ -50,7 +50,11 @@ export function VariableExpensesSection({
 }: Props) {
   const { t, i18n } = useTranslation();
   const month = formatMonthLong(budgetReferenceDate(referenceDate), i18n.language);
-  const density = getDensity();
+  const density = useSyncExternalStore(
+    subscribeDensity,
+    getDensity,
+    () => "comfortable" as const,
+  );
   return (
     <section
       data-tour="variable-expenses"

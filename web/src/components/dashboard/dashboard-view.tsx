@@ -3,7 +3,7 @@
  * category selector, spending chart, and financial insights.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { AppBackdrop } from "@/components/app-backdrop";
 import { SettingsModal } from "@/components/settings-modal";
@@ -38,7 +38,7 @@ import {
 import { maybeShowDailyNotification } from "@/lib/daily-notification";
 import { hapticTick } from "@/lib/haptics";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
-import { getDensity } from "@/lib/density-preference";
+import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import type { DashboardSection } from "@/lib/dashboard-state";
 import { getActiveSection, setActiveSection } from "@/lib/dashboard-state";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
@@ -119,6 +119,11 @@ export function Dashboard({ profileName }: Props) {
   const [showTour, setShowTour] = useState(false);
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const density = useSyncExternalStore(
+    subscribeDensity,
+    getDensity,
+    () => "comfortable" as const,
+  );
 
   function returnToMenu(closePanel: () => void) {
     closePanel();
@@ -388,7 +393,7 @@ export function Dashboard({ profileName }: Props) {
         <main
           id="main-content"
           tabIndex={-1}
-          data-density={getDensity()}
+          data-density={density}
           className="relative z-10 mx-auto w-full max-w-4xl space-y-4 px-3 py-5 pb-[8.5rem] sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl md:pb-20"
         >
         {error && (
