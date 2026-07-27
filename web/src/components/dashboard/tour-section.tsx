@@ -1,70 +1,58 @@
-/** Inline tour section - starts the guided tour overlay. */
+/** Inline tour section — starts the guided tour overlay on the live dashboard. */
 
 import { useTranslation } from "react-i18next";
 import { IoClose, IoPlay } from "react-icons/io5";
+import { TYPE_DISPLAY } from "@/lib/typography";
+import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING } from "@/lib/ui-a11y";
+import type { DashboardSection } from "@/lib/dashboard-state";
 
 type Props = {
   onStart: () => void;
+  onNavigate?: (section: DashboardSection) => void;
 };
 
-export function TourSection({ onStart }: Props) {
+export function TourSection({ onStart, onNavigate }: Props) {
   const { t } = useTranslation();
 
   return (
-    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-[var(--color-text)]">{t("nav.guidedTour")}</h2>
+    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-surface)] sm:p-6">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className={TYPE_DISPLAY}>{t("nav.guidedTour")}</h2>
         <button
           type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent('navigate-section', { detail: 'hoy' }))}
-          className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)]"
-          aria-label="Volver"
+          onClick={() => onNavigate?.("hoy")}
+          className={`rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+          aria-label={t("common.back", { defaultValue: "Volver" })}
         >
-          <IoClose className="h-5 w-5" />
+          <IoClose className="h-5 w-5" aria-hidden />
         </button>
       </div>
 
-      <div className="text-center py-8 space-y-6">
+      <div className="space-y-6 py-4 text-center sm:py-8">
         <div>
-          <div className="h-20 w-20 mx-auto mb-4 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center">
-            <IoPlay className="h-10 w-10 text-[var(--color-accent)]" />
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-[10px] bg-[var(--color-accent-dim)]">
+            <IoPlay className="h-10 w-10 text-[var(--color-accent)]" aria-hidden />
           </div>
-          <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
-            ¿Nuevo en GastoDeHoy?
+          <h3 className="mb-2 font-display text-lg font-semibold text-[var(--color-text)]">
+            {t("tour.introTitle", { defaultValue: "¿Nuevo en GastoDeHoy?" })}
           </h3>
-          <p className="text-sm text-[var(--color-text-muted)] max-w-md mx-auto">
-            El tour guiado te mostrará las funciones principales de la aplicación
-            y te ayudará a configurarla por primera vez.
+          <p className="mx-auto max-w-md text-sm text-[var(--color-text-muted)]">
+            {t("nav.guidedTourDesc")}
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-          <button
-            type="button"
-            onClick={() => {
-              onStart();
-            }}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-[var(--color-bg)] hover:brightness-110"
-          >
-            <IoPlay className="h-4 w-4" />
-            Iniciar Tour Guiado
+        <div className="flex flex-col justify-center gap-3 pt-2 sm:flex-row">
+          <button type="button" onClick={onStart} className={BTN_PRIMARY}>
+            <IoPlay className="mr-2 h-4 w-4" aria-hidden />
+            {t("tour.start", { defaultValue: "Iniciar tour guiado" })}
           </button>
           <button
             type="button"
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('navigate-section', { detail: 'hoy' }));
-            }}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-6 py-3 text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-panel)]"
+            onClick={() => onNavigate?.("hoy")}
+            className={BTN_SECONDARY}
           >
-            Ya conozco la app
+            {t("tour.alreadyKnow", { defaultValue: "Ya conozco la app" })}
           </button>
-        </div>
-
-        <div className="pt-6 border-t border-[var(--color-border)]">
-          <p className="text-xs text-[var(--color-text-dim)]">
-            💡 El tour te guiará paso a paso por las secciones principales:
-            Hoy, Gastos, Análisis e Histórico.
-          </p>
         </div>
       </div>
     </section>

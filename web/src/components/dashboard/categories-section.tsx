@@ -8,10 +8,12 @@ import { api } from "@/api/client";
 import type { ExpenseCategory } from "@/api/types";
 import { getCategoryIcon, CATEGORY_ICON_PICKER } from "@/components/dashboard/category-icon";
 import { INPUT_CLASS, BTN_PRIMARY, BTN_SECONDARY } from "@/lib/ui-a11y";
+import type { DashboardSection } from "@/lib/dashboard-state";
 
 type Props = {
   categories: ExpenseCategory[];
   onChanged: () => void;
+  onNavigate?: (section: DashboardSection) => void;
 };
 
 const PRESET_COLORS = [
@@ -20,7 +22,7 @@ const PRESET_COLORS = [
   "#f97316", "#14b8a6", "#8b5cf6", "#06b6d4",
 ];
 
-export function CategoriesSection({ categories, onChanged }: Props) {
+export function CategoriesSection({ categories, onChanged, onNavigate }: Props) {
   const qc = useQueryClient();
   const { t } = useTranslation();
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -113,7 +115,7 @@ export function CategoriesSection({ categories, onChanged }: Props) {
         <h2 className="text-xl font-bold text-[var(--color-text)]">{t("nav.categories")}</h2>
         <button
           type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent('navigate-section', { detail: 'hoy' }))}
+          onClick={() => onNavigate?.("hoy")}
           className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)]"
           aria-label="Volver"
         >

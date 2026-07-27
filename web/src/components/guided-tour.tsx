@@ -19,6 +19,8 @@ type Props = {
   onComplete: () => void;
   onSkip: () => void;
   onBackToMenu?: () => void;
+  /** Switch dashboard section so the step target is mounted. */
+  onEnsureSection?: (section: NonNullable<TourStep["section"]>) => void;
 };
 
 type SpotlightRect = {
@@ -50,7 +52,13 @@ function TourSpotlightOverlay({ rect, onDismiss }: { rect: SpotlightRect | null;
   );
 }
 
-export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
+export function GuidedTour({
+  steps,
+  onComplete,
+  onSkip,
+  onBackToMenu,
+  onEnsureSection,
+}: Props) {
   const { t } = useTranslation();
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<SpotlightRect | null>(null);
@@ -84,7 +92,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
     return () => tourScrollLockDisable();
   }, []);
 
-  // Scroll to and measure the current step's target
+  // Ensure the right dashboard section is mounted, then scroll/measure.
   useEffect(() => {
     if (!step) return;
 
@@ -93,6 +101,13 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
     setScrolling(true);
 
     void (async () => {
+      if (step.section && onEnsureSection) {
+        onEnsureSection(step.section);
+        // Wait for React to mount the section content.
+        await new Promise((r) => requestAnimationFrame(r));
+        await new Promise((r) => setTimeout(r, 80));
+      }
+      if (cancelled) return;
       await tourScrollToTarget(step.target);
       if (cancelled) return;
       await new Promise((r) => requestAnimationFrame(r));
@@ -104,7 +119,7 @@ export function GuidedTour({ steps, onComplete, onSkip, onBackToMenu }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [step]);
+  }, [step, onEnsureSection]);
 
   // Re-measure on resize
   useEffect(() => {

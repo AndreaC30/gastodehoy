@@ -3,7 +3,7 @@
  * category selector, spending chart, and financial insights.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppBackdrop } from "@/components/app-backdrop";
 import { SettingsModal } from "@/components/settings-modal";
@@ -38,7 +38,7 @@ import { hapticTick } from "@/lib/haptics";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
 import { getDensity } from "@/lib/density-preference";
 import type { DashboardSection } from "@/lib/dashboard-state";
-import { getActiveSection } from "@/lib/dashboard-state";
+import { getActiveSection, setActiveSection } from "@/lib/dashboard-state";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { SiteFooter } from "@/components/site-footer";
 import { APP_SHELL_CLASS } from "@/lib/app-layout";
@@ -159,7 +159,11 @@ export function Dashboard({ profileName }: Props) {
       ("standalone" in navigator && (navigator as any).standalone === true);
 
     const delay = isIOS ? 2500 : 1500;
-    const t = window.setTimeout(() => setShowTour(true), delay);
+    const t = window.setTimeout(() => {
+      setActiveSectionState("hoy");
+      setActiveSection("hoy");
+      setShowTour(true);
+    }, delay);
     return () => window.clearTimeout(t);
   }, [settingsQ.data, summaryQ.isPending, fixedQ.isPending, expensesQ.isPending]);
 
@@ -318,9 +322,22 @@ export function Dashboard({ profileName }: Props) {
     }
   }
 
-  function handleSectionChange(section: DashboardSection) {
+  const handleSectionChange = useCallback((section: DashboardSection) => {
     setActiveSectionState(section);
-    try { localStorage.setItem('gastodehoy_active_section', section); } catch {}
+    setActiveSection(section);
+  }, []);
+
+  const ensureTourSection = useCallback(
+    (section: NonNullable<(typeof DASHBOARD_TOUR_STEPS)[number]["section"]>) => {
+      handleSectionChange(section);
+    },
+    [handleSectionChange],
+  );
+
+  function startGuidedTour() {
+    handleSectionChange("hoy");
+    // Let the «hoy» section mount before the overlay measures targets.
+    window.setTimeout(() => setShowTour(true), 100);
   }
 
   return (
@@ -461,6 +478,7 @@ export function Dashboard({ profileName }: Props) {
         {activeSection === 'ingresos' && settings && (
           <IncomeSettingsSection
             settings={settings}
+            onNavigate={handleSectionChange}
             onSave={() => {
               setToastMsg("Configuración guardada");
               void invalidateAll();
@@ -472,6 +490,7 @@ export function Dashboard({ profileName }: Props) {
         {activeSection === 'categorias' && (
           <CategoriesSection
             categories={categories}
+            onNavigate={handleSectionChange}
             onChanged={() => {
               setToastMsg("Categorías actualizadas");
               void invalidateAll();
@@ -482,18 +501,16 @@ export function Dashboard({ profileName }: Props) {
         {/* Section: METAS */}
         {activeSection === 'metas' && (
           <SavingsGoalsSection
-            reservedSavings={Number(summaryQ.data?.savings_amount) ?? 0}
-            onSaved={() => {
-              setToastMsg("Meta guardada");
-              void invalidateAll();
-            }}
+            reservedSavings={summaryQ.data?.savings_amount}
+            onNavigate={handleSectionChange}
           />
         )}
 
         {/* Section: TOUR */}
         {activeSection === 'tour' && (
           <TourSection
-            onStart={() => setShowTour(true)}
+            onStart={startGuidedTour}
+            onNavigate={handleSectionChange}
           />
         )}
 
@@ -570,6 +587,7 @@ export function Dashboard({ profileName }: Props) {
       {showTour && (
         <GuidedTour
           steps={DASHBOARD_TOUR_STEPS}
+          onEnsureSection={ensureTourSection}
           onBackToMenu={() =>
             returnToMenu(() => {
               setShowTour(false);

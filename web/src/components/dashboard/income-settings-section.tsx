@@ -6,13 +6,15 @@ import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { Settings } from "@/api/types";
 import { INPUT_CLASS } from "@/lib/ui-a11y";
+import type { DashboardSection } from "@/lib/dashboard-state";
 
 type Props = {
   settings: Settings;
   onSave: () => void;
+  onNavigate?: (section: DashboardSection) => void;
 };
 
-export function IncomeSettingsSection({ settings, onSave }: Props) {
+export function IncomeSettingsSection({ settings, onSave, onNavigate }: Props) {
   const { t } = useTranslation();
   const [monthlyIncome, setMonthlyIncome] = useState(settings.monthly_income ?? "");
   const [savingsMode, setSavingsMode] = useState<'percent' | 'fixed' | 'none'>(
@@ -46,7 +48,7 @@ export function IncomeSettingsSection({ settings, onSave }: Props) {
         <h2 className="text-xl font-bold text-[var(--color-text)]">{t("nav.yourIncome")}</h2>
         <button
           type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent('navigate-section', { detail: 'hoy' }))}
+          onClick={() => onNavigate?.("hoy")}
           className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)]"
           aria-label="Volver"
         >

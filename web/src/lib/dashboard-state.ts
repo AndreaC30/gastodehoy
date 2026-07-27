@@ -7,13 +7,23 @@ const SECTION_KEY = 'gastodehoy_active_section';
 export function getActiveSection(): DashboardSection {
   try {
     const stored = localStorage.getItem(SECTION_KEY);
-    if (stored === 'hoy' || stored === 'gastos' || stored === 'analisis' || stored === 'historico') {
-      return stored;
+    const allowed: DashboardSection[] = [
+      "hoy",
+      "gastos",
+      "analisis",
+      "historico",
+      "ingresos",
+      "categorias",
+      "metas",
+      "tour",
+    ];
+    if (stored && (allowed as string[]).includes(stored)) {
+      return stored as DashboardSection;
     }
   } catch {
     // localStorage not available
   }
-  return 'hoy';
+  return "hoy";
 }
 
 export function setActiveSection(section: DashboardSection): void {
