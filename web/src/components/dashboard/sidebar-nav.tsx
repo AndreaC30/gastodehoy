@@ -7,6 +7,7 @@ import {
   IoFlagOutline,
   IoHelpCircleOutline,
   IoLogOutOutline,
+  IoPersonOutline,
   IoPricetagsOutline,
   IoWalletOutline,
   IoMenu,
@@ -69,6 +70,7 @@ export function Sidebar({
       className="flex h-full w-[230px] flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-soft)]"
       aria-label={t("nav.accountMenu")}
     >
+      <div className="min-h-0 flex-1 overflow-y-auto">
       {/* Section navigation */}
       <div className="border-b border-[var(--color-border)] px-1.5 py-2">
         <p className="mb-1.5 px-2 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--color-text-dim)]">
@@ -150,15 +152,44 @@ export function Sidebar({
           );
         })}
       </div>
+      </div>
 
-      {/* Logout */}
-      <div className="border-t border-[var(--color-border)] px-1.5 py-2">
+      {/* Account + logout */}
+      <div className="shrink-0 border-t border-[var(--color-border)] px-1.5 py-2">
+        <div className="mb-2 px-2">
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--color-text-dim)]">
+            {t("nav.account")}
+          </p>
+          <p className="mt-0.5 truncate text-sm font-semibold text-[var(--color-accent)]">
+            {profileName}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setMobileOpen(false);
+            setAccountOpen(true);
+          }}
+          className={`mb-1 flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-panel)] ${FOCUS_RING}`}
+        >
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-accent)]">
+            <IoPersonOutline className="h-[1.1rem] w-[1.1rem]" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium text-[var(--color-text)]">
+              {t("nav.account")}
+            </span>
+            <span className="block truncate text-[11px] text-[var(--color-text-dim)]">
+              {t("nav.accountDesc")}
+            </span>
+          </span>
+        </button>
         <button
           type="button"
           onClick={handleLogout}
           className={`flex w-full items-center gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-3 py-2.5 text-left text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
         >
-          <span className="flex shrink-0 items-center justify-center rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] h-8 w-8">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)]">
             <IoLogOutOutline className="h-[1rem] w-[1rem]" aria-hidden />
           </span>
           {t("nav.logout")}
