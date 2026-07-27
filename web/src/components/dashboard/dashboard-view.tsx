@@ -16,6 +16,8 @@ import { SavingsGoalsSection } from "@/components/dashboard/savings-goals-sectio
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { IoMenu } from "react-icons/io5";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
 import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
 import { FixedExpensesSection } from "@/components/dashboard/fixed-expenses-section";
@@ -116,6 +118,7 @@ export function Dashboard({ profileName }: Props) {
   const [exportBusy, setExportBusy] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function returnToMenu(closePanel: () => void) {
     closePanel();
@@ -348,20 +351,34 @@ export function Dashboard({ profileName }: Props) {
         onExport={() => void handleExport()}
         onSectionChange={handleSectionChange}
         activeSection={activeSection}
+        mobileOpen={mobileMenuOpen}
+        onMobileOpenChange={setMobileMenuOpen}
       />
 
       <div className={`flex-1 min-w-0 flex flex-col ${APP_SHELL_CLASS} overflow-y-auto`}>
         <AppBackdrop />
 
-        {/* Simplified header — branding only */}
-        <header className="relative z-10 border-b border-[var(--color-border)] px-3 py-4 sm:px-4 sm:py-5 md:hidden">
-          <div className="mx-auto max-w-4xl lg:max-w-6xl">
-            <h1 className="m-0 leading-none">
-              <BrandLogo variant="header" />
-            </h1>
-            <p className="mt-1.5 max-w-md text-sm text-[var(--color-text-muted)] sm:text-base">
-              {t("header.tagline")}
-            </p>
+        <header className="relative z-10 border-b border-[var(--color-border)] px-3 py-3 sm:px-4 sm:py-4">
+          <div className="mx-auto flex max-w-4xl items-center gap-3 lg:max-w-6xl">
+            <button
+              type="button"
+              data-tour="menu"
+              onClick={() => setMobileMenuOpen(true)}
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] text-[var(--color-text)] md:hidden ${FOCUS_RING}`}
+              aria-label={t("header.menu")}
+              aria-expanded={mobileMenuOpen}
+              aria-haspopup="dialog"
+            >
+              <IoMenu className="gdh-icon" aria-hidden />
+            </button>
+            <div className="min-w-0 flex-1">
+              <h1 className="m-0 leading-none">
+                <BrandLogo variant="header" />
+              </h1>
+              <p className="mt-1 max-w-md text-sm text-[var(--color-text-muted)] sm:text-base">
+                {t("header.tagline")}
+              </p>
+            </div>
           </div>
         </header>
 

@@ -18,7 +18,7 @@ export function BrandLogo({ variant = "hero", className = "" }: Props) {
   const sizing =
     variant === "hero"
       ? "mx-auto block h-auto w-full max-w-[min(100%,19rem)] object-contain sm:max-w-[21rem] md:max-w-[23rem]"
-      : "h-12 w-auto max-w-[min(100%,26rem)] object-contain object-left sm:h-14 md:h-16 md:max-w-[min(100%,30rem)]";
+      : "h-9 w-auto max-w-[min(100%,11.5rem)] object-contain object-left sm:h-10 sm:max-w-[14rem] md:h-11 md:max-w-[16rem]";
 
   return (
     <span
