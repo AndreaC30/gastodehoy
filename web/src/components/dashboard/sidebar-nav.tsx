@@ -18,7 +18,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { AccountModal } from "@/components/account-modal";
 import { DeleteAccountModal } from "@/components/delete-account-modal";
-import { BrandLogo } from "@/components/brand-logo";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { FOCUS_RING } from "@/lib/ui-a11y";
@@ -78,9 +77,6 @@ export function Sidebar({
       aria-label={t("nav.accountMenu")}
       data-tour="menu"
     >
-      <div className="shrink-0 border-b border-[var(--color-border)] px-3 py-3 pr-10 md:pr-3">
-        <BrandLogo variant="header" className="max-w-full" />
-      </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
       {/* Section navigation */}
       <div className="border-b border-[var(--color-border)] px-1.5 py-2">
