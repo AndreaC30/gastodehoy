@@ -113,6 +113,14 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("VAPID_SUBJECT"),
         description="Contacto VAPID (mailto: o https:).",
     )
+    admin_api_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("ADMIN_API_KEY"),
+        description=(
+            "Clave para /api/admin/* (cabecera X-Admin-Key). "
+            "Obligatoria en ENV=production."
+        ),
+    )
 
     def web_push_enabled(self) -> bool:
         """True when both VAPID keys are set."""

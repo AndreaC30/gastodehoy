@@ -2,7 +2,7 @@
 
 Web sencilla que te dice **cuánto puedes gastar hoy** sin salirte del presupuesto del mes. Llevas tu ingreso, tus gastos fijos y los gastos del día a día; la app calcula tu margen diario.
 
-Construido con **FastAPI** (Python), **SQLite** (un archivo en `./data/`), **React + Vite + Tailwind**. En producción usa **Caddy** para HTTPS automático.
+Construido con **FastAPI** (Python), **SQLite** (un archivo en `./data/`), **React + Vite + Tailwind**. En producción suele ir detrás de un **proxy HTTPS** (Caddy, nginx o nginx-proxy) en el mismo VPS.
 
 En cada conexión SQLite la API activa automáticamente **WAL**, `busy_timeout` (5 s) y `synchronous=NORMAL` para lecturas concurrentes y menos errores «database is locked» con un solo proceso escritor (Docker o local).
 
@@ -96,13 +96,14 @@ Los tests usan SQLite en memoria, sin tocar la BBDD real.
 
 ---
 
-## 3. Producción (Docker + Caddy + HTTPS)
+## 3. Producción (Docker + HTTPS)
 
 Pensado para un VPS (Hetzner, DigitalOcean, OVH…) o una Raspberry Pi expuesta. Necesitas:
 
 - Un **dominio** apuntando a la IP del servidor (registro A/AAAA).
-- Los puertos **80** y **443** abiertos en el firewall.
+- Los puertos **80** y **443** abiertos en el firewall (los usa tu proxy, no el contenedor `app`).
 - **Docker** instalado en el servidor.
+- Un **reverse proxy** en el host (Caddy, nginx, nginx-proxy…) que termine TLS y reenvíe al contenedor `app` en la red Docker `gastodehoy_backend`.
 
 ### Paso 1 — Clona el repo
 
@@ -123,30 +124,29 @@ Edita `.env` y rellena **obligatoriamente**:
 SITE_DOMAIN=gastos.tudominio.com
 ACME_EMAIL=tu-email@ejemplo.com
 APP_SECRET=<clave secreta de 32+ caracteres>
+ADMIN_API_KEY=<clave de 32+ caracteres para /api/admin y n8n>
 COOKIE_SECURE=true
 ```
 
-Genera el `APP_SECRET`:
+Genera secretos:
 
 ```bash
-openssl rand -hex 32
+openssl rand -hex 32   # APP_SECRET y ADMIN_API_KEY (usa dos valores distintos)
 ```
 
-> La app **no arranca** si `COOKIE_SECURE=true` y `APP_SECRET` es el default o tiene menos de 32 caracteres.
+> La app **no arranca** en producción si `APP_SECRET` o `ADMIN_API_KEY` son débiles o faltan, o si `COOKIE_SECURE=true` con `APP_SECRET` por defecto.
 
 ### Paso 3 — Levanta con el overlay de producción
 
-**IMPORTANTE:** En producción hay que usar **ambos** archivos de compose. Si solo usas `docker-compose.yml`, Caddy no se levanta y la app no será accesible desde fuera.
+**IMPORTANTE:** Usa `docker-compose.yml` **y** `docker-compose.prod.yml`. El servicio `app` **no publica puertos**; el proxy del host debe enlazar con la red Docker.
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-Esto levanta dos contenedores:
-- **app**: la API + frontend, en red interna (sin puertos expuestos al exterior).
-- **caddy**: reverse proxy con HTTPS automático vía Let's Encrypt, puertos 80 y 443.
+En servidores que además ejecutan **kya-system-hermes** / **hermes-core**, añade el overlay opcional `docker-compose.prod.server.yml` (ver comentarios en ese archivo).
 
-Caddy obtiene y renueva el certificado SSL automáticamente.
+El contenedor **app** sirve API + frontend estático. HTTPS y certificados los gestiona tu proxy (p. ej. Let's Encrypt con Caddy o nginx).
 
 Abre **https://gastos.tudominio.com** y crea tu primera cuenta.
 
@@ -244,7 +244,8 @@ techo diario = (ingreso mensual − ahorro − fijos − gastos variables del me
 - **Rate limit** en login y recuperación: 5 intentos por IP cada 5 minutos.
 - **Cambiar la contraseña invalida todas las sesiones** y obliga a iniciar sesión otra vez.
 - Cada cuenta solo ve sus propios datos.
-- En producción, Caddy añade HSTS, CSP, `X-Frame-Options=DENY`, `Referrer-Policy`, `Permissions-Policy` y oculta la cabecera `Server`.
+- En producción, el proxy (Caddy/nginx) puede añadir HSTS, CSP, `X-Frame-Options=DENY`, etc.
+- `/api/admin/*` exige la cabecera `X-Admin-Key` con `ADMIN_API_KEY` (obligatoria con `ENV=production`).
 - La BBDD es un único archivo SQLite con permisos de filesystem; sin puerto abierto ni usuario remoto. Para protegerla del robo físico del disco, cifra el filesystem del VPS (LUKS o equivalente).
 - Validación de dominio MX en registro y recuperación de contraseña (desde v2026.05.13).
 - Respuestas de tiempo constante en auth para evitar enumeración de usuarios.

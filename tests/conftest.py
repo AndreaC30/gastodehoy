@@ -12,6 +12,7 @@ os.environ["TIMEZONE"] = "Europe/Madrid"
 # Must set to empty (not pop) because pydantic-settings falls back to .env file
 os.environ["VAPID_PUBLIC_KEY"] = ""
 os.environ["VAPID_PRIVATE_KEY"] = ""
+os.environ.pop("ADMIN_API_KEY", None)
 
 from collections.abc import Generator
 

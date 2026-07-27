@@ -60,8 +60,23 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
 
 
 MIN_APP_SECRET_LEN = 32
+MIN_ADMIN_API_KEY_LEN = 32
 
 _log = logging.getLogger(__name__)
+
+
+def _require_strong_admin_api_key(reason: str) -> None:
+    key = (app_settings.admin_api_key or "").strip()
+    if not key:
+        raise RuntimeError(
+            f"{reason}: ADMIN_API_KEY no está definida. "
+            "Genera una: ADMIN_API_KEY=$(openssl rand -hex 32)"
+        )
+    if len(key) < MIN_ADMIN_API_KEY_LEN:
+        raise RuntimeError(
+            f"{reason}: ADMIN_API_KEY demasiado corta "
+            f"({len(key)} < {MIN_ADMIN_API_KEY_LEN})."
+        )
 
 
 def _require_strong_app_secret(reason: str) -> None:
@@ -98,6 +113,7 @@ async def lifespan(_: FastAPI):
 
     if app_settings.environment == "production":
         _require_strong_app_secret("Refusing to start: ENV=production")
+        _require_strong_admin_api_key("Refusing to start: ENV=production")
         if not app_settings.cookie_secure:
             _log.warning(
                 "ENV=production pero COOKIE_SECURE=false: la cookie de sesión puede enviarse sin "

@@ -1,15 +1,18 @@
-# Overlay para producción: proxy inverso con Nginx + cookies seguras.
-# Incluye los 3 proyectos: gastodehoy, kya-system-hermes, hermes-core
+# Overlay de producción para GastoDeHoy (solo servicio app).
+#
+# La app queda en la red interna; expón HTTPS con un proxy en el host
+# (Caddy, nginx, nginx-proxy, etc.) apuntando al contenedor «app».
 #
 # Uso:
-#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --force-recreate app
-#   docker compose -f /root/kya-system-hermes/docker-compose.yml -f docker-compose.prod.yml up -d --build kya
-#   docker compose -f /root/hermes-core/docker-compose.yml -f docker-compose.prod.yml up -d --build hermes-core
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# En servidores con kya-system-hermes / hermes-core, añade además:
+#   -f docker-compose.prod.server.yml
 #
 # Requiere en .env:
 #   SITE_DOMAIN=gastodehoy.es
-#   ACME_EMAIL=tu-email@ejemplo.com
 #   APP_SECRET=<openssl rand -hex 32>
+#   ADMIN_API_KEY=<openssl rand -hex 32>
 #   COOKIE_SECURE=true
 
 services:
@@ -19,60 +22,19 @@ services:
       args:
         SITE_DOMAIN: ${SITE_DOMAIN}
         BUILD_REF: ${BUILD_REF:-prod}
-    # Solo expuesto a la red interna; Nginx hace de puerta.
     ports: []
     environment:
       DATABASE_URL: sqlite:////app/data/gastodehoy.db
+      ENV: production
       TIMEZONE: ${TIMEZONE:-Europe/Madrid}
       APP_SECRET: ${APP_SECRET}
+      ADMIN_API_KEY: ${ADMIN_API_KEY}
       SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-30}
       COOKIE_SECURE: "true"
       COOKIE_DOMAIN: ${SITE_DOMAIN}
       TRUST_FORWARDED_FOR: "true"
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
     networks:
       backend:
         aliases:
           - app
-
-  kya:
-    build:
-      context: /root/kya-system-hermes
-    container_name: kya-system-hermes
-    restart: unless-stopped
-    ports: []
-    volumes:
-      - kya-data:/app/data
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/log:/var/log:ro
-    environment:
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
-      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-875698538}
-      - APP_SECRET=${APP_SECRET:-kya-secret-change-me}
-      - APP_USER=${APP_USER:-admin}
-      - APP_PASS=${APP_PASS:-kya2026}
-      - COLLECTOR_INTERVAL=30
-    networks:
-      backend:
-        aliases:
-          - kya
-
-  hermes-core:
-    build:
-      context: /root/hermes-core
-    container_name: hermes-core
-    restart: unless-stopped
-    ports: []
-    volumes:
-      - /root/.hermes:/root/.hermes:ro
-    environment:
-      - APP_SECRET=${APP_SECRET:-hermes-secret-change-me}
-      - APP_USER=${APP_USER:-admin}
-      - APP_PASS=${APP_PASS:-hermes2026}
-      - HERMES_HOME=/root/.hermes
-    networks:
-      backend:
-        aliases:
-          - hermes-core
-
-volumes:
-  kya-data:

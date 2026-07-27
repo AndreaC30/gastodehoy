@@ -38,7 +38,7 @@ echo "==> build app (--no-cache --pull BUILD_REF/npm run build en imagen)"
 echo "==> recrear solo app"
 "${COMPOSE[@]}" up -d --force-recreate --no-deps app
 
-echo "==> recargar nginx (proxy inverso)"
+echo "==> recargar nginx (proxy inverso, opcional)"
 docker exec nginx-proxy nginx -s reload 2>/dev/null || true
 
 echo ""

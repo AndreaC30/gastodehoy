@@ -1,18 +1,19 @@
-"""Minimal admin endpoints: stats + notification bridge for n8n.
+"""Admin endpoints: stats + notification bridge for n8n.
 
-KISS: no auth, solo datos agregados y un puente para que n8n
-pueda enviar correos usando el SMTP ya configurado en GastoDeHoy.
+Protected with ``X-Admin-Key`` when ``ADMIN_API_KEY`` is set (required in production).
 """
 from __future__ import annotations
 
 import logging
+import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.mail import send_email
 from app.models import User, VariableExpense, FixedExpense, UserSettings
@@ -20,6 +21,38 @@ from app.models import User, VariableExpense, FixedExpense, UserSettings
 _log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
+
+
+def _configured_admin_key() -> str:
+    return (settings.admin_api_key or "").strip()
+
+
+def require_admin_api_key(
+    x_admin_key: str | None = Header(default=None, alias="X-Admin-Key"),
+) -> None:
+    """Reject requests when an admin key is configured but missing or wrong."""
+    expected = _configured_admin_key()
+    if not expected:
+        if settings.environment == "production":
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Admin API not configured",
+            )
+        return
+    if not x_admin_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
+    try:
+        ok = secrets.compare_digest(x_admin_key, expected)
+    except (TypeError, ValueError):
+        ok = False
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+        )
 
 
 class StatsResponse(BaseModel):
@@ -31,7 +64,10 @@ class StatsResponse(BaseModel):
 
 
 @router.get("/stats", response_model=StatsResponse)
-def stats(db: Session = Depends(get_db)) -> StatsResponse:
+def stats(
+    _: None = Depends(require_admin_api_key),
+    db: Session = Depends(get_db),
+) -> StatsResponse:
     """Return aggregate user statistics."""
     now = datetime.now(timezone.utc)
 
@@ -92,7 +128,10 @@ class AnalyticsResponse(BaseModel):
 
 
 @router.get("/analytics", response_model=AnalyticsResponse)
-def analytics(db: Session = Depends(get_db)) -> AnalyticsResponse:
+def analytics(
+    _: None = Depends(require_admin_api_key),
+    db: Session = Depends(get_db),
+) -> AnalyticsResponse:
     """Return detailed usage analytics for n8n reporting."""
     now = datetime.now(timezone.utc)
 
@@ -199,7 +238,10 @@ class NotificationRequest(BaseModel):
 
 
 @router.post("/send-notification", status_code=204)
-def send_notification(payload: NotificationRequest):
+def send_notification(
+    payload: NotificationRequest,
+    _: None = Depends(require_admin_api_key),
+):
     """Bridge para que n8n envíe correos usando el SMTP de GastoDeHoy.
 
     Envía un email a gastodehoy@gmail.com (el admin). Úsalo desde n8n
