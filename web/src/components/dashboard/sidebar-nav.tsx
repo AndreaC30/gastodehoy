@@ -78,7 +78,7 @@ export function Sidebar({
       aria-label={t("nav.accountMenu")}
       data-tour="menu"
     >
-      <div className="shrink-0 border-b border-[var(--color-border)] px-3 py-3">
+      <div className="shrink-0 border-b border-[var(--color-border)] px-3 py-3 pr-10 md:pr-3">
         <BrandLogo variant="header" className="max-w-full" />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
@@ -216,19 +216,19 @@ export function Sidebar({
         <div className="fixed inset-0 z-[60] md:hidden" role="presentation">
           <button
             type="button"
-            className="absolute inset-0 bg-black/60 backdrop-blur-[1px]"
+            className="absolute inset-0 bg-black/55"
             aria-label={t("nav.closeMenu")}
             onClick={() => setMobileOpen(false)}
           />
-          <div className="relative flex h-full justify-start">
+          <div className="relative flex h-full max-w-[min(100%,16rem)] justify-start shadow-[8px_0_24px_rgb(0_0_0_/_0.35)]">
             {sidebarContent}
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className={`absolute top-3 right-3 z-10 flex min-h-8 min-w-8 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+              className={`absolute right-2 top-3 z-10 inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-panel-elevated)] px-2 py-1.5 text-[var(--color-text-dim)] hover:border-[var(--color-accent-border)] hover:text-[var(--color-accent)] ${FOCUS_RING}`}
               aria-label={t("nav.closeMenu")}
             >
-              <IoClose className="h-4 w-4" aria-hidden />
+              <IoClose className="gdh-icon" aria-hidden />
             </button>
           </div>
         </div>

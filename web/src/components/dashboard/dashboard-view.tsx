@@ -358,27 +358,30 @@ export function Dashboard({ profileName }: Props) {
       <div className={`flex-1 min-w-0 flex flex-col ${APP_SHELL_CLASS} overflow-y-auto`}>
         <AppBackdrop />
 
-        <header className="relative z-10 border-b border-[var(--color-border)] px-3 py-3 sm:px-4 sm:py-4">
+        <header className="relative z-10 border-b border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-3 sm:px-4 sm:py-3.5">
           <div className="mx-auto flex max-w-4xl items-center gap-3 lg:max-w-6xl">
+            <div className="min-w-0 flex-1">
+              <h1 className="m-0 leading-none">
+                <BrandLogo variant="header" />
+              </h1>
+              <p className="mt-1 max-w-md truncate text-sm text-[var(--color-text-muted)] sm:text-[13px]">
+                {t("header.tagline")}
+              </p>
+            </div>
             <button
               type="button"
               data-tour="menu"
               onClick={() => setMobileMenuOpen(true)}
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] text-[var(--color-text)] md:hidden ${FOCUS_RING}`}
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-2 text-[var(--color-accent)] md:hidden ${FOCUS_RING}`}
               aria-label={t("header.menu")}
               aria-expanded={mobileMenuOpen}
               aria-haspopup="dialog"
             >
               <IoMenu className="gdh-icon" aria-hidden />
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em]">
+                {t("header.menu")}
+              </span>
             </button>
-            <div className="min-w-0 flex-1">
-              <h1 className="m-0 leading-none">
-                <BrandLogo variant="header" />
-              </h1>
-              <p className="mt-1 max-w-md text-sm text-[var(--color-text-muted)] sm:text-base">
-                {t("header.tagline")}
-              </p>
-            </div>
           </div>
         </header>
 
