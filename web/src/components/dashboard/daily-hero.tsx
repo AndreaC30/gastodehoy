@@ -5,7 +5,7 @@ import { money, savingsLabel } from "@/lib/format";
 import { useAnimatedNumber } from "@/lib/use-animated-number";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FOCUS_RING } from "@/lib/ui-a11y";
-import { TYPE_BODY, TYPE_EYEBROW } from "@/lib/typography";
+import { TYPE_BODY, TYPE_EYEBROW, TYPE_HERO_NUMBER } from "@/lib/typography";
 
 type Props = {
   summary: Summary | undefined;
@@ -22,11 +22,11 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
   return (
     <section
       data-tour="hero"
-      className="overflow-hidden rounded-xl border border-teal-500/20 bg-gradient-to-br from-slate-900/90 to-slate-900 p-4 shadow-xl shadow-black/30 sm:rounded-2xl sm:p-5 md:p-6"
+      className="overflow-hidden rounded-xl border border-[var(--color-accent-border)] bg-gradient-to-br from-[var(--color-panel)] to-[var(--color-bg-soft)] p-4 shadow-xl shadow-black/30 sm:rounded-2xl sm:p-5 md:p-6"
       aria-live="polite"
     >
       <div className="grid gap-4 sm:gap-6 md:grid-cols-[1fr_1.35fr] md:items-stretch md:gap-8">
-        <div className="flex flex-col justify-center rounded-lg border border-slate-800 bg-slate-900 p-4 sm:rounded-xl sm:p-5">
+        <div className="flex flex-col justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] p-4 sm:rounded-xl sm:p-5">
           <p className={TYPE_EYEBROW}>{t("hero.dailyBudget")}</p>
           <div className="mt-1 min-h-[2.25rem] sm:min-h-[2.75rem] md:min-h-[3.5rem]">
             {summaryPending ? (
@@ -36,7 +36,7 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
               />
             ) : (
               <p
-                className="break-words text-2xl font-bold tabular-nums tracking-tight text-teal-400 min-[375px]:text-3xl sm:text-4xl md:text-5xl"
+                className={TYPE_HERO_NUMBER}
                 aria-label={
                   summary?.suggested_spend_today != null
                     ? money(summary.suggested_spend_today)
@@ -129,7 +129,7 @@ export function DailyHero({ summary, summaryPending, onRefresh }: Props) {
           />
         </div>
       </div>
-      <p className={`mt-5 border-t border-slate-800 pt-4 ${TYPE_BODY}`}>
+      <p className={`mt-5 border-t border-[var(--color-border)] pt-4 ${TYPE_BODY}`}>
         {t("hero.explanation")}
       </p>
     </section>

@@ -5,7 +5,7 @@ type Props = {
 export function Skeleton({ className = "" }: Props) {
   return (
     <div
-      className={`animate-pulse rounded bg-slate-700/40 ${className}`}
+      className={`animate-pulse rounded bg-[var(--color-border)]/40 ${className}`}
       aria-hidden="true"
     />
   );

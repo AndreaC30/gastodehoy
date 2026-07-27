@@ -114,7 +114,7 @@ export function EditVariableExpenseModal({
         ref={panelRef}
         tabIndex={-1}
         style={{ transform: `translateY(${dragOffset}px)` }}
-        className={`modal-scroll w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl transition-transform duration-300 sm:rounded-2xl sm:p-5 ${dragging ? "transition-none" : ""}`}
+        className={`modal-scroll w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-2xl transition-transform duration-300 sm:rounded-2xl sm:p-5 ${dragging ? "transition-none" : ""}`}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -128,7 +128,7 @@ export function EditVariableExpenseModal({
           <button
             type="button"
             onClick={onClose}
-            className={`min-h-11 min-w-11 rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200 ${FOCUS_RING}`}
+            className={`min-h-11 min-w-11 rounded-lg p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
             aria-label="Cerrar"
           >
             <IoClose className="h-5 w-5" aria-hidden />
@@ -137,7 +137,7 @@ export function EditVariableExpenseModal({
 
         {error && (
           <p
-            className="mt-3 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200"
+            className="mt-3 rounded-lg border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2 text-sm text-[var(--color-crit)]"
             role="alert"
           >
             {error}
@@ -146,7 +146,7 @@ export function EditVariableExpenseModal({
 
         <form onSubmit={submit} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="edit-var-amount" className="mb-1.5 block text-xs text-slate-500">
+            <label htmlFor="edit-var-amount" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
               Cantidad (€)
             </label>
             <input
@@ -162,7 +162,7 @@ export function EditVariableExpenseModal({
             />
           </div>
           <div>
-            <label htmlFor="edit-var-date" className="mb-1.5 block text-xs text-slate-500">
+            <label htmlFor="edit-var-date" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
               Fecha
             </label>
             <input
@@ -175,7 +175,7 @@ export function EditVariableExpenseModal({
             />
           </div>
           <div>
-            <label htmlFor="edit-var-category" className="mb-1.5 block text-xs text-slate-500">
+            <label htmlFor="edit-var-category" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
               {t("editVariableExpense.category")}
             </label>
             <select
@@ -193,7 +193,7 @@ export function EditVariableExpenseModal({
             </select>
           </div>
           <div>
-            <label htmlFor="edit-var-note" className="mb-1.5 block text-xs text-slate-500">
+            <label htmlFor="edit-var-note" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
               Nota (opcional)
             </label>
             <input

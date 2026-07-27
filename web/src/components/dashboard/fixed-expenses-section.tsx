@@ -54,12 +54,12 @@ export function FixedExpensesSection({
   return (
     <section
       data-tour="fixed-expenses"
-      className="rounded-2xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/20"
+      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-lg shadow-black/20"
     >
-      <div className="border-b border-slate-800 px-5 py-4">
+      <div className="border-b border-[var(--color-border)] px-5 py-4">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">{t("fixedExpenses.title")}</h2>
         <p className={`mt-1 ${TYPE_CAPTION}`}>{t("fixedExpenses.subtitle")}</p>
-        <p className={`mt-1.5 ${TYPE_CAPTION} text-teal-200/70`}>
+        <p className={`mt-1.5 ${TYPE_CAPTION} text-[var(--color-accent)]/70`}>
           {t("monthContext.fixedRepeats")}
         </p>
       </div>
@@ -133,7 +133,7 @@ export function FixedExpensesSection({
                         <button
                           type="button"
                           onClick={() => onEdit(it)}
-                          className={`min-h-11 rounded-lg border border-slate-600 px-2.5 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800 ${FOCUS_RING}`}
+                          className={`min-h-11 rounded-lg border border-[var(--color-border-subtle)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
                           aria-label={t("fixedExpenses.editLabel", { name: it.name })}
                         >
                           {t("common.edit")}
@@ -142,7 +142,7 @@ export function FixedExpensesSection({
                           type="button"
                           onClick={() => onDelete(it.id)}
                           disabled={deletePending}
-                          className={`min-h-11 rounded-lg border border-rose-500/40 px-2.5 py-1.5 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
+                          className={`min-h-11 rounded-lg border border-[var(--color-crit-border)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-crit)] hover:bg-[var(--color-crit-dim)] disabled:opacity-50 ${FOCUS_RING}`}
                           aria-label={t("fixedExpenses.removeLabel", { name: it.name })}
                         >
                           {t("common.remove")}
@@ -151,10 +151,10 @@ export function FixedExpensesSection({
                     }
                   >
                     <div className="flex min-w-0 items-center gap-2">
-                      <FixedIcon className="h-4 w-4 shrink-0 text-sky-400/90" />
+                      <FixedIcon className="h-4 w-4 shrink-0 text-[var(--color-accent)]/90" />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-slate-200 data-[density=compact]:text-xs" data-density={density}>{it.name}</p>
-                        <p className="truncate text-sm tabular-nums text-slate-500 data-[density=compact]:text-xs" data-density={density}>{money(it.amount)}</p>
+                        <p className="truncate text-sm font-semibold text-[var(--color-text)] data-[density=compact]:text-xs" data-density={density}>{it.name}</p>
+                        <p className="truncate text-sm tabular-nums text-[var(--color-text-dim)] data-[density=compact]:text-xs" data-density={density}>{money(it.amount)}</p>
                       </div>
                     </div>
                   </SwipeableRow>
@@ -166,7 +166,7 @@ export function FixedExpensesSection({
               <button
                 type="button"
                 onClick={onToggleExpand}
-                className={`mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 ${FOCUS_RING}`}
+                className={`mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-3 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
                 aria-expanded={expanded}
               >
                 <ChevronInCircle expanded={expanded} />

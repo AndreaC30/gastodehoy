@@ -30,7 +30,7 @@ export function FormField({
   hint,
   error,
   className,
-  labelClassName = "block text-sm font-medium text-slate-300 sm:text-base",
+  labelClassName = "block text-sm font-medium text-[var(--color-text)] sm:text-base",
   children,
 }: Props) {
   const fallbackId = useId();
@@ -55,12 +55,12 @@ export function FormField({
       </label>
       <div className="mt-1.5">{control}</div>
       {hint && (
-        <p id={hintId} className="mt-2 text-sm leading-relaxed text-slate-400">
+        <p id={hintId} className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} role="alert" className="mt-1.5 text-sm text-rose-300">
+        <p id={errorId} role="alert" className="mt-1.5 text-sm text-[var(--color-crit)]">
           {error}
         </p>
       )}

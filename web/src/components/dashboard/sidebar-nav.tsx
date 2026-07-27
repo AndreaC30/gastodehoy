@@ -1,3 +1,5 @@
+/** Sidebar navigation for desktop + mobile drawer. */
+
 import { useEffect, useState } from "react";
 import {
   IoClose,
@@ -5,64 +7,45 @@ import {
   IoFlagOutline,
   IoHelpCircleOutline,
   IoLogOutOutline,
-  IoPersonOutline,
   IoPricetagsOutline,
   IoWalletOutline,
-  IoChevronBack,
-  IoChevronForward,
   IoMenu,
+  IoHome,
+  IoWallet,
+  IoPieChart,
+  IoCalendar,
 } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
-import { api } from "@/api/client";
 import { AccountModal } from "@/components/account-modal";
 import { DeleteAccountModal } from "@/components/delete-account-modal";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { FOCUS_RING } from "@/lib/ui-a11y";
-
-export type DashboardNavAction =
-  | "settings"
-  | "categories"
-  | "savings-goals"
-  | "export"
-  | "guided-tour"
-  | "account";
+import type { DashboardSection } from "@/lib/dashboard-state";
 
 type Props = {
   profileName: string;
-  settingsReady: boolean;
   exportBusy?: boolean;
-  onNavigate: (action: DashboardNavAction) => void;
-  onExport: () => void;
+  onExport?: () => void;
+  onSectionChange?: (section: DashboardSection) => void;
+  activeSection: DashboardSection;
 };
-
-type NavItem = {
-  id: DashboardNavAction;
-  label: string;
-  Icon: typeof IoWalletOutline;
-  disabled?: boolean;
-};
-
-const COLLAPSED_KEY = "gastodehoy_sidebar_collapsed";
-const COLLAPSED_W = "w-[3.5rem]";
-const EXPANDED_W = "w-56";
 
 export function Sidebar({
   profileName,
-  settingsReady,
   exportBusy = false,
-  onNavigate,
   onExport,
+  onSectionChange,
+  activeSection,
 }: Props) {
   const { t, i18n } = useTranslation();
-  const [collapsed, setCollapsed] = useState(() => {
-    try { return localStorage.getItem(COLLAPSED_KEY) === "1"; } catch { return false; }
-  });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   useBodyScrollLock(mobileOpen || accountOpen || deleteOpen);
+
+  const isExportBusy = exportBusy ?? false;
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -71,33 +54,10 @@ export function Sidebar({
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
-  const toggleCollapse = () => {
-    const next = !collapsed;
-    setCollapsed(next);
-    try { localStorage.setItem(COLLAPSED_KEY, next ? "1" : "0"); } catch {}
-  };
-
-  const items: NavItem[] = [
-    { id: "settings", label: t("nav.yourIncome"), Icon: IoWalletOutline, disabled: !settingsReady },
-    { id: "categories", label: t("nav.categories"), Icon: IoPricetagsOutline },
-    { id: "savings-goals", label: t("nav.savingsGoals"), Icon: IoFlagOutline },
-    { id: "export", label: exportBusy ? t("nav.exporting") : t("nav.exportCsv"), Icon: IoDownloadOutline, disabled: exportBusy },
-    { id: "guided-tour", label: t("nav.guidedTour"), Icon: IoHelpCircleOutline },
-    { id: "account", label: t("nav.account"), Icon: IoPersonOutline },
-  ];
-
-  function pick(action: DashboardNavAction) {
-    if (action === "account") {
-      setAccountOpen(true);
-      return;
-    }
-    if (action === "export") {
-      onExport();
-      return;
-    }
-    onNavigate(action);
+  const handleSectionChange = (section: DashboardSection) => {
     setMobileOpen(false);
-  }
+    onSectionChange?.(section);
+  };
 
   function handleLogout() {
     setMobileOpen(false);
@@ -106,55 +66,69 @@ export function Sidebar({
 
   const sidebarContent = (
     <nav
-      className={`flex h-full flex-col border-r border-slate-800 bg-slate-950 ${collapsed ? COLLAPSED_W : EXPANDED_W} transition-[width] duration-200 ease-out`}
+      className="flex h-full w-64 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-soft)]"
       aria-label={t("nav.accountMenu")}
     >
-      {/* Header: logo area + collapse toggle */}
-      <div className={`flex items-center border-b border-slate-800 px-2 py-3 ${collapsed ? "justify-center" : "justify-between px-3"}`}>
-        {!collapsed && (
-          <span className="text-sm font-bold tracking-tight text-teal-400">GastoDeHoy</span>
-        )}
+      {/* Section navigation */}
+      <div className="border-b border-[var(--color-border)] px-1.5 py-2">
+        <p className="mb-1.5 px-2 text-[0.6rem] font-semibold uppercase tracking-widest text-[var(--color-text-dim)]">
+          Navegación
+        </p>
+        <ul className="space-y-0.5">
+          {[
+            { id: 'hoy' as DashboardSection, label: 'Hoy', Icon: IoHome },
+            { id: 'gastos' as DashboardSection, label: 'Gastos', Icon: IoWallet },
+            { id: 'analisis' as DashboardSection, label: 'Análisis', Icon: IoPieChart },
+            { id: 'historico' as DashboardSection, label: 'Histórico', Icon: IoCalendar },
+            { id: 'ingresos' as DashboardSection, label: 'Ingresos', Icon: IoWalletOutline },
+            { id: 'categorias' as DashboardSection, label: 'Categorías', Icon: IoPricetagsOutline },
+            { id: 'metas' as DashboardSection, label: 'Metas', Icon: IoFlagOutline },
+            { id: 'tour' as DashboardSection, label: 'Tour guiado', Icon: IoHelpCircleOutline },
+          ].map(({ id, label, Icon }) => (
+            <li key={id}>
+              <button
+                type="button"
+                onClick={() => handleSectionChange(id)}
+                className={`flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors ${
+                  activeSection === id
+                    ? 'border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] text-[var(--color-accent)]'
+                    : 'hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-panel)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+                }`}
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)]">
+                  <Icon className="h-[1.1rem] w-[1.1rem]" aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                  {label}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Export action */}
+      <div className="border-t border-[var(--color-border)] px-1.5 py-2">
         <button
           type="button"
-          onClick={toggleCollapse}
-          className={`hidden md:flex min-h-8 min-w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-800 hover:text-slate-300 ${FOCUS_RING}`}
-          aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
+          onClick={() => onExport?.()}
+          disabled={isExportBusy}
+          className={`flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-panel)] disabled:cursor-not-allowed disabled:opacity-45`}
         >
-          {collapsed ? <IoChevronForward className="h-4 w-4" /> : <IoChevronBack className="h-4 w-4" />}
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-accent)]">
+            <IoDownloadOutline className="h-[1.1rem] w-[1.1rem]" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--color-text)]">
+            {isExportBusy ? t("nav.exporting") : t("nav.exportCsv")}
+          </span>
         </button>
       </div>
 
-      {/* Nav items */}
-      <ul className="flex-1 overflow-y-auto px-1.5 py-2 space-y-0.5">
-        {items.map(({ id, label, Icon, disabled }) => (
-          <li key={id}>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => pick(id)}
-              className={`flex w-full items-center gap-3 rounded-lg border border-transparent text-left transition-colors hover:border-slate-700 hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-transparent disabled:hover:bg-transparent ${collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5"}`}
-              title={collapsed ? label : undefined}
-            >
-              <span className={`flex shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-teal-400 ${collapsed ? "h-9 w-9" : "h-8 w-8"}`}>
-                <Icon className="h-[1.1rem] w-[1.1rem]" aria-hidden />
-              </span>
-              {!collapsed && (
-                <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-200">
-                  {label}
-                </span>
-              )}
-            </button>
-          </li>
-        ))}
-      </ul>
-
       {/* Language selector */}
-      <div className={`border-t border-slate-800 px-1.5 py-2 ${collapsed ? "flex flex-col items-center gap-1" : ""}`}>
-        {!collapsed && (
-          <p className="mb-1.5 px-2 text-[0.6rem] font-semibold uppercase tracking-widest text-slate-500">
-            {t("nav.language")}
-          </p>
-        )}
+      <div className="border-t border-[var(--color-border)] px-1.5 py-2">
+        <p className="mb-1.5 px-2 text-[0.6rem] font-semibold uppercase tracking-widest text-[var(--color-text-dim)]">
+          {t("nav.language")}
+        </p>
         {(["es", "en", "fr", "de"] as const).map((lang) => {
           const active = (i18n.language?.startsWith(lang) ?? false) || (lang === "es" && !i18n.language);
           return (
@@ -163,16 +137,11 @@ export function Sidebar({
               type="button"
               onClick={() => {
                 i18n.changeLanguage(lang);
-                api("/api/settings/language", { method: "PUT", body: JSON.stringify({ language: lang }) }).catch(() => {});
               }}
-              className={`rounded-md text-[0.65rem] font-semibold uppercase tracking-wide transition-colors ${
-                collapsed
-                  ? "h-7 w-7 flex items-center justify-center"
-                  : "min-h-7 px-2 py-1"
-              } ${
+              className={`min-h-7 rounded-md px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-wide transition-colors ${
                 active
-                  ? "border border-teal-500/40 bg-teal-500/15 text-teal-300"
-                  : "border border-transparent text-slate-500 hover:border-slate-600 hover:text-slate-300"
+                  ? "border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] text-[var(--color-accent)]"
+                  : "border border-transparent text-[var(--color-text-dim)] hover:border-[var(--color-border-subtle)] hover:text-[var(--color-text-muted)]"
               }`}
               title={t(`nav.lang_${lang}`)}
             >
@@ -183,17 +152,16 @@ export function Sidebar({
       </div>
 
       {/* Logout */}
-      <div className={`border-t border-slate-800 px-1.5 py-2 ${collapsed ? "flex justify-center" : ""}`}>
+      <div className="border-t border-[var(--color-border)] px-1.5 py-2">
         <button
           type="button"
           onClick={handleLogout}
-          className={`flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-900 text-left text-sm font-medium text-slate-300 transition-colors hover:bg-slate-800 ${collapsed ? "justify-center p-2.5" : "w-full px-3 py-2.5"} ${FOCUS_RING}`}
-          title={collapsed ? t("nav.logout") : undefined}
+          className={`flex w-full items-center gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-3 py-2.5 text-left text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
         >
-          <span className="flex shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 h-8 w-8">
+          <span className="flex shrink-0 items-center justify-center rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] h-8 w-8">
             <IoLogOutOutline className="h-[1rem] w-[1rem]" aria-hidden />
           </span>
-          {!collapsed && t("nav.logout")}
+          {t("nav.logout")}
         </button>
       </div>
     </nav>
@@ -201,23 +169,18 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile hamburger — visible in header area */}
+      {/* Mobile hamburger */}
       <button
         type="button"
         onClick={() => setMobileOpen(true)}
         data-tour="menu"
-        className={`md:hidden fixed top-3 left-3 z-30 min-h-11 min-w-11 flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900/95 backdrop-blur text-slate-200 shadow-lg ${FOCUS_RING}`}
+        className={`md:hidden fixed top-3 left-3 z-30 min-h-11 min-w-11 flex items-center justify-center rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/95 backdrop-blur text-[var(--color-text)] shadow-lg ${FOCUS_RING}`}
         aria-label={t("header.menu")}
         aria-expanded={mobileOpen}
         aria-haspopup="dialog"
       >
         <IoMenu className="h-5 w-5" aria-hidden />
       </button>
-
-      {/* Desktop sidebar */}
-      <aside className="hidden md:block shrink-0 h-screen sticky top-0">
-        {sidebarContent}
-      </aside>
 
       {/* Mobile overlay */}
       {mobileOpen && (
@@ -228,24 +191,24 @@ export function Sidebar({
             aria-label={t("nav.closeMenu")}
             onClick={() => setMobileOpen(false)}
           />
-          <div className="relative flex h-full">
-            <div className="relative flex h-full">
-              {/* Close button overlaid on sidebar */}
-              <button
-                type="button"
-                onClick={() => setMobileOpen(false)}
-                className={`absolute top-3 right-3 z-10 min-h-8 min-w-8 flex items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-slate-200 ${FOCUS_RING}`}
-                aria-label={t("nav.closeMenu")}
-              >
-                <IoClose className="h-4 w-4" aria-hidden />
-              </button>
-              {sidebarContent}
-            </div>
-            {/* Click outside to close */}
-            <div className="flex-1" onClick={() => setMobileOpen(false)} />
+          <div className="relative flex h-full justify-start">
+            {sidebarContent}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              className={`absolute top-3 right-3 z-10 min-h-8 min-w-8 flex items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+              aria-label={t("nav.closeMenu")}
+            >
+              <IoClose className="h-4 w-4" aria-hidden />
+            </button>
           </div>
         </div>
       )}
+
+      {/* Desktop sidebar */}
+      <aside className="hidden md:block shrink-0 h-screen sticky top-0 z-20">
+        {sidebarContent}
+      </aside>
 
       {/* Account modals */}
       <AccountModal

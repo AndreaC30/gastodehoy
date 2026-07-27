@@ -1,7 +1,65 @@
 @import "tailwindcss";
 
+/* Import Google Fonts: Space Grotesk (display) + JetBrains Mono */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/*
+ * GastoDeHoy Design Tokens
+ * ========================
+ * Variables semánticas para colores, tipografía y estados.
+ * 
+ * COLORES BASE:
+ * --color-bg: fondo principal de la app (dark)
+ * --color-panel: fondo de paneles/tarjetas (ligeramente más claro)
+ * --color-border: bordes y divisores
+ * --color-accent: color principal de acento (teal actual)
+ * 
+ * ESTADOS:
+ * --color-ok: estado positivo/saludable (teal verde)
+ * --color-warn: estado de atención (ámbar/naranja)
+ * --color-crit: estado crítico/error (rojo)
+ * 
+ * TEXTOS:
+ * --color-text: texto principal
+ * --color-text-muted: texto secundario
+ * --color-text-dim: texto terciario/meta
+ */
+
 @theme {
   --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Colores base — dark theme */
+  --color-bg: #020617;
+  --color-bg-soft: #0b1120;
+  --color-panel: #0f172a;
+  --color-panel-elevated: #1e293b;
+  --color-border: #1e293b;
+  --color-border-subtle: #334155;
+  
+  /* Acento (teal actual de GastoDeHoy) */
+  --color-accent: #2dd4bf;
+  --color-accent-dim: rgb(45 212 191 / 0.15);
+  --color-accent-border: rgb(45 212 191 / 0.35);
+  
+  /* Estados — salud del sistema */
+  --color-ok: #2dd4bf;
+  --color-ok-dim: rgb(45 212 191 / 0.12);
+  --color-ok-border: rgb(45 212 191 / 0.35);
+  
+  --color-warn: #f59e0b;
+  --color-warn-dim: rgb(245 158 11 / 0.12);
+  --color-warn-border: rgb(245 158 11 / 0.35);
+  
+  --color-crit: #ef4444;
+  --color-crit-dim: rgb(239 68 68 / 0.12);
+  --color-crit-border: rgb(239 68 68 / 0.35);
+  
+  /* Textos */
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-text-dim: #64748b;
 }
 
 html {
@@ -12,6 +70,8 @@ body {
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.5;
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 /* Guía paso a paso: deja hueco arriba/abajo al hacer scroll automático */

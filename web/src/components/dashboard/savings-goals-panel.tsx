@@ -84,14 +84,14 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
   }, [pct]);
 
   return (
-    <li className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+    <li className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-soft)] p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-slate-100">{goal.name}</p>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="truncate font-semibold text-[var(--color-text)]">{goal.name}</p>
+          <p className="mt-0.5 text-xs text-[var(--color-text-dim)]">
             {t("savingsGoals.target", { amount: money(goal.target_amount) })}
             {goal.target_date ? (
-              <span className="text-slate-600"> · {goal.target_date}</span>
+              <span className="text-[var(--color-text-dim)]"> · {goal.target_date}</span>
             ) : null}
           </p>
         </div>
@@ -99,7 +99,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
           type="button"
           onClick={() => onDelete(goal.id)}
           disabled={deleting}
-          className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-800 hover:text-rose-400 disabled:opacity-40"
+          className="shrink-0 rounded-lg p-1.5 text-[var(--color-text-dim)] hover:bg-[var(--color-panel)] hover:text-[var(--color-crit)] disabled:opacity-40"
           aria-label={t("savingsGoals.deleteLabel", { name: goal.name })}
         >
           <IoTrashOutline className="h-4 w-4" aria-hidden />
@@ -107,7 +107,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
       </div>
 
       <div
-        className="mt-3 h-2 overflow-hidden rounded-full bg-slate-800"
+        className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--color-border)]"
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}
@@ -115,19 +115,19 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
         aria-label={t("savingsGoals.progress", { name: goal.name })}
       >
         <div
-          className="h-full rounded-full bg-teal-500 transition-[width] duration-300"
+          className="h-full rounded-full bg-[var(--color-accent)] transition-[width] duration-300"
           style={{ width: `${pct}%` }}
         />
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-slate-500">{t("savingsGoals.saved")}</span>
+        <span className="text-xs text-[var(--color-text-dim)]">{t("savingsGoals.saved")}</span>
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => adjust(-10)}
             disabled={patchMut.isPending}
-            className="rounded-lg border border-slate-700 bg-slate-900 p-1.5 text-slate-300 hover:border-slate-600 disabled:opacity-40"
+            className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-1.5 text-[var(--color-text)] hover:border-[var(--color-border)] disabled:opacity-40"
             aria-label={t("savingsGoals.subtract10")}
           >
             <IoRemove className="h-4 w-4" aria-hidden />
@@ -141,20 +141,20 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commitDraft}
             disabled={patchMut.isPending}
-            className={`w-24 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-right text-sm ${FOCUS_RING}`}
+            className={`w-24 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-2 py-1.5 text-right text-sm ${FOCUS_RING}`}
             aria-label={t("savingsGoals.savedAmount", { name: goal.name })}
           />
           <button
             type="button"
             onClick={() => adjust(10)}
             disabled={patchMut.isPending}
-            className="rounded-lg border border-slate-700 bg-slate-900 p-1.5 text-slate-300 hover:border-slate-600 disabled:opacity-40"
+            className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-1.5 text-[var(--color-text)] hover:border-[var(--color-border)] disabled:opacity-40"
             aria-label={t("savingsGoals.add10")}
           >
             <IoAdd className="h-4 w-4" aria-hidden />
           </button>
         </div>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-[var(--color-text-dim)]">
           {money(goal.current_amount)} / {money(goal.target_amount)} ({pct}%)
         </span>
       </div>
@@ -223,16 +223,16 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
   return (
     <div className="space-y-4">
       {reservedSavings != null && Number(reservedSavings) > 0 && (
-        <p className="rounded-xl border border-teal-500/25 bg-teal-500/10 px-3 py-2 text-sm text-slate-300">
+        <p className="rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-2 text-sm text-slate-300">
           {t("savingsGoals.reservedThisMonth")}{" "}
-          <span className="font-semibold text-teal-300">{money(reservedSavings)}</span>
+          <span className="font-semibold text-[var(--color-accent)]">{money(reservedSavings)}</span>
         </p>
       )}
         {goalsQ.isPending && (
-          <div className="h-16 animate-pulse rounded-xl bg-slate-800/40" aria-hidden />
+          <div className="h-16 animate-pulse rounded-xl bg-[var(--color-border)]/40" aria-hidden />
         )}
         {goalsQ.error && (
-          <p className="text-sm text-rose-300" role="alert">
+          <p className="text-sm text-[var(--color-crit)]" role="alert">
             {(goalsQ.error as Error).message}
           </p>
         )}
@@ -249,14 +249,14 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
           </ul>
         )}
         {!goalsQ.isPending && goals.length === 0 && !goalsQ.error && (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-[var(--color-text-dim)]">
             {t("savingsGoals.empty")}
           </p>
         )}
 
         <form
           onSubmit={onSubmit}
-          className="flex flex-col gap-2 border-t border-slate-800 pt-4 sm:flex-row sm:flex-wrap sm:items-end"
+          className="flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 sm:flex-row sm:flex-wrap sm:items-end"
         >
           <input
             type="text"
@@ -264,7 +264,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
             placeholder={t("savingsGoals.namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className={`w-full min-w-0 max-w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm sm:min-w-0 sm:flex-1 ${FOCUS_RING}`}
+            className={`w-full min-w-0 max-w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-3 py-2 text-sm sm:min-w-0 sm:flex-1 ${FOCUS_RING}`}
           />
           <input
             type="number"
@@ -274,7 +274,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
             placeholder={t("savingsGoals.targetPlaceholder")}
             value={target}
             onChange={(e) => setTarget(e.target.value)}
-            className={`w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm sm:w-32 ${FOCUS_RING}`}
+            className={`w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-3 py-2 text-sm sm:w-32 ${FOCUS_RING}`}
           />
           <button
             type="submit"
@@ -285,7 +285,7 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
           </button>
         </form>
         {formError && (
-          <p className="text-xs text-rose-300" role="alert">
+          <p className="text-xs text-[var(--color-crit)]" role="alert">
             {formError}
           </p>
         )}

@@ -40,16 +40,16 @@ export function MonthContextBanner({ referenceDate }: Props) {
   return (
     <div
       role="status"
-      className="rounded-xl border border-slate-900 bg-teal-950/25 px-3 py-3 sm:px-4"
+      className="rounded-xl border border-[var(--color-ok-border)] bg-[var(--color-ok-dim)] px-3 py-3 sm:px-4"
     >
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold normal-case text-teal-200 sm:text-base">
+          <p className="text-sm font-semibold normal-case text-[var(--color-ok)] sm:text-base">
             {showStart
               ? t("monthContext.bannerNewMonthTitle")
               : t("monthContext.bannerEndMonthTitle", { month: monthLabel })}
           </p>
-          <p className={`mt-1 normal-case ${TYPE_CAPTION} text-teal-200/80`}>
+          <p className={`mt-1 normal-case ${TYPE_CAPTION} text-[var(--color-ok)]/80`}>
             {showStart
               ? t("monthContext.bannerNewMonthBody")
               : t("monthContext.bannerEndMonthBody", {
@@ -61,7 +61,7 @@ export function MonthContextBanner({ referenceDate }: Props) {
         <button
           type="button"
           onClick={handleDismiss}
-          className={`shrink-0 rounded-lg p-1.5 text-teal-300/80 hover:bg-teal-500/10 hover:text-teal-200 ${FOCUS_RING}`}
+          className={`shrink-0 rounded-lg p-1.5 text-[var(--color-ok)]/80 hover:bg-[var(--color-ok-dim)] hover:text-[var(--color-ok)] ${FOCUS_RING}`}
           aria-label={t("monthContext.bannerDismiss")}
         >
           <IoClose className="h-5 w-5" aria-hidden />

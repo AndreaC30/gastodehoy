@@ -101,7 +101,7 @@ export function SwipeableRow({ children, actions, density }: Props) {
         }}
         className={`flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 data-[density=compact]:py-1.5 ${
           swiping ? "" : "transition-transform duration-200 ease-out"
-        } bg-slate-900`}
+        } bg-[var(--color-panel)]`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

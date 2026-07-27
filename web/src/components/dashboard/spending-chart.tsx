@@ -51,8 +51,8 @@ function MiniDonut({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <p className="text-xs text-slate-500">Total</p>
-        <p className="text-base font-bold text-slate-100">{totalLabel}</p>
+        <p className="text-xs text-[var(--color-text-dim)]">Total</p>
+        <p className="text-base font-bold text-[var(--color-text)]">{totalLabel}</p>
       </div>
     </div>
   );
@@ -76,11 +76,11 @@ export function SpendingChart({ breakdown, total }: Props) {
   );
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900 p-4 shadow-lg shadow-black/20 sm:p-5">
-      <h2 className="text-lg font-bold tracking-tight">
+    <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-lg shadow-black/20 sm:p-5">
+      <h2 className="text-lg font-bold tracking-tight text-[var(--color-text)]">
         {t("spendingChart.title")}
       </h2>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-[var(--color-text-dim)]">
         {t("spendingChart.subtitle")}
       </p>
 
@@ -122,10 +122,10 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
           style={{ color: seg.category_color }}
         />
 
-        <span className="min-w-0 flex-1 truncate text-slate-300">
+        <span className="min-w-0 flex-1 truncate text-[var(--color-text)]">
           {seg.category_name}
           {overBudget && (
-            <span className="ml-1.5 text-xs font-medium text-amber-400">
+            <span className="ml-1.5 text-xs font-medium text-[var(--color-warn)]">
               · sobre presupuesto
             </span>
           )}
@@ -133,17 +133,17 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
 
         <span
           className={`shrink-0 basis-full text-right font-semibold sm:basis-auto sm:text-left ${
-            overBudget ? "text-amber-300" : "text-slate-200"
+            overBudget ? "text-[var(--color-warn)]" : "text-[var(--color-text)]"
           }`}
         >
           {money(seg.total)}
           {hasBudget && (
-            <span className="font-normal text-slate-500">
+            <span className="font-normal text-[var(--color-text-dim)]">
               {" "}
               / {money(budget)}
             </span>
           )}
-          <span className="ml-2 text-xs font-normal text-slate-500 sm:ml-0">
+          <span className="ml-2 text-xs font-normal text-[var(--color-text-dim)] sm:ml-0">
             {hasBudget && seg.budget_used_percent != null
               ? `${Number(seg.budget_used_percent).toFixed(0)}% pres.`
               : `${pct.toFixed(0)}%`}
@@ -151,10 +151,10 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
         </span>
       </div>
 
-      <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-slate-800">
+      <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-[var(--color-border)]">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
-            overBudget ? "bg-amber-500" : ""
+            overBudget ? "bg-[var(--color-warn)]" : ""
           }`}
           style={{
             width: `${barWidth}%`,

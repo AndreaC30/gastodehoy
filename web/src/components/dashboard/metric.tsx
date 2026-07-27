@@ -12,14 +12,14 @@ export function Metric({ label, value, highlight }: Props) {
     <div
       className={`rounded-xl border px-3 py-3 ${
         highlight
-          ? "border-teal-500/35 bg-teal-500/10"
-          : "border-slate-800 bg-slate-900"
+          ? "border-[var(--color-ok-border)] bg-[var(--color-ok-dim)]"
+          : "border-[var(--color-border)] bg-[var(--color-panel)]"
       }`}
     >
       <p className={`${TYPE_EYEBROW} line-clamp-2 leading-tight`}>{label}</p>
       <p
         className={`mt-1.5 break-words text-base font-bold tabular-nums leading-snug sm:text-lg ${
-          highlight ? "text-teal-300" : "text-slate-100"
+          highlight ? "text-[var(--color-ok)]" : "text-[var(--color-text)]"
         }`}
       >
         {value}

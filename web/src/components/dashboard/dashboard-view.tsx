@@ -4,12 +4,18 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppBackdrop } from "@/components/app-backdrop";
 import { SettingsModal } from "@/components/settings-modal";
 import { CategoryManager } from "@/components/dashboard/category-manager";
 import { DailyHero } from "@/components/dashboard/daily-hero";
-import { Sidebar, type DashboardNavAction } from "@/components/dashboard/sidebar-nav";
+import { Sidebar } from "@/components/dashboard/sidebar-nav";
+import { IncomeSettingsSection } from "@/components/dashboard/income-settings-section";
+import { CategoriesSection } from "@/components/dashboard/categories-section";
+import { SavingsGoalsSection } from "@/components/dashboard/savings-goals-section";
+import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
 import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
 import { FixedExpensesSection } from "@/components/dashboard/fixed-expenses-section";
@@ -22,6 +28,21 @@ import { MonthContextBanner } from "@/components/dashboard/month-context-banner"
 import { MonthlyIncomeCheckFlow } from "@/components/dashboard/monthly-income-check-flow";
 import { Rule503020Panel } from "@/components/dashboard/rule-503020-panel";
 import { SavingsGoalsModal } from "@/components/savings-goals-modal";
+import { GuidedTour } from "@/components/guided-tour";
+import { DASHBOARD_TOUR_STEPS } from "@/lib/dashboard-tour-steps";
+import {
+  markDashboardTourCompleted,
+} from "@/lib/guided-tour-preference";
+import { maybeShowDailyNotification } from "@/lib/daily-notification";
+import { hapticTick } from "@/lib/haptics";
+import { useUndoableDelete } from "@/lib/use-undoable-delete";
+import { getDensity } from "@/lib/density-preference";
+import type { DashboardSection } from "@/lib/dashboard-state";
+import { getActiveSection } from "@/lib/dashboard-state";
+import { invalidateBudgetQueries } from "@/lib/query-keys";
+import { SiteFooter } from "@/components/site-footer";
+import { APP_SHELL_CLASS } from "@/lib/app-layout";
+import { DEFAULT_FIXED_EXPENSE_ICON } from "@/components/dashboard/category-icon";
 import { api, downloadCsv } from "@/api/client";
 import type {
   ExpenseCategory,
@@ -33,20 +54,6 @@ import type {
   PaginatedVariableExpenses,
   VariableExpense,
 } from "@/api/types";
-import { APP_SHELL_CLASS } from "@/lib/app-layout";
-import { DEFAULT_FIXED_EXPENSE_ICON } from "@/components/dashboard/category-icon";
-import { invalidateBudgetQueries } from "@/lib/query-keys";
-import { SiteFooter } from "@/components/site-footer";
-import { GuidedTour } from "@/components/guided-tour";
-import { DASHBOARD_TOUR_STEPS } from "@/lib/dashboard-tour-steps";
-import { useTranslation } from "react-i18next";
-import {
-  markDashboardTourCompleted,
-} from "@/lib/guided-tour-preference";
-import { maybeShowDailyNotification } from "@/lib/daily-notification";
-import { hapticTick } from "@/lib/haptics";
-import { useUndoableDelete } from "@/lib/use-undoable-delete";
-import { getDensity } from "@/lib/density-preference";
 
 async function loadSummary() {
   return api<Summary>("/api/summary");
@@ -252,6 +259,9 @@ export function Dashboard({ profileName }: Props) {
   const settings = settingsQ.data;
   const categories = categoriesQ.data ?? [];
 
+  // Active section state
+  const [activeSection, setActiveSectionState] = useState<DashboardSection>(() => getActiveSection());
+
   const variableExpenseItems = expensesQ.data ?? [];
   const variableNeedsToggle =
     variableExpenseItems.length > VARIABLE_LIST_PREVIEW;
@@ -308,35 +318,31 @@ export function Dashboard({ profileName }: Props) {
     }
   }
 
-  function handleNavigate(action: DashboardNavAction) {
-    switch (action) {
-      case "settings": setShowSettings(true); break;
-      case "categories": setShowCategoryManager(true); break;
-      case "savings-goals": setShowSavingsGoals(true); break;
-      case "guided-tour": setShowTour(true); break;
-    }
+  function handleSectionChange(section: DashboardSection) {
+    setActiveSectionState(section);
+    try { localStorage.setItem('gastodehoy_active_section', section); } catch {}
   }
 
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar
         profileName={profileName}
-        settingsReady={!!settingsQ.data}
         exportBusy={exportBusy}
-        onNavigate={handleNavigate}
         onExport={() => void handleExport()}
+        onSectionChange={handleSectionChange}
+        activeSection={activeSection}
       />
 
       <div className={`flex-1 min-w-0 flex flex-col ${APP_SHELL_CLASS} overflow-y-auto`}>
         <AppBackdrop />
 
         {/* Simplified header — branding only */}
-        <header className="relative z-10 border-b border-slate-800/80 px-3 py-4 sm:px-4 sm:py-5">
+        <header className="relative z-10 border-b border-[var(--color-border)] px-3 py-4 sm:px-4 sm:py-5 md:hidden">
           <div className="mx-auto max-w-4xl lg:max-w-6xl">
             <h1 className="m-0 leading-none">
               <BrandLogo variant="header" />
             </h1>
-            <p className="mt-1.5 max-w-md text-sm text-slate-400 sm:text-base">
+            <p className="mt-1.5 max-w-md text-sm text-[var(--color-text-muted)] sm:text-base">
               {t("header.tagline")}
             </p>
           </div>
@@ -346,103 +352,161 @@ export function Dashboard({ profileName }: Props) {
           id="main-content"
           tabIndex={-1}
           data-density={getDensity()}
-          className="relative z-10 mx-auto w-full max-w-4xl space-y-4 px-3 py-5 pb-20 sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl"
+          className="relative z-10 mx-auto w-full max-w-4xl space-y-4 px-3 py-5 pb-[5.5rem] sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl sm:pb-20"
         >
         {error && (
           <div
-            className="rounded-xl border border-rose-500/40 bg-rose-950/40 px-3 py-2.5 text-xs text-rose-200 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
+            className="rounded-xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2.5 text-xs text-[var(--color-crit)] sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
             role="alert"
           >
             {(error as Error).message}
           </div>
         )}
 
-        <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
+        {/* Section: HOY */}
+        {activeSection === 'hoy' && (
+          <>
+            <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
+            <MonthContextBanner referenceDate={summaryQ.data?.reference_date} />
+            <DailyHero
+              summary={summaryQ.data}
+              summaryPending={summaryQ.isPending}
+              onRefresh={() => {
+                void invalidateAll().then(() => setToastMsg(t("toasts.done")));
+              }}
+            />
+          </>
+        )}
 
-        <MonthContextBanner referenceDate={summaryQ.data?.reference_date} />
-
-        <DailyHero
-          summary={summaryQ.data}
-          summaryPending={summaryQ.isPending}
-          onRefresh={() => {
-            void invalidateAll().then(() => setToastMsg(t("toasts.done")));
-          }}
-        />
-
-        <InsightsPanel
-          data={insightsQ.data}
-          isLoading={insightsQ.isPending}
-          error={insightsQ.error as Error | null}
-        />
-
-        <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
-          <div className="min-w-0">
-          <VariableExpensesSection
-            referenceDate={summaryQ.data?.reference_date}
-            categories={categories}
-            items={variableExpenseItems}
-            visibleItems={variableVisibleItems}
-            isLoading={expensesQ.isPending}
-            needsToggle={variableNeedsToggle}
-            expanded={expandVariableList}
-            hiddenCount={variableHiddenCount}
-            addPending={addExpense.isPending}
-            deletePending={expenseUndo.isPending}
-            onSubmit={onExpenseSubmit}
-            onToggleExpand={() => setExpandVariableList((v) => !v)}
-            onEdit={setEditingVariable}
-            onDelete={(id) => {
-              expenseUndo.perform(id);
-              setToastMsg(t("toasts.undoDelete"));
-              setToastUndo({
-                label: t("toasts.undoAction"),
-                action: () => expenseUndo.undo(),
-              });
-            }}
-          />
+        {/* Section: GASTOS */}
+        {activeSection === 'gastos' && (
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
+            <div className="min-w-0">
+            <VariableExpensesSection
+              referenceDate={summaryQ.data?.reference_date}
+              categories={categories}
+              items={variableExpenseItems}
+              visibleItems={variableVisibleItems}
+              isLoading={expensesQ.isPending}
+              needsToggle={variableNeedsToggle}
+              expanded={expandVariableList}
+              hiddenCount={variableHiddenCount}
+              addPending={addExpense.isPending}
+              deletePending={expenseUndo.isPending}
+              onSubmit={onExpenseSubmit}
+              onToggleExpand={() => setExpandVariableList((v) => !v)}
+              onEdit={setEditingVariable}
+              onDelete={(id) => {
+                expenseUndo.perform(id);
+                setToastMsg(t("toasts.undoDelete"));
+                setToastUndo({
+                  label: t("toasts.undoAction"),
+                  action: () => expenseUndo.undo(),
+                });
+              }}
+            />
+            </div>
+            <div className="min-w-0">
+            <FixedExpensesSection
+              items={fixedItems}
+              visibleItems={fixedVisibleItems}
+              isLoading={fixedQ.isPending}
+              needsToggle={fixedNeedsToggle}
+              expanded={expandFixedList}
+              hiddenCount={fixedHiddenCount}
+              formIcon={fixedFormIcon}
+              pending={addFixed.isPending}
+              deletePending={fixedUndo.isPending}
+              onToggleExpand={() => setExpandFixedList((v) => !v)}
+              onFormIconChange={setFixedFormIcon}
+              onSubmit={onFixedSubmit}
+              onEdit={setEditingFixed}
+              onDelete={(id) => {
+                fixedUndo.perform(id);
+                setToastMsg(t("toasts.undoDelete"));
+                setToastUndo({
+                  label: t("toasts.undoAction"),
+                  action: () => fixedUndo.undo(),
+                });
+              }}
+            />
+            </div>
           </div>
-          <div className="min-w-0">
-          <FixedExpensesSection
-            items={fixedItems}
-            visibleItems={fixedVisibleItems}
-            isLoading={fixedQ.isPending}
-            needsToggle={fixedNeedsToggle}
-            expanded={expandFixedList}
-            hiddenCount={fixedHiddenCount}
-            formIcon={fixedFormIcon}
-            pending={addFixed.isPending}
-            deletePending={fixedUndo.isPending}
-            onToggleExpand={() => setExpandFixedList((v) => !v)}
-            onFormIconChange={setFixedFormIcon}
-            onSubmit={onFixedSubmit}
-            onEdit={setEditingFixed}
-            onDelete={(id) => {
-              fixedUndo.perform(id);
-              setToastMsg(t("toasts.undoDelete"));
-              setToastUndo({
-                label: t("toasts.undoAction"),
-                action: () => fixedUndo.undo(),
-              });
-            }}
-          />
-          </div>
-        </div>
+        )}
 
-        {insightsQ.data && insightsQ.data.category_breakdown.length > 0 && (
-          <SpendingChart
-            breakdown={insightsQ.data.category_breakdown}
-            total={insightsQ.data.total_spent}
+        {/* Section: ANALISIS */}
+        {activeSection === 'analisis' && (
+          <>
+            <Rule503020Panel />
+            <InsightsPanel
+              data={insightsQ.data}
+              isLoading={insightsQ.isPending}
+              error={insightsQ.error as Error | null}
+            />
+            {insightsQ.data && insightsQ.data.category_breakdown.length > 0 && (
+              <SpendingChart
+                breakdown={insightsQ.data.category_breakdown}
+                total={insightsQ.data.total_spent}
+              />
+            )}
+          </>
+        )}
+
+        {/* Section: HISTORICO */}
+        {activeSection === 'historico' && (
+          <MonthHistoryStrip />
+        )}
+
+        {/* Section: INGRESOS */}
+        {activeSection === 'ingresos' && settings && (
+          <IncomeSettingsSection
+            settings={settings}
+            onSave={() => {
+              setToastMsg("Configuración guardada");
+              void invalidateAll();
+            }}
           />
         )}
 
-        <MonthHistoryStrip />
+        {/* Section: CATEGORIAS */}
+        {activeSection === 'categorias' && (
+          <CategoriesSection
+            categories={categories}
+            onChanged={() => {
+              setToastMsg("Categorías actualizadas");
+              void invalidateAll();
+            }}
+          />
+        )}
 
-        <Rule503020Panel />
+        {/* Section: METAS */}
+        {activeSection === 'metas' && (
+          <SavingsGoalsSection
+            reservedSavings={Number(summaryQ.data?.savings_amount) ?? 0}
+            onSaved={() => {
+              setToastMsg("Meta guardada");
+              void invalidateAll();
+            }}
+          />
+        )}
+
+        {/* Section: TOUR */}
+        {activeSection === 'tour' && (
+          <TourSection
+            onStart={() => setShowTour(true)}
+          />
+        )}
 
         <SiteFooter />
       </main>
 
-      {showSettings && settings && (
+      {/* Bottom navigation (mobile only) */}
+      <BottomNav
+        activeSection={activeSection}
+        onSectionChange={handleSectionChange}
+      />
+
+      {showSettings && settings != null && (
         <SettingsModal
           initial={settings}
           extras={extraIncomeQ.data ?? []}

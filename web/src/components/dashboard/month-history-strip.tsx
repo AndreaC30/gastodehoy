@@ -29,8 +29,8 @@ function cardClass(months: MonthCount, isCurrentMonth: boolean): string {
   const base =
     "rounded-xl border px-2.5 py-2.5 text-center sm:px-3 shrink-0 min-w-[4.5rem] sm:min-w-0";
   const tone = isCurrentMonth
-    ? "border-teal-500/35 bg-teal-500/10"
-    : "border-slate-800 bg-slate-900";
+    ? "border-[var(--color-accent-border)] bg-[var(--color-accent-dim)]"
+    : "border-[var(--color-border)] bg-[var(--color-panel)]";
   if (months === 12) return `${base} w-[4.75rem] sm:w-auto sm:shrink ${tone}`;
   return `${base} ${tone}`;
 }
@@ -45,7 +45,7 @@ export function MonthHistoryStrip() {
 
   if (error) {
     return (
-      <p className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-slate-500">
+      <p className="rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-3 text-sm text-[var(--color-text-muted)]">
         No se pudo cargar el historial mensual.
       </p>
     );
@@ -60,7 +60,7 @@ export function MonthHistoryStrip() {
         {Array.from({ length: months }, (_, i) => (
           <div
             key={i}
-            className="h-[4.5rem] animate-pulse rounded-xl border border-slate-800 bg-slate-900"
+            className="h-[4.5rem] animate-pulse rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)]"
           />
         ))}
       </div>
@@ -72,18 +72,18 @@ export function MonthHistoryStrip() {
 
   return (
     <section
-      className="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-4 shadow-lg shadow-black/20"
+      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-4 shadow-lg shadow-black/20"
       aria-label={t("monthHistory.ariaLabel")}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold tracking-tight text-slate-200 sm:text-lg">
+          <h2 className="text-base font-semibold tracking-tight text-[var(--color-text)] sm:text-lg">
             {historyTitle(t, months)}
           </h2>
           <p className={`mt-0.5 ${TYPE_CAPTION}`}>Gasto variable por mes</p>
         </div>
         <div
-          className="inline-flex rounded-lg border border-slate-700 bg-slate-900 p-0.5"
+          className="inline-flex rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-0.5"
           role="group"
           aria-label="Meses a mostrar"
         >
@@ -95,8 +95,8 @@ export function MonthHistoryStrip() {
               aria-pressed={months === n}
               className={`min-h-11 min-w-11 rounded-md px-2.5 py-1 text-sm font-semibold transition-colors ${FOCUS_RING} ${
                 months === n
-                  ? "bg-teal-600 text-white"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-[var(--color-accent)] text-[var(--color-bg)]"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               }`}
             >
               {n}
@@ -115,7 +115,7 @@ export function MonthHistoryStrip() {
               <p className={`${TYPE_EYEBROW} text-center`}>{row.month_label}</p>
               <p
                 className={`mt-1 truncate text-base font-bold tabular-nums sm:text-lg ${
-                  isCurrentMonth ? "text-teal-400" : "text-slate-200"
+                  isCurrentMonth ? "text-[var(--color-accent)]" : "text-[var(--color-text)]"
                 }`}
               >
                 {money(row.variable_spent_month)}

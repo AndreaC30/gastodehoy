@@ -54,9 +54,9 @@ export function VariableExpensesSection({
   return (
     <section
       data-tour="variable-expenses"
-      className="rounded-2xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/20"
+      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-lg shadow-black/20"
     >
-      <div className="border-b border-slate-800 px-5 py-4">
+      <div className="border-b border-[var(--color-border)] px-5 py-4">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">
           {t("variableExpenses.title")}
         </h2>
@@ -67,7 +67,7 @@ export function VariableExpensesSection({
       <div className="p-5">
         <p className={`mb-4 ${TYPE_BODY}`}>
           {t("variableExpenses.description")}
-          <strong className="text-slate-400">Gastos fijos</strong>
+          <strong className="text-[var(--color-text-muted)]">Gastos fijos</strong>
           <span className="hidden lg:inline">{t("variableExpenses.descriptionSuffixDesktop")}</span>
           <span className="lg:hidden">{t("variableExpenses.descriptionSuffixMobile")}</span>.
         </p>
@@ -100,7 +100,7 @@ export function VariableExpensesSection({
                         <button
                           type="button"
                           onClick={() => onEdit(it)}
-                          className={`min-h-11 rounded-lg border border-slate-600 px-2.5 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800 ${FOCUS_RING}`}
+                          className={`min-h-11 rounded-lg border border-[var(--color-border-subtle)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
                           aria-label={t("variableExpenses.editLabel", { amount: `${money(it.amount)}${it.note ? `, ${it.note}` : ""}` })}
                         >
                           {t("common.edit")}
@@ -109,7 +109,7 @@ export function VariableExpensesSection({
                           type="button"
                           onClick={() => onDelete(it.id)}
                           disabled={deletePending}
-                          className={`min-h-11 rounded-lg border border-rose-500/40 px-2.5 py-1.5 text-sm font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
+                          className={`min-h-11 rounded-lg border border-[var(--color-crit-border)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-crit)] hover:bg-[var(--color-crit-dim)] disabled:opacity-50 ${FOCUS_RING}`}
                           aria-label={t("variableExpenses.deleteLabel", { amount: money(it.amount) })}
                         >
                           {t("common.delete")}
@@ -123,11 +123,11 @@ export function VariableExpensesSection({
                           className="h-4 w-4 shrink-0"
                           style={{ color: it.category_color ?? "#64748b" }}
                         />
-                        <p className="truncate font-semibold tabular-nums text-teal-300/90">
+                        <p className="truncate font-semibold tabular-nums text-[var(--color-accent)]/90">
                           {money(it.amount)}
                         </p>
                       </div>
-                      <p className="truncate text-sm text-slate-500 data-[density=compact]:text-xs" data-density={density}>
+                      <p className="truncate text-sm text-[var(--color-text-dim)] data-[density=compact]:text-xs" data-density={density}>
                         {it.occurred_at}
                         {it.note ? ` · ${it.note}` : ""}
                         {it.category_name && !it.note
@@ -144,7 +144,7 @@ export function VariableExpensesSection({
               <button
                 type="button"
                 onClick={onToggleExpand}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700/90 bg-slate-950 px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-3 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)]"
                 aria-expanded={expanded}
               >
                 <ChevronInCircle expanded={expanded} />

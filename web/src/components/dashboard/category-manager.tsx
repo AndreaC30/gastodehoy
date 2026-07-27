@@ -175,16 +175,16 @@ export function CategoryManager({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(85vh,100dvh)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-700 bg-slate-900 p-4 pr-3 shadow-2xl sm:rounded-2xl sm:p-6 sm:pr-5"
+        className="modal-scroll max-h-[min(85vh,100dvh)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 pr-3 shadow-2xl sm:rounded-2xl sm:p-6 sm:pr-5"
       >
         <div className="flex min-w-0 items-center justify-between gap-3">
-          <h2 id="category-manager-title" className="min-w-0 flex-1 text-lg font-bold">
+          <h2 id="category-manager-title" className="min-w-0 flex-1 text-lg font-bold text-[var(--color-text)]">
             {t("categoryManager.title")}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+            className="rounded-lg p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-text)]"
             aria-label={t("common.close")}
           >
             <IoClose className="h-5 w-5" aria-hidden />
@@ -193,7 +193,7 @@ export function CategoryManager({
 
         {error && (
           <p
-            className="mt-3 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200"
+            className="mt-3 rounded-lg border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2 text-sm text-[var(--color-crit)]"
             role="alert"
           >
             {error}
@@ -206,18 +206,18 @@ export function CategoryManager({
             return (
               <li
                 key={cat.id}
-                className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2.5 sm:flex-row sm:items-center sm:gap-3"
+                className="flex flex-col gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 sm:flex-row sm:items-center sm:gap-3"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <span
                     className="h-4 w-4 shrink-0 rounded-full"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <Icon className="h-4 w-4 shrink-0 text-slate-400" />
-                  <span className="min-w-0 flex-1 truncate text-sm text-slate-200">
+                  <Icon className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
+                  <span className="min-w-0 flex-1 truncate text-sm text-[var(--color-text)]">
                     {cat.name}
                     {cat.monthly_budget != null && cat.monthly_budget !== "" && (
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[var(--color-text-dim)]">
                         {" "}
                         · {String(cat.monthly_budget)}€/mes
                       </span>
@@ -228,7 +228,7 @@ export function CategoryManager({
                   <button
                     type="button"
                     onClick={() => startEdit(cat)}
-                    className={`min-h-11 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200 ${FOCUS_RING}`}
+                    className={`min-h-11 rounded-lg px-2.5 py-1.5 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
                     aria-label={t("categoryManager.editCategory", { name: cat.name })}
                   >
                     {t("common.edit")}
@@ -237,7 +237,7 @@ export function CategoryManager({
                     type="button"
                     onClick={() => deleteMut.mutate(cat.id)}
                     disabled={deleteMut.isPending}
-                    className={`min-h-11 rounded-lg px-2.5 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`min-h-11 rounded-lg px-2.5 py-1.5 text-xs text-[var(--color-crit)] hover:bg-[var(--color-crit-dim)] disabled:opacity-50 ${FOCUS_RING}`}
                     aria-label={t("categoryManager.deleteCategory", { name: cat.name })}
                   >
                     {t("common.delete")}
@@ -249,11 +249,11 @@ export function CategoryManager({
         </ul>
 
         <form className="mt-6 space-y-3" onSubmit={onSubmit}>
-          <h3 className="text-sm font-semibold text-slate-300">
+          <h3 className="text-sm font-semibold text-[var(--color-text)]">
             {editingId ? t("categoryManager.editForm") : t("categoryManager.newForm")}
           </h3>
           <div>
-            <label htmlFor="cat-form-name" className="mb-1 block text-xs text-slate-500">
+            <label htmlFor="cat-form-name" className="mb-1 block text-xs text-[var(--color-text-muted)]">
               {t("categoryManager.name")}
             </label>
             <input
@@ -268,7 +268,7 @@ export function CategoryManager({
           </div>
 
           <div>
-            <label htmlFor="cat-form-budget" className="mb-1 block text-xs text-slate-500">
+            <label htmlFor="cat-form-budget" className="mb-1 block text-xs text-[var(--color-text-muted)]">
               {t("categoryManager.budget")}
             </label>
             <input
@@ -280,13 +280,13 @@ export function CategoryManager({
               placeholder={t("categoryManager.budgetPlaceholder")}
               className={INPUT_CLASS}
             />
-            <p className="mt-1 text-xs text-slate-600">
+            <p className="mt-1 text-xs text-[var(--color-text-dim)]">
               {t("categoryManager.budgetHint")}
             </p>
           </div>
 
           <fieldset>
-            <legend className="mb-2 text-xs text-slate-500">{t("categoryManager.color")}</legend>
+            <legend className="mb-2 text-xs text-[var(--color-text-muted)]">{t("categoryManager.color")}</legend>
             <div className="flex flex-wrap gap-2">
               {PRESET_COLORS.map((c) => (
                 <button
@@ -304,7 +304,7 @@ export function CategoryManager({
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-xs text-slate-500">{t("categoryManager.icon")}</legend>
+            <legend className="mb-2 text-xs text-[var(--color-text-muted)]">{t("categoryManager.icon")}</legend>
             <div className="flex flex-wrap gap-2">
               {CATEGORY_ICON_PICKER.map((opt) => {
                 const OptIcon = opt.Icon;
@@ -315,12 +315,12 @@ export function CategoryManager({
                     onClick={() => setFormIcon(opt.name)}
                     className={`rounded-lg border p-2 ${
                       formIcon === opt.name
-                        ? "border-sky-500 bg-sky-500/20"
-                        : "border-slate-700 hover:border-slate-500"
+                        ? "border-[var(--color-accent)] bg-[var(--color-accent-dim)]"
+                        : "border-[var(--color-border-subtle)] hover:border-[var(--color-border)]"
                     }`}
                     aria-label={opt.name}
                   >
-                    <OptIcon className="h-5 w-5 text-slate-300" />
+                    <OptIcon className="h-5 w-5 text-[var(--color-text)]" />
                   </button>
                 );
               })}

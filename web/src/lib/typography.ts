@@ -17,3 +17,11 @@ export const TYPE_HINT = "text-sm leading-relaxed text-slate-400";
 
 /** Small meta (still ≥12px). */
 export const TYPE_META = "text-xs text-slate-500 sm:text-sm";
+
+/** Hero numbers — monospace for tabular alignment (importe principal). */
+export const TYPE_HERO_NUMBER =
+  "text-2xl font-bold tabular-nums tracking-tight text-teal-400 min-[375px]:text-3xl sm:text-4xl md:text-5xl";
+
+/** Display headings — Space Grotesk para títulos principales. */
+export const TYPE_DISPLAY =
+  "text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl md:text-3xl";

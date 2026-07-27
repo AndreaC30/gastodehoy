@@ -74,10 +74,10 @@ function ChoiceDialog({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(85dvh,100dvh)] w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-slate-800 bg-slate-900 p-4 shadow-2xl shadow-black/50 sm:max-h-none sm:rounded-2xl sm:p-5"
+        className="modal-scroll max-h-[min(85dvh,100dvh)] w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-2xl shadow-black/50 sm:max-h-none sm:rounded-2xl sm:p-5"
       >
         <header className="mb-4 flex items-start justify-between gap-3">
-          <h2 id={titleId} className="min-w-0 flex-1 text-lg font-bold tracking-tight sm:text-xl">
+          <h2 id={titleId} className="min-w-0 flex-1 text-lg font-bold tracking-tight text-[var(--color-text)] sm:text-xl">
             {title}
           </h2>
           {onClose && (
@@ -85,21 +85,21 @@ function ChoiceDialog({
               type="button"
               onClick={onClose}
               aria-label={t("common.close")}
-              className="min-h-11 min-w-11 shrink-0 rounded-lg border border-slate-800 p-2 text-slate-400 hover:bg-slate-800/60"
+              className="min-h-11 min-w-11 shrink-0 rounded-lg border border-[var(--color-border)] p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)]"
             >
               <IoClose className="mx-auto h-5 w-5" aria-hidden />
             </button>
           )}
         </header>
-        <p className="text-sm leading-relaxed text-slate-400 sm:text-base">{body}</p>
+        <p className="text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-base">{body}</p>
         {hint && (
-          <p className="mt-3 text-xs leading-relaxed text-slate-500 sm:text-sm">{hint}</p>
+          <p className="mt-3 text-xs leading-relaxed text-[var(--color-text-dim)] sm:text-sm">{hint}</p>
         )}
         <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-end sm:gap-2">
           <button
             type="button"
             onClick={onNo}
-            className="min-h-11 w-full rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-800/60 sm:w-auto"
+            className="min-h-11 w-full rounded-lg border border-[var(--color-border-subtle)] px-4 py-2.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel)] sm:w-auto"
           >
             {noLabel}
           </button>

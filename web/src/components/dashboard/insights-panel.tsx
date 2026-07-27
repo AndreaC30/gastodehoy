@@ -26,17 +26,17 @@ type Props = {
 
 /** Misma estructura flex + shrink-0 que rule-503020 (no falla en Android). */
 const TYPE_STYLES: Record<string, string> = {
-  warning: "border-amber-500/40 bg-[#1c1810] text-amber-200",
-  tip: "border-sky-500/40 bg-[#101c24] text-sky-200",
-  success: "border-emerald-500/40 bg-[#0f1c18] text-emerald-200",
-  info: "border-slate-600/40 bg-slate-800 text-slate-300",
+  warning: "border-[var(--color-warn-border)] bg-[var(--color-warn-dim)] text-[var(--color-warn)]",
+  tip: "border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] text-[var(--color-accent)]",
+  success: "border-[var(--color-ok-border)] bg-[var(--color-ok-dim)] text-[var(--color-ok)]",
+  info: "border-[var(--color-border-subtle)] bg-[var(--color-panel)] text-[var(--color-text)]",
 };
 
 const TYPE_ICON_COLORS: Record<string, string> = {
-  warning: "text-amber-400",
-  tip: "text-sky-400",
-  success: "text-emerald-400",
-  info: "text-slate-400",
+  warning: "text-[var(--color-warn)]",
+  tip: "text-[var(--color-accent)]",
+  success: "text-[var(--color-ok)]",
+  info: "text-[var(--color-text-muted)]",
 };
 
 const INSIGHT_ICON_BY_SLUG: Record<string, IconType> = {
@@ -102,7 +102,7 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
 }
 
 const PANEL_CLASS =
-  "rounded-2xl border border-slate-800 bg-slate-900 p-3 sm:p-5 sm:shadow-lg sm:shadow-black/20";
+  "rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-3 sm:p-5 sm:shadow-lg sm:shadow-black/20";
 
 export function InsightsPanel({ data, isLoading, error }: Props) {
   const { t } = useTranslation();
@@ -115,9 +115,9 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         aria-busy="true"
         aria-label={t("insights.title")}
       >
-        <div className="h-6 w-40 animate-pulse rounded bg-slate-700/40" />
-        <div className="mt-3 h-4 w-full animate-pulse rounded bg-slate-700/30" />
-        <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-slate-700/30" />
+        <div className="h-6 w-40 animate-pulse rounded bg-[var(--color-border)]/40" />
+        <div className="mt-3 h-4 w-full animate-pulse rounded bg-[var(--color-border)]/30" />
+        <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-[var(--color-border)]/30" />
       </section>
     );
   }
@@ -126,7 +126,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
     return (
       <section
         data-tour="insights"
-        className="rounded-2xl border border-rose-500/30 bg-rose-950 p-5 text-sm text-rose-300"
+        className="rounded-2xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] p-5 text-sm text-[var(--color-crit)]"
       >
         {t("insights.error")} {error.message}
       </section>
@@ -145,10 +145,10 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         <div className="min-w-0">
           <h2
             id="insights-panel-title"
-            className="flex items-center gap-2 text-lg font-bold tracking-tight"
+            className="flex items-center gap-2 text-lg font-bold tracking-tight text-[var(--color-text)]"
           >
             <IoBulbOutline
-              className="h-5 w-5 shrink-0 text-sky-400"
+              className="h-5 w-5 shrink-0 text-[var(--color-accent)]"
               aria-hidden
             />
             {t("insights.title")}
@@ -157,7 +157,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         </div>
         <div className="text-right sm:shrink-0">
           <p className={TYPE_CAPTION}>{t("insights.avgDaily")}</p>
-          <p className="text-base font-semibold text-slate-200">
+          <p className="text-base font-semibold text-[var(--color-text)]">
             {money(data.avg_daily_spend)}
           </p>
         </div>
@@ -190,22 +190,22 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
       </ul>
 
       {Number(data.projected_monthly) > 0 && (
-        <div className="mt-5 border-t border-slate-800 pt-4">
+        <div className="mt-5 border-t border-[var(--color-border)] pt-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">{t("insights.projection")}</span>
-            <span className="font-semibold text-slate-200">
+            <span className="text-[var(--color-text-muted)]">{t("insights.projection")}</span>
+            <span className="font-semibold text-[var(--color-text)]">
               {money(data.projected_monthly)}
             </span>
           </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--color-border)]">
             <div
-              className="h-full rounded-full bg-teal-500 sm:bg-gradient-to-r sm:from-sky-500 sm:to-teal-500"
+              className="h-full rounded-full bg-[var(--color-accent)] sm:bg-gradient-to-r sm:from-sky-500 sm:to-teal-500"
               style={{
                 width: `${Math.min(100, (Number(data.total_spent) / Math.max(Number(data.projected_monthly), 1)) * 100)}%`,
               }}
             />
           </div>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-[var(--color-text-dim)]">
             {t("insights.projectionDetail", {
               spent: money(data.total_spent),
               projected: money(data.projected_monthly),
