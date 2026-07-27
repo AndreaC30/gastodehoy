@@ -474,7 +474,6 @@ export function Dashboard({ profileName }: Props) {
         {/* Section: ANALISIS */}
         {activeSection === 'analisis' && (
           <>
-            <Rule503020Panel />
             <InsightsPanel
               data={insightsQ.data}
               isLoading={insightsQ.isPending}
@@ -486,6 +485,7 @@ export function Dashboard({ profileName }: Props) {
                 total={insightsQ.data.total_spent}
               />
             )}
+            <Rule503020Panel />
           </>
         )}
 
