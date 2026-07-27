@@ -118,7 +118,7 @@ function CategoryRow({ seg }: { seg: CategorySpending }) {
     <div className="min-w-0">
       <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm">
         <Icon
-          className="h-4 w-4 shrink-0"
+          className="gdh-icon shrink-0"
           style={{ color: seg.category_color }}
         />
 

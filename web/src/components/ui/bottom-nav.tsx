@@ -58,7 +58,7 @@ export function BottomNav({ activeSection, onSectionChange }: Props) {
                 aria-label={t(`nav.${section.id}`)}
               >
                 <Icon
-                  className={`h-5 w-5 transition-colors ${
+                  className={`gdh-icon-nav transition-colors ${
                     isActive
                       ? 'text-[var(--color-accent)]'
                       : 'text-[var(--color-text-muted)]'

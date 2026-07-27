@@ -95,7 +95,7 @@ export function CategoryIconPickerStrip({
               key={opt.name}
               type="button"
               onClick={() => onChange(opt.name)}
-              className={`rounded-lg border p-1.5 ${
+              className={`min-h-11 min-w-11 rounded-lg border p-2 ${
                 selected
                   ? "border-[var(--color-accent)] bg-[var(--color-accent-dim)]"
                   : "border-[var(--color-border-subtle)] hover:border-[var(--color-border-subtle)]"
@@ -103,7 +103,7 @@ export function CategoryIconPickerStrip({
               aria-label={opt.name}
               aria-pressed={selected}
             >
-              <OptIcon className="h-4 w-4 text-[var(--color-text-muted)]" />
+              <OptIcon className="gdh-icon text-[var(--color-text-muted)]" />
             </button>
           );
         })}

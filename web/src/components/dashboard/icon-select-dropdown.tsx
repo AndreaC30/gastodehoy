@@ -51,9 +51,10 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
         aria-expanded={open}
         aria-haspopup="listbox"
       >
-        <SelectedIcon className="h-5 w-5 shrink-0 text-sky-400/90" />
+        <SelectedIcon className="gdh-icon shrink-0 text-[var(--color-accent)]" />
         <IoChevronDown
-          className={`h-3.5 w-3.5 shrink-0 text-[var(--color-text-dim)] transition ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-[var(--color-text-dim)] transition ${open ? "rotate-180" : ""}`}
+          style={{ width: "0.875rem", height: "0.875rem", maxWidth: "none" }}
           aria-hidden
         />
       </button>
@@ -81,7 +82,7 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
                   }`}
                   aria-label={opt.name}
                 >
-                  <OptIcon className="mx-auto h-4 w-4 text-[var(--color-text-muted)]" />
+                  <OptIcon className="gdh-icon mx-auto text-[var(--color-text-muted)]" />
                 </button>
               );
             })}

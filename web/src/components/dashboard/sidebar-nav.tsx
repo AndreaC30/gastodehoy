@@ -98,7 +98,7 @@ export function Sidebar({
                 }`}
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)]">
-                  <Icon className="h-[1.1rem] w-[1.1rem]" aria-hidden />
+                  <Icon className="gdh-icon" aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1 truncate text-sm font-medium">
                   {label}
@@ -118,7 +118,7 @@ export function Sidebar({
           className={`flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-panel)] disabled:cursor-not-allowed disabled:opacity-45`}
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-accent)]">
-            <IoDownloadOutline className="h-[1.1rem] w-[1.1rem]" aria-hidden />
+            <IoDownloadOutline className="gdh-icon" aria-hidden />
           </span>
           <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--color-text)]">
             {isExportBusy ? t("nav.exporting") : t("nav.exportCsv")}
@@ -173,7 +173,7 @@ export function Sidebar({
           className={`mb-1 flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-panel)] ${FOCUS_RING}`}
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-accent)]">
-            <IoPersonOutline className="h-[1.1rem] w-[1.1rem]" aria-hidden />
+            <IoPersonOutline className="gdh-icon" aria-hidden />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium text-[var(--color-text)]">
@@ -190,7 +190,7 @@ export function Sidebar({
           className={`flex w-full items-center gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-3 py-2.5 text-left text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)]">
-            <IoLogOutOutline className="h-[1rem] w-[1rem]" aria-hidden />
+            <IoLogOutOutline className="gdh-icon" aria-hidden />
           </span>
           {t("nav.logout")}
         </button>

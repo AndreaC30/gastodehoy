@@ -213,7 +213,7 @@ export function CategoryManager({
                     className="h-4 w-4 shrink-0 rounded-full"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <Icon className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
+                  <Icon className="gdh-icon shrink-0 text-[var(--color-text-muted)]" />
                   <span className="min-w-0 flex-1 truncate text-sm text-[var(--color-text)]">
                     {cat.name}
                     {cat.monthly_budget != null && cat.monthly_budget !== "" && (

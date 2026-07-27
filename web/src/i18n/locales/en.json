@@ -323,7 +323,14 @@
   },
   "monthHistory": {
     "lastMonths": "Last {{months}} months",
-    "ariaLabel": "Variable spending last months"
+    "ariaLabel": "Variable spending last months",
+    "hint": "Tap a month to see its variable expenses",
+    "rangeLabel": "Months to show",
+    "expensesFor": "Variable expenses · {{month}}",
+    "total": "Total {{amount}}",
+    "entries": "entries",
+    "emptyMonth": "No variable expenses in this month.",
+    "loadError": "Could not load monthly history."
   },
   "cookieConsent": {
     "message": "GastoDeHoy uses necessary technical cookies to work. With your permission, we use anonymous analytics (no third-party cookies) to improve the app.",

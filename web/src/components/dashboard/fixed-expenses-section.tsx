@@ -151,7 +151,7 @@ export function FixedExpensesSection({
                     }
                   >
                     <div className="flex min-w-0 items-center gap-2">
-                      <FixedIcon className="h-4 w-4 shrink-0 text-[var(--color-accent)]/90" />
+                      <FixedIcon className="gdh-icon shrink-0 text-[var(--color-accent)]" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-[var(--color-text)] data-[density=compact]:text-xs" data-density={density}>{it.name}</p>
                         <p className="truncate text-sm tabular-nums text-[var(--color-text-dim)] data-[density=compact]:text-xs" data-density={density}>{money(it.amount)}</p>

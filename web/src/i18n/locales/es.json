@@ -334,7 +334,14 @@
   },
   "monthHistory": {
     "lastMonths": "Últimos {{months}} meses",
-    "ariaLabel": "Gasto variable últimos meses"
+    "ariaLabel": "Gasto variable últimos meses",
+    "hint": "Toca un mes para ver sus gastos variables",
+    "rangeLabel": "Meses a mostrar",
+    "expensesFor": "Gastos variables · {{month}}",
+    "total": "Total {{amount}}",
+    "entries": "movimientos",
+    "emptyMonth": "No hay gastos variables en este mes.",
+    "loadError": "No se pudo cargar el historial mensual."
   },
   "cookieConsent": {
     "message": "GastoDeHoy usa cookies técnicas necesarias para funcionar. Con tu permiso, usamos analytics anónimo (sin cookies de terceros) para mejorar la app.",

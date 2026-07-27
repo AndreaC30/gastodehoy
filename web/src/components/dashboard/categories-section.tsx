@@ -236,7 +236,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate }: Props) 
                     className="h-4 w-4 shrink-0 rounded-full"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <Icon className="h-5 w-5 shrink-0 text-[var(--color-text-muted)]" />
+                  <Icon className="gdh-icon-lg shrink-0 text-[var(--color-text-muted)]" />
                   <div>
                     <span className="text-sm font-medium text-[var(--color-text)]">{cat.name}</span>
                     {cat.monthly_budget != null && cat.monthly_budget !== "" && (
