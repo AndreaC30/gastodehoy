@@ -498,9 +498,14 @@ export function Dashboard({ profileName }: Props) {
         {activeSection === 'ingresos' && settings && (
           <IncomeSettingsSection
             settings={settings}
+            extras={extraIncomeQ.data ?? []}
             onNavigate={handleSectionChange}
             onSave={() => {
-              setToastMsg("Configuración guardada");
+              setToastMsg(t("toasts.changesSaved"));
+              void invalidateAll();
+            }}
+            onExtrasChanged={() => {
+              setToastMsg(t("toasts.extraIncomeUpdated"));
               void invalidateAll();
             }}
           />
