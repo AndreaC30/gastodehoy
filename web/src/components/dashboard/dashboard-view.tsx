@@ -389,7 +389,7 @@ export function Dashboard({ profileName }: Props) {
           id="main-content"
           tabIndex={-1}
           data-density={getDensity()}
-          className="relative z-10 mx-auto w-full max-w-4xl space-y-4 px-3 py-5 pb-[5.5rem] sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl sm:pb-20"
+          className="relative z-10 mx-auto w-full max-w-4xl space-y-4 px-3 py-5 pb-[8.5rem] sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl md:pb-20"
         >
         {error && (
           <div

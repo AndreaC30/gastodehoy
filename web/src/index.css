@@ -55,6 +55,18 @@
 html {
   color-scheme: dark;
   -webkit-text-size-adjust: 100%;
+  /* Cookie banner / overlays sit above mobile BottomNav when it is mounted. */
+  --gdh-bottom-chrome-offset: 0px;
+}
+
+html[data-mobile-bottom-nav="1"] {
+  --gdh-bottom-chrome-offset: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  html[data-mobile-bottom-nav="1"] {
+    --gdh-bottom-chrome-offset: 0px;
+  }
 }
 
 body {

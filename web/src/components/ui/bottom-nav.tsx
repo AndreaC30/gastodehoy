@@ -1,5 +1,6 @@
 /** Mobile bottom navigation bar for dashboard sections. */
 
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DashboardSection } from '@/lib/dashboard-state';
 import { FOCUS_RING } from '@/lib/ui-a11y';
@@ -37,13 +38,21 @@ function getIcon(section: DashboardSection, active: boolean) {
 export function BottomNav({ activeSection, onSectionChange }: Props) {
   const { t } = useTranslation();
 
+  // Signal cookie chrome / overlays to sit above this bar on mobile.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-mobile-bottom-nav', '1');
+    return () => {
+      document.documentElement.removeAttribute('data-mobile-bottom-nav');
+    };
+  }, []);
+
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[var(--color-panel)] md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[var(--color-panel)] pb-[env(safe-area-inset-bottom,0px)] md:hidden"
       role="navigation"
       aria-label="Navegación principal"
     >
-      <ul className="flex h-[60px] items-center justify-around pb-[max(0.25rem,env(safe-area-inset-bottom))]">
+      <ul className="flex h-[60px] items-center justify-around">
         {MAIN_SECTIONS.map((section) => {
           const isActive = activeSection === section.id;
           const Icon = getIcon(section.id, isActive);

@@ -77,10 +77,10 @@ export function CookieConsentBanner() {
     setConsent(null);
   }, []);
 
-  // Banner already dismissed
+  // Banner already dismissed — keep above mobile bottom nav (see --gdh-bottom-chrome-offset).
   if (consent !== null) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
+      <div className="gdh-cookie-chrome fixed bottom-[var(--gdh-bottom-chrome-offset,0px)] left-0 right-0 z-50 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-3xl items-center justify-end px-4 py-1.5">
           <button
             type="button"
@@ -95,7 +95,7 @@ export function CookieConsentBanner() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border-subtle)] bg-[var(--color-panel)]/95 shadow-[var(--shadow-surface)] backdrop-blur-md">
+    <div className="gdh-cookie-chrome fixed bottom-[var(--gdh-bottom-chrome-offset,0px)] left-0 right-0 z-50 border-t border-[var(--color-border-subtle)] bg-[var(--color-panel)]/95 shadow-[var(--shadow-surface)] backdrop-blur-md">
       <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-4 sm:py-3">
         {/* Message */}
         <p className="flex-1 text-sm leading-relaxed text-[var(--color-text-muted)]">
