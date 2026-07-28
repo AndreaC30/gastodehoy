@@ -6,13 +6,15 @@
  *   - `"necessary"` — user declined non-essential cookies
  *
  * On "accept", the Umami analytics script is injected dynamically.
- * A subtle "Manage cookies" link lets users change their preference later.
+ * After consent, there is no persistent bottom strip (it overlapped mobile CTAs);
+ * users reopen choices via Account → Gestionar cookies.
  */
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const STORAGE_KEY = "gdh_cookie_consent";
 const UMAMI_SCRIPT_ID = "umami-analytics-script";
+const REVIEW_EVENT = "gdh:cookie-consent-review";
 
 function injectUmamiScript() {
   // Avoid duplicate injection
@@ -43,6 +45,13 @@ function removeUmamiScript() {
   }
 }
 
+/** Reopen the consent banner (e.g. from Account preferences). */
+export function requestCookieConsentReview() {
+  localStorage.removeItem(STORAGE_KEY);
+  removeUmamiScript();
+  window.dispatchEvent(new Event(REVIEW_EVENT));
+}
+
 export function CookieConsentBanner() {
   const { t } = useTranslation();
   // null = not decided yet, "all" | "necessary" = decided
@@ -59,6 +68,14 @@ export function CookieConsentBanner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    function onReview() {
+      setConsent(null);
+    }
+    window.addEventListener(REVIEW_EVENT, onReview);
+    return () => window.removeEventListener(REVIEW_EVENT, onReview);
+  }, []);
+
   const handleAccept = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, "all");
     injectUmamiScript();
@@ -71,31 +88,13 @@ export function CookieConsentBanner() {
     setConsent("necessary");
   }, []);
 
-  const handleManageCookies = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    removeUmamiScript();
-    setConsent(null);
-  }, []);
-
-  // Banner already dismissed — keep above mobile bottom nav (see --gdh-bottom-chrome-offset).
+  // Consent already set — no fixed bottom chrome (avoids covering logout / nav).
   if (consent !== null) {
-    return (
-      <div className="gdh-cookie-chrome fixed bottom-[var(--gdh-bottom-chrome-offset,0px)] left-0 right-0 z-50 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-3xl items-center justify-end px-4 py-1.5">
-          <button
-            type="button"
-            onClick={handleManageCookies}
-            className="text-xs text-[var(--color-text-dim)] underline-offset-2 hover:text-[var(--color-text-muted)] hover:underline focus-visible:rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-          >
-            {t("cookieConsent.manage")}
-          </button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="gdh-cookie-chrome fixed bottom-[var(--gdh-bottom-chrome-offset,0px)] left-0 right-0 z-50 border-t border-[var(--color-border-subtle)] bg-[var(--color-panel)]/95 shadow-[var(--shadow-surface)] backdrop-blur-md">
+    <div className="gdh-cookie-chrome fixed bottom-[var(--gdh-bottom-chrome-offset,0px)] left-0 right-0 z-[80] border-t border-[var(--color-border-subtle)] bg-[var(--color-panel)]/95 shadow-[var(--shadow-surface)] backdrop-blur-md">
       <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-4 sm:py-3">
         {/* Message */}
         <p className="flex-1 text-sm leading-relaxed text-[var(--color-text-muted)]">

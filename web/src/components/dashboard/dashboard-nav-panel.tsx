@@ -212,7 +212,7 @@ export function DashboardNavPanel({
               </div>
             </div>
 
-            <div className="border-t border-[var(--color-border)] px-3 py-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="border-t border-[var(--color-border)] px-3 py-3 pb-[max(1rem,var(--gdh-overlay-footer-pad,env(safe-area-inset-bottom)))]">
               <button
                 type="button"
                 onClick={() => {

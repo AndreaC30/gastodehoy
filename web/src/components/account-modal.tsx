@@ -8,6 +8,7 @@ import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
 import { ModalMenuFooter } from "@/components/modal-menu-footer";
+import { requestCookieConsentReview } from "@/components/cookie-consent-banner";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 import {
   isDailyNotificationEnabled,
@@ -65,7 +66,7 @@ export function AccountModal({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex touch-none items-end justify-center overflow-hidden bg-black/60 px-3 py-4 sm:items-center sm:px-4 sm:py-6"
+      className="fixed inset-0 z-[70] flex touch-none items-end justify-center overflow-hidden bg-black/60 px-3 pb-[max(1rem,var(--gdh-overlay-footer-pad,1rem))] pt-4 sm:items-center sm:px-4 sm:py-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="account-modal-title"
@@ -165,6 +166,17 @@ export function AccountModal({
               </span>
             </span>
           </label>
+
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              requestCookieConsentReview();
+            }}
+            className={`flex w-full min-h-11 items-center justify-center rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 px-4 py-3 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+          >
+            {t("cookieConsent.manage")}
+          </button>
         </div>
 
         <button

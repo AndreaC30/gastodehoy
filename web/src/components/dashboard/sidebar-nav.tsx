@@ -162,7 +162,7 @@ export function Sidebar({
       </div>
 
       {/* Account + logout */}
-      <div className="shrink-0 border-t border-[var(--color-border)] px-1.5 py-2">
+      <div className="shrink-0 border-t border-[var(--color-border)] px-1.5 py-2 pb-[max(0.75rem,var(--gdh-overlay-footer-pad,env(safe-area-inset-bottom)))] md:pb-2">
         <div className="mb-2 px-2">
           <p className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--color-text-dim)]">
             {t("nav.account")}

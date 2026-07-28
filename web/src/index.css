@@ -61,12 +61,21 @@ html {
 
 html[data-mobile-bottom-nav="1"] {
   --gdh-bottom-chrome-offset: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+  /* Holgura sobre bottom nav para footers de menú/modal */
+  --gdh-overlay-footer-pad: calc(var(--gdh-bottom-chrome-offset) + 0.5rem);
 }
 
 @media (min-width: 768px) {
   html[data-mobile-bottom-nav="1"] {
     --gdh-bottom-chrome-offset: 0px;
+    --gdh-overlay-footer-pad: max(1rem, env(safe-area-inset-bottom, 0px));
   }
+}
+
+/* Banner de consentimiento (solo si aún no hay decisión) no tapa overlays */
+html[data-overlay-open="1"] .gdh-cookie-chrome {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 body {
