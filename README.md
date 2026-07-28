@@ -162,7 +162,12 @@ Flujo recomendado en el VPS:
 1. Trabaja y despliega en **staging** (`./scripts/deploy-staging.sh`).
 2. Cuando esté bien, merge `develop` → `main` y despliega prod (`./scripts/deploy-docker-prod.sh`).
 
-Staging usa `docker-compose.staging.yml` (contenedor `gastodehoy-dev-app`, alias nginx `app-dev`, SQLite propia en el clon). Secretos y `SITE_DOMAIN` van en el `.env` de `/root/gastodehoy-dev` — **no** reutilices `APP_SECRET` ni la BBDD de producción.
+Staging usa `docker-compose.staging.yml` (servicio `app-dev`, contenedor `gastodehoy-dev-app`, SQLite propia en el clon). Secretos y `SITE_DOMAIN` van en el `.env` de `/root/gastodehoy-dev` — **no** reutilices `APP_SECRET` ni la BBDD de producción.
+
+```bash
+cd /root/gastodehoy-dev
+./scripts/deploy-staging.sh
+```
 
 ### Paso 4 — Permisos de la BBDD
 

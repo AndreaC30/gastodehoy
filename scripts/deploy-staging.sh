@@ -4,7 +4,7 @@
 set -euo pipefail
 
 ROOT="${GDH_STAGING_DIR:-/root/gastodehoy-dev}"
-COMPOSE=(docker compose -p gastodehoy-dev -f docker-compose.yml -f docker-compose.staging.yml)
+COMPOSE=(docker compose -f docker-compose.staging.yml)
 
 cd "$ROOT"
 
@@ -12,6 +12,7 @@ git fetch origin
 git checkout develop
 git pull --ff-only origin develop
 
+export COMPOSE_BAKE=false
 "${COMPOSE[@]}" up -d --build
 "${COMPOSE[@]}" ps
 echo "Staging HEAD: $(git rev-parse --short HEAD)"

@@ -1,27 +1,30 @@
-# Overlay de staging (dev.gastodehoy.es) — aislado de producción.
+# Staging stack for https://dev.gastodehoy.es (rama develop).
 #
-# Uso en el VPS (clon en /root/gastodehoy-dev, rama develop):
-#   docker compose -p gastodehoy-dev \
-#     -f docker-compose.yml -f docker-compose.staging.yml up -d --build
+# Standalone (no merges docker-compose.yml) so the service is NOT named «app»
+# and cannot steal the prod DNS alias on gastodehoy_backend.
 #
-# Requiere en .env del clon staging:
+# Uso en el VPS (/root/gastodehoy-dev):
+#   docker compose -f docker-compose.staging.yml up -d --build
+#
+# Requiere .env:
 #   SITE_DOMAIN=dev.gastodehoy.es
 #   APP_SECRET=<openssl rand -hex 32>   # distinto del de prod
 #   ADMIN_API_KEY=<openssl rand -hex 32>
 #   COOKIE_SECURE=true
 #   CORS_ORIGINS=https://dev.gastodehoy.es
-#
-# El proxy nginx debe apuntar a alias «app-dev» en la red gastodehoy_backend.
-# SQLite vive en ./data de este clon (no reutiliza la BBDD de prod).
+#   (+ SMTP / VAPID igual que prod si quieres probar correo/push)
+
+name: gastodehoy-dev
 
 services:
-  app:
-    container_name: gastodehoy-dev-app
+  app-dev:
     build:
       context: .
       args:
         SITE_DOMAIN: ${SITE_DOMAIN:-dev.gastodehoy.es}
         BUILD_REF: ${BUILD_REF:-staging}
+    container_name: gastodehoy-dev-app
+    restart: unless-stopped
     ports: []
     environment:
       DATABASE_URL: sqlite:////app/data/gastodehoy.db
@@ -34,10 +37,34 @@ services:
       COOKIE_DOMAIN: ${SITE_DOMAIN:-dev.gastodehoy.es}
       TRUST_FORWARDED_FOR: "true"
       CORS_ORIGINS: ${CORS_ORIGINS:-https://dev.gastodehoy.es}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      SMTP_USE_SSL: ${SMTP_USE_SSL:-false}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@gastodehoy.es}
+    volumes:
+      - ./data:/app/data
     networks:
       backend:
         aliases:
           - app-dev
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 networks:
   backend:
