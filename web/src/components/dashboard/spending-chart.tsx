@@ -76,20 +76,20 @@ export function SpendingChart({ breakdown, total }: Props) {
   );
 
   return (
-    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] p-4 sm:p-5">
-      <h2 className="text-lg font-bold tracking-tight text-[var(--color-text)]">
+    <section className="h-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-3 shadow-[var(--shadow-surface)] sm:p-4">
+      <h2 className="text-base font-bold tracking-tight text-[var(--color-text)] md:text-lg">
         {t("spendingChart.title")}
       </h2>
       <p className="mt-1 text-sm text-[var(--color-text-dim)]">
         {t("spendingChart.subtitle")}
       </p>
 
-      <div className="mt-5 flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">
+      <div className="mt-4 flex flex-col items-center gap-4 sm:mt-5 sm:flex-row sm:items-start sm:gap-6">
         <div className="shrink-0 pt-1 sm:pt-2">
           <MiniDonut segments={donutSegments} totalLabel={money(total)} />
         </div>
 
-        <div className="w-full min-w-0 flex-1 space-y-4">
+        <div className="w-full min-w-0 flex-1 space-y-3 md:space-y-3.5">
           {sorted.map((seg) => (
             <CategoryRow key={seg.category_id ?? "none"} seg={seg} />
           ))}

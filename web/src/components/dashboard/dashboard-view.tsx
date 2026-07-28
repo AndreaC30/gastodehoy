@@ -478,20 +478,24 @@ export function Dashboard({ profileName }: Props) {
 
         {/* Section: ANALISIS */}
         {activeSection === 'analisis' && (
-          <>
+          <div className="space-y-4 md:space-y-5">
             <InsightsPanel
               data={insightsQ.data}
               isLoading={insightsQ.isPending}
               error={insightsQ.error as Error | null}
             />
-            {insightsQ.data && insightsQ.data.category_breakdown.length > 0 && (
-              <SpendingChart
-                breakdown={insightsQ.data.category_breakdown}
-                total={insightsQ.data.total_spent}
-              />
-            )}
-            <Rule503020Panel />
-          </>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-5">
+              {insightsQ.data && insightsQ.data.category_breakdown.length > 0 ? (
+                <SpendingChart
+                  breakdown={insightsQ.data.category_breakdown}
+                  total={insightsQ.data.total_spent}
+                />
+              ) : (
+                <div className="hidden lg:block" aria-hidden />
+              )}
+              <Rule503020Panel />
+            </div>
+          </div>
         )}
 
         {/* Section: HISTORICO */}

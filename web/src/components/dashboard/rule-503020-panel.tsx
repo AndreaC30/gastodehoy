@@ -70,7 +70,7 @@ export function Rule503020Panel() {
 
   return (
     <section
-      className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] px-4 py-4"
+      className="h-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-3 shadow-[var(--shadow-surface)] sm:px-4 sm:py-4"
       aria-label={t("rule503020.title")}
     >
       <div className="flex items-start gap-2">

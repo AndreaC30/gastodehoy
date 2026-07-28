@@ -102,7 +102,7 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
 }
 
 const PANEL_CLASS =
-  "rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] p-3 sm:p-5";
+  "rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] p-3 sm:p-4 md:p-4";
 
 export function InsightsPanel({ data, isLoading, error }: Props) {
   const { t } = useTranslation();
@@ -163,14 +163,14 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         </div>
       </div>
 
-      <ul className="mt-4 list-none space-y-3 p-0">
+      <ul className="mt-3 list-none grid grid-cols-1 gap-2 p-0 md:mt-4 md:grid-cols-2 md:gap-3">
         {data.insights.map((insight) => {
           const { Icon, colorClass } = getInsightIcon(insight);
           const cardStyle = TYPE_STYLES[insight.type] ?? TYPE_STYLES.info;
           return (
             <li
               key={`${insight.type}-${insight.title}`}
-              className={`rounded-xl border px-3 py-2.5 text-sm leading-relaxed sm:px-4 sm:py-3 sm:text-base ${cardStyle}`}
+              className={`rounded-xl border px-3 py-2.5 text-sm leading-snug ${cardStyle}`}
             >
               <div className="flex items-start gap-2">
                 <Icon
@@ -179,7 +179,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
                 />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">{insight.title}</p>
-                  <p className="mt-1 text-sm text-current/90">
+                  <p className="mt-0.5 text-xs text-current/90 md:text-sm">
                     {insight.message}
                   </p>
                 </div>
@@ -190,7 +190,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
       </ul>
 
       {Number(data.projected_monthly) > 0 && (
-        <div className="mt-5 border-t border-[var(--color-border)] pt-4">
+        <div className="mt-4 border-t border-[var(--color-border)] pt-3 md:mt-4 md:pt-3">
           <div className="flex items-center justify-between text-sm">
             <span className="text-[var(--color-text-muted)]">{t("insights.projection")}</span>
             <span className="font-semibold text-[var(--color-text)]">
