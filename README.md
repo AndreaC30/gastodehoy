@@ -150,6 +150,20 @@ El contenedor **app** sirve API + frontend estático. HTTPS y certificados los g
 
 Abre **https://gastos.tudominio.com** y crea tu primera cuenta.
 
+### Staging (`develop` → `dev.gastodehoy.es`)
+
+Flujo recomendado en el VPS:
+
+| Entorno | Rama | Clon | URL |
+|---------|------|------|-----|
+| Staging | `develop` | `/root/gastodehoy-dev` | https://dev.gastodehoy.es |
+| Producción | `main` | `/root/gastodehoy` | https://gastodehoy.es |
+
+1. Trabaja y despliega en **staging** (`./scripts/deploy-staging.sh`).
+2. Cuando esté bien, merge `develop` → `main` y despliega prod (`./scripts/deploy-docker-prod.sh`).
+
+Staging usa `docker-compose.staging.yml` (contenedor `gastodehoy-dev-app`, alias nginx `app-dev`, SQLite propia en el clon). Secretos y `SITE_DOMAIN` van en el `.env` de `/root/gastodehoy-dev` — **no** reutilices `APP_SECRET` ni la BBDD de producción.
+
 ### Paso 4 — Permisos de la BBDD
 
 El contenedor corre como usuario `appuser` (UID 999). El directorio `./data` debe ser escribible por ese usuario:

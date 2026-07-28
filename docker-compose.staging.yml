@@ -1,0 +1,45 @@
+# Overlay de staging (dev.gastodehoy.es) — aislado de producción.
+#
+# Uso en el VPS (clon en /root/gastodehoy-dev, rama develop):
+#   docker compose -p gastodehoy-dev \
+#     -f docker-compose.yml -f docker-compose.staging.yml up -d --build
+#
+# Requiere en .env del clon staging:
+#   SITE_DOMAIN=dev.gastodehoy.es
+#   APP_SECRET=<openssl rand -hex 32>   # distinto del de prod
+#   ADMIN_API_KEY=<openssl rand -hex 32>
+#   COOKIE_SECURE=true
+#   CORS_ORIGINS=https://dev.gastodehoy.es
+#
+# El proxy nginx debe apuntar a alias «app-dev» en la red gastodehoy_backend.
+# SQLite vive en ./data de este clon (no reutiliza la BBDD de prod).
+
+services:
+  app:
+    container_name: gastodehoy-dev-app
+    build:
+      context: .
+      args:
+        SITE_DOMAIN: ${SITE_DOMAIN:-dev.gastodehoy.es}
+        BUILD_REF: ${BUILD_REF:-staging}
+    ports: []
+    environment:
+      DATABASE_URL: sqlite:////app/data/gastodehoy.db
+      ENV: production
+      TIMEZONE: ${TIMEZONE:-Europe/Madrid}
+      APP_SECRET: ${APP_SECRET}
+      ADMIN_API_KEY: ${ADMIN_API_KEY}
+      SESSION_TTL_DAYS: ${SESSION_TTL_DAYS:-30}
+      COOKIE_SECURE: "true"
+      COOKIE_DOMAIN: ${SITE_DOMAIN:-dev.gastodehoy.es}
+      TRUST_FORWARDED_FOR: "true"
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://dev.gastodehoy.es}
+    networks:
+      backend:
+        aliases:
+          - app-dev
+
+networks:
+  backend:
+    external: true
+    name: gastodehoy_backend
