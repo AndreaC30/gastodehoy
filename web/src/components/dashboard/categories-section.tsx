@@ -110,8 +110,8 @@ export function CategoriesSection({ categories, onChanged, onNavigate }: Props) 
   }
 
   return (
-    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-6">
+    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-surface)] sm:p-5 md:p-5">
+      <div className="mb-4 flex items-center justify-between md:mb-5">
         <h2 className="text-xl font-bold text-[var(--color-text)]">{t("nav.categories")}</h2>
         <button
           type="button"
@@ -218,9 +218,9 @@ export function CategoriesSection({ categories, onChanged, onNavigate }: Props) 
       )}
 
       {/* Categories List */}
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {categories.length === 0 ? (
-          <p className="text-sm text-[var(--color-text-muted)] text-center py-8">
+          <p className="col-span-full py-8 text-center text-sm text-[var(--color-text-muted)]">
             No hay categorías. ¡Crea la primera!
           </p>
         ) : (
@@ -229,28 +229,28 @@ export function CategoriesSection({ categories, onChanged, onNavigate }: Props) 
             return (
               <div
                 key={cat.id}
-                className="flex items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-3"
+                className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-2.5 py-2.5 sm:px-3"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
                   <span
-                    className="h-4 w-4 shrink-0 rounded-full"
+                    className="h-3.5 w-3.5 shrink-0 rounded-full"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <Icon className="gdh-icon-lg shrink-0 text-[var(--color-text-muted)]" />
-                  <div>
-                    <span className="text-sm font-medium text-[var(--color-text)]">{cat.name}</span>
+                  <Icon className="gdh-icon shrink-0 text-[var(--color-text-muted)]" />
+                  <div className="min-w-0">
+                    <span className="block truncate text-sm font-medium text-[var(--color-text)]">{cat.name}</span>
                     {cat.monthly_budget != null && cat.monthly_budget !== "" && (
-                      <div className="text-xs text-[var(--color-text-dim)]">
+                      <div className="truncate text-xs text-[var(--color-text-dim)]">
                         {String(cat.monthly_budget)}€/mes
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex shrink-0 gap-0.5">
                   <button
                     type="button"
                     onClick={() => handleEdit(cat)}
-                    className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                    className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                     aria-label="Editar"
                   >
                     <IoPencil className="h-4 w-4" />
@@ -262,7 +262,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate }: Props) 
                         deleteMut.mutate(cat.id);
                       }
                     }}
-                    className="p-2 text-[var(--color-text-muted)] hover:text-red-500"
+                    className="p-1.5 text-[var(--color-text-muted)] hover:text-red-500"
                     aria-label="Eliminar"
                   >
                     <IoTrash className="h-4 w-4" />
