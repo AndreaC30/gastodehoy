@@ -13,5 +13,5 @@ alwaysApply: true
 ## Agent behaviour
 
 - **Do not run `git push`** or any command that publishes commits to GitHub (including `gh pr create` with implicit push), unless the user explicitly orders a push in that conversation.
-- **Do not assume commits must be created by the agent.** If the user prefers GitHub Desktop, **provide the proposed commit message as plain text** they can paste there.
-- Only run `git commit` when the user clearly asks to create the commit from the agent session.
+- When a **mejora/fix queda terminada** en este repo: **crea el commit** (el usuario hace el push). Luego sigue `.cursor/rules/staging-delivery-flow.mdc` para staging.
+- If the user prefers GitHub Desktop for a specific change, provide the proposed commit message as plain text they can paste there.

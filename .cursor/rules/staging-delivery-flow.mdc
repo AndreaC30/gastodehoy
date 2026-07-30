@@ -1,0 +1,15 @@
+---
+description: Flujo commit → push del usuario → deploy staging (dev)
+alwaysApply: true
+---
+
+# GastoDeHoy — entrega y staging
+
+Cuando termines una mejora o fix en este repo (código listo y verificado):
+
+1. **Crea el commit** en la rama de trabajo (normalmente `develop`), con mensaje conciso al estilo del repo. No hagas push desde aquí si falla auth local.
+2. **Espera** a que el usuario suba el push a GitHub (`origin`).
+3. **Después del push**, despliega **solo staging** (`dev.gastodehoy.es`): en el VPS `/root/gastodehoy-dev` con `scripts/deploy-staging.sh` (o el flujo documentado). Confirma HEAD + health/assets.
+4. **No despliegues producción** (`gastodehoy.es` / `main`) salvo petición explícita del usuario.
+
+Si el usuario dice que ya hizo push, pasa a staging sin re-preguntar.
