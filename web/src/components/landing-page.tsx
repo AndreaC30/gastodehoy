@@ -82,7 +82,7 @@ export function LandingPage({ onEnter }: Props) {
   ];
 
   return (
-    <div className="gdh-landing relative z-10 min-h-dvh overflow-x-hidden text-[var(--color-text)]">
+    <div className="gdh-landing relative z-10 min-h-dvh overflow-x-clip text-[var(--color-text)]">
       <div className="gdh-landing-atmosphere pointer-events-none absolute inset-0" aria-hidden />
 
       <header className="relative z-20 border-b border-[var(--color-border)]/80 bg-[var(--color-bg)]/80 backdrop-blur-md">

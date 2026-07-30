@@ -43,7 +43,7 @@ import type { DashboardSection } from "@/lib/dashboard-state";
 import { getActiveSection, setActiveSection } from "@/lib/dashboard-state";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { SiteFooter } from "@/components/site-footer";
-import { APP_SHELL_CLASS } from "@/lib/app-layout";
+import { DASHBOARD_SCROLL_CLASS } from "@/lib/app-layout";
 import { DEFAULT_FIXED_EXPENSE_ICON } from "@/components/dashboard/category-icon";
 import { api, downloadCsv } from "@/api/client";
 import type {
@@ -376,7 +376,7 @@ export function Dashboard({ profileName }: Props) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-[100dvh] overflow-hidden">
       <Sidebar
         profileName={profileName}
         exportBusy={exportBusy}
@@ -387,7 +387,7 @@ export function Dashboard({ profileName }: Props) {
         onMobileOpenChange={setMobileMenuOpen}
       />
 
-      <div className={`flex-1 min-w-0 flex flex-col ${APP_SHELL_CLASS} overflow-y-auto`}>
+      <div className={DASHBOARD_SCROLL_CLASS}>
         <AppBackdrop />
 
         <header className="relative z-10 border-b border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 sm:px-4 sm:py-3.5">
@@ -426,7 +426,7 @@ export function Dashboard({ profileName }: Props) {
           id="main-content"
           tabIndex={-1}
           data-density={density}
-          className="relative z-10 mx-auto w-full max-w-lg space-y-5 px-3 py-5 pb-[8.5rem] sm:space-y-5 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-4 md:pb-20 lg:max-w-6xl"
+          className="relative z-10 mx-auto w-full max-w-lg flex-1 space-y-5 px-3 py-5 pb-[8.5rem] sm:space-y-5 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-4 md:pb-20 lg:max-w-6xl"
         >
         {error && (
           <div
@@ -652,8 +652,9 @@ export function Dashboard({ profileName }: Props) {
           <SiteFooter />
         </div>
       </main>
+      </div>
 
-      {/* FAB: add expense (mobile) */}
+      {/* FAB: add expense (mobile) — fuera del scroll para fixed fiable en iOS */}
       {(activeSection === "hoy" || activeSection === "gastos") && (
         <button
           type="button"
@@ -789,7 +790,6 @@ export function Dashboard({ profileName }: Props) {
             {toastUndo.label}
           </button></>
         )}
-      </div>
       </div>
     </div>
   );
