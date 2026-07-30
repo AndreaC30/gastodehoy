@@ -163,14 +163,14 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         </div>
       </div>
 
-      <ul className="mt-3 list-none grid grid-cols-1 gap-2 p-0 md:mt-4 md:grid-cols-2 md:gap-3">
+      <ul className="mt-4 list-none grid grid-cols-1 gap-3 p-0 md:mt-4 md:grid-cols-2 md:gap-3">
         {data.insights.map((insight) => {
           const { Icon, colorClass } = getInsightIcon(insight);
           const cardStyle = TYPE_STYLES[insight.type] ?? TYPE_STYLES.info;
           return (
             <li
               key={`${insight.type}-${insight.title}`}
-              className={`rounded-xl border px-3 py-2.5 text-sm leading-snug ${cardStyle}`}
+              className={`rounded-xl border px-3.5 py-3 text-sm leading-snug ${cardStyle}`}
             >
               <div className="flex items-start gap-2">
                 <Icon

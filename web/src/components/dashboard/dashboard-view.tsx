@@ -426,7 +426,7 @@ export function Dashboard({ profileName }: Props) {
           id="main-content"
           tabIndex={-1}
           data-density={density}
-          className="relative z-10 mx-auto w-full max-w-lg flex-1 space-y-5 px-3 py-5 pb-[8.5rem] sm:space-y-5 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-4 md:pb-20 lg:max-w-6xl"
+          className="relative z-10 mx-auto w-full max-w-lg flex-1 space-y-7 px-3 py-5 pb-[8.5rem] sm:space-y-6 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-5 md:pb-20 lg:max-w-6xl"
         >
         {error && (
           <div
@@ -489,7 +489,7 @@ export function Dashboard({ profileName }: Props) {
               ))}
             </div>
 
-            <div className="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 md:items-start lg:gap-6">
+            <div className="grid min-w-0 grid-cols-1 gap-6 sm:gap-5 md:grid-cols-2 md:items-start lg:gap-6">
               <div
                 id="add-expense"
                 className={`min-w-0 ${gastosTab === "variables" ? "block" : "hidden"} md:block`}
@@ -551,7 +551,7 @@ export function Dashboard({ profileName }: Props) {
 
         {/* Section: ANALISIS */}
         {activeSection === 'analisis' && (
-          <div className="space-y-4 md:space-y-5">
+          <div className="space-y-5 md:space-y-5">
             <InsightsPanel
               data={insightsQ.data}
               isLoading={insightsQ.isPending}

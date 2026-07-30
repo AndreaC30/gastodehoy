@@ -91,7 +91,7 @@ export function VariableExpensesSection({
           </div>
         ) : (
           <>
-            <ul className="space-y-2">
+            <ul className="space-y-2.5 sm:space-y-2">
               {visibleItems.length > 0 ? (
                 visibleItems.map((it) => {
                 const CatIcon = getCategoryIcon(it.category_icon);
