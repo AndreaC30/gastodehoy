@@ -21,3 +21,6 @@ PLIEGO.md
 *.pem
 *.key
 youtube_uploader.py
+
+# Cursor rules locales (no versionar)
+.cursor/
