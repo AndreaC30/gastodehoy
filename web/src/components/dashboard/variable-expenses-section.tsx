@@ -58,18 +58,18 @@ export function VariableExpensesSection({
   return (
     <section
       data-tour="variable-expenses"
-      className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]"
+      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] sm:rounded-[10px]"
     >
-      <div className="border-b border-[var(--color-border)] px-5 py-4">
+      <div className="border-b border-[var(--color-border)] px-5 py-5">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">
           {t("variableExpenses.title")}
         </h2>
-        <p className={`mt-1 normal-case ${TYPE_CAPTION}`}>
+        <p className={`mt-1.5 normal-case ${TYPE_CAPTION}`}>
           {t("monthContext.variableSubtitle", { month })}
         </p>
       </div>
-      <div className="p-5">
-        <p className={`mb-4 ${TYPE_BODY}`}>
+      <div className="p-5 sm:p-5">
+        <p className={`mb-5 ${TYPE_BODY}`}>
           {t("variableExpenses.description")}
           <strong className="text-[var(--color-text-muted)]">Gastos fijos</strong>
           <span className="hidden lg:inline">{t("variableExpenses.descriptionSuffixDesktop")}</span>

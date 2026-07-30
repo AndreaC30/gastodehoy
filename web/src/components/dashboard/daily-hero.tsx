@@ -13,9 +13,17 @@ type Props = {
   summaryPending: boolean;
   onRefresh: () => void;
   onAddExpense?: () => void;
+  /** Optional month label rendered inside the hero (avoids a separate cramped card). */
+  monthLabel?: string;
 };
 
-export function DailyHero({ summary, summaryPending, onRefresh, onAddExpense }: Props) {
+export function DailyHero({
+  summary,
+  summaryPending,
+  onRefresh,
+  onAddExpense,
+  monthLabel,
+}: Props) {
   const { t } = useTranslation();
   const [showMetrics, setShowMetrics] = useState(false);
   const animatedSpend = useAnimatedNumber(
@@ -23,7 +31,7 @@ export function DailyHero({ summary, summaryPending, onRefresh, onAddExpense }: 
   );
 
   const metrics = (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       <Metric
         label={t("metrics.savings")}
         value={
@@ -99,17 +107,23 @@ export function DailyHero({ summary, summaryPending, onRefresh, onAddExpense }: 
   return (
     <section
       data-tour="hero"
-      className={`${SECTION_CARD} overflow-hidden border-[var(--color-accent-border)] p-4 sm:p-5 md:p-5`}
+      className={`${SECTION_CARD} overflow-hidden p-5 sm:p-6`}
       style={{ boxShadow: "inset 3px 0 0 var(--color-accent)" }}
       aria-live="polite"
     >
-      <div className="grid gap-5 md:grid-cols-[minmax(0,0.95fr)_1.35fr] md:items-stretch md:gap-6">
-        <div className="flex flex-col justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-soft)] p-5 sm:p-5">
+      {monthLabel ? (
+        <p className="mb-4 text-sm font-medium text-[var(--color-text-muted)] md:hidden">
+          {monthLabel}
+        </p>
+      ) : null}
+
+      <div className="grid gap-6 md:grid-cols-[minmax(0,0.95fr)_1.35fr] md:items-stretch md:gap-8">
+        <div className="flex flex-col justify-center">
           <p className={TYPE_EYEBROW}>{t("hero.dailyBudget")}</p>
-          <div className="mt-2 min-h-[3rem] sm:min-h-[2.75rem] md:min-h-[3.25rem]">
+          <div className="mt-3 min-h-[3.25rem]">
             {summaryPending ? (
               <div
-                className="h-12 w-44 animate-pulse rounded-lg bg-[var(--color-panel-elevated)] sm:h-10 sm:w-44 md:h-12 md:w-52"
+                className="h-12 w-44 animate-pulse rounded-lg bg-[var(--color-panel-elevated)]"
                 aria-hidden
               />
             ) : (
@@ -130,35 +144,38 @@ export function DailyHero({ summary, summaryPending, onRefresh, onAddExpense }: 
             <button
               type="button"
               onClick={onAddExpense}
-              className={`mt-4 flex min-h-12 w-full items-center justify-center rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent)] px-4 text-sm font-semibold text-[var(--color-bg)] hover:opacity-95 sm:w-auto ${FOCUS_RING}`}
+              className={`mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 text-sm font-semibold text-[var(--color-accent-ink)] hover:opacity-95 md:w-auto ${FOCUS_RING}`}
             >
               {t("hero.addExpense")}
             </button>
           ) : null}
 
-          <button
-            type="button"
-            onClick={onRefresh}
-            aria-label={t("hero.refresh")}
-            className={`mt-3 min-h-11 w-fit px-1 text-sm font-medium text-[var(--color-text-dim)] underline decoration-[var(--color-border-subtle)] underline-offset-4 hover:text-[var(--color-text-muted)] ${FOCUS_RING}`}
-          >
-            {t("hero.refresh")}
-          </button>
+          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+            <button
+              type="button"
+              onClick={onRefresh}
+              aria-label={t("hero.refresh")}
+              className={`min-h-11 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+            >
+              {t("hero.refresh")}
+            </button>
+            <button
+              type="button"
+              className={`min-h-11 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] md:hidden ${FOCUS_RING}`}
+              onClick={() => setShowMetrics((v) => !v)}
+              aria-expanded={showMetrics}
+            >
+              {showMetrics ? t("hero.hideMetrics") : t("hero.showMetrics")}
+            </button>
+          </div>
 
-          <button
-            type="button"
-            className={`mt-3 min-h-11 text-left text-sm font-medium text-[var(--color-accent)] md:hidden ${FOCUS_RING}`}
-            onClick={() => setShowMetrics((v) => !v)}
-            aria-expanded={showMetrics}
-          >
-            {showMetrics ? t("hero.hideMetrics") : t("hero.showMetrics")}
-          </button>
-          {showMetrics ? <div className="mt-3 md:hidden">{metrics}</div> : null}
+          {showMetrics ? <div className="mt-5 md:hidden">{metrics}</div> : null}
         </div>
 
         <div className="hidden md:block">{metrics}</div>
       </div>
-      <p className={`mt-4 border-t border-[var(--color-border)] pt-3 ${TYPE_BODY}`}>
+
+      <p className={`mt-6 border-t border-[var(--color-border)] pt-4 ${TYPE_BODY}`}>
         {t("hero.explanation")}
       </p>
     </section>

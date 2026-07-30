@@ -16,7 +16,7 @@ import { SavingsGoalsSection } from "@/components/dashboard/savings-goals-sectio
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { IoAdd, IoPersonOutline } from "react-icons/io5";
+import { IoPersonOutline } from "react-icons/io5";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
 import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
@@ -27,6 +27,11 @@ import { InsightsPanel } from "@/components/dashboard/insights-panel";
 import { MonthHistoryStrip } from "@/components/dashboard/month-history-strip";
 import { MonthContextBadge } from "@/components/dashboard/month-context-badge";
 import { MonthContextBanner } from "@/components/dashboard/month-context-banner";
+import {
+  budgetReferenceDate,
+  capitalizeFirstLetter,
+  formatMonthYear,
+} from "@/lib/month-context";
 import { MonthlyIncomeCheckFlow } from "@/components/dashboard/monthly-income-check-flow";
 import { Rule503020Panel } from "@/components/dashboard/rule-503020-panel";
 import { SavingsGoalsModal } from "@/components/savings-goals-modal";
@@ -426,7 +431,7 @@ export function Dashboard({ profileName }: Props) {
           id="main-content"
           tabIndex={-1}
           data-density={density}
-          className="relative z-10 mx-auto w-full max-w-lg flex-1 space-y-7 px-3 py-5 pb-[8.5rem] sm:space-y-6 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-5 md:pb-20 lg:max-w-6xl"
+          className="relative z-10 mx-auto w-full max-w-lg flex-1 space-y-8 px-4 py-6 pb-[8.5rem] sm:space-y-7 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-6 md:pb-20 lg:max-w-6xl"
         >
         {error && (
           <div
@@ -443,18 +448,26 @@ export function Dashboard({ profileName }: Props) {
         >
         {/* Section: HOY */}
         {activeSection === 'hoy' && (
-          <>
-            <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
+          <div className="space-y-5 md:space-y-4">
+            <div className="hidden md:block">
+              <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
+            </div>
             <MonthContextBanner referenceDate={summaryQ.data?.reference_date} />
             <DailyHero
               summary={summaryQ.data}
               summaryPending={summaryQ.isPending}
+              monthLabel={capitalizeFirstLetter(
+                formatMonthYear(
+                  budgetReferenceDate(summaryQ.data?.reference_date),
+                  i18n.language,
+                ),
+              )}
               onRefresh={() => {
                 void invalidateAll().then(() => setToastMsg(t("toasts.done")));
               }}
               onAddExpense={goToAddExpense}
             />
-          </>
+          </div>
         )}
 
         {/* Section: GASTOS */}
@@ -653,23 +666,6 @@ export function Dashboard({ profileName }: Props) {
         </div>
       </main>
       </div>
-
-      {/* FAB: add expense (mobile) — fuera del scroll para fixed fiable en iOS */}
-      {(activeSection === "hoy" || activeSection === "gastos") && (
-        <button
-          type="button"
-          onClick={goToAddExpense}
-          className={`fixed z-40 inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--color-accent-border)] bg-[var(--color-accent)] px-4 text-sm font-semibold text-[var(--color-accent-ink)] shadow-lg md:hidden ${FOCUS_RING}`}
-          style={{
-            right: "1rem",
-            bottom: "calc(var(--gdh-bottom-chrome-offset, 3.75rem) + 0.75rem)",
-          }}
-          aria-label={t("nav.fabAddExpense")}
-        >
-          <IoAdd className="h-5 w-5" aria-hidden />
-          {t("nav.fabAddExpense")}
-        </button>
-      )}
 
       {/* Bottom navigation (mobile only) */}
       <BottomNav

@@ -72,7 +72,7 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex touch-none items-end justify-center overflow-hidden bg-black/60 px-3 py-4 sm:items-center sm:px-4 sm:py-6"
+      className="fixed inset-0 z-[80] flex touch-none items-end justify-center overflow-hidden bg-black/60 pt-10 sm:items-center sm:px-4 sm:py-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="delete-account-title"
@@ -81,9 +81,16 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-rose-500/30 bg-[var(--color-panel)] p-4 shadow-2xl sm:rounded-2xl sm:p-5"
+        className="modal-scroll max-h-[min(92dvh,100%)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-rose-500/30 bg-[var(--color-panel)] px-5 py-5 shadow-2xl sm:max-h-[min(90vh,100dvh)] sm:rounded-2xl"
+        style={{
+          paddingBottom:
+            "max(1rem, var(--gdh-overlay-footer-pad, env(safe-area-inset-bottom)))",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="mb-3 flex justify-center sm:hidden" aria-hidden>
+          <div className="h-1 w-10 rounded-full bg-[var(--color-border-subtle)]" />
+        </div>
         <header className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h2

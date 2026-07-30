@@ -86,7 +86,7 @@ export function SettingsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex touch-none items-end justify-center overflow-hidden bg-black/60 px-3 py-4 sm:items-center sm:px-4 sm:py-6"
+      className="fixed inset-0 z-50 flex touch-none items-end justify-center overflow-hidden bg-black/60 pt-10 sm:items-center sm:px-4 sm:py-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-modal-title"
@@ -96,14 +96,14 @@ export function SettingsModal({
         ref={panelRef}
         tabIndex={-1}
         style={{ transform: `translateY(${dragOffset}px)` }}
-        className={`modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-4 pr-3 shadow-2xl shadow-black/50 transition-transform duration-300 sm:rounded-2xl sm:p-5 sm:pr-4 ${dragging ? "transition-none" : ""}`}
+        className={`modal-scroll max-h-[min(92dvh,100%)] w-full max-w-lg touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-5 shadow-2xl shadow-black/50 transition-transform duration-300 sm:max-h-[min(90vh,100dvh)] sm:rounded-2xl sm:p-5 ${dragging ? "transition-none" : ""}`}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-slate-600 sm:hidden" />
-        <header className="mb-4 flex items-start justify-between gap-3">
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[var(--color-border-subtle)] sm:hidden" />
+        <header className="mb-5 flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h2
               id="settings-modal-title"
@@ -111,7 +111,7 @@ export function SettingsModal({
             >
               {title ?? t("incomeSettings.title")}
             </h2>
-            <p className="text-sm text-[var(--color-text-dim)]">
+            <p className="mt-1 text-sm text-[var(--color-text-dim)]">
               {subtitle ?? t("incomeSettings.subtitle")}
             </p>
           </div>
@@ -119,7 +119,7 @@ export function SettingsModal({
             type="button"
             onClick={onClose}
             aria-label={t("common.close")}
-            className="rounded-lg border border-[var(--color-border)] p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)]/60"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-[var(--color-border)] p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)]/60"
           >
             <IoClose className="h-5 w-5" aria-hidden />
           </button>
