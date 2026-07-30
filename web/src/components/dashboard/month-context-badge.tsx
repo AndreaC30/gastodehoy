@@ -15,14 +15,14 @@ export function MonthContextBadge({ referenceDate }: Props) {
 
   return (
     <div
-      className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)]/60 px-3 py-2 sm:px-4"
+      className="flex flex-wrap items-baseline gap-x-2 gap-y-0 rounded-lg border border-[var(--color-border)]/80 bg-[var(--color-panel)]/40 px-2.5 py-1.5 sm:rounded-xl sm:px-4 sm:py-2"
       data-tour="month-context"
       aria-label={`${monthYear}, ${t("monthContext.badgeSubtitle")}`}
     >
-      <p className="text-base font-bold tracking-tight text-[var(--color-text)] normal-case sm:text-lg">
+      <p className="text-sm font-semibold tracking-tight text-[var(--color-text)] normal-case sm:text-lg sm:font-bold">
         {monthYear}
       </p>
-      <p className={TYPE_CAPTION}>{t("monthContext.badgeSubtitle")}</p>
+      <p className={`hidden sm:inline ${TYPE_CAPTION}`}>{t("monthContext.badgeSubtitle")}</p>
     </div>
   );
 }

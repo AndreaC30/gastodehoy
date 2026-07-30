@@ -40,7 +40,7 @@ function gridClass(months: MonthCount): string {
 
 function cardClass(months: MonthCount, selected: boolean, isCurrentMonth: boolean): string {
   const base =
-    "rounded-xl border px-2.5 py-2.5 text-center sm:px-3 shrink-0 min-w-[4.5rem] sm:min-w-0 transition-colors";
+    "rounded-2xl border px-3 py-3 text-center sm:px-3 shrink-0 min-w-[5rem] sm:min-w-0 min-h-[4.75rem] transition-colors";
   let tone: string;
   if (selected) {
     tone = "border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] ring-1 ring-[var(--color-accent-border)]";
@@ -49,7 +49,7 @@ function cardClass(months: MonthCount, selected: boolean, isCurrentMonth: boolea
   } else {
     tone = "border-[var(--color-border)] bg-[var(--color-bg-soft)] hover:border-[var(--color-border-subtle)]";
   }
-  if (months === 12) return `${base} w-[4.75rem] sm:w-auto sm:shrink ${tone}`;
+  if (months === 12) return `${base} w-[5rem] sm:w-auto sm:shrink ${tone}`;
   return `${base} ${tone}`;
 }
 
@@ -113,15 +113,15 @@ export function MonthHistoryStrip() {
 
   return (
     <section
-      className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-4 shadow-[var(--shadow-surface)]"
+      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-4 shadow-[var(--shadow-surface)] sm:px-4"
       aria-label={t("monthHistory.ariaLabel")}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="text-base font-semibold tracking-tight text-[var(--color-text)] sm:text-lg">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="font-display text-lg font-semibold tracking-tight text-[var(--color-text)] sm:text-xl">
             {historyTitle(t, months)}
           </h2>
-          <p className={`mt-0.5 ${TYPE_CAPTION}`}>
+          <p className={`mt-1 ${TYPE_CAPTION}`}>
             {t("monthHistory.hint", {
               defaultValue: "Toca un mes para ver sus gastos variables",
             })}
@@ -150,7 +150,7 @@ export function MonthHistoryStrip() {
         </div>
       </div>
 
-      <div className={`mt-3 ${gridClass(months)}`} role="listbox" aria-label={t("monthHistory.ariaLabel")}>
+      <div className={`mt-4 ${gridClass(months)}`} role="listbox" aria-label={t("monthHistory.ariaLabel")}>
         {rows.map((row, index) => {
           const key = monthKey(row.year, row.month);
           const isCurrentMonth = index === rows.length - 1;

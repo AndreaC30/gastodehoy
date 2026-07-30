@@ -20,11 +20,11 @@ type Props = {
   onSectionChange: (section: DashboardSection) => void;
 };
 
-const MAIN_SECTIONS: { id: DashboardSection; label: string }[] = [
-  { id: 'hoy', label: 'Hoy' },
-  { id: 'gastos', label: 'Gastos' },
-  { id: 'analisis', label: 'Análisis' },
-  { id: 'historico', label: 'Histórico' },
+const MAIN_SECTIONS: { id: DashboardSection; labelKey: string }[] = [
+  { id: 'hoy', labelKey: 'header.sectionHoy' },
+  { id: 'gastos', labelKey: 'header.sectionGastos' },
+  { id: 'analisis', labelKey: 'header.sectionAnalisis' },
+  { id: 'historico', labelKey: 'header.sectionHistorico' },
 ];
 
 function getIcon(section: DashboardSection, active: boolean) {
@@ -64,7 +64,7 @@ export function BottomNav({ activeSection, onSectionChange }: Props) {
                 onClick={() => onSectionChange(section.id)}
                 className={`flex h-full w-full flex-1 flex-col items-center justify-center gap-0.5 ${FOCUS_RING}`}
                 aria-current={isActive ? 'page' : undefined}
-                aria-label={t(`nav.${section.id}`)}
+                aria-label={t(section.labelKey)}
               >
                 <Icon
                   className={`gdh-icon-nav transition-colors ${
@@ -79,7 +79,7 @@ export function BottomNav({ activeSection, onSectionChange }: Props) {
                     isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
                   }`}
                 >
-                  {section.label}
+                  {t(section.labelKey)}
                 </span>
               </button>
             </li>

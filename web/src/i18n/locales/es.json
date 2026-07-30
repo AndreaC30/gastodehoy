@@ -9,7 +9,10 @@
   "hero": {
     "dailyBudget": "Hoy puedes gastar",
     "refresh": "Actualizar números",
-    "explanation": "Tu margen diario: lo que queda del mes ÷ los días que faltan."
+    "explanation": "Tu margen diario: lo que queda del mes ÷ los días que faltan.",
+    "addExpense": "Añadir gasto",
+    "showMetrics": "Ver desglose del mes",
+    "hideMetrics": "Ocultar desglose"
   },
   "monthContext": {
     "badgeSubtitle": "Presupuesto de este mes",
@@ -48,6 +51,7 @@
   "insights": {
     "title": "Insights financieros",
     "subtitle": "Análisis de tus gastos este mes",
+    "moreCharts": "Gráfico y regla 50/30/20",
     "avgDaily": "Gasto variable medio/día",
     "projection": "Proyección mensual (solo variables)",
     "projectionDetail": "Llevas {{spent}}. A este ritmo, ~{{projected}} al mes.",
@@ -183,7 +187,15 @@
   "header": {
     "tagline": "Tu margen para hoy, claro y al instante.",
     "profile": "Perfil",
-    "menu": "Menú"
+    "menu": "Menú",
+    "sectionHoy": "Hoy",
+    "sectionGastos": "Gastos",
+    "sectionAnalisis": "Análisis",
+    "sectionHistorico": "Histórico",
+    "sectionIngresos": "Ingresos",
+    "sectionCategorias": "Categorías",
+    "sectionMetas": "Metas",
+    "sectionTour": "Guía"
   },
   "nav": {
     "yourIncome": "Tus ingresos",
@@ -206,7 +218,12 @@
     "lang_es": "Español",
     "lang_en": "English",
     "lang_fr": "Français",
-    "lang_de": "Deutsch"
+    "lang_de": "Deutsch",
+    "moreTitle": "Más",
+    "tabsHint": "Hoy, Gastos, Análisis e Histórico están en la barra inferior.",
+    "gastosVariables": "Variables",
+    "gastosFijos": "Fijos",
+    "fabAddExpense": "Añadir gasto"
   },
   "emptyStates": {
     "noVariableExpenses": "Sin gastos este mes",
@@ -328,7 +345,12 @@
     "logout": "Cerrar sesión",
     "dangerZone": "Zona de peligro",
     "dangerDesc": "Borrar la cuenta elimina gastos, categorías y ajustes de forma permanente. Te pediremos la contraseña en un segundo paso.",
-    "deleteAccount": "Eliminar mi cuenta…"
+    "deleteAccount": "Eliminar mi cuenta…",
+    "installTitle": "Instalar la app",
+    "installBodyIos": "En Safari: Compartir → «Añadir a pantalla de inicio». Así se abre a pantalla completa, sin barra del navegador.",
+    "installBodyAndroid": "En Chrome: menú ⋮ → «Instalar aplicación» o «Añadir a la pantalla de inicio».",
+    "installBodyDesktop": "En el navegador: icono de instalar en la barra de direcciones, o menú → Instalar GastoDeHoy.",
+    "installDismiss": "Entendido"
   },
   "deleteAccount": {
     "title": "Eliminar cuenta",

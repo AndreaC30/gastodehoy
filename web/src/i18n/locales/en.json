@@ -9,7 +9,10 @@
   "hero": {
     "dailyBudget": "You can spend today",
     "refresh": "Refresh numbers",
-    "explanation": "Your daily margin: what's left this month ÷ days remaining."
+    "explanation": "Your daily margin: what's left this month ÷ days remaining.",
+    "addExpense": "Add expense",
+    "showMetrics": "Show month breakdown",
+    "hideMetrics": "Hide breakdown"
   },
   "monthContext": {
     "badgeSubtitle": "This month's budget",
@@ -48,6 +51,7 @@
   "insights": {
     "title": "Financial Insights",
     "subtitle": "Your spending analysis this month",
+    "moreCharts": "Chart and 50/30/20 rule",
     "avgDaily": "Avg daily variable spend",
     "projection": "Monthly projection (variables only)",
     "projectionDetail": "You've spent {{spent}}. At this pace, ~{{projected}}/month.",
@@ -183,7 +187,15 @@
   "header": {
     "tagline": "Your daily margin, clear and instant.",
     "profile": "Profile",
-    "menu": "Menu"
+    "menu": "Menu",
+    "sectionHoy": "Today",
+    "sectionGastos": "Expenses",
+    "sectionAnalisis": "Insights",
+    "sectionHistorico": "History",
+    "sectionIngresos": "Income",
+    "sectionCategorias": "Categories",
+    "sectionMetas": "Goals",
+    "sectionTour": "Guide"
   },
   "nav": {
     "yourIncome": "Your income",
@@ -206,7 +218,12 @@
     "lang_es": "Spanish",
     "lang_en": "English",
     "lang_fr": "French",
-    "lang_de": "German"
+    "lang_de": "German",
+    "moreTitle": "More",
+    "tabsHint": "Today, Expenses, Insights and History are in the bottom bar.",
+    "gastosVariables": "Variable",
+    "gastosFijos": "Fixed",
+    "fabAddExpense": "Add expense"
   },
   "variableExpenses": {
     "title": "Day-to-day expenses",
@@ -317,7 +334,12 @@
     "logout": "Log out",
     "dangerZone": "Danger zone",
     "dangerDesc": "Deleting your account permanently removes expenses, categories and settings. We'll ask for your password in a second step.",
-    "deleteAccount": "Delete my account…"
+    "deleteAccount": "Delete my account…",
+    "installTitle": "Install the app",
+    "installBodyIos": "In Safari: Share → “Add to Home Screen”. Opens full screen without the browser bar.",
+    "installBodyAndroid": "In Chrome: menu ⋮ → “Install app” or “Add to Home screen”.",
+    "installBodyDesktop": "In the browser: install icon in the address bar, or menu → Install GastoDeHoy.",
+    "installDismiss": "Got it"
   },
   "deleteAccount": {
     "title": "Delete account",

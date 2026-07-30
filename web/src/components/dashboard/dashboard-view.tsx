@@ -16,7 +16,7 @@ import { SavingsGoalsSection } from "@/components/dashboard/savings-goals-sectio
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { IoMenu } from "react-icons/io5";
+import { IoAdd, IoPersonOutline } from "react-icons/io5";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
 import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
@@ -56,6 +56,19 @@ import type {
   PaginatedVariableExpenses,
   VariableExpense,
 } from "@/api/types";
+
+type GastosTab = "variables" | "fijos";
+
+const SECTION_TITLE_KEY: Record<DashboardSection, string> = {
+  hoy: "header.sectionHoy",
+  gastos: "header.sectionGastos",
+  analisis: "header.sectionAnalisis",
+  historico: "header.sectionHistorico",
+  ingresos: "header.sectionIngresos",
+  categorias: "header.sectionCategorias",
+  metas: "header.sectionMetas",
+  tour: "header.sectionTour",
+};
 
 async function loadSummary() {
   return api<Summary>("/api/summary");
@@ -119,6 +132,8 @@ export function Dashboard({ profileName }: Props) {
   const [showTour, setShowTour] = useState(false);
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [gastosTab, setGastosTab] = useState<GastosTab>("variables");
+  const [analisisChartsOpen, setAnalisisChartsOpen] = useState(false);
   const density = useSyncExternalStore(
     subscribeDensity,
     getDensity,
@@ -331,9 +346,21 @@ export function Dashboard({ profileName }: Props) {
   }
 
   const handleSectionChange = useCallback((section: DashboardSection) => {
+    hapticTick();
     setActiveSectionState(section);
     setActiveSection(section);
   }, []);
+
+  const goToAddExpense = useCallback(() => {
+    setGastosTab("variables");
+    handleSectionChange("gastos");
+    window.setTimeout(() => {
+      document.getElementById("add-expense")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 80);
+  }, [handleSectionChange]);
 
   const ensureTourSection = useCallback(
     (section: NonNullable<(typeof DASHBOARD_TOUR_STEPS)[number]["section"]>) => {
@@ -363,23 +390,28 @@ export function Dashboard({ profileName }: Props) {
       <div className={`flex-1 min-w-0 flex flex-col ${APP_SHELL_CLASS} overflow-y-auto`}>
         <AppBackdrop />
 
-        <header className="relative z-10 border-b border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-3 sm:px-4 sm:py-3.5">
-          <div className="mx-auto flex max-w-4xl items-center gap-3 lg:max-w-6xl">
+        <header className="relative z-10 border-b border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 sm:px-4 sm:py-3.5">
+          <div className="mx-auto flex max-w-lg items-center gap-3 md:max-w-4xl lg:max-w-6xl">
+            {/* Mobile: section title + account/menu icon */}
+            <div className="flex min-w-0 flex-1 items-center md:hidden">
+              <h1 className="m-0 truncate text-lg font-semibold tracking-tight text-[var(--color-text)]">
+                {t(SECTION_TITLE_KEY[activeSection])}
+              </h1>
+            </div>
             <button
               type="button"
               data-tour="menu"
               onClick={() => setMobileMenuOpen(true)}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-2 text-[var(--color-accent)] md:hidden ${FOCUS_RING}`}
+              className={`inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-text)] md:hidden ${FOCUS_RING}`}
               aria-label={t("header.menu")}
               aria-expanded={mobileMenuOpen}
               aria-haspopup="dialog"
             >
-              <IoMenu className="gdh-icon" aria-hidden />
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em]">
-                {t("header.menu")}
-              </span>
+              <IoPersonOutline className="gdh-icon" aria-hidden />
             </button>
-            <div className="min-w-0 flex-1">
+
+            {/* Desktop: brand + tagline */}
+            <div className="hidden min-w-0 flex-1 md:block">
               <h1 className="m-0 leading-none">
                 <BrandLogo variant="header" />
               </h1>
@@ -394,7 +426,7 @@ export function Dashboard({ profileName }: Props) {
           id="main-content"
           tabIndex={-1}
           data-density={density}
-          className="relative z-10 mx-auto w-full max-w-4xl space-y-4 px-3 py-5 pb-[8.5rem] sm:space-y-5 sm:px-4 sm:py-6 lg:max-w-6xl md:pb-20"
+          className="relative z-10 mx-auto w-full max-w-lg space-y-5 px-3 py-5 pb-[8.5rem] sm:space-y-5 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-4 md:pb-20 lg:max-w-6xl"
         >
         {error && (
           <div
@@ -405,6 +437,10 @@ export function Dashboard({ profileName }: Props) {
           </div>
         )}
 
+        <div
+          key={activeSection}
+          style={{ animation: "gdhSectionIn 180ms ease-out" }}
+        >
         {/* Section: HOY */}
         {activeSection === 'hoy' && (
           <>
@@ -416,64 +452,101 @@ export function Dashboard({ profileName }: Props) {
               onRefresh={() => {
                 void invalidateAll().then(() => setToastMsg(t("toasts.done")));
               }}
+              onAddExpense={goToAddExpense}
             />
           </>
         )}
 
         {/* Section: GASTOS */}
         {activeSection === 'gastos' && (
-          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-5 lg:gap-6">
-            <div className="min-w-0">
-            <VariableExpensesSection
-              referenceDate={summaryQ.data?.reference_date}
-              categories={categories}
-              items={variableExpenseItems}
-              visibleItems={variableVisibleItems}
-              isLoading={expensesQ.isPending}
-              needsToggle={variableNeedsToggle}
-              expanded={expandVariableList}
-              hiddenCount={variableHiddenCount}
-              addPending={addExpense.isPending}
-              deletePending={expenseUndo.isPending}
-              onSubmit={onExpenseSubmit}
-              onToggleExpand={() => setExpandVariableList((v) => !v)}
-              onEdit={setEditingVariable}
-              onDelete={(id) => {
-                expenseUndo.perform(id);
-                setToastMsg(t("toasts.undoDelete"));
-                setToastUndo({
-                  label: t("toasts.undoAction"),
-                  action: () => expenseUndo.undo(),
-                });
-              }}
-            />
+          <>
+            <div
+              className="flex rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-1 md:hidden"
+              role="tablist"
+              aria-label={t("header.sectionGastos")}
+            >
+              {([
+                { id: "variables" as const, label: t("nav.gastosVariables") },
+                { id: "fijos" as const, label: t("nav.gastosFijos") },
+              ]).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={gastosTab === tab.id}
+                  onClick={() => {
+                    hapticTick();
+                    setGastosTab(tab.id);
+                  }}
+                  className={`min-h-11 flex-1 rounded-lg text-sm font-semibold transition-colors ${FOCUS_RING} ${
+                    gastosTab === tab.id
+                      ? "bg-[var(--color-accent)] text-[var(--color-accent-ink)]"
+                      : "text-[var(--color-text-muted)]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-            <div className="min-w-0">
-            <FixedExpensesSection
-              items={fixedItems}
-              visibleItems={fixedVisibleItems}
-              isLoading={fixedQ.isPending}
-              needsToggle={fixedNeedsToggle}
-              expanded={expandFixedList}
-              hiddenCount={fixedHiddenCount}
-              formIcon={fixedFormIcon}
-              pending={addFixed.isPending}
-              deletePending={fixedUndo.isPending}
-              onToggleExpand={() => setExpandFixedList((v) => !v)}
-              onFormIconChange={setFixedFormIcon}
-              onSubmit={onFixedSubmit}
-              onEdit={setEditingFixed}
-              onDelete={(id) => {
-                fixedUndo.perform(id);
-                setToastMsg(t("toasts.undoDelete"));
-                setToastUndo({
-                  label: t("toasts.undoAction"),
-                  action: () => fixedUndo.undo(),
-                });
-              }}
-            />
+
+            <div className="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 md:items-start lg:gap-6">
+              <div
+                id="add-expense"
+                className={`min-w-0 ${gastosTab === "variables" ? "block" : "hidden"} md:block`}
+              >
+              <VariableExpensesSection
+                referenceDate={summaryQ.data?.reference_date}
+                categories={categories}
+                items={variableExpenseItems}
+                visibleItems={variableVisibleItems}
+                isLoading={expensesQ.isPending}
+                needsToggle={variableNeedsToggle}
+                expanded={expandVariableList}
+                hiddenCount={variableHiddenCount}
+                addPending={addExpense.isPending}
+                deletePending={expenseUndo.isPending}
+                onSubmit={onExpenseSubmit}
+                onToggleExpand={() => setExpandVariableList((v) => !v)}
+                onEdit={setEditingVariable}
+                onDelete={(id) => {
+                  expenseUndo.perform(id);
+                  setToastMsg(t("toasts.undoDelete"));
+                  setToastUndo({
+                    label: t("toasts.undoAction"),
+                    action: () => expenseUndo.undo(),
+                  });
+                }}
+              />
+              </div>
+              <div
+                className={`min-w-0 ${gastosTab === "fijos" ? "block" : "hidden"} md:block`}
+              >
+              <FixedExpensesSection
+                items={fixedItems}
+                visibleItems={fixedVisibleItems}
+                isLoading={fixedQ.isPending}
+                needsToggle={fixedNeedsToggle}
+                expanded={expandFixedList}
+                hiddenCount={fixedHiddenCount}
+                formIcon={fixedFormIcon}
+                pending={addFixed.isPending}
+                deletePending={fixedUndo.isPending}
+                onToggleExpand={() => setExpandFixedList((v) => !v)}
+                onFormIconChange={setFixedFormIcon}
+                onSubmit={onFixedSubmit}
+                onEdit={setEditingFixed}
+                onDelete={(id) => {
+                  fixedUndo.perform(id);
+                  setToastMsg(t("toasts.undoDelete"));
+                  setToastUndo({
+                    label: t("toasts.undoAction"),
+                    action: () => fixedUndo.undo(),
+                  });
+                }}
+              />
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* Section: ANALISIS */}
@@ -484,7 +557,33 @@ export function Dashboard({ profileName }: Props) {
               isLoading={insightsQ.isPending}
               error={insightsQ.error as Error | null}
             />
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-5">
+
+            <div className="md:hidden">
+              <button
+                type="button"
+                className={`flex min-h-11 w-full items-center justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 text-sm font-semibold text-[var(--color-text)] ${FOCUS_RING}`}
+                aria-expanded={analisisChartsOpen}
+                onClick={() => setAnalisisChartsOpen((v) => !v)}
+              >
+                {t("insights.moreCharts")}
+                <span className="text-[var(--color-text-dim)]" aria-hidden>
+                  {analisisChartsOpen ? "−" : "+"}
+                </span>
+              </button>
+              {analisisChartsOpen ? (
+                <div className="mt-3 space-y-4">
+                  {insightsQ.data && insightsQ.data.category_breakdown.length > 0 ? (
+                    <SpendingChart
+                      breakdown={insightsQ.data.category_breakdown}
+                      total={insightsQ.data.total_spent}
+                    />
+                  ) : null}
+                  <Rule503020Panel />
+                </div>
+              ) : null}
+            </div>
+
+            <div className="hidden grid-cols-1 gap-4 md:grid lg:grid-cols-2 lg:items-start lg:gap-5">
               {insightsQ.data && insightsQ.data.category_breakdown.length > 0 ? (
                 <SpendingChart
                   breakdown={insightsQ.data.category_breakdown}
@@ -547,9 +646,29 @@ export function Dashboard({ profileName }: Props) {
             onNavigate={handleSectionChange}
           />
         )}
+        </div>
 
-        <SiteFooter />
+        <div className="hidden md:block">
+          <SiteFooter />
+        </div>
       </main>
+
+      {/* FAB: add expense (mobile) */}
+      {(activeSection === "hoy" || activeSection === "gastos") && (
+        <button
+          type="button"
+          onClick={goToAddExpense}
+          className={`fixed z-40 inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--color-accent-border)] bg-[var(--color-accent)] px-4 text-sm font-semibold text-[var(--color-accent-ink)] shadow-lg md:hidden ${FOCUS_RING}`}
+          style={{
+            right: "1rem",
+            bottom: "calc(var(--gdh-bottom-chrome-offset, 3.75rem) + 0.75rem)",
+          }}
+          aria-label={t("nav.fabAddExpense")}
+        >
+          <IoAdd className="h-5 w-5" aria-hidden />
+          {t("nav.fabAddExpense")}
+        </button>
+      )}
 
       {/* Bottom navigation (mobile only) */}
       <BottomNav

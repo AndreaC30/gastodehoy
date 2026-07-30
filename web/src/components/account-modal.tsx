@@ -22,6 +22,12 @@ import {
   subscribeDensity,
   type Density,
 } from "@/lib/density-preference";
+import {
+  getInstallHintPlatform,
+  isStandaloneDisplay,
+} from "@/lib/pwa-display";
+
+const INSTALL_HINT_DISMISS_KEY = "gdh-install-hint-dismissed";
 
 type Props = {
   open: boolean;
@@ -42,6 +48,7 @@ export function AccountModal({
   const { t } = useTranslation();
   const [dailyNotify, setDailyNotify] = useState(isDailyNotificationEnabled);
   const [prefError, setPrefError] = useState<string | null>(null);
+  const [showInstallHint, setShowInstallHint] = useState(false);
   const density = useSyncExternalStore(
     subscribeDensity,
     getDensity,
@@ -55,6 +62,10 @@ export function AccountModal({
     if (!open) return;
     setDailyNotify(isDailyNotificationEnabled());
     setPrefError(null);
+    const dismissed =
+      typeof localStorage !== "undefined" &&
+      localStorage.getItem(INSTALL_HINT_DISMISS_KEY) === "1";
+    setShowInstallHint(!isStandaloneDisplay() && !dismissed);
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
@@ -63,6 +74,14 @@ export function AccountModal({
   }, [open, onClose]);
 
   if (!open) return null;
+
+  const installPlatform = getInstallHintPlatform();
+  const installBodyKey =
+    installPlatform === "ios"
+      ? "account.installBodyIos"
+      : installPlatform === "android"
+        ? "account.installBodyAndroid"
+        : "account.installBodyDesktop";
 
   return (
     <div
@@ -101,6 +120,34 @@ export function AccountModal({
         <p className="mt-4 break-words text-sm leading-relaxed text-[var(--color-text-muted)]">
           {t("account.description")}
         </p>
+
+        {showInstallHint ? (
+          <div
+            className="mt-4 rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-3"
+            role="note"
+          >
+            <p className="text-sm font-semibold text-[var(--color-accent)]">
+              {t("account.installTitle")}
+            </p>
+            <p className="mt-1 text-sm leading-snug text-[var(--color-text-muted)]">
+              {t(installBodyKey)}
+            </p>
+            <button
+              type="button"
+              className={`mt-2 min-h-10 text-sm font-medium text-[var(--color-accent)] underline underline-offset-2 ${FOCUS_RING}`}
+              onClick={() => {
+                try {
+                  localStorage.setItem(INSTALL_HINT_DISMISS_KEY, "1");
+                } catch {
+                  /* ignore */
+                }
+                setShowInstallHint(false);
+              }}
+            >
+              {t("account.installDismiss")}
+            </button>
+          </div>
+        ) : null}
 
         <div className="mt-5 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-dim)]">

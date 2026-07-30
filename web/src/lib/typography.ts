@@ -25,7 +25,7 @@ export const TYPE_META =
 
 /** Hero numbers — display + accent (importe principal). */
 export const TYPE_HERO_NUMBER =
-  "font-display text-2xl font-semibold tabular-nums tracking-tight text-[var(--color-accent)] min-[375px]:text-3xl sm:text-4xl md:text-[2.75rem]";
+  "font-display text-4xl font-semibold tabular-nums tracking-tight text-[var(--color-accent)] sm:text-4xl md:text-[2.75rem]";
 
 /** Display headings — Space Grotesk para títulos principales. */
 export const TYPE_DISPLAY =

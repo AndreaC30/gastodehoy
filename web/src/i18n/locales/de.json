@@ -9,7 +9,10 @@
   "hero": {
     "dailyBudget": "Heute kannst du ausgeben",
     "refresh": "Zahlen aktualisieren",
-    "explanation": "Deine tägliche Marge: was diesen Monat übrig bleibt ÷ verbleibende Tage."
+    "explanation": "Deine tägliche Marge: was diesen Monat übrig bleibt ÷ verbleibende Tage.",
+    "addExpense": "Ausgabe hinzufügen",
+    "showMetrics": "Monatsübersicht anzeigen",
+    "hideMetrics": "Übersicht ausblenden"
   },
   "monthContext": {
     "badgeSubtitle": "Budget dieses Monats",
@@ -51,7 +54,8 @@
     "avgDaily": "Ø tägliche variable Ausgaben",
     "projection": "Monatsprognose (nur Variable)",
     "projectionDetail": "Du hast {{spent}} ausgegeben. Bei diesem Tempo ~{{projected}}/Monat.",
-    "error": "Einblicke konnten nicht geladen werden."
+    "error": "Einblicke konnten nicht geladen werden.",
+    "moreCharts": "Diagramm und 50/30/20-Regel"
   },
   "rule503020": {
     "title": "50/30/20-Regel",
@@ -148,7 +152,15 @@
   "header": {
     "tagline": "Deine tägliche Marge, klar und sofort.",
     "profile": "Profil",
-    "menu": "Menü"
+    "menu": "Menü",
+    "sectionHoy": "Heute",
+    "sectionGastos": "Ausgaben",
+    "sectionAnalisis": "Analyse",
+    "sectionHistorico": "Verlauf",
+    "sectionIngresos": "Einkommen",
+    "sectionCategorias": "Kategorien",
+    "sectionMetas": "Ziele",
+    "sectionTour": "Tour"
   },
   "nav": {
     "yourIncome": "Dein Einkommen",
@@ -171,7 +183,12 @@
     "lang_es": "Spanisch",
     "lang_en": "Englisch",
     "lang_fr": "Französisch",
-    "lang_de": "Deutsch"
+    "lang_de": "Deutsch",
+    "moreTitle": "Mehr",
+    "tabsHint": "Heute, Ausgaben, Analyse und Verlauf sind in der unteren Leiste.",
+    "gastosVariables": "Variabel",
+    "gastosFijos": "Fix",
+    "fabAddExpense": "Ausgabe hinzufügen"
   },
   "variableExpenses": {
     "title": "Tägliche Ausgaben",
@@ -283,7 +300,12 @@
     "language": "Sprache",
     "dangerZone": "Gefahrenzone",
     "dangerDesc": "Das Löschen des Kontos entfernt dauerhaft Ausgaben, Kategorien und Einstellungen. Wir fragen im zweiten Schritt nach deinem Passwort.",
-    "deleteAccount": "Mein Konto löschen…"
+    "deleteAccount": "Mein Konto löschen…",
+    "installTitle": "App installieren",
+    "installBodyIos": "In Safari: Teilen → „Zum Home-Bildschirm“. Öffnet ohne Browserleiste.",
+    "installBodyAndroid": "In Chrome: Menü ⋮ → „App installieren“ oder „Zum Startbildschirm“.",
+    "installBodyDesktop": "Im Browser: Installieren-Symbol in der Adressleiste oder Menü → GastoDeHoy installieren.",
+    "installDismiss": "Verstanden"
   },
   "deleteAccount": {
     "title": "Konto löschen",

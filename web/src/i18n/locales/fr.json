@@ -9,7 +9,10 @@
   "hero": {
     "dailyBudget": "Vous pouvez dépenser aujourd'hui",
     "refresh": "Actualiser",
-    "explanation": "Votre marge quotidienne : ce qu'il reste ce mois ÷ jours restants."
+    "explanation": "Votre marge quotidienne : ce qu'il reste ce mois ÷ jours restants.",
+    "addExpense": "Ajouter une dépense",
+    "showMetrics": "Voir le détail du mois",
+    "hideMetrics": "Masquer le détail"
   },
   "monthContext": {
     "badgeSubtitle": "Budget de ce mois",
@@ -51,7 +54,8 @@
     "avgDaily": "Dépense variable moyenne/jour",
     "projection": "Projection mensuelle (variables)",
     "projectionDetail": "Vous avez dépensé {{spent}}. À ce rythme, ~{{projected}}/mois.",
-    "error": "Impossible de charger les aperçus."
+    "error": "Impossible de charger les aperçus.",
+    "moreCharts": "Graphique et règle 50/30/20"
   },
   "rule503020": {
     "title": "Règle 50/30/20",
@@ -148,7 +152,15 @@
   "header": {
     "tagline": "Votre marge quotidienne, claire et instantanée.",
     "profile": "Profil",
-    "menu": "Menu"
+    "menu": "Menu",
+    "sectionHoy": "Aujourd'hui",
+    "sectionGastos": "Dépenses",
+    "sectionAnalisis": "Analyse",
+    "sectionHistorico": "Historique",
+    "sectionIngresos": "Revenus",
+    "sectionCategorias": "Catégories",
+    "sectionMetas": "Objectifs",
+    "sectionTour": "Guide"
   },
   "nav": {
     "yourIncome": "Vos revenus",
@@ -171,7 +183,12 @@
     "lang_es": "Espagnol",
     "lang_en": "Anglais",
     "lang_fr": "Français",
-    "lang_de": "Allemand"
+    "lang_de": "Allemand",
+    "moreTitle": "Plus",
+    "tabsHint": "Aujourd'hui, Dépenses, Analyse et Historique sont dans la barre du bas.",
+    "gastosVariables": "Variables",
+    "gastosFijos": "Fixes",
+    "fabAddExpense": "Ajouter une dépense"
   },
   "variableExpenses": {
     "title": "Dépenses quotidiennes",
@@ -283,7 +300,12 @@
     "language": "Langue",
     "dangerZone": "Zone de danger",
     "dangerDesc": "Supprimer le compte efface définitivement les dépenses, catégories et paramètres. Nous vous demanderons votre mot de passe dans une deuxième étape.",
-    "deleteAccount": "Supprimer mon compte…"
+    "deleteAccount": "Supprimer mon compte…",
+    "installTitle": "Installer l'app",
+    "installBodyIos": "Dans Safari : Partager → « Sur l'écran d'accueil ». Plein écran, sans barre du navigateur.",
+    "installBodyAndroid": "Dans Chrome : menu ⋮ → « Installer l'application » ou « Ajouter à l'écran d'accueil ».",
+    "installBodyDesktop": "Dans le navigateur : icône d'installation dans la barre d'adresse, ou menu → Installer GastoDeHoy.",
+    "installDismiss": "Compris"
   },
   "deleteAccount": {
     "title": "Supprimer le compte",
