@@ -190,7 +190,11 @@ export function GuidedTour({
       {/* Controls panel: fixed to bottom, scrollable on small screens */}
       <div
         data-guided-tour-controls
-        className="absolute inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[3] mx-auto max-h-[45vh] max-w-md overflow-y-auto rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-4 shadow-2xl sm:inset-x-4 sm:max-h-none sm:p-5"
+        className="absolute inset-x-3 z-[3] mx-auto max-h-[45vh] max-w-md overflow-y-auto rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-4 shadow-2xl sm:inset-x-4 sm:max-h-none sm:p-5"
+        style={{
+          bottom:
+            "calc(var(--gdh-bottom-chrome-offset, 0px) + 0.75rem)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-2">

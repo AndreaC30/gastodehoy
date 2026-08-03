@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { IoClose, IoTrash, IoPencil } from "react-icons/io5";
+import { IoTrash, IoPencil } from "react-icons/io5";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import type { ExpenseCategory } from "@/api/types";
@@ -22,7 +22,7 @@ const PRESET_COLORS = [
   "#f97316", "#14b8a6", "#8b5cf6", "#06b6d4",
 ];
 
-export function CategoriesSection({ categories, onChanged, onNavigate }: Props) {
+export function CategoriesSection({ categories, onChanged, onNavigate: _onNavigate }: Props) {
   const qc = useQueryClient();
   const { t } = useTranslation();
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -111,16 +111,8 @@ export function CategoriesSection({ categories, onChanged, onNavigate }: Props) 
 
   return (
     <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-surface)] sm:p-5 md:p-5">
-      <div className="mb-4 flex items-center justify-between md:mb-5">
+      <div className="mb-4 md:mb-5">
         <h2 className="text-xl font-bold text-[var(--color-text)]">{t("nav.categories")}</h2>
-        <button
-          type="button"
-          onClick={() => onNavigate?.("hoy")}
-          className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)]"
-          aria-label="Volver"
-        >
-          <IoClose className="h-5 w-5" />
-        </button>
       </div>
 
       {/* Create/Edit Form */}

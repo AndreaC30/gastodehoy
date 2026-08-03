@@ -1,14 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { FixedExpense } from "@/api/types";
 import { DEFAULT_FIXED_EXPENSE_ICON } from "@/components/dashboard/category-icon";
 import { IconSelectDropdown } from "@/components/dashboard/icon-select-dropdown";
-import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
-import { useDialogA11y } from "@/lib/use-dialog-a11y";
-import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
+import { AppSheet } from "@/components/ui/app-sheet";
+import { BTN_PRIMARY, BTN_SECONDARY, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   expense: FixedExpense;
@@ -22,46 +20,6 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
   const [amount, setAmount] = useState(String(expense.amount));
   const [icon, setIcon] = useState(expense.icon ?? DEFAULT_FIXED_EXPENSE_ICON);
   const [error, setError] = useState<string | null>(null);
-
-  const panelRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef(0);
-  const [dragging, setDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState(0);
-  useBodyScrollLock(true);
-  useDialogA11y(true, panelRef);
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  function onTouchStart(e: React.TouchEvent) {
-    const panel = panelRef.current;
-    if (!panel) return;
-    if (panel.scrollTop > 5) return;
-    touchStartY.current = e.touches[0].clientY;
-    setDragging(true);
-  }
-
-  function onTouchMove(e: React.TouchEvent) {
-    if (!dragging) return;
-    const delta = e.touches[0].clientY - touchStartY.current;
-    if (delta < 0) return;
-    const clamped = Math.min(delta, 120);
-    setDragOffset(clamped);
-  }
-
-  function onTouchEnd() {
-    if (!dragging) return;
-    setDragging(false);
-    if (dragOffset > 80) {
-      onClose();
-    }
-    setDragOffset(0);
-  }
 
   const saveMut = useMutation({
     mutationFn: (body: { name: string; amount: string; icon: string }) =>
@@ -92,100 +50,70 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex touch-none items-end justify-center overflow-hidden bg-black/60 p-3 sm:items-center sm:p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="edit-fixed-title"
+    <AppSheet
+      open
+      onClose={onClose}
+      title={`${t("common.edit", { defaultValue: "Editar" })} ${t("fixedExpenses.title")}`}
+      zClass="z-50"
+      labelledById="edit-fixed-title"
     >
-      <div
-        ref={panelRef}
-        tabIndex={-1}
-        style={{ transform: `translateY(${dragOffset}px)` }}
-        className={`modal-scroll max-h-[min(90vh,100dvh)] w-full max-w-md touch-auto overflow-x-hidden overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-2xl transition-transform duration-300 sm:rounded-2xl sm:p-5 ${dragging ? "transition-none" : ""}`}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        {/* Drag handle – visible only on mobile */}
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-slate-600 sm:hidden" />
-        <div className="flex items-center justify-between gap-3">
-          <h2 id="edit-fixed-title" className="text-lg font-bold">
-            Editar {t("fixedExpenses.title")}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className={`min-h-11 min-w-11 rounded-lg p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
-            aria-label={t("common.close")}
-          >
-            <IoClose className="h-5 w-5" aria-hidden />
-          </button>
-        </div>
+      {error && (
+        <p
+          className="mb-4 rounded-lg border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2 text-sm text-[var(--color-crit)]"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
 
-        {error && (
-          <p
-            className="mt-3 rounded-lg border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2 text-sm text-[var(--color-crit)]"
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
-
-        <form onSubmit={submit} className="mt-4 space-y-4">
-          <div>
-            <label htmlFor="edit-fixed-name" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
-              {t("fixedExpenses.concept")}
-            </label>
-            <div className="flex min-w-0 gap-2">
-              <IconSelectDropdown value={icon} onChange={setIcon} />
-              <input
-                id="edit-fixed-name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className={`min-w-0 flex-1 ${INPUT_CLASS}`}
-              />
-            </div>
-          </div>
-          <div>
-            <label htmlFor="edit-fixed-amount" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
-              {t("fixedExpenses.amount")}
-            </label>
+      <form onSubmit={submit} className="space-y-4">
+        <div>
+          <label htmlFor="edit-fixed-name" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
+            {t("fixedExpenses.concept")}
+          </label>
+          <div className="flex min-w-0 gap-2">
+            <IconSelectDropdown value={icon} onChange={setIcon} />
             <input
-              id="edit-fixed-amount"
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min={0}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              id="edit-fixed-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
-              className={INPUT_CLASS}
+              className={`min-w-0 flex-1 ${INPUT_CLASS}`}
             />
           </div>
-          <div className="flex gap-2 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className={`flex-1 ${BTN_SECONDARY}`}
-            >
-              {t("common.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={saveMut.isPending}
-              className={`flex-1 ${BTN_PRIMARY}`}
-            >
-              {saveMut.isPending ? t("common.saving") : t("common.save")}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+        <div>
+          <label htmlFor="edit-fixed-amount" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
+            {t("fixedExpenses.amount")}
+          </label>
+          <input
+            id="edit-fixed-amount"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min={0}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            required
+            className={INPUT_CLASS}
+          />
+        </div>
+        <div className="flex gap-2 pt-1">
+          <button type="button" onClick={onClose} className={`flex-1 ${BTN_SECONDARY}`}>
+            {t("common.cancel")}
+          </button>
+          <button
+            type="submit"
+            disabled={saveMut.isPending}
+            className={`flex-1 ${BTN_PRIMARY}`}
+          >
+            {saveMut.isPending
+              ? t("common.saving", { defaultValue: "Guardando…" })
+              : t("common.save")}
+          </button>
+        </div>
+      </form>
+    </AppSheet>
   );
 }

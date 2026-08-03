@@ -16,7 +16,7 @@ import { SavingsGoalsSection } from "@/components/dashboard/savings-goals-sectio
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { IoPersonOutline } from "react-icons/io5";
+import { IoEllipsisHorizontal } from "react-icons/io5";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
 import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
@@ -408,11 +408,11 @@ export function Dashboard({ profileName }: Props) {
               data-tour="menu"
               onClick={() => setMobileMenuOpen(true)}
               className={`inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-text)] md:hidden ${FOCUS_RING}`}
-              aria-label={t("header.menu")}
+              aria-label={t("nav.moreTitle")}
               aria-expanded={mobileMenuOpen}
               aria-haspopup="dialog"
             >
-              <IoPersonOutline className="gdh-icon" aria-hidden />
+              <IoEllipsisHorizontal className="gdh-icon" aria-hidden />
             </button>
 
             {/* Desktop: brand + tagline */}
@@ -765,9 +765,13 @@ export function Dashboard({ profileName }: Props) {
       )}
 
       <div
-        className={`pointer-events-none fixed bottom-5 left-4 right-4 z-50 mx-auto max-w-md break-words rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-4 py-3 text-center text-base text-[var(--color-text)] shadow-2xl transition-all duration-200 ${
+        className={`pointer-events-none fixed left-4 right-4 z-50 mx-auto max-w-md break-words rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-4 py-3 text-center text-base text-[var(--color-text)] shadow-2xl transition-all duration-200 ${
           toastMsg ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         } ${toastUndo ? "pointer-events-auto" : ""}`}
+        style={{
+          bottom:
+            "calc(var(--gdh-bottom-chrome-offset, 0px) + 0.75rem)",
+        }}
         role="status"
         aria-live="polite"
       >

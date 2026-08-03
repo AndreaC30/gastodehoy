@@ -1,12 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { IoClose } from "react-icons/io5";
 import { api } from "@/api/client";
 import type { ExpenseCategory, VariableExpense } from "@/api/types";
-import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
-import { useDialogA11y } from "@/lib/use-dialog-a11y";
-import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
+import { AppSheet } from "@/components/ui/app-sheet";
+import { BTN_PRIMARY, BTN_SECONDARY, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   expense: VariableExpense;
@@ -29,46 +27,6 @@ export function EditVariableExpenseModal({
   );
   const [note, setNote] = useState(expense.note ?? "");
   const [error, setError] = useState<string | null>(null);
-
-  const panelRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef(0);
-  const [dragging, setDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState(0);
-  useBodyScrollLock(true);
-  useDialogA11y(true, panelRef);
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  function onTouchStart(e: React.TouchEvent) {
-    const panel = panelRef.current;
-    if (!panel) return;
-    if (panel.scrollTop > 5) return;
-    touchStartY.current = e.touches[0].clientY;
-    setDragging(true);
-  }
-
-  function onTouchMove(e: React.TouchEvent) {
-    if (!dragging) return;
-    const delta = e.touches[0].clientY - touchStartY.current;
-    if (delta < 0) return;
-    const clamped = Math.min(delta, 120);
-    setDragOffset(clamped);
-  }
-
-  function onTouchEnd() {
-    if (!dragging) return;
-    setDragging(false);
-    if (dragOffset > 80) {
-      onClose();
-    }
-    setDragOffset(0);
-  }
 
   const saveMut = useMutation({
     mutationFn: (body: {
@@ -101,127 +59,97 @@ export function EditVariableExpenseModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex touch-none items-end justify-center overflow-hidden bg-black/60 p-3 sm:items-center sm:p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="edit-variable-title"
+    <AppSheet
+      open
+      onClose={onClose}
+      title={t("editVariableExpense.title", { defaultValue: "Editar gasto" })}
+      zClass="z-50"
+      labelledById="edit-variable-title"
     >
-      <div
-        ref={panelRef}
-        tabIndex={-1}
-        style={{ transform: `translateY(${dragOffset}px)` }}
-        className={`modal-scroll w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-2xl transition-transform duration-300 sm:rounded-2xl sm:p-5 ${dragging ? "transition-none" : ""}`}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        {/* Drag handle – visible only on mobile */}
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-slate-600 sm:hidden" />
-        <div className="flex items-center justify-between gap-3">
-          <h2 id="edit-variable-title" className="text-lg font-bold">
-            Editar gasto
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className={`min-h-11 min-w-11 rounded-lg p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
-            aria-label="Cerrar"
+      {error && (
+        <p
+          className="mb-4 rounded-lg border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2 text-sm text-[var(--color-crit)]"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
+
+      <form onSubmit={submit} className="space-y-4">
+        <div>
+          <label htmlFor="edit-var-amount" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
+            {t("addVariableExpense.amount", { defaultValue: "Cantidad (€)" })}
+          </label>
+          <input
+            id="edit-var-amount"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0.01"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            required
+            className={INPUT_CLASS}
+          />
+        </div>
+        <div>
+          <label htmlFor="edit-var-date" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
+            {t("editVariableExpense.date", { defaultValue: "Fecha" })}
+          </label>
+          <input
+            id="edit-var-date"
+            type="date"
+            value={occurredAt}
+            onChange={(e) => setOccurredAt(e.target.value)}
+            required
+            className={INPUT_CLASS}
+          />
+        </div>
+        <div>
+          <label htmlFor="edit-var-category" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
+            {t("editVariableExpense.category")}
+          </label>
+          <select
+            id="edit-var-category"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className={INPUT_CLASS}
           >
-            <IoClose className="h-5 w-5" aria-hidden />
+            <option value="">{t("editVariableExpense.uncategorized")}</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="edit-var-note" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
+            {t("addVariableExpense.note", { defaultValue: "Nota (opcional)" })}
+          </label>
+          <input
+            id="edit-var-note"
+            type="text"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className={INPUT_CLASS}
+          />
+        </div>
+        <div className="flex gap-2 pt-1">
+          <button type="button" onClick={onClose} className={`flex-1 ${BTN_SECONDARY}`}>
+            {t("common.cancel")}
+          </button>
+          <button
+            type="submit"
+            disabled={saveMut.isPending}
+            className={`flex-1 ${BTN_PRIMARY}`}
+          >
+            {saveMut.isPending
+              ? t("common.saving", { defaultValue: "Guardando…" })
+              : t("common.save")}
           </button>
         </div>
-
-        {error && (
-          <p
-            className="mt-3 rounded-lg border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2 text-sm text-[var(--color-crit)]"
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
-
-        <form onSubmit={submit} className="mt-4 space-y-4">
-          <div>
-            <label htmlFor="edit-var-amount" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
-              Cantidad (€)
-            </label>
-            <input
-              id="edit-var-amount"
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
-              className={INPUT_CLASS}
-            />
-          </div>
-          <div>
-            <label htmlFor="edit-var-date" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
-              Fecha
-            </label>
-            <input
-              id="edit-var-date"
-              type="date"
-              value={occurredAt}
-              onChange={(e) => setOccurredAt(e.target.value)}
-              required
-              className={INPUT_CLASS}
-            />
-          </div>
-          <div>
-            <label htmlFor="edit-var-category" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
-              {t("editVariableExpense.category")}
-            </label>
-            <select
-              id="edit-var-category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className={INPUT_CLASS}
-            >
-              <option value="">{t("editVariableExpense.uncategorized")}</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="edit-var-note" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
-              Nota (opcional)
-            </label>
-            <input
-              id="edit-var-note"
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </div>
-          <div className="flex gap-2 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className={`flex-1 ${BTN_SECONDARY}`}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={saveMut.isPending}
-              className={`flex-1 ${BTN_PRIMARY}`}
-            >
-              {saveMut.isPending ? "Guardando…" : "Guardar"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </AppSheet>
   );
 }

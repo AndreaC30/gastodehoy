@@ -1,9 +1,9 @@
 /** Inline tour section — starts the guided tour overlay on the live dashboard. */
 
 import { useTranslation } from "react-i18next";
-import { IoClose, IoPlay } from "react-icons/io5";
+import { IoPlay } from "react-icons/io5";
 import { TYPE_DISPLAY } from "@/lib/typography";
-import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING } from "@/lib/ui-a11y";
+import { BTN_PRIMARY, BTN_SECONDARY } from "@/lib/ui-a11y";
 import type { DashboardSection } from "@/lib/dashboard-state";
 
 type Props = {
@@ -16,16 +16,8 @@ export function TourSection({ onStart, onNavigate }: Props) {
 
   return (
     <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-surface)] sm:p-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6">
         <h2 className={TYPE_DISPLAY}>{t("nav.guidedTour")}</h2>
-        <button
-          type="button"
-          onClick={() => onNavigate?.("hoy")}
-          className={`rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
-          aria-label={t("common.back", { defaultValue: "Volver" })}
-        >
-          <IoClose className="h-5 w-5" aria-hidden />
-        </button>
       </div>
 
       <div className="space-y-6 py-4 text-center sm:py-8">
@@ -51,7 +43,7 @@ export function TourSection({ onStart, onNavigate }: Props) {
             onClick={() => onNavigate?.("hoy")}
             className={BTN_SECONDARY}
           >
-            {t("tour.alreadyKnow", { defaultValue: "Ya conozco la app" })}
+            {t("common.back", { defaultValue: "Volver" })}
           </button>
         </div>
       </div>
