@@ -14,7 +14,10 @@ import {
   IoPieChart,
   IoCalendar,
 } from "react-icons/io5";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { api } from "@/api/client";
+import type { Settings } from "@/api/types";
 import { AppDrawer } from "@/components/ui/app-drawer";
 import { logout } from "@/lib/session";
 import { FOCUS_RING } from "@/lib/ui-a11y";
@@ -65,7 +68,9 @@ export function Sidebar({
   onMobileOpenChange,
 }: Props) {
   const { t, i18n } = useTranslation();
+  const qc = useQueryClient();
   const [mobileOpenLocal, setMobileOpenLocal] = useState(false);
+  const [langSaving, setLangSaving] = useState(false);
   const mobileOpen = mobileOpenProp ?? mobileOpenLocal;
   const setMobileOpen = onMobileOpenChange ?? setMobileOpenLocal;
 
@@ -81,6 +86,27 @@ export function Sidebar({
     void logout();
   }
 
+  async function persistLanguage(lang: "es" | "en" | "fr" | "de") {
+    if (langSaving || i18n.language?.startsWith(lang)) return;
+    setLangSaving(true);
+    const previous = i18n.language;
+    try {
+      await i18n.changeLanguage(lang);
+      await api<Settings>("/api/settings/language", {
+        method: "PUT",
+        body: JSON.stringify({ language: lang }),
+      });
+      void qc.invalidateQueries({ queryKey: ["settings"] });
+      void qc.invalidateQueries({ queryKey: ["categories"] });
+      void qc.invalidateQueries({ queryKey: ["insights"] });
+      void qc.invalidateQueries({ queryKey: ["rule-503020"] });
+    } catch {
+      if (previous) void i18n.changeLanguage(previous);
+    } finally {
+      setLangSaving(false);
+    }
+  }
+
   function LanguageRow() {
     return (
       <div className="flex flex-wrap gap-1.5">
@@ -92,10 +118,11 @@ export function Sidebar({
             <button
               key={lang}
               type="button"
+              disabled={langSaving}
               onClick={() => {
-                void i18n.changeLanguage(lang);
+                void persistLanguage(lang);
               }}
-              className={`min-h-11 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
+              className={`min-h-11 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors disabled:opacity-60 ${
                 active
                   ? "border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] text-[var(--color-accent)]"
                   : "border border-[var(--color-border)] text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
