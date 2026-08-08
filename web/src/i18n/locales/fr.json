@@ -355,7 +355,22 @@
   },
   "monthHistory": {
     "lastMonths": "{{months}} derniers mois",
-    "ariaLabel": "Dépenses variables des derniers mois"
+    "ariaLabel": "Calendrier des dépenses variables",
+    "hint": "Touchez un mois pour voir ses dépenses variables",
+    "calendarTitle": "Calendrier",
+    "calendarHint": "Touchez un jour pour voir ses dépenses",
+    "monthTotal": "Total du mois",
+    "prevMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "rangeLabel": "Mois à afficher",
+    "expensesFor": "Dépenses variables · {{month}}",
+    "expensesForDay": "Dépenses · {{day}} {{month}}",
+    "showFullMonth": "Voir le mois entier",
+    "total": "Total {{amount}}",
+    "entries": "mouvements",
+    "emptyMonth": "Aucune dépense variable ce mois-ci.",
+    "emptyDay": "Aucune dépense ce jour-là.",
+    "loadError": "Impossible de charger l'historique mensuel."
   },
   "cookieConsent": {
     "message": "GastoDeHoy utilise des cookies techniques nécessaires pour fonctionner. Avec votre permission, nous utilisons des analytics anonymes (sans cookies tiers) pour améliorer l'app.",

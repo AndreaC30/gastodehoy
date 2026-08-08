@@ -355,7 +355,22 @@
   },
   "monthHistory": {
     "lastMonths": "Letzte {{months}} Monate",
-    "ariaLabel": "Variable Ausgaben der letzten Monate"
+    "ariaLabel": "Kalender der variablen Ausgaben",
+    "hint": "Tippe auf einen Monat, um die variablen Ausgaben zu sehen",
+    "calendarTitle": "Kalender",
+    "calendarHint": "Tippe auf einen Tag, um die Ausgaben zu sehen",
+    "monthTotal": "Monatssumme",
+    "prevMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "rangeLabel": "Anzuzeigende Monate",
+    "expensesFor": "Variable Ausgaben · {{month}}",
+    "expensesForDay": "Ausgaben · {{day}} {{month}}",
+    "showFullMonth": "Ganzen Monat zeigen",
+    "total": "Summe {{amount}}",
+    "entries": "Einträge",
+    "emptyMonth": "Keine variablen Ausgaben in diesem Monat.",
+    "emptyDay": "Keine Ausgaben an diesem Tag.",
+    "loadError": "Monatsverlauf konnte nicht geladen werden."
   },
   "cookieConsent": {
     "message": "GastoDeHoy verwendet notwendige technische Cookies. Mit deiner Erlaubnis nutzen wir anonyme Analytics (keine Drittanbieter-Cookies) zur Verbesserung der App.",

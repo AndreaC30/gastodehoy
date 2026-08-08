@@ -399,13 +399,21 @@
   },
   "monthHistory": {
     "lastMonths": "Últimos {{months}} meses",
-    "ariaLabel": "Gasto variable últimos meses",
+    "ariaLabel": "Calendario de gastos variables",
     "hint": "Toca un mes para ver sus gastos variables",
+    "calendarTitle": "Calendario",
+    "calendarHint": "Toca un día para ver sus gastos",
+    "monthTotal": "Total del mes",
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
     "rangeLabel": "Meses a mostrar",
     "expensesFor": "Gastos variables · {{month}}",
+    "expensesForDay": "Gastos · {{day}} {{month}}",
+    "showFullMonth": "Ver mes completo",
     "total": "Total {{amount}}",
     "entries": "movimientos",
     "emptyMonth": "No hay gastos variables en este mes.",
+    "emptyDay": "No hay gastos este día.",
     "loadError": "No se pudo cargar el historial mensual."
   },
   "cookieConsent": {

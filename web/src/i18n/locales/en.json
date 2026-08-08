@@ -388,13 +388,21 @@
   },
   "monthHistory": {
     "lastMonths": "Last {{months}} months",
-    "ariaLabel": "Variable spending last months",
+    "ariaLabel": "Variable spending calendar",
     "hint": "Tap a month to see its variable expenses",
+    "calendarTitle": "Calendar",
+    "calendarHint": "Tap a day to see its expenses",
+    "monthTotal": "Month total",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
     "rangeLabel": "Months to show",
     "expensesFor": "Variable expenses · {{month}}",
+    "expensesForDay": "Expenses · {{day}} {{month}}",
+    "showFullMonth": "Show full month",
     "total": "Total {{amount}}",
     "entries": "entries",
     "emptyMonth": "No variable expenses in this month.",
+    "emptyDay": "No expenses on this day.",
     "loadError": "Could not load monthly history."
   },
   "cookieConsent": {

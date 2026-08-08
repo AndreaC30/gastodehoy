@@ -1,26 +1,19 @@
-/** Compact strip: variable spend for the last N months + list for the selected month. */
+/** Month calendar for variable expenses — navigate months, tap a day for detail. */
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { api } from "@/api/client";
-import type { MonthHistoryItem, MonthHistoryRead, PaginatedVariableExpenses } from "@/api/types";
+import type { PaginatedVariableExpenses, VariableExpense } from "@/api/types";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { money } from "@/lib/format";
-import { FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
+import {
+  capitalizeFirstLetter,
+  formatMonthYear,
+  todayDate,
+} from "@/lib/month-context";
+import { FOCUS_RING, ICON_BTN, SECTION_CARD } from "@/lib/ui-a11y";
 import { TYPE_CAPTION, TYPE_DISPLAY, TYPE_EYEBROW } from "@/lib/typography";
-
-const MONTH_OPTIONS = [3, 6, 12] as const;
-type MonthCount = (typeof MONTH_OPTIONS)[number];
-
-type MonthKey = `${number}-${number}`;
-
-function monthKey(year: number, month: number): MonthKey {
-  return `${year}-${month}`;
-}
-
-async function loadMonthHistory(months: MonthCount) {
-  return api<MonthHistoryRead>(`/api/summary/history?months=${months}`);
-}
 
 async function loadMonthExpenses(year: number, month: number) {
   return api<PaginatedVariableExpenses>(
@@ -28,229 +21,369 @@ async function loadMonthExpenses(year: number, month: number) {
   );
 }
 
-function historyTitle(t: (key: string, opts?: Record<string, string>) => string, months: MonthCount): string {
-  return t("monthHistory.lastMonths", { months: String(months) });
+function daysInMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate();
 }
 
-function gridClass(months: MonthCount): string {
-  if (months === 3) return "grid grid-cols-3 gap-2 sm:gap-3";
-  if (months === 6) return "grid grid-cols-3 gap-2 sm:gap-3";
-  return "flex gap-2 overflow-x-auto pb-1 sm:gap-3 [-webkit-overflow-scrolling:touch]";
+/** Monday-first pad + day numbers (null = empty cell). */
+function buildMonthCells(year: number, month: number): (number | null)[] {
+  const firstDow = new Date(year, month - 1, 1).getDay(); // Sun=0
+  const pad = (firstDow + 6) % 7; // Mon=0
+  const total = daysInMonth(year, month);
+  const cells: (number | null)[] = Array.from({ length: pad }, () => null);
+  for (let d = 1; d <= total; d++) cells.push(d);
+  while (cells.length % 7 !== 0) cells.push(null);
+  return cells;
 }
 
-function cardClass(months: MonthCount, selected: boolean, isCurrentMonth: boolean): string {
-  const base =
-    "rounded-[10px] border px-3 py-3 text-center sm:px-3 shrink-0 min-w-[5rem] sm:min-w-0 min-h-[4.75rem] transition-colors";
-  let tone: string;
-  if (selected) {
-    tone = "border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] ring-1 ring-[var(--color-accent-border)]";
-  } else if (isCurrentMonth) {
-    tone = "border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)]";
-  } else {
-    tone = "border-[var(--color-border)] bg-[var(--color-bg-soft)] hover:border-[var(--color-border-subtle)]";
+function weekdayLabels(locale: string): string[] {
+  // 2024-01-01 was a Monday — walk 7 days for Mon→Sun short names.
+  const labels: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(2024, 0, 1 + i);
+    labels.push(
+      new Intl.DateTimeFormat(locale, { weekday: "short" })
+        .format(d)
+        .replace(/\.$/, ""),
+    );
   }
-  if (months === 12) return `${base} w-[5rem] sm:w-auto sm:shrink ${tone}`;
-  return `${base} ${tone}`;
+  return labels;
+}
+
+function dayKey(year: number, month: number, day: number): string {
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function parseDay(iso: string): string {
+  return iso.slice(0, 10);
+}
+
+function sumAmounts(items: VariableExpense[]): number {
+  return items.reduce((acc, it) => {
+    const n = Number(it.amount);
+    return acc + (Number.isFinite(n) ? n : 0);
+  }, 0);
+}
+
+function compactMoney(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) return "";
+  if (n >= 1000) return `${Math.round(n / 100) / 10}k`;
+  if (n >= 100) return String(Math.round(n));
+  return n.toLocaleString("es-ES", {
+    maximumFractionDigits: n < 10 ? 2 : 0,
+    minimumFractionDigits: 0,
+  });
 }
 
 export function MonthHistoryStrip() {
-  const { t } = useTranslation();
-  const [months, setMonths] = useState<MonthCount>(3);
-  const [selected, setSelected] = useState<MonthKey | null>(null);
+  const { t, i18n } = useTranslation();
+  const now = todayDate();
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth() + 1); // 1–12
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
-  const { data, isPending, error } = useQuery({
-    queryKey: ["history", months],
-    queryFn: () => loadMonthHistory(months),
-  });
-
-  const rows = data?.months ?? [];
-
-  // Default selection: current (last) month in the strip.
-  useEffect(() => {
-    if (rows.length === 0) return;
-    const last = rows[rows.length - 1];
-    const key = monthKey(last.year, last.month);
-    setSelected((prev) => {
-      if (prev && rows.some((r) => monthKey(r.year, r.month) === prev)) return prev;
-      return key;
-    });
-  }, [rows]);
-
-  const selectedRow: MonthHistoryItem | undefined = rows.find(
-    (r) => monthKey(r.year, r.month) === selected,
-  );
+  const isCurrentMonth =
+    year === now.getFullYear() && month === now.getMonth() + 1;
+  const canGoNext = !isCurrentMonth;
 
   const expensesQ = useQuery({
-    queryKey: ["history-expenses", selectedRow?.year, selectedRow?.month],
-    queryFn: () => loadMonthExpenses(selectedRow!.year, selectedRow!.month),
-    enabled: selectedRow != null,
+    queryKey: ["history-expenses", year, month],
+    queryFn: () => loadMonthExpenses(year, month),
   });
 
-  if (error) {
+  const items = expensesQ.data?.items ?? [];
+
+  const byDay = useMemo(() => {
+    const map = new Map<string, VariableExpense[]>();
+    for (const it of items) {
+      const key = parseDay(it.occurred_at);
+      const list = map.get(key);
+      if (list) list.push(it);
+      else map.set(key, [it]);
+    }
+    return map;
+  }, [items]);
+
+  const dayTotals = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const [key, list] of byDay) {
+      map.set(key, sumAmounts(list));
+    }
+    return map;
+  }, [byDay]);
+
+  const maxDayTotal = useMemo(() => {
+    let max = 0;
+    for (const v of dayTotals.values()) if (v > max) max = v;
+    return max;
+  }, [dayTotals]);
+
+  const monthTotal = useMemo(() => sumAmounts(items), [items]);
+
+  // Default day: today when viewing the current month; otherwise whole month.
+  useEffect(() => {
+    const today = todayDate();
+    if (year === today.getFullYear() && month === today.getMonth() + 1) {
+      setSelectedDay(today.getDate());
+    } else {
+      setSelectedDay(null);
+    }
+  }, [year, month]);
+
+  const selectedKey =
+    selectedDay != null ? dayKey(year, month, selectedDay) : null;
+  const selectedItems =
+    selectedKey != null ? (byDay.get(selectedKey) ?? []) : items;
+  const selectedTotal =
+    selectedKey != null ? (dayTotals.get(selectedKey) ?? 0) : monthTotal;
+
+  const monthLabel = capitalizeFirstLetter(
+    formatMonthYear(new Date(year, month - 1, 1), i18n.language),
+  );
+  const weekdays = useMemo(
+    () => weekdayLabels(i18n.language || "es"),
+    [i18n.language],
+  );
+  const cells = useMemo(() => buildMonthCells(year, month), [year, month]);
+
+  function goPrev() {
+    if (month === 1) {
+      setYear((y) => y - 1);
+      setMonth(12);
+    } else {
+      setMonth((m) => m - 1);
+    }
+  }
+
+  function goNext() {
+    if (!canGoNext) return;
+    if (month === 12) {
+      setYear((y) => y + 1);
+      setMonth(1);
+    } else {
+      setMonth((m) => m + 1);
+    }
+  }
+
+  function intensity(total: number): number {
+    if (maxDayTotal <= 0 || total <= 0) return 0;
+    return Math.min(1, total / maxDayTotal);
+  }
+
+  if (expensesQ.error) {
     return (
       <p className={`${SECTION_CARD} px-4 py-3 text-sm text-[var(--color-text-muted)]`}>
-        {t("monthHistory.loadError", { defaultValue: "No se pudo cargar el historial mensual." })}
+        {t("monthHistory.loadError")}
       </p>
     );
   }
-
-  if (isPending) {
-    return (
-      <div className={gridClass(months)} aria-label={t("common.loading")}>
-        {Array.from({ length: months }, (_, i) => (
-          <div
-            key={i}
-            className="h-[4.5rem] animate-pulse rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)]"
-          />
-        ))}
-      </div>
-    );
-  }
-
-  if (rows.length === 0) return null;
-
-  const expenseItems = expensesQ.data?.items ?? [];
 
   return (
     <section
       className={`${SECTION_CARD} px-3 py-4 sm:px-4`}
       aria-label={t("monthHistory.ariaLabel")}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className={TYPE_DISPLAY}>
-            {historyTitle(t, months)}
-          </h2>
-          <p className={`mt-1 ${TYPE_CAPTION}`}>
-            {t("monthHistory.hint", {
-              defaultValue: "Toca un mes para ver sus gastos variables",
-            })}
+          <h2 className={TYPE_DISPLAY}>{t("monthHistory.calendarTitle")}</h2>
+          <p className={`mt-1 ${TYPE_CAPTION}`}>{t("monthHistory.calendarHint")}</p>
+        </div>
+        <div className="shrink-0 text-right">
+          <p className={TYPE_EYEBROW}>{t("monthHistory.monthTotal")}</p>
+          <p className="mt-0.5 font-display text-lg font-semibold tabular-nums text-[var(--color-accent)]">
+            {expensesQ.isPending ? "…" : money(monthTotal)}
           </p>
         </div>
-        <div
-          className="inline-flex rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-0.5"
-          role="group"
-          aria-label={t("monthHistory.rangeLabel", { defaultValue: "Meses a mostrar" })}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={goPrev}
+          className={ICON_BTN}
+          aria-label={t("monthHistory.prevMonth")}
         >
-          {MONTH_OPTIONS.map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => setMonths(n)}
-              aria-pressed={months === n}
-              className={`min-h-11 min-w-11 rounded-md px-2.5 py-1 text-sm font-semibold transition-colors ${FOCUS_RING} ${
-                months === n
-                  ? "bg-[var(--color-accent)] text-[var(--color-accent-ink)]"
-                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-              }`}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
+          <IoChevronBack className="h-5 w-5" aria-hidden />
+        </button>
+        <h3 className="min-w-0 flex-1 text-center font-display text-base font-semibold tracking-tight text-[var(--color-text)]">
+          {monthLabel}
+        </h3>
+        <button
+          type="button"
+          onClick={goNext}
+          disabled={!canGoNext}
+          className={`${ICON_BTN} disabled:cursor-not-allowed disabled:opacity-35`}
+          aria-label={t("monthHistory.nextMonth")}
+        >
+          <IoChevronForward className="h-5 w-5" aria-hidden />
+        </button>
       </div>
 
-      <div className={`mt-4 ${gridClass(months)}`} role="listbox" aria-label={t("monthHistory.ariaLabel")}>
-        {rows.map((row, index) => {
-          const key = monthKey(row.year, row.month);
-          const isCurrentMonth = index === rows.length - 1;
-          const isSelected = selected === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              role="option"
-              aria-selected={isSelected}
-              onClick={() => setSelected(key)}
-              className={`${cardClass(months, isSelected, isCurrentMonth)} ${FOCUS_RING}`}
-            >
-              <p className={`${TYPE_EYEBROW} text-center`}>{row.month_label}</p>
-              <p
-                className={`mt-1 truncate text-base font-bold tabular-nums sm:text-lg ${
-                  isSelected ? "text-[var(--color-accent)]" : "text-[var(--color-text)]"
-                }`}
-              >
-                {money(row.variable_spent_month)}
-              </p>
-            </button>
-          );
-        })}
-      </div>
+      <div
+        className="mt-3 grid grid-cols-7 gap-1"
+        role="grid"
+        aria-label={monthLabel}
+      >
+        {weekdays.map((label) => (
+          <div
+            key={label}
+            className="pb-1 text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-dim)] sm:text-[11px]"
+            role="columnheader"
+          >
+            {label}
+          </div>
+        ))}
 
-      {selectedRow && (
-        <div className="mt-5 border-t border-[var(--color-border)] pt-4">
-          <h3 className="text-sm font-semibold text-[var(--color-text)]">
-            {t("monthHistory.expensesFor", {
-              defaultValue: "Gastos variables · {{month}}",
-              month: selectedRow.month_label,
-            })}
-          </h3>
-          <p className="mt-0.5 text-xs text-[var(--color-text-dim)]">
-            {t("monthHistory.total", {
-              defaultValue: "Total {{amount}}",
-              amount: money(selectedRow.variable_spent_month),
-            })}
-            {expensesQ.data?.meta.total != null
-              ? ` · ${expensesQ.data.meta.total} ${t("monthHistory.entries", { defaultValue: "movimientos" })}`
-              : ""}
-          </p>
+        {expensesQ.isPending
+          ? Array.from({ length: 35 }, (_, i) => (
+              <div
+                key={i}
+                className="aspect-square animate-pulse rounded-lg bg-[var(--color-bg-soft)]"
+              />
+            ))
+          : cells.map((day, i) => {
+              if (day == null) {
+                return <div key={`e-${i}`} className="aspect-square" aria-hidden />;
+              }
+              const key = dayKey(year, month, day);
+              const total = dayTotals.get(key) ?? 0;
+              const hasSpend = total > 0;
+              const selected = selectedDay === day;
+              const isToday = isCurrentMonth && day === now.getDate();
+              const heat = intensity(total);
 
-          {expensesQ.isPending ? (
-            <div className="mt-3 space-y-2" aria-busy>
-              <div className="h-14 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
-              <div className="h-14 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
-            </div>
-          ) : expensesQ.error ? (
-            <p className="mt-3 text-sm text-[var(--color-crit)]" role="alert">
-              {(expensesQ.error as Error).message}
-            </p>
-          ) : expenseItems.length === 0 ? (
-            <p className="mt-3 text-sm text-[var(--color-text-dim)]">
-              {t("monthHistory.emptyMonth", {
-                defaultValue: "No hay gastos variables en este mes.",
-              })}
-            </p>
-          ) : (
-            <ul className="mt-3 space-y-2">
-              {expenseItems.map((it) => {
-                const CatIcon = getCategoryIcon(it.category_icon);
-                return (
-                  <li
-                    key={it.id}
-                    className="flex items-center gap-3 rounded-lg bg-[var(--color-bg-soft)]/80 px-3 py-2.5"
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  role="gridcell"
+                  aria-selected={selected}
+                  aria-label={`${day} ${monthLabel}${hasSpend ? `, ${money(total)}` : ""}`}
+                  onClick={() =>
+                    setSelectedDay((prev) => (prev === day ? null : day))
+                  }
+                  className={`relative flex aspect-square flex-col items-center justify-center rounded-lg border px-0.5 py-1 transition-colors ${FOCUS_RING} ${
+                    selected
+                      ? "border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] ring-1 ring-[var(--color-accent-border)]"
+                      : isToday
+                        ? "border-[var(--color-accent-border)]/60 bg-[var(--color-bg-soft)]"
+                        : hasSpend
+                          ? "border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] hover:border-[var(--color-accent-border)]"
+                          : "border-transparent hover:bg-[var(--color-bg-soft)]/80"
+                  }`}
+                  style={
+                    hasSpend && !selected
+                      ? {
+                          backgroundColor: `color-mix(in srgb, var(--color-accent-dim) ${Math.round(28 + heat * 52)}%, var(--color-bg-soft))`,
+                        }
+                      : undefined
+                  }
+                >
+                  <span
+                    className={`text-xs font-semibold tabular-nums sm:text-sm ${
+                      selected || isToday
+                        ? "text-[var(--color-accent)]"
+                        : "text-[var(--color-text)]"
+                    }`}
                   >
+                    {day}
+                  </span>
+                  {hasSpend ? (
                     <span
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-panel)]"
-                      style={{
-                        backgroundColor: `${it.category_color ?? "#223040"}22`,
-                        color: it.category_color ?? "var(--color-accent)",
-                      }}
-                      aria-hidden
+                      className={`mt-0.5 max-w-full truncate text-[9px] font-medium tabular-nums leading-none sm:text-[10px] ${
+                        selected
+                          ? "text-[var(--color-accent)]"
+                          : "text-[var(--color-text-muted)]"
+                      }`}
                     >
-                      <CatIcon className="gdh-icon-lg" />
+                      {compactMoney(total)}
                     </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold tabular-nums text-[var(--color-text)]">
-                        {money(it.amount)}
-                        {it.category_name ? (
-                          <span className="font-medium text-[var(--color-text-muted)]">
-                            {" "}
-                            · {it.category_name}
-                          </span>
-                        ) : null}
-                      </p>
-                      <p className="truncate text-xs text-[var(--color-text-dim)]">
-                        {it.occurred_at}
-                        {it.note ? ` · ${it.note}` : ""}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+                  ) : (
+                    <span className="mt-0.5 h-[9px]" aria-hidden />
+                  )}
+                </button>
+              );
+            })}
+      </div>
+
+      <div className="mt-5 border-t border-[var(--color-border)] pt-4">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-[var(--color-text)]">
+              {selectedDay != null
+                ? t("monthHistory.expensesForDay", {
+                    day: String(selectedDay),
+                    month: monthLabel,
+                  })
+                : t("monthHistory.expensesFor", { month: monthLabel })}
+            </h3>
+            <p className="mt-0.5 text-xs text-[var(--color-text-dim)]">
+              {t("monthHistory.total", { amount: money(selectedTotal) })}
+              {` · ${selectedItems.length} ${t("monthHistory.entries")}`}
+            </p>
+          </div>
+          {selectedDay != null ? (
+            <button
+              type="button"
+              onClick={() => setSelectedDay(null)}
+              className={`text-sm font-medium text-[var(--color-accent)] ${FOCUS_RING}`}
+            >
+              {t("monthHistory.showFullMonth")}
+            </button>
+          ) : null}
         </div>
-      )}
+
+        {expensesQ.isPending ? (
+          <div className="mt-3 space-y-2" aria-busy>
+            <div className="h-14 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
+            <div className="h-14 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
+          </div>
+        ) : selectedItems.length === 0 ? (
+          <p className="mt-3 text-sm text-[var(--color-text-dim)]">
+            {selectedDay != null
+              ? t("monthHistory.emptyDay")
+              : t("monthHistory.emptyMonth")}
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {selectedItems.map((it) => {
+              const CatIcon = getCategoryIcon(it.category_icon);
+              return (
+                <li
+                  key={it.id}
+                  className="flex items-center gap-3 rounded-lg bg-[var(--color-bg-soft)]/80 px-3 py-2.5"
+                >
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                    style={{
+                      backgroundColor: `${it.category_color ?? "#223040"}22`,
+                      color: it.category_color ?? "var(--color-accent)",
+                    }}
+                    aria-hidden
+                  >
+                    <CatIcon className="gdh-icon-lg" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold tabular-nums text-[var(--color-text)]">
+                      {money(it.amount)}
+                      {it.category_name ? (
+                        <span className="font-medium text-[var(--color-text-muted)]">
+                          {" "}
+                          · {it.category_name}
+                        </span>
+                      ) : null}
+                    </p>
+                    <p className="truncate text-xs text-[var(--color-text-dim)]">
+                      {it.occurred_at}
+                      {it.note ? ` · ${it.note}` : ""}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }
