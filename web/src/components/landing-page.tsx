@@ -14,6 +14,7 @@ import {
 import { BrandLogo } from "@/components/brand-logo";
 import type { AuthEntryTab } from "@/components/login-screen";
 import { TYPE_BODY, TYPE_EYEBROW } from "@/lib/typography";
+import { SECTION_CARD } from "@/lib/ui-a11y";
 
 type Props = {
   onEnter: (mode: AuthEntryTab) => void;
@@ -207,7 +208,7 @@ export function LandingPage({ onEnter }: Props) {
               {features.map(({ Icon, title, text }) => (
                 <li
                   key={title}
-                  className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-surface)]"
+                  className={`${SECTION_CARD} p-4`}
                 >
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-accent-dim)] text-[var(--color-accent)]">
                     <Icon className="h-5 w-5" aria-hidden />

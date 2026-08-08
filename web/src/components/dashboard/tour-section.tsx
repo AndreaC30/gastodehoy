@@ -3,7 +3,7 @@
 import { useTranslation } from "react-i18next";
 import { IoPlay } from "react-icons/io5";
 import { TYPE_DISPLAY } from "@/lib/typography";
-import { BTN_PRIMARY, BTN_SECONDARY } from "@/lib/ui-a11y";
+import { BTN_PRIMARY, BTN_SECONDARY, SECTION_CARD } from "@/lib/ui-a11y";
 import type { DashboardSection } from "@/lib/dashboard-state";
 
 type Props = {
@@ -15,7 +15,7 @@ export function TourSection({ onStart, onNavigate }: Props) {
   const { t } = useTranslation();
 
   return (
-    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-surface)] sm:p-6">
+    <section className={`${SECTION_CARD} p-4 sm:p-6`}>
       <div className="mb-6">
         <h2 className={TYPE_DISPLAY}>{t("nav.guidedTour")}</h2>
       </div>

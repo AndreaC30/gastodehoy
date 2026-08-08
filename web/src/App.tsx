@@ -240,7 +240,7 @@ function BootstrapErrorSplash({
     <div className="boot-splash" role="alert">
       <div className="boot-splash__inner">
         <BootSplashContent />
-        <p className="max-w-md text-sm text-rose-300">{message}</p>
+        <p className="max-w-md text-sm text-[var(--color-crit)]">{message}</p>
         <button
           type="button"
           className="rounded-lg border border-[var(--color-border-subtle)] px-4 py-2 text-sm text-[var(--color-accent)] hover:bg-[var(--color-panel-elevated)]"

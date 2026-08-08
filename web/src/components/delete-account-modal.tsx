@@ -8,17 +8,15 @@ import { setAnonymous } from "@/auth";
 import { logout } from "@/lib/session";
 import { translateBackendError } from "@/lib/backend-errors";
 import { FormField } from "@/components/ui/form-field";
-import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { AppSheet } from "@/components/ui/app-sheet";
-import { FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
+import { BTN_SECONDARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onBackToMenu?: () => void;
 };
 
-export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
+export function DeleteAccountModal({ open, onClose }: Props) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -62,20 +60,19 @@ export function DeleteAccountModal({ open, onClose, onBackToMenu }: Props) {
       zClass="z-[80]"
       danger
       footer={
-        <ModalMenuFooter
-          onBackToMenu={onBackToMenu}
-          onClose={onClose}
-          closeLabel={t("deleteAccount.cancel")}
-        >
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className={BTN_SECONDARY}>
+            {t("deleteAccount.cancel")}
+          </button>
           <button
             type="button"
             onClick={() => void confirmDelete()}
             disabled={busy}
-            className={`min-h-11 w-full rounded-lg bg-[var(--color-crit)] px-4 py-2 text-sm font-semibold text-[var(--color-bg)] hover:opacity-90 disabled:opacity-60 sm:w-auto ${FOCUS_RING}`}
+            className={`min-h-11 rounded-lg bg-[var(--color-crit)] px-4 py-2 text-sm font-semibold text-[var(--color-bg)] hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
           >
             {busy ? t("deleteAccount.deleting") : t("deleteAccount.confirm")}
           </button>
-        </ModalMenuFooter>
+        </div>
       }
     >
       {error && (

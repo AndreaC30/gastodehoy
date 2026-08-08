@@ -6,7 +6,7 @@ import { api } from "@/api/client";
 import type { MonthHistoryItem, MonthHistoryRead, PaginatedVariableExpenses } from "@/api/types";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { money } from "@/lib/format";
-import { FOCUS_RING } from "@/lib/ui-a11y";
+import { FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
 import { TYPE_CAPTION, TYPE_EYEBROW } from "@/lib/typography";
 
 const MONTH_OPTIONS = [3, 6, 12] as const;
@@ -113,7 +113,7 @@ export function MonthHistoryStrip() {
 
   return (
     <section
-      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-4 shadow-[var(--shadow-surface)] sm:px-4"
+      className={`${SECTION_CARD} px-3 py-4 sm:px-4`}
       aria-label={t("monthHistory.ariaLabel")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">

@@ -358,15 +358,6 @@ export function Sidebar({
         open={accountOpen}
         profileName={profileName}
         onClose={() => setAccountOpen(false)}
-        onBackToMenu={() => {
-          setAccountOpen(false);
-          if (
-            typeof window !== "undefined" &&
-            window.matchMedia("(max-width: 767px)").matches
-          ) {
-            setMobileOpen(true);
-          }
-        }}
         onRequestDelete={() => {
           setAccountOpen(false);
           setDeleteOpen(true);
@@ -376,15 +367,6 @@ export function Sidebar({
       <DeleteAccountModal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        onBackToMenu={() => {
-          setDeleteOpen(false);
-          if (
-            typeof window !== "undefined" &&
-            window.matchMedia("(max-width: 767px)").matches
-          ) {
-            setMobileOpen(true);
-          }
-        }}
       />
     </>
   );

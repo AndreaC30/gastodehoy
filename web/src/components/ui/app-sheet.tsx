@@ -60,7 +60,7 @@ export function AppSheet({
   if (!open) return null;
 
   const border = danger
-    ? "border-rose-500/30"
+    ? "border-[var(--color-crit-border)]"
     : "border-[var(--color-border-subtle)]";
 
   return (
@@ -92,7 +92,7 @@ export function AppSheet({
           <div className="min-w-0 flex-1">
             <h2
               id={titleId}
-              className={`text-lg font-bold tracking-tight ${danger ? "text-rose-200" : "text-[var(--color-text)]"}`}
+              className={`text-lg font-bold tracking-tight ${danger ? "text-[var(--color-crit)]" : "text-[var(--color-text)]"}`}
             >
               {title}
             </h2>

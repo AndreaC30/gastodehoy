@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { CategorySpending } from "@/api/types";
 import { money } from "@/lib/format";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
+import { SECTION_CARD } from "@/lib/ui-a11y";
 
 type Props = {
   breakdown: CategorySpending[];
@@ -76,7 +77,7 @@ export function SpendingChart({ breakdown, total }: Props) {
   );
 
   return (
-    <section className="h-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-3 shadow-[var(--shadow-surface)] sm:p-4">
+    <section className={`h-full ${SECTION_CARD} p-3 sm:p-4`}>
       <h2 className="text-base font-bold tracking-tight text-[var(--color-text)] md:text-lg">
         {t("spendingChart.title")}
       </h2>

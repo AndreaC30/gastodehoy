@@ -17,6 +17,7 @@ import {
 import type { InsightItem, Insights } from "@/api/types";
 import { money } from "@/lib/format";
 import { TYPE_CAPTION } from "@/lib/typography";
+import { SECTION_CARD } from "@/lib/ui-a11y";
 
 type Props = {
   data: Insights | undefined;
@@ -101,8 +102,7 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
   }
 }
 
-const PANEL_CLASS =
-  "rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] p-3 sm:p-4 md:p-4";
+const PANEL_CLASS = `${SECTION_CARD} p-3 sm:p-4`;
 
 export function InsightsPanel({ data, isLoading, error }: Props) {
   const { t } = useTranslation();

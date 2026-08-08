@@ -6,6 +6,7 @@ import { api } from "@/api/client";
 import type { Rule503020 } from "@/api/types";
 import { money } from "@/lib/format";
 import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
+import { SECTION_CARD } from "@/lib/ui-a11y";
 
 async function loadRule503020(lang: string) {
   return api<Rule503020>(`/api/rule-503020?lang=${lang}`);
@@ -60,7 +61,7 @@ export function Rule503020Panel() {
   if (isPending) {
     return (
       <div
-        className="h-40 animate-pulse rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]"
+        className={`h-40 animate-pulse ${SECTION_CARD}`}
         aria-label={t("rule503020.title")}
       />
     );
@@ -70,7 +71,7 @@ export function Rule503020Panel() {
 
   return (
     <section
-      className="h-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-3 shadow-[var(--shadow-surface)] sm:px-4 sm:py-4"
+      className={`h-full ${SECTION_CARD} px-3 py-3 sm:px-4 sm:py-4`}
       aria-label={t("rule503020.title")}
     >
       <div className="flex items-start gap-2">

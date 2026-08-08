@@ -3,8 +3,9 @@
 import { useTranslation } from "react-i18next";
 import type { ExtraIncome, Settings } from "@/api/types";
 import { IncomeSettingsContent } from "@/components/dashboard/income-settings-content";
-import type { DashboardSection } from "@/lib/dashboard-state";
 import { TYPE_DISPLAY } from "@/lib/typography";
+import { SECTION_CARD } from "@/lib/ui-a11y";
+import type { DashboardSection } from "@/lib/dashboard-state";
 
 type Props = {
   settings: Settings;
@@ -23,7 +24,7 @@ export function IncomeSettingsSection({
   const { t } = useTranslation();
 
   return (
-    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-surface)] sm:p-6">
+    <section className={`${SECTION_CARD} p-4 sm:p-6`}>
       <div className="mb-5">
         <h2 className={TYPE_DISPLAY}>{t("nav.yourIncome")}</h2>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">

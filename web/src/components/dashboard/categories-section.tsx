@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import type { ExpenseCategory } from "@/api/types";
 import { getCategoryIcon, CATEGORY_ICON_PICKER } from "@/components/dashboard/category-icon";
-import { INPUT_CLASS, BTN_PRIMARY, BTN_SECONDARY } from "@/lib/ui-a11y";
+import { INPUT_CLASS, BTN_PRIMARY, BTN_SECONDARY, SECTION_CARD } from "@/lib/ui-a11y";
 import type { DashboardSection } from "@/lib/dashboard-state";
 
 type Props = {
@@ -110,7 +110,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
   }
 
   return (
-    <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-surface)] sm:p-5 md:p-5">
+    <section className={`${SECTION_CARD} p-4 sm:p-5`}>
       <div className="mb-4 md:mb-5">
         <h2 className="text-xl font-bold text-[var(--color-text)]">{t("nav.categories")}</h2>
       </div>
@@ -254,7 +254,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
                         deleteMut.mutate(cat.id);
                       }
                     }}
-                    className="p-1.5 text-[var(--color-text-muted)] hover:text-red-500"
+                    className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-crit)]"
                     aria-label="Eliminar"
                   >
                     <IoTrash className="h-4 w-4" />

@@ -66,7 +66,7 @@ function ChoiceDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[95] flex touch-none items-end justify-center overflow-hidden bg-black/60 px-3 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center sm:px-4 sm:py-6"
+      className="fixed inset-0 z-[95] flex touch-none items-end justify-center overflow-hidden bg-black/60 px-3 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:items-center md:px-4 md:py-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
@@ -74,10 +74,10 @@ function ChoiceDialog({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(85dvh,100dvh)] w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-2xl shadow-black/50 sm:max-h-none sm:rounded-2xl sm:p-5"
+        className="modal-scroll max-h-[min(85dvh,100dvh)] w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-2xl shadow-black/50 md:max-h-none md:rounded-2xl md:p-5"
       >
         <header className="mb-4 flex items-start justify-between gap-3">
-          <h2 id={titleId} className="min-w-0 flex-1 text-lg font-bold tracking-tight text-[var(--color-text)] sm:text-xl">
+          <h2 id={titleId} className="min-w-0 flex-1 text-lg font-bold tracking-tight text-[var(--color-text)] md:text-xl">
             {title}
           </h2>
           {onClose && (

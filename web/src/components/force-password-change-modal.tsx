@@ -59,7 +59,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
         </p>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200">
+          <div className="mt-4 rounded-xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2 text-sm text-[var(--color-crit)]">
             {error}
           </div>
         )}

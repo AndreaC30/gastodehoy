@@ -10,7 +10,7 @@ import { SwipeableRow } from "@/components/ui/swipeable-row";
 import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
-import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
+import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
 import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
 import { IoWalletOutline } from "react-icons/io5";
 
@@ -58,7 +58,7 @@ export function FixedExpensesSection({
   return (
     <section
       data-tour="fixed-expenses"
-      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] sm:rounded-[10px]"
+      className={SECTION_CARD}
     >
       <div className="border-b border-[var(--color-border)] px-5 py-5">
         <h2 className="text-lg font-bold tracking-tight sm:text-xl">{t("fixedExpenses.title")}</h2>

@@ -6,8 +6,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { AppBackdrop } from "@/components/app-backdrop";
-import { SettingsModal } from "@/components/settings-modal";
-import { CategoryManager } from "@/components/dashboard/category-manager";
 import { DailyHero } from "@/components/dashboard/daily-hero";
 import { Sidebar } from "@/components/dashboard/sidebar-nav";
 import { IncomeSettingsSection } from "@/components/dashboard/income-settings-section";
@@ -34,7 +32,6 @@ import {
 } from "@/lib/month-context";
 import { MonthlyIncomeCheckFlow } from "@/components/dashboard/monthly-income-check-flow";
 import { Rule503020Panel } from "@/components/dashboard/rule-503020-panel";
-import { SavingsGoalsModal } from "@/components/savings-goals-modal";
 import { GuidedTour } from "@/components/guided-tour";
 import { DASHBOARD_TOUR_STEPS } from "@/lib/dashboard-tour-steps";
 import {
@@ -123,9 +120,6 @@ export function Dashboard({ profileName }: Props) {
     label: string;
     action: () => void;
   } | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showCategoryManager, setShowCategoryManager] = useState(false);
-  const [showSavingsGoals, setShowSavingsGoals] = useState(false);
   const [expandFixedList, setExpandFixedList] = useState(false);
   const [expandVariableList, setExpandVariableList] = useState(false);
   const [fixedFormIcon, setFixedFormIcon] = useState(DEFAULT_FIXED_EXPENSE_ICON);
@@ -144,10 +138,6 @@ export function Dashboard({ profileName }: Props) {
     getDensity,
     () => "comfortable" as const,
   );
-
-  function returnToMenu(closePanel: () => void) {
-    closePanel();
-  }
 
   useEffect(() => {
     if (!toastMsg) return;
@@ -673,44 +663,6 @@ export function Dashboard({ profileName }: Props) {
         onSectionChange={handleSectionChange}
       />
 
-      {showSettings && settings != null && (
-        <SettingsModal
-          initial={settings}
-          extras={extraIncomeQ.data ?? []}
-          onBackToMenu={() => returnToMenu(() => setShowSettings(false))}
-          onClose={() => setShowSettings(false)}
-          onExtrasChanged={() => {
-            setToastMsg(t("toasts.extraIncomeUpdated"));
-            void invalidateAll();
-          }}
-          onSaved={() => {
-            setShowSettings(false);
-            setToastMsg(t("toasts.changesSaved"));
-            void invalidateAll();
-          }}
-        />
-      )}
-
-      {showSavingsGoals && (
-        <SavingsGoalsModal
-          reservedSavings={summaryQ.data?.savings_amount}
-          onBackToMenu={() => returnToMenu(() => setShowSavingsGoals(false))}
-          onClose={() => setShowSavingsGoals(false)}
-        />
-      )}
-
-      {showCategoryManager && (
-        <CategoryManager
-          categories={categories}
-          onBackToMenu={() => returnToMenu(() => setShowCategoryManager(false))}
-          onClose={() => setShowCategoryManager(false)}
-          onChanged={() => {
-            setToastMsg(t("toasts.categoriesUpdated"));
-            void invalidateAll();
-          }}
-        />
-      )}
-
       {editingFixed && (
         <EditFixedExpenseModal
           expense={editingFixed}
@@ -738,12 +690,10 @@ export function Dashboard({ profileName }: Props) {
         <GuidedTour
           steps={DASHBOARD_TOUR_STEPS}
           onEnsureSection={ensureTourSection}
-          onBackToMenu={() =>
-            returnToMenu(() => {
-              setShowTour(false);
-              setTourClosedSignal((n) => n + 1);
-            })
-          }
+          onBackToMenu={() => {
+            setShowTour(false);
+            setTourClosedSignal((n) => n + 1);
+          }}
           onComplete={finishTour}
           onSkip={skipTour}
         />

@@ -4,7 +4,7 @@ import { Metric } from "@/components/dashboard/metric";
 import { money, savingsLabel } from "@/lib/format";
 import { useAnimatedNumber } from "@/lib/use-animated-number";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
+import { BTN_PRIMARY, FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
 import { TYPE_BODY, TYPE_EYEBROW, TYPE_HERO_NUMBER } from "@/lib/typography";
 import { useState } from "react";
 
@@ -144,7 +144,7 @@ export function DailyHero({
             <button
               type="button"
               onClick={onAddExpense}
-              className={`mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 text-sm font-semibold text-[var(--color-accent-ink)] hover:opacity-95 md:w-auto ${FOCUS_RING}`}
+              className={`mt-6 w-full md:w-auto ${BTN_PRIMARY}`}
             >
               {t("hero.addExpense")}
             </button>

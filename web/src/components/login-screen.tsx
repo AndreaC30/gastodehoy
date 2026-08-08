@@ -16,7 +16,7 @@ import type {
 import { setUser } from "@/auth";
 import { BrandLogo } from "@/components/brand-logo";
 import { showLegalPage } from "@/lib/legal-pages-state";
-import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
+import { ALERT_CRIT, BTN_PRIMARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
 import { translateBackendError } from "@/lib/backend-errors";
 
 type Mode = "login" | "register" | "forgot";
@@ -100,7 +100,7 @@ export function LoginScreen({
 
         {error && (
           <div
-            className="mt-4 rounded-2xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"
+            className={`mt-4 ${ALERT_CRIT} px-4 py-3`}
             role="alert"
             aria-live="polite"
           >

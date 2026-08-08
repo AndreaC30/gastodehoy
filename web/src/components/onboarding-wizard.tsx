@@ -103,7 +103,7 @@ export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
 
       <section className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/70 p-5 shadow-xl shadow-black/30 md:p-6">
         {error && (
-          <div className="mb-4 rounded-xl border border-rose-500/40 bg-rose-950/40 px-4 py-3 text-sm text-rose-200">
+          <div className="mb-4 rounded-xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-4 py-3 text-sm text-[var(--color-crit)]">
             {error}
           </div>
         )}
@@ -169,7 +169,7 @@ function Stepper({ step }: { step: Step }) {
           >
             {n}
           </span>
-          {n < 3 && <span className="h-px w-8 bg-slate-800" />}
+          {n < 3 && <span className="h-px w-8 bg-[var(--color-border)]" />}
         </li>
       ))}
     </ol>
@@ -206,7 +206,7 @@ function StepIncome({
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           {t("onboarding.incomeDescription")}
         </p>
-        <p className="mt-2 rounded-lg border border-slate-800/80 bg-[var(--color-bg)]/50 px-3 py-2 text-xs leading-relaxed text-[var(--color-text-dim)]">
+        <p className="mt-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]/50 px-3 py-2 text-xs leading-relaxed text-[var(--color-text-dim)]">
           {t("onboarding.incomeExamples")}
         </p>
       </div>
@@ -288,7 +288,7 @@ function StepFixed({
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           {t("onboarding.fixedDescription")}
         </p>
-        <p className="mt-2 rounded-lg border border-dashed border-slate-700/80 px-3 py-2 text-xs leading-relaxed text-[var(--color-text-dim)]">
+        <p className="mt-2 rounded-lg border border-dashed border-[var(--color-border-subtle)] px-3 py-2 text-xs leading-relaxed text-[var(--color-text-dim)]">
           {t("onboarding.fixedOptional")}
         </p>
       </div>
@@ -336,7 +336,7 @@ function StepFixed({
               className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/80 px-3 py-2.5"
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                <FixedIcon className="h-4 w-4 shrink-0 text-sky-400/90" />
+                <FixedIcon className="h-4 w-4 shrink-0 text-[var(--color-accent)]/90" />
                 <div className="min-w-0">
                   <p className="truncate font-semibold text-[var(--color-text)]">{it.name}</p>
                   <p className="truncate text-sm tabular-nums text-[var(--color-text-dim)]">{money(it.amount)}</p>
@@ -345,7 +345,7 @@ function StepFixed({
               <button
                 type="button"
                 onClick={() => remove(i)}
-                className="shrink-0 rounded-lg border border-rose-500/40 px-2.5 py-1 text-sm font-medium text-rose-400 hover:bg-rose-500/10"
+                className="shrink-0 rounded-lg border border-[var(--color-crit-border)] px-2.5 py-1 text-sm font-medium text-[var(--color-crit)] hover:bg-[var(--color-crit-dim)]"
               >
                 {t("common.remove")}
               </button>

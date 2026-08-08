@@ -193,7 +193,7 @@ export function IncomeSettingsContent({
     <div>
       {error && (
         <div
-          className="mb-3 rounded-xl border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-sm text-rose-200"
+          className="mb-3 rounded-xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2 text-sm text-[var(--color-crit)]"
           role="alert"
           aria-live="polite"
         >
@@ -448,7 +448,7 @@ export function IncomeSettingsContent({
                     type="button"
                     onClick={() => delExtra.mutate(it.id)}
                     disabled={delExtra.isPending}
-                    className="shrink-0 rounded-lg border border-rose-500/40 px-2 py-1 text-xs font-medium text-rose-400 hover:bg-rose-500/10 disabled:opacity-50"
+                    className="shrink-0 rounded-lg border border-[var(--color-crit-border)] px-2 py-1 text-xs font-medium text-[var(--color-crit)] hover:bg-[var(--color-crit-dim)] disabled:opacity-50"
                   >
                     {t("incomeSettings.extraDelete")}
                   </button>

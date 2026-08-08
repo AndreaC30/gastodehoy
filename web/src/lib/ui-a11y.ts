@@ -8,6 +8,10 @@
  * - `rounded-xl`     → intermediate panels, toast, modals
  * - `rounded-lg` / `rounded-[8px]` → inputs, buttons, inner cards, list items
  * - `rounded-md`     → segmented controls, inline chips
+ *
+ * ## Breakpoints
+ * - `md` (768px) = app chrome (BottomNav / sidebar) and overlay sheets (AppSheet)
+ * - `sm` (640px) = typography / content density only — do not flip shell or modals at sm
  */
 
 export const FOCUS_RING =
@@ -31,3 +35,7 @@ export const SECTION_CARD =
 /** Inner card / panel inside a section. */
 export const INNER_CARD =
   "rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)]";
+
+/** Inline error / destructive alert surface. */
+export const ALERT_CRIT =
+  "rounded-xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] text-sm text-[var(--color-crit)]";
