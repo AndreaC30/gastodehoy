@@ -15,14 +15,16 @@ import {
   IoWarningOutline,
 } from "react-icons/io5";
 import type { InsightItem, Insights } from "@/api/types";
+import type { DashboardSection } from "@/lib/dashboard-state";
 import { money } from "@/lib/format";
 import { TYPE_CAPTION, TYPE_DISPLAY } from "@/lib/typography";
-import { SECTION_CARD } from "@/lib/ui-a11y";
+import { BTN_SECONDARY, SECTION_CARD } from "@/lib/ui-a11y";
 
 type Props = {
   data: Insights | undefined;
   isLoading: boolean;
   error: Error | null;
+  onNavigate?: (section: DashboardSection) => void;
 };
 
 /** Misma estructura flex + shrink-0 que rule-503020 (no falla en Android). */
@@ -104,7 +106,7 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
 
 const PANEL_CLASS = `${SECTION_CARD} p-5`;
 
-export function InsightsPanel({ data, isLoading, error }: Props) {
+export function InsightsPanel({ data, isLoading, error, onNavigate }: Props) {
   const { t } = useTranslation();
 
   if (isLoading) {
@@ -182,6 +184,15 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
                   <p className="mt-0.5 text-xs text-current/90 md:text-sm">
                     {insight.message}
                   </p>
+                  {insight.action && onNavigate && (
+                    <button
+                      type="button"
+                      onClick={() => onNavigate(insight.action!.kind)}
+                      className={`mt-2 min-h-11 px-3 py-1.5 text-xs font-semibold ${BTN_SECONDARY}`}
+                    >
+                      {insight.action.label}
+                    </button>
+                  )}
                 </div>
               </div>
             </li>

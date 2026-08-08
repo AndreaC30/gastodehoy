@@ -407,7 +407,10 @@
   },
   "spendingChart": {
     "title": "Ausgaben nach Kategorie",
-    "subtitle": "Aufteilung deiner Ausgaben diesen Monat"
+    "subtitle": "Aufteilung deiner Ausgaben diesen Monat",
+    "emptyTitle": "Keine Ausgaben diesen Monat",
+    "emptyDesc": "Wenn du variable Ausgaben erfasst, siehst du hier die Verteilung nach Kategorie.",
+    "emptyCta": "Ausgabe hinzufügen"
   },
   "monthHistory": {
     "lastMonths": "Letzte {{months}} Monate",

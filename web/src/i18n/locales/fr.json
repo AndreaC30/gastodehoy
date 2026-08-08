@@ -407,7 +407,10 @@
   },
   "spendingChart": {
     "title": "Dépenses par catégorie",
-    "subtitle": "Répartition de vos dépenses ce mois"
+    "subtitle": "Répartition de vos dépenses ce mois",
+    "emptyTitle": "Aucune dépense ce mois",
+    "emptyDesc": "Quand vous enregistrerez des dépenses variables, vous verrez ici la répartition par catégorie.",
+    "emptyCta": "Ajouter une dépense"
   },
   "monthHistory": {
     "lastMonths": "{{months}} derniers mois",

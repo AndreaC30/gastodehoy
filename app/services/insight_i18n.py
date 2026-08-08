@@ -48,6 +48,14 @@ INSIGHT_TRANSLATIONS = {
         "notif_daily_budget_body_remaining": "You can spend up to {amount}€ today. You have {remaining}€ left this month.",
         "notif_daily_limit_title": "Your daily cap",
 
+
+        "action_review_expenses": "Review expenses",
+        "action_categorize": "Go to expenses",
+        "action_edit_categories": "Edit categories",
+        "action_review_fixed": "Review fixed expenses",
+        "action_go_today": "See today",
+        "action_add_expense": "Add an expense",
+        "action_set_income": "Set income",
         # Category
         "uncategorized_label": "Uncategorized",
     },
@@ -97,6 +105,14 @@ INSIGHT_TRANSLATIONS = {
         "notif_daily_budget_body_remaining": "Hoy puedes gastar hasta {amount}€. Te quedan {remaining}€ este mes.",
         "notif_daily_limit_title": "Tu tope de hoy",
 
+
+        "action_review_expenses": "Revisar gastos",
+        "action_categorize": "Ir a gastos",
+        "action_edit_categories": "Editar categorías",
+        "action_review_fixed": "Revisar gastos fijos",
+        "action_go_today": "Ver hoy",
+        "action_add_expense": "Añadir un gasto",
+        "action_set_income": "Configurar ingreso",
         "uncategorized_label": "Sin categoría",
     },
     "fr": {
@@ -145,6 +161,14 @@ INSIGHT_TRANSLATIONS = {
         "notif_daily_budget_body_remaining": "Vous pouvez dépenser jusqu'à {amount}€ aujourd'hui. Il vous reste {remaining}€ ce mois.",
         "notif_daily_limit_title": "Votre plafond du jour",
 
+
+        "action_review_expenses": "Voir les dépenses",
+        "action_categorize": "Aller aux dépenses",
+        "action_edit_categories": "Modifier les catégories",
+        "action_review_fixed": "Voir les dépenses fixes",
+        "action_go_today": "Voir aujourd'hui",
+        "action_add_expense": "Ajouter une dépense",
+        "action_set_income": "Configurer le revenu",
         "uncategorized_label": "Sans catégorie",
     },
     "de": {
@@ -193,6 +217,14 @@ INSIGHT_TRANSLATIONS = {
         "notif_daily_budget_body_remaining": "Du kannst heute bis zu {amount}€ ausgeben. Du hast noch {remaining}€ diesen Monat.",
         "notif_daily_limit_title": "Dein Tageslimit",
 
+
+        "action_review_expenses": "Ausgaben prüfen",
+        "action_categorize": "Zu Ausgaben",
+        "action_edit_categories": "Kategorien bearbeiten",
+        "action_review_fixed": "Fixkosten prüfen",
+        "action_go_today": "Heute ansehen",
+        "action_add_expense": "Ausgabe hinzufügen",
+        "action_set_income": "Einkommen einrichten",
         "uncategorized_label": "Ohne Kategorie",
     },
 }

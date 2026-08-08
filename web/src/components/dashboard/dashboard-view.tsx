@@ -142,7 +142,7 @@ export function Dashboard({ profileName }: Props) {
 
   useEffect(() => {
     if (!toastMsg) return;
-    const duration = toastUndo ? 5000 : 2800;
+    const duration = toastUndo ? 5000 : toastMsg.length > 48 ? 5500 : 2800;
     const timer = window.setTimeout(() => {
       setToastMsg(null);
       setToastUndo(null);
@@ -188,7 +188,11 @@ export function Dashboard({ profileName }: Props) {
 
   useEffect(() => {
     if (!summaryQ.isSuccess) return;
-    void maybeShowDailyNotification();
+    void maybeShowDailyNotification().then((aviso) => {
+      if (aviso) {
+        setToastMsg(`${aviso.title} — ${aviso.body}`);
+      }
+    });
   }, [summaryQ.isSuccess]);
 
   function finishTour() {
@@ -359,7 +363,11 @@ export function Dashboard({ profileName }: Props) {
   }, [handleSectionChange]);
 
   const ensureTourSection = useCallback(
-    (section: NonNullable<(typeof DASHBOARD_TOUR_STEPS)[number]["section"]>) => {
+    (
+      section: NonNullable<(typeof DASHBOARD_TOUR_STEPS)[number]["section"]>,
+      gastosTab?: (typeof DASHBOARD_TOUR_STEPS)[number]["gastosTab"],
+    ) => {
+      if (gastosTab) setGastosTab(gastosTab);
       handleSectionChange(section);
     },
     [handleSectionChange],
@@ -443,9 +451,7 @@ export function Dashboard({ profileName }: Props) {
         {/* Section: HOY */}
         {activeSection === 'hoy' && (
           <div className="space-y-5 md:space-y-4">
-            <div className="hidden md:block">
-              <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
-            </div>
+            <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
             <MonthContextBanner referenceDate={summaryQ.data?.reference_date} />
             <DailyHero
               summary={summaryQ.data}
@@ -563,17 +569,15 @@ export function Dashboard({ profileName }: Props) {
               data={insightsQ.data}
               isLoading={insightsQ.isPending}
               error={insightsQ.error as Error | null}
+              onNavigate={handleSectionChange}
             />
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-5">
-              {insightsQ.data && insightsQ.data.category_breakdown.length > 0 ? (
-                <SpendingChart
-                  breakdown={insightsQ.data.category_breakdown}
-                  total={insightsQ.data.total_spent}
-                />
-              ) : (
-                <div className="hidden lg:block" aria-hidden />
-              )}
+              <SpendingChart
+                breakdown={insightsQ.data?.category_breakdown ?? []}
+                total={insightsQ.data?.total_spent ?? 0}
+                onAddExpense={goToAddExpense}
+              />
               <Rule503020Panel />
             </div>
           </div>
@@ -674,10 +678,7 @@ export function Dashboard({ profileName }: Props) {
         <GuidedTour
           steps={DASHBOARD_TOUR_STEPS}
           onEnsureSection={ensureTourSection}
-          onBackToMenu={() => {
-            setShowTour(false);
-            setTourClosedSignal((n) => n + 1);
-          }}
+          onBackToMenu={skipTour}
           onComplete={finishTour}
           onSkip={skipTour}
         />

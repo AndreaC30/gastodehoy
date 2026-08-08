@@ -1,6 +1,8 @@
 /** Spending breakdown by category: donut + progress-bar legend (all viewports). */
 import { useTranslation } from "react-i18next";
+import { IoPieChartOutline } from "react-icons/io5";
 import type { CategorySpending } from "@/api/types";
+import { EmptyState } from "@/components/ui/empty-state";
 import { money } from "@/lib/format";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { SECTION_CARD } from "@/lib/ui-a11y";
@@ -9,6 +11,7 @@ import { TYPE_DISPLAY } from "@/lib/typography";
 type Props = {
   breakdown: CategorySpending[];
   total: string | number;
+  onAddExpense?: () => void;
 };
 
 /* ── tiny donut for desktop (kept simple, 120×120) ────────────── */
@@ -62,10 +65,32 @@ function MiniDonut({
 
 /* ── main component ────────────────────────────────────────────── */
 
-export function SpendingChart({ breakdown, total }: Props) {
+export function SpendingChart({ breakdown, total, onAddExpense }: Props) {
   const { t } = useTranslation();
   const totalNum = Number(total);
-  if (totalNum === 0) return null;
+
+  if (totalNum === 0 || breakdown.length === 0) {
+    return (
+      <section className={`h-full ${SECTION_CARD} p-5`}>
+        <h2 className={TYPE_DISPLAY}>{t("spendingChart.title")}</h2>
+        <p className="mt-1 text-sm text-[var(--color-text-dim)]">
+          {t("spendingChart.subtitle")}
+        </p>
+        <div className="mt-4">
+          <EmptyState
+            icon={<IoPieChartOutline className="h-8 w-8" aria-hidden />}
+            title={t("spendingChart.emptyTitle")}
+            description={t("spendingChart.emptyDesc")}
+            action={
+              onAddExpense
+                ? { label: t("spendingChart.emptyCta"), onClick: onAddExpense }
+                : undefined
+            }
+          />
+        </div>
+      </section>
+    );
+  }
 
   const donutSegments = breakdown.map((s) => ({
     color: s.category_color,

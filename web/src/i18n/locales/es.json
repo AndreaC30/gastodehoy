@@ -405,7 +405,10 @@
   },
   "spendingChart": {
     "title": "Gastos por categoría",
-    "subtitle": "Distribución de tus gastos este mes"
+    "subtitle": "Distribución de tus gastos este mes",
+    "emptyTitle": "Sin gastos este mes",
+    "emptyDesc": "Cuando registres gastos variables, verás aquí cómo se reparte el dinero por categoría.",
+    "emptyCta": "Añadir un gasto"
   },
   "monthHistory": {
     "lastMonths": "Últimos {{months}} meses",

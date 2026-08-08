@@ -19,8 +19,11 @@ type Props = {
   onComplete: () => void;
   onSkip: () => void;
   onBackToMenu?: () => void;
-  /** Switch dashboard section so the step target is mounted. */
-  onEnsureSection?: (section: NonNullable<TourStep["section"]>) => void;
+  /** Switch dashboard section (and optional Gastos tab) so the step target is mounted. */
+  onEnsureSection?: (
+    section: NonNullable<TourStep["section"]>,
+    gastosTab?: TourStep["gastosTab"],
+  ) => void;
 };
 
 type SpotlightRect = {
@@ -102,7 +105,7 @@ export function GuidedTour({
 
     void (async () => {
       if (step.section && onEnsureSection) {
-        onEnsureSection(step.section);
+        onEnsureSection(step.section, step.gastosTab);
         // Wait for React to mount the section content.
         await new Promise((r) => requestAnimationFrame(r));
         await new Promise((r) => setTimeout(r, 80));

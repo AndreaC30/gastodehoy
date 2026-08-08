@@ -40,6 +40,7 @@ export function MonthContextBanner({ referenceDate }: Props) {
   return (
     <div
       role="status"
+      data-tour="month-context"
       className="rounded-2xl border border-[var(--color-ok-border)] bg-[var(--color-ok-dim)] px-4 py-3.5 sm:rounded-xl sm:px-4 sm:py-3"
     >
       <div className="flex items-start gap-3">

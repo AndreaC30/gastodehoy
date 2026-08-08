@@ -41,6 +41,10 @@ TITLE_KEEP_RECORDING: str = "Sigue registrando"
 from app.services.insight_i18n import get_insight_text
 
 
+def _cta(kind: str, label: str) -> dict[str, str]:
+    return {"kind": kind, "label": label}
+
+
 def _previous_month_bounds(month_start: date) -> tuple[date, date]:
     """First and last day of the calendar month before ``month_start``."""
     if month_start.month == 1:
@@ -181,6 +185,7 @@ def compute_insights(
                     "title": _t("more_spending"),
                     "message": _t("msg_more", pct=pct_change, curr=total_spent, prev=prev_spent),
                     "icon": "trending_up",
+                    "action": _cta("historico", _t("action_review_expenses")),
                 }
             )
         elif diff < Decimal("-0.01"):
@@ -190,6 +195,7 @@ def compute_insights(
                     "title": _t("less_spending"),
                     "message": _t("msg_less", pct=pct_change, curr=total_spent, prev=prev_spent),
                     "icon": "trending_down",
+                    "action": _cta("historico", _t("action_review_expenses")),
                 }
             )
         else:
@@ -199,6 +205,7 @@ def compute_insights(
                     "title": _t("similar_pace"),
                     "message": _t("msg_similar", curr=total_spent, prev=prev_spent),
                     "icon": "calendar",
+                    "action": _cta("historico", _t("action_review_expenses")),
                 }
             )
 
@@ -210,6 +217,7 @@ def compute_insights(
                 "title": _t("concentrated_spending"),
                 "message": _t("msg_concentrated", pct=top_category["percentage"], name=top_category["category_name"]),
                 "icon": "alert_triangle",
+                "action": _cta("gastos", _t("action_review_expenses")),
             }
         )
 
@@ -229,6 +237,7 @@ def compute_insights(
                         "title": _t("budget_exhausted"),
                         "message": _t("msg_budget_exhausted", over=abs(remaining), fixed=summary['fixed_expenses_total'] + summary['savings_amount'], var=total_spent),
                         "icon": "alert_circle",
+                        "action": _cta("hoy", _t("action_go_today")),
                     }
                 )
             elif spend_pct >= 85:
@@ -238,6 +247,7 @@ def compute_insights(
                         "title": _t("high_spending_ratio"),
                         "message": _t("msg_high_ratio", pct=spend_pct, remaining=remaining, total=available_budget),
                         "icon": "alert_circle",
+                        "action": _cta("hoy", _t("action_go_today")),
                     }
                 )
             elif spend_pct < 50 and elapsed > 15:
@@ -247,6 +257,7 @@ def compute_insights(
                         "title": _t("good_pace"),
                         "message": _t("msg_good_pace", pct=spend_pct, remaining=remaining),
                         "icon": "check_circle",
+                        "action": _cta("hoy", _t("action_go_today")),
                     }
                 )
 
@@ -261,6 +272,7 @@ def compute_insights(
                     "title": _t("projected_overspend"),
                     "message": _t("msg_projected", proj=projected, over=over, cap=available_budget),
                     "icon": "trending_up",
+                    "action": _cta("hoy", _t("action_go_today")),
                 }
             )
 
@@ -275,6 +287,7 @@ def compute_insights(
                 "title": _t("budget_exceeded", name=item['category_name']),
                 "message": _t("msg_budget_exceeded", name=item['category_name'], spent=item['total'], budget=budget),
                 "icon": "alert_triangle",
+                "action": _cta("categorias", _t("action_edit_categories")),
             }
         )
 
@@ -289,6 +302,7 @@ def compute_insights(
                 "title": _t("categorize_expenses"),
                 "message": _t("msg_uncategorized", count=uncategorised["transaction_count"]),
                 "icon": "tags",
+                "action": _cta("gastos", _t("action_categorize")),
             }
         )
 
@@ -310,6 +324,7 @@ def compute_insights(
                     "title": _t("high_fixed_costs"),
                     "message": _t("msg_fixed_ratio", pct=fixed_pct),
                     "icon": "home",
+                    "action": _cta("gastos", _t("action_review_fixed")),
                 }
             )
 
@@ -325,6 +340,7 @@ def compute_insights(
                     "title": _t("daily_limit"),
                     "message": _t("msg_daily_tip", remaining=remaining, days=days_left, daily=daily_budget),
                     "icon": "calendar",
+                    "action": _cta("hoy", _t("action_go_today")),
                 }
             )
         # When remaining < 0, insight #2 already covers it with TITLE_BUDGET_EXHAUSTED.
@@ -338,6 +354,7 @@ def compute_insights(
                 "title": _t("keep_recording"),
                 "message": _t("msg_fallback"),
                 "icon": "lightbulb",
+                "action": _cta("gastos", _t("action_add_expense")),
             }
         )
 

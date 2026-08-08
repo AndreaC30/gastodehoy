@@ -22,6 +22,11 @@ import {
 } from "@/components/login-screen";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
 import { ForcePasswordChangeModal } from "@/components/force-password-change-modal";
+import {
+  clearOnboardingSkipped,
+  isOnboardingSkipped,
+  markOnboardingSkipped,
+} from "@/lib/onboarding-preference";
 import { AppBackdrop } from "@/components/app-backdrop";
 import { PrivacyPolicy } from "@/components/privacy-policy";
 import { LegalNotice } from "@/components/legal-notice";
@@ -158,8 +163,15 @@ function Authed({ userName }: { userName: string }) {
     queryFn: loadSettings,
     enabled: !mustChange,
   });
-  const [skipped, setSkipped] = useState(false);
+  const [skipped, setSkipped] = useState(() => isOnboardingSkipped());
   const qc = useQueryClient();
+
+  useEffect(() => {
+    if (settingsQ.data != null && Number(settingsQ.data.monthly_income) > 0) {
+      clearOnboardingSkipped();
+      setSkipped(false);
+    }
+  }, [settingsQ.data]);
 
   // Apply language from DB on load (cross-device sync)
   const [langSynced, setLangSynced] = useState(false);
@@ -200,8 +212,12 @@ function Authed({ userName }: { userName: string }) {
         <AppBackdrop />
         <OnboardingWizard
           userName={userName}
-          onSkip={() => setSkipped(true)}
+          onSkip={() => {
+            markOnboardingSkipped();
+            setSkipped(true);
+          }}
           onDone={() => {
+            clearOnboardingSkipped();
             if (isFirstDayOfMonth(todayDate())) {
               void markIncomeCheckAnswered(todayDate());
             }

@@ -6,6 +6,11 @@ import {
   wasDailyNotificationShownToday,
 } from "@/lib/daily-notification-preference";
 
+export type DailyAviso = {
+  title: string;
+  body: string;
+};
+
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
   if (!("Notification" in window)) {
     return "denied";
@@ -19,33 +24,41 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   return Notification.requestPermission();
 }
 
-export async function maybeShowDailyNotification(): Promise<void> {
+/**
+ * Show the daily aviso at most once per day.
+ * Prefer a browser Notification when permission is granted; otherwise return
+ * the payload for an in-app toast/banner.
+ */
+export async function maybeShowDailyNotification(): Promise<DailyAviso | null> {
   if (!isDailyNotificationEnabled()) {
-    return;
-  }
-  if (!("Notification" in window) || Notification.permission !== "granted") {
-    return;
+    return null;
   }
   if (wasDailyNotificationShownToday()) {
-    return;
+    return null;
   }
 
   const payload = await api<DailyNotification | null>(
     "/api/insights/daily-notification",
   );
   if (!payload) {
-    return;
+    return null;
   }
 
-  const icon = "/gastodehoy-favicon-192.png";
-  const n = new Notification(payload.title, {
-    body: payload.body,
-    icon,
-    tag: payload.tag,
-  });
-  n.onclick = () => {
-    window.focus();
-    n.close();
-  };
+  if ("Notification" in window && Notification.permission === "granted") {
+    const icon = "/gastodehoy-favicon-192.png";
+    const n = new Notification(payload.title, {
+      body: payload.body,
+      icon,
+      tag: payload.tag,
+    });
+    n.onclick = () => {
+      window.focus();
+      n.close();
+    };
+    markDailyNotificationShown();
+    return null;
+  }
+
   markDailyNotificationShown();
+  return { title: payload.title, body: payload.body };
 }

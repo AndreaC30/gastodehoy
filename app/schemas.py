@@ -292,11 +292,19 @@ class CategorySpending(BaseModel):
     budget_used_percent: Decimal | None = None
 
 
+class InsightAction(BaseModel):
+    """Optional CTA that navigates to a dashboard section."""
+
+    kind: Literal["hoy", "gastos", "ingresos", "categorias", "historico"]
+    label: str
+
+
 class InsightItem(BaseModel):
     type: Literal["warning", "tip", "success", "info"]
     title: str
     message: str
     icon: str = "lightbulb"
+    action: InsightAction | None = None
 
 
 class InsightsRead(BaseModel):

@@ -115,11 +115,17 @@ export type CategorySpending = {
   budget_used_percent: string | number | null;
 };
 
+export type InsightAction = {
+  kind: "hoy" | "gastos" | "ingresos" | "categorias" | "historico";
+  label: string;
+};
+
 export type InsightItem = {
   type: "warning" | "tip" | "success" | "info";
   title: string;
   message: string;
   icon: string;
+  action?: InsightAction | null;
 };
 
 export type Insights = {

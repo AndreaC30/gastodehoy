@@ -405,7 +405,10 @@
   },
   "spendingChart": {
     "title": "Spending by category",
-    "subtitle": "Your spending breakdown this month"
+    "subtitle": "Your spending breakdown this month",
+    "emptyTitle": "No spending this month",
+    "emptyDesc": "When you log variable expenses, you’ll see how money breaks down by category.",
+    "emptyCta": "Add an expense"
   },
   "monthHistory": {
     "lastMonths": "Last {{months}} months",

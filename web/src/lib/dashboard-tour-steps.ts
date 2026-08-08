@@ -1,9 +1,13 @@
+export type TourGastosTab = "variables" | "fijos";
+
 export type TourStep = {
   target: string;
   title: string;
   body: string;
   /** Dashboard section that must be visible for ``target`` to exist in the DOM. */
   section?: "hoy" | "gastos" | "analisis" | "historico";
+  /** Mobile Gastos segment tab (variables/fijos are mutually hidden below md). */
+  gastosTab?: TourGastosTab;
 };
 
 /** I18n key‑based steps for the dashboard guided tour. */
@@ -19,12 +23,14 @@ export const DASHBOARD_TOUR_STEPS: TourStep[] = [
     title: "tour.step2.title",
     body: "tour.step2.body",
     section: "gastos",
+    gastosTab: "variables",
   },
   {
     target: "fixed-expenses",
     title: "tour.step3.title",
     body: "tour.step3.body",
     section: "gastos",
+    gastosTab: "fijos",
   },
   {
     target: "month-context",
