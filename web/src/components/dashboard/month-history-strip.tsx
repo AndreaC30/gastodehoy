@@ -180,209 +180,214 @@ export function MonthHistoryStrip() {
 
   return (
     <section
-      className={`${SECTION_CARD} px-3 py-4 sm:px-4`}
+      className={`${SECTION_CARD} px-3 py-4 sm:px-4 md:px-5`}
       aria-label={t("monthHistory.ariaLabel")}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className={TYPE_DISPLAY}>{t("monthHistory.calendarTitle")}</h2>
           <p className={`mt-1 ${TYPE_CAPTION}`}>{t("monthHistory.calendarHint")}</p>
         </div>
         <div className="shrink-0 text-right">
           <p className={TYPE_EYEBROW}>{t("monthHistory.monthTotal")}</p>
-          <p className="mt-0.5 font-display text-lg font-semibold tabular-nums text-[var(--color-accent)]">
+          <p className="mt-0.5 font-display text-base font-semibold tabular-nums text-[var(--color-accent)] sm:text-lg">
             {expensesQ.isPending ? "…" : money(monthTotal)}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={goPrev}
-          className={ICON_BTN}
-          aria-label={t("monthHistory.prevMonth")}
-        >
-          <IoChevronBack className="h-5 w-5" aria-hidden />
-        </button>
-        <h3 className="min-w-0 flex-1 text-center font-display text-base font-semibold tracking-tight text-[var(--color-text)]">
-          {monthLabel}
-        </h3>
-        <button
-          type="button"
-          onClick={goNext}
-          disabled={!canGoNext}
-          className={`${ICON_BTN} disabled:cursor-not-allowed disabled:opacity-35`}
-          aria-label={t("monthHistory.nextMonth")}
-        >
-          <IoChevronForward className="h-5 w-5" aria-hidden />
-        </button>
-      </div>
-
-      <div
-        className="mt-3 grid grid-cols-7 gap-1"
-        role="grid"
-        aria-label={monthLabel}
-      >
-        {weekdays.map((label) => (
-          <div
-            key={label}
-            className="pb-1 text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-dim)] sm:text-[11px]"
-            role="columnheader"
-          >
-            {label}
-          </div>
-        ))}
-
-        {expensesQ.isPending
-          ? Array.from({ length: 35 }, (_, i) => (
-              <div
-                key={i}
-                className="aspect-square animate-pulse rounded-lg bg-[var(--color-bg-soft)]"
-              />
-            ))
-          : cells.map((day, i) => {
-              if (day == null) {
-                return <div key={`e-${i}`} className="aspect-square" aria-hidden />;
-              }
-              const key = dayKey(year, month, day);
-              const total = dayTotals.get(key) ?? 0;
-              const hasSpend = total > 0;
-              const selected = selectedDay === day;
-              const isToday = isCurrentMonth && day === now.getDate();
-              const heat = intensity(total);
-
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  role="gridcell"
-                  aria-selected={selected}
-                  aria-label={`${day} ${monthLabel}${hasSpend ? `, ${money(total)}` : ""}`}
-                  onClick={() =>
-                    setSelectedDay((prev) => (prev === day ? null : day))
-                  }
-                  className={`relative flex aspect-square flex-col items-center justify-center rounded-lg border px-0.5 py-1 transition-colors ${FOCUS_RING} ${
-                    selected
-                      ? "border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] ring-1 ring-[var(--color-accent-border)]"
-                      : isToday
-                        ? "border-[var(--color-accent-border)]/60 bg-[var(--color-bg-soft)]"
-                        : hasSpend
-                          ? "border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] hover:border-[var(--color-accent-border)]"
-                          : "border-transparent hover:bg-[var(--color-bg-soft)]/80"
-                  }`}
-                  style={
-                    hasSpend && !selected
-                      ? {
-                          backgroundColor: `color-mix(in srgb, var(--color-accent-dim) ${Math.round(28 + heat * 52)}%, var(--color-bg-soft))`,
-                        }
-                      : undefined
-                  }
-                >
-                  <span
-                    className={`text-xs font-semibold tabular-nums sm:text-sm ${
-                      selected || isToday
-                        ? "text-[var(--color-accent)]"
-                        : "text-[var(--color-text)]"
-                    }`}
-                  >
-                    {day}
-                  </span>
-                  {hasSpend ? (
-                    <span
-                      className={`mt-0.5 max-w-full truncate text-[9px] font-medium tabular-nums leading-none sm:text-[10px] ${
-                        selected
-                          ? "text-[var(--color-accent)]"
-                          : "text-[var(--color-text-muted)]"
-                      }`}
-                    >
-                      {compactMoney(total)}
-                    </span>
-                  ) : (
-                    <span className="mt-0.5 h-[9px]" aria-hidden />
-                  )}
-                </button>
-              );
-            })}
-      </div>
-
-      <div className="mt-5 border-t border-[var(--color-border)] pt-4">
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-[var(--color-text)]">
-              {selectedDay != null
-                ? t("monthHistory.expensesForDay", {
-                    day: String(selectedDay),
-                    month: monthLabel,
-                  })
-                : t("monthHistory.expensesFor", { month: monthLabel })}
-            </h3>
-            <p className="mt-0.5 text-xs text-[var(--color-text-dim)]">
-              {t("monthHistory.total", { amount: money(selectedTotal) })}
-              {` · ${selectedItems.length} ${t("monthHistory.entries")}`}
-            </p>
-          </div>
-          {selectedDay != null ? (
+      {/* Mobile: stacked. md+: compact calendar left, expense list right. */}
+      <div className="mt-4 grid gap-5 md:grid-cols-[minmax(0,18.5rem)_minmax(0,1fr)] md:items-start md:gap-6 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+        <div className="mx-auto w-full max-w-[22rem] md:mx-0 md:max-w-none">
+          <div className="flex items-center justify-between gap-1">
             <button
               type="button"
-              onClick={() => setSelectedDay(null)}
-              className={`text-sm font-medium text-[var(--color-accent)] ${FOCUS_RING}`}
+              onClick={goPrev}
+              className={ICON_BTN}
+              aria-label={t("monthHistory.prevMonth")}
             >
-              {t("monthHistory.showFullMonth")}
+              <IoChevronBack className="h-5 w-5" aria-hidden />
             </button>
-          ) : null}
-        </div>
-
-        {expensesQ.isPending ? (
-          <div className="mt-3 space-y-2" aria-busy>
-            <div className="h-14 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
-            <div className="h-14 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
+            <h3 className="min-w-0 flex-1 truncate text-center font-display text-sm font-semibold tracking-tight text-[var(--color-text)] sm:text-base">
+              {monthLabel}
+            </h3>
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={!canGoNext}
+              className={`${ICON_BTN} disabled:cursor-not-allowed disabled:opacity-35`}
+              aria-label={t("monthHistory.nextMonth")}
+            >
+              <IoChevronForward className="h-5 w-5" aria-hidden />
+            </button>
           </div>
-        ) : selectedItems.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--color-text-dim)]">
-            {selectedDay != null
-              ? t("monthHistory.emptyDay")
-              : t("monthHistory.emptyMonth")}
-          </p>
-        ) : (
-          <ul className="mt-3 space-y-2">
-            {selectedItems.map((it) => {
-              const CatIcon = getCategoryIcon(it.category_icon);
-              return (
-                <li
-                  key={it.id}
-                  className="flex items-center gap-3 rounded-lg bg-[var(--color-bg-soft)]/80 px-3 py-2.5"
-                >
-                  <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                    style={{
-                      backgroundColor: `${it.category_color ?? "#223040"}22`,
-                      color: it.category_color ?? "var(--color-accent)",
-                    }}
-                    aria-hidden
-                  >
-                    <CatIcon className="gdh-icon-lg" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold tabular-nums text-[var(--color-text)]">
-                      {money(it.amount)}
-                      {it.category_name ? (
-                        <span className="font-medium text-[var(--color-text-muted)]">
-                          {" "}
-                          · {it.category_name}
+
+          <div
+            className="mt-2 grid grid-cols-7 gap-0.5 sm:gap-1"
+            role="grid"
+            aria-label={monthLabel}
+          >
+            {weekdays.map((label) => (
+              <div
+                key={label}
+                className="pb-0.5 text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-dim)]"
+                role="columnheader"
+              >
+                {label}
+              </div>
+            ))}
+
+            {expensesQ.isPending
+              ? Array.from({ length: 35 }, (_, i) => (
+                  <div
+                    key={i}
+                    className="h-11 animate-pulse rounded-md bg-[var(--color-bg-soft)] md:h-9"
+                  />
+                ))
+              : cells.map((day, i) => {
+                  if (day == null) {
+                    return (
+                      <div key={`e-${i}`} className="h-11 md:h-9" aria-hidden />
+                    );
+                  }
+                  const key = dayKey(year, month, day);
+                  const total = dayTotals.get(key) ?? 0;
+                  const hasSpend = total > 0;
+                  const selected = selectedDay === day;
+                  const isToday = isCurrentMonth && day === now.getDate();
+                  const heat = intensity(total);
+
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      role="gridcell"
+                      aria-selected={selected}
+                      aria-label={`${day} ${monthLabel}${hasSpend ? `, ${money(total)}` : ""}`}
+                      onClick={() =>
+                        setSelectedDay((prev) => (prev === day ? null : day))
+                      }
+                      className={`relative flex h-11 min-h-11 flex-col items-center justify-center rounded-md border px-0.5 transition-colors md:h-9 md:min-h-9 ${FOCUS_RING} ${
+                        selected
+                          ? "border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] ring-1 ring-[var(--color-accent-border)]"
+                          : isToday
+                            ? "border-[var(--color-accent-border)]/60 bg-[var(--color-bg-soft)]"
+                            : hasSpend
+                              ? "border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] hover:border-[var(--color-accent-border)]"
+                              : "border-transparent hover:bg-[var(--color-bg-soft)]/80"
+                      }`}
+                      style={
+                        hasSpend && !selected
+                          ? {
+                              backgroundColor: `color-mix(in srgb, var(--color-accent-dim) ${Math.round(28 + heat * 52)}%, var(--color-bg-soft))`,
+                            }
+                          : undefined
+                      }
+                    >
+                      <span
+                        className={`text-[11px] font-semibold tabular-nums leading-none sm:text-xs ${
+                          selected || isToday
+                            ? "text-[var(--color-accent)]"
+                            : "text-[var(--color-text)]"
+                        }`}
+                      >
+                        {day}
+                      </span>
+                      {hasSpend ? (
+                        <span
+                          className={`mt-0.5 max-w-full truncate text-[8px] font-medium tabular-nums leading-none sm:text-[9px] ${
+                            selected
+                              ? "text-[var(--color-accent)]"
+                              : "text-[var(--color-text-muted)]"
+                          }`}
+                        >
+                          {compactMoney(total)}
                         </span>
                       ) : null}
-                    </p>
-                    <p className="truncate text-xs text-[var(--color-text-dim)]">
-                      {it.occurred_at}
-                      {it.note ? ` · ${it.note}` : ""}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+                    </button>
+                  );
+                })}
+          </div>
+        </div>
+
+        <div className="min-w-0 border-t border-[var(--color-border)] pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-[var(--color-text)]">
+                {selectedDay != null
+                  ? t("monthHistory.expensesForDay", {
+                      day: String(selectedDay),
+                      month: monthLabel,
+                    })
+                  : t("monthHistory.expensesFor", { month: monthLabel })}
+              </h3>
+              <p className="mt-0.5 text-xs text-[var(--color-text-dim)]">
+                {t("monthHistory.total", { amount: money(selectedTotal) })}
+                {` · ${selectedItems.length} ${t("monthHistory.entries")}`}
+              </p>
+            </div>
+            {selectedDay != null ? (
+              <button
+                type="button"
+                onClick={() => setSelectedDay(null)}
+                className={`min-h-11 text-sm font-medium text-[var(--color-accent)] ${FOCUS_RING}`}
+              >
+                {t("monthHistory.showFullMonth")}
+              </button>
+            ) : null}
+          </div>
+
+          {expensesQ.isPending ? (
+            <div className="mt-3 space-y-2" aria-busy>
+              <div className="h-14 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
+              <div className="h-14 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
+            </div>
+          ) : selectedItems.length === 0 ? (
+            <p className="mt-3 text-sm text-[var(--color-text-dim)]">
+              {selectedDay != null
+                ? t("monthHistory.emptyDay")
+                : t("monthHistory.emptyMonth")}
+            </p>
+          ) : (
+            <ul className="mt-3 max-h-[min(28rem,55vh)] space-y-2 overflow-y-auto overscroll-y-contain md:max-h-[min(32rem,60vh)]">
+              {selectedItems.map((it) => {
+                const CatIcon = getCategoryIcon(it.category_icon);
+                return (
+                  <li
+                    key={it.id}
+                    className="flex items-center gap-3 rounded-lg bg-[var(--color-bg-soft)]/80 px-3 py-2.5"
+                  >
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                      style={{
+                        backgroundColor: `${it.category_color ?? "#223040"}22`,
+                        color: it.category_color ?? "var(--color-accent)",
+                      }}
+                      aria-hidden
+                    >
+                      <CatIcon className="gdh-icon-lg" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold tabular-nums text-[var(--color-text)]">
+                        {money(it.amount)}
+                        {it.category_name ? (
+                          <span className="font-medium text-[var(--color-text-muted)]">
+                            {" "}
+                            · {it.category_name}
+                          </span>
+                        ) : null}
+                      </p>
+                      <p className="truncate text-xs text-[var(--color-text-dim)]">
+                        {it.occurred_at}
+                        {it.note ? ` · ${it.note}` : ""}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </div>
     </section>
   );
