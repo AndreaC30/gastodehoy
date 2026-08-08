@@ -388,7 +388,7 @@ export function Dashboard({ profileName }: Props) {
 
         <header className="relative z-10 border-b border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 sm:px-4 sm:py-3.5">
           <div className="mx-auto flex max-w-lg items-center gap-2 sm:gap-3 md:max-w-4xl lg:max-w-6xl">
-            {/* Mobile: menu left (same side as desktop sidebar) + section title */}
+            {/* Mobile: menu left + brand (section as subtitle, like desktop tagline) */}
             <button
               type="button"
               data-tour="menu"
@@ -400,10 +400,13 @@ export function Dashboard({ profileName }: Props) {
             >
               <IoMenu className="gdh-icon-lg" aria-hidden />
             </button>
-            <div className="flex min-w-0 flex-1 items-center md:hidden">
-              <h1 className="m-0 truncate font-display text-lg font-semibold tracking-tight text-[var(--color-text)]">
-                {t(SECTION_TITLE_KEY[activeSection])}
+            <div className="min-w-0 flex-1 md:hidden">
+              <h1 className="m-0 leading-none">
+                <BrandLogo variant="header" />
               </h1>
+              <p className="mt-0.5 truncate text-sm font-medium text-[var(--color-text-muted)]">
+                {t(SECTION_TITLE_KEY[activeSection])}
+              </p>
             </div>
 
             {/* Desktop: brand + tagline */}
