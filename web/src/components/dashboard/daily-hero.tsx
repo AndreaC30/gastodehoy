@@ -6,7 +6,6 @@ import { useAnimatedNumber } from "@/lib/use-animated-number";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BTN_PRIMARY, FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
 import { TYPE_BODY, TYPE_EYEBROW, TYPE_HERO_NUMBER } from "@/lib/typography";
-import { useState } from "react";
 
 type Props = {
   summary: Summary | undefined;
@@ -25,13 +24,12 @@ export function DailyHero({
   monthLabel,
 }: Props) {
   const { t } = useTranslation();
-  const [showMetrics, setShowMetrics] = useState(false);
   const animatedSpend = useAnimatedNumber(
     summary?.suggested_spend_today != null ? Number(summary.suggested_spend_today) : undefined,
   );
 
   const metrics = (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
       <Metric
         label={t("metrics.savings")}
         value={
@@ -150,7 +148,7 @@ export function DailyHero({
             </button>
           ) : null}
 
-          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+          <div className="mt-4">
             <button
               type="button"
               onClick={onRefresh}
@@ -159,17 +157,9 @@ export function DailyHero({
             >
               {t("hero.refresh")}
             </button>
-            <button
-              type="button"
-              className={`min-h-11 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] md:hidden ${FOCUS_RING}`}
-              onClick={() => setShowMetrics((v) => !v)}
-              aria-expanded={showMetrics}
-            >
-              {showMetrics ? t("hero.hideMetrics") : t("hero.showMetrics")}
-            </button>
           </div>
 
-          {showMetrics ? <div className="mt-5 md:hidden">{metrics}</div> : null}
+          <div className="mt-5 md:hidden">{metrics}</div>
         </div>
 
         <div className="hidden md:block">{metrics}</div>

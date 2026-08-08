@@ -132,7 +132,6 @@ export function Dashboard({ profileName }: Props) {
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [gastosTab, setGastosTab] = useState<GastosTab>("variables");
-  const [analisisChartsOpen, setAnalisisChartsOpen] = useState(false);
   const density = useSyncExternalStore(
     subscribeDensity,
     getDensity,
@@ -554,39 +553,14 @@ export function Dashboard({ profileName }: Props) {
 
         {/* Section: ANALISIS */}
         {activeSection === 'analisis' && (
-          <div className="space-y-5 md:space-y-5">
+          <div className="space-y-5">
             <InsightsPanel
               data={insightsQ.data}
               isLoading={insightsQ.isPending}
               error={insightsQ.error as Error | null}
             />
 
-            <div className="md:hidden">
-              <button
-                type="button"
-                className={`flex min-h-11 w-full items-center justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 text-sm font-semibold text-[var(--color-text)] ${FOCUS_RING}`}
-                aria-expanded={analisisChartsOpen}
-                onClick={() => setAnalisisChartsOpen((v) => !v)}
-              >
-                {t("insights.moreCharts")}
-                <span className="text-[var(--color-text-dim)]" aria-hidden>
-                  {analisisChartsOpen ? "−" : "+"}
-                </span>
-              </button>
-              {analisisChartsOpen ? (
-                <div className="mt-3 space-y-4">
-                  {insightsQ.data && insightsQ.data.category_breakdown.length > 0 ? (
-                    <SpendingChart
-                      breakdown={insightsQ.data.category_breakdown}
-                      total={insightsQ.data.total_spent}
-                    />
-                  ) : null}
-                  <Rule503020Panel />
-                </div>
-              ) : null}
-            </div>
-
-            <div className="hidden grid-cols-1 gap-4 md:grid lg:grid-cols-2 lg:items-start lg:gap-5">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-5">
               {insightsQ.data && insightsQ.data.category_breakdown.length > 0 ? (
                 <SpendingChart
                   breakdown={insightsQ.data.category_breakdown}
