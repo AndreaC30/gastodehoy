@@ -1,4 +1,4 @@
-/** Sidebar (desktop) + bottom sheet “Más” (móvil). */
+/** Sidebar (desktop) + left drawer menu (móvil). */
 
 import { useState } from "react";
 import {
@@ -15,9 +15,9 @@ import {
   IoCalendar,
 } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
-import { AppSheet } from "@/components/ui/app-sheet";
+import { AppDrawer } from "@/components/ui/app-drawer";
 import { logout } from "@/lib/session";
-import { BTN_SECONDARY, FOCUS_RING } from "@/lib/ui-a11y";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 import { TYPE_EYEBROW } from "@/lib/typography";
 import type { DashboardSection } from "@/lib/dashboard-state";
 import type { IconType } from "react-icons";
@@ -28,7 +28,7 @@ type Props = {
   onExport?: () => void;
   onSectionChange?: (section: DashboardSection) => void;
   activeSection: DashboardSection;
-  /** Controlled mobile sheet (header owns the trigger). */
+  /** Controlled mobile drawer (header owns the trigger). */
   mobileOpen?: boolean;
   onMobileOpenChange?: (open: boolean) => void;
 };
@@ -139,19 +139,13 @@ export function Sidebar({
     );
   }
 
-  const desktopSidebar = (
-    <nav
-      className="flex h-full w-[230px] flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-soft)]"
-      aria-label={t("nav.accountMenu")}
-      data-tour="menu"
-    >
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="border-b border-[var(--color-border)] px-1.5 py-2">
-          <p className={`mb-1.5 px-2 ${TYPE_EYEBROW}`}>
-            {t("nav.accountMenu")}
-          </p>
-          <ul className="space-y-0.5">
-            {ALL_NAV.map((item) => (
+  function NavChrome({ items }: { items: NavItem[] }) {
+    return (
+      <>
+        <div className="border-b border-[var(--color-border)] px-0.5 py-1">
+          <p className={`mb-1.5 px-2 ${TYPE_EYEBROW}`}>{t("nav.accountMenu")}</p>
+          <ul className="space-y-0.5" data-tour="menu">
+            {items.map((item) => (
               <li key={item.id}>
                 <NavButton {...item} dense />
               </li>
@@ -159,7 +153,7 @@ export function Sidebar({
           </ul>
         </div>
 
-        <div className="border-t border-[var(--color-border)] px-1.5 py-2">
+        <div className="border-t border-[var(--color-border)] px-0.5 py-2">
           <button
             type="button"
             onClick={() => onExport?.()}
@@ -175,14 +169,39 @@ export function Sidebar({
           </button>
         </div>
 
-        <div className="border-t border-[var(--color-border)] px-1.5 py-2">
-          <p className={`mb-1.5 px-2 ${TYPE_EYEBROW}`}>
-            {t("nav.language")}
-          </p>
+        <div className="border-t border-[var(--color-border)] px-0.5 py-2">
+          <p className={`mb-1.5 px-2 ${TYPE_EYEBROW}`}>{t("nav.language")}</p>
           <div className="px-1">
             <LanguageRow />
           </div>
         </div>
+      </>
+    );
+  }
+
+  function LogoutRow() {
+    return (
+      <button
+        type="button"
+        onClick={handleLogout}
+        className={`flex min-h-11 w-full items-center gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-3 py-2.5 text-left text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)]">
+          <IoLogOutOutline className="gdh-icon" aria-hidden />
+        </span>
+        {t("nav.logout")}
+      </button>
+    );
+  }
+
+  const desktopSidebar = (
+    <nav
+      className="flex h-full w-[230px] flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-soft)]"
+      aria-label={t("nav.accountMenu")}
+      data-tour="menu"
+    >
+      <div className="min-h-0 flex-1 overflow-y-auto px-1.5 py-2">
+        <NavChrome items={ALL_NAV} />
       </div>
 
       <div className="shrink-0 border-t border-[var(--color-border)] px-1.5 py-2 md:pb-2">
@@ -192,72 +211,29 @@ export function Sidebar({
             {profileName}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className={`flex min-h-11 w-full items-center gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-3 py-2.5 text-left text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
-        >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)]">
-            <IoLogOutOutline className="gdh-icon" aria-hidden />
-          </span>
-          {t("nav.logout")}
-        </button>
+        <LogoutRow />
       </div>
     </nav>
   );
 
   return (
     <>
-      <div className="md:hidden">
-        <AppSheet
-          open={mobileOpen}
-          onClose={() => setMobileOpen(false)}
-          title={t("nav.moreTitle")}
-          subtitle={
-            <span className="truncate text-[var(--color-accent)]">{profileName}</span>
-          }
-          zClass="z-[60]"
-          labelledById="gdh-more-sheet-title"
-        >
-          <ul className="space-y-1.5" data-tour="menu">
-            {SECONDARY_NAV.map((item) => (
-              <li key={item.id}>
-                <NavButton {...item} />
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-4 space-y-1.5 border-t border-[var(--color-border)] pt-4">
-            <button
-              type="button"
-              onClick={() => onExport?.()}
-              disabled={isExportBusy}
-              className={`flex min-h-11 w-full items-center gap-3 rounded-xl border border-transparent px-3.5 py-3 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] disabled:cursor-not-allowed disabled:opacity-45 ${FOCUS_RING}`}
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] text-[var(--color-accent)]">
-                <IoDownloadOutline className="gdh-icon" aria-hidden />
-              </span>
-              <span className="text-sm font-medium text-[var(--color-text)]">
-                {isExportBusy ? t("nav.exporting") : t("nav.exportCsv")}
-              </span>
-            </button>
+      <AppDrawer
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        title={t("header.menu")}
+        subtitle={profileName}
+        labelledById="gdh-more-drawer-title"
+      >
+        <div className="flex h-full min-h-0 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto px-0.5">
+            <NavChrome items={SECONDARY_NAV} />
           </div>
-
-          <div className="mt-4 border-t border-[var(--color-border)] pt-4">
-            <p className={`mb-2 px-1 ${TYPE_EYEBROW}`}>{t("nav.language")}</p>
-            <LanguageRow />
+          <div className="shrink-0 border-t border-[var(--color-border)] px-1.5 py-2">
+            <LogoutRow />
           </div>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className={`mt-4 w-full gap-2 ${BTN_SECONDARY}`}
-          >
-            <IoLogOutOutline className="h-5 w-5 shrink-0" aria-hidden />
-            {t("nav.logout")}
-          </button>
-        </AppSheet>
-      </div>
+        </div>
+      </AppDrawer>
 
       <aside className="sticky top-0 z-20 hidden h-screen shrink-0 md:block">
         {desktopSidebar}
