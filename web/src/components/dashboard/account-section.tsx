@@ -19,6 +19,7 @@ import {
   type Density,
 } from "@/lib/density-preference";
 import {
+  canUseOsNotifications,
   getInstallHintPlatform,
   isStandaloneDisplay,
 } from "@/lib/pwa-display";
@@ -35,6 +36,7 @@ export function AccountSection({ profileName }: Props) {
   const { t } = useTranslation();
   const [dailyNotify, setDailyNotify] = useState(isDailyNotificationEnabled);
   const [prefError, setPrefError] = useState<string | null>(null);
+  const [prefNotice, setPrefNotice] = useState<string | null>(null);
   const [showInstallHint, setShowInstallHint] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const density = useSyncExternalStore(
@@ -46,6 +48,7 @@ export function AccountSection({ profileName }: Props) {
   useEffect(() => {
     setDailyNotify(isDailyNotificationEnabled());
     setPrefError(null);
+    setPrefNotice(null);
     const dismissed =
       typeof localStorage !== "undefined" &&
       localStorage.getItem(INSTALL_HINT_DISMISS_KEY) === "1";
@@ -109,6 +112,14 @@ export function AccountSection({ profileName }: Props) {
               {prefError}
             </div>
           ) : null}
+          {prefNotice ? (
+            <div
+              className="mt-3 rounded-lg border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-2 text-sm text-[var(--color-text-muted)]"
+              role="status"
+            >
+              {prefNotice}
+            </div>
+          ) : null}
 
           <div className="mt-3 space-y-3">
             <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-4 py-3.5">
@@ -119,18 +130,53 @@ export function AccountSection({ profileName }: Props) {
                 onChange={async (e) => {
                   const on = e.target.checked;
                   setPrefError(null);
+                  setPrefNotice(null);
                   if (on) {
-                    const perm = await requestNotificationPermission();
-                    if (perm !== "granted") {
-                      setPrefError(t("account.notifyError"));
-                      return;
+                    let osGranted = false;
+                    try {
+                      if (canUseOsNotifications()) {
+                        const perm = await requestNotificationPermission();
+                        osGranted = perm === "granted";
+                        if (osGranted) {
+                          try {
+                            await registerWebPush();
+                          } catch {
+                            /* Push is optional; in-app aviso still works. */
+                          }
+                        }
+                      }
+                    } catch {
+                      osGranted = false;
                     }
-                    await registerWebPush();
-                  } else {
-                    await unregisterWebPush();
+
+                    setDailyNotificationEnabled(true);
+                    setDailyNotify(true);
+
+                    if (!osGranted) {
+                      if (
+                        installPlatform === "ios" &&
+                        !isStandaloneDisplay()
+                      ) {
+                        setPrefNotice(t("account.notifyNeedInstall"));
+                      } else if (
+                        "Notification" in window &&
+                        Notification.permission === "denied"
+                      ) {
+                        setPrefNotice(t("account.notifyDeniedInApp"));
+                      } else {
+                        setPrefNotice(t("account.notifyInAppOnly"));
+                      }
+                    }
+                    return;
                   }
-                  setDailyNotificationEnabled(on);
-                  setDailyNotify(on);
+
+                  try {
+                    await unregisterWebPush();
+                  } catch {
+                    /* ignore */
+                  }
+                  setDailyNotificationEnabled(false);
+                  setDailyNotify(false);
                 }}
               />
               <span className="text-sm text-[var(--color-text-muted)]">

@@ -16,3 +16,17 @@ export function getInstallHintPlatform(): "ios" | "android" | "desktop" {
   if (/Android/i.test(ua)) return "android";
   return "desktop";
 }
+
+/**
+ * Whether the OS/browser can show real notifications for this context.
+ * iOS only supports Web Notifications reliably from an installed Home Screen app.
+ */
+export function canUseOsNotifications(): boolean {
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    return false;
+  }
+  if (getInstallHintPlatform() === "ios" && !isStandaloneDisplay()) {
+    return false;
+  }
+  return true;
+}

@@ -345,7 +345,7 @@
     "description": "Ingresos, categorías y metas están en el menú principal. Aquí ajustas preferencias de la app, la sesión y, si lo necesitas, el cierre de la cuenta.",
     "prefsTitle": "Preferencias",
     "dailyNotifyTitle": "Aviso diario",
-    "dailyNotifyDesc": "Al abrir la app, un mensaje motivador (máximo uno al día). El navegador pedirá permiso para notificaciones.",
+    "dailyNotifyDesc": "Mensaje positivo una vez al día: en la app al abrirla y, si das permiso, también como notificación del sistema (con la app cerrada hace falta instalarla y activar push).",
     "notifyError": "Activa las notificaciones en los ajustes del navegador o del sistema para recibir el aviso diario.",
     "densityTitle": "Vista compacta",
     "densityDesc": "En las listas de gastos fijos y variables, menos espacio y letra un poco más pequeña para ver más filas.",
@@ -357,7 +357,10 @@
     "installBodyIos": "En Safari: Compartir → «Añadir a pantalla de inicio». Así se abre a pantalla completa, sin barra del navegador.",
     "installBodyAndroid": "En Chrome: menú ⋮ → «Instalar aplicación» o «Añadir a la pantalla de inicio».",
     "installBodyDesktop": "En el navegador: icono de instalar en la barra de direcciones, o menú → Instalar GastoDeHoy.",
-    "installDismiss": "Entendido"
+    "installDismiss": "Entendido",
+    "notifyNeedInstall": "Aviso activado dentro de la app. En iPhone, para notificaciones del sistema: instala GastoDeHoy en la pantalla de inicio y vuelve a activar el permiso desde la app instalada.",
+    "notifyDeniedInApp": "Aviso activado dentro de la app. El navegador tiene las notificaciones bloqueadas; actívalas en Ajustes del sistema/navegador si quieres el aviso con la app cerrada.",
+    "notifyInAppOnly": "Aviso activado dentro de la app. Este dispositivo no puede mostrar notificaciones del sistema ahora; verás el mensaje al abrir GastoDeHoy."
   },
   "deleteAccount": {
     "title": "Eliminar cuenta",

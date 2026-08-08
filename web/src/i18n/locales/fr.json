@@ -345,7 +345,7 @@
     "description": "Revenus, catégories et objectifs sont dans le menu principal. Ici, vous gérez les préférences de l'app, la session et, si besoin, la fermeture du compte.",
     "prefsTitle": "Préférences",
     "dailyNotifyTitle": "Rappel quotidien",
-    "dailyNotifyDesc": "À l'ouverture de l'app, un message motivant (un maximum par jour). Le navigateur demandera l'autorisation des notifications.",
+    "dailyNotifyDesc": "Un message positif une fois par jour : dans l’app à l’ouverture et, si vous autorisez, aussi en notification système (app fermée : installation + push nécessaires).",
     "notifyError": "Activez les notifications dans les réglages du navigateur ou du système pour recevoir le rappel quotidien.",
     "densityTitle": "Vue compacte",
     "densityDesc": "Dans les listes de dépenses fixes et variables, moins d'espace et un texte un peu plus petit pour voir plus de lignes.",
@@ -358,7 +358,10 @@
     "installBodyIos": "Dans Safari : Partager → « Sur l'écran d'accueil ». Plein écran, sans barre du navigateur.",
     "installBodyAndroid": "Dans Chrome : menu ⋮ → « Installer l'application » ou « Ajouter à l'écran d'accueil ».",
     "installBodyDesktop": "Dans le navigateur : icône d'installation dans la barre d'adresse, ou menu → Installer GastoDeHoy.",
-    "installDismiss": "Compris"
+    "installDismiss": "Compris",
+    "notifyNeedInstall": "Rappel activé dans l’app. Sur iPhone, pour les notifications système : ajoutez GastoDeHoy à l’écran d’accueil, ouvrez-la depuis là et autorisez les notifications.",
+    "notifyDeniedInApp": "Rappel activé dans l’app. Les notifications sont bloquées dans le navigateur ; activez-les dans les réglages pour les alertes app fermée.",
+    "notifyInAppOnly": "Rappel activé dans l’app. Cet appareil ne peut pas afficher de notifications système pour l’instant ; vous verrez le message à l’ouverture."
   },
   "deleteAccount": {
     "title": "Supprimer le compte",

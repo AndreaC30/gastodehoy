@@ -345,7 +345,7 @@
     "description": "Income, categories and goals are in the main menu. Here you manage app preferences, your session and, if needed, account closure.",
     "prefsTitle": "Preferences",
     "dailyNotifyTitle": "Daily reminder",
-    "dailyNotifyDesc": "When you open the app, a short motivational message (at most one per day). The browser will ask for notification permission.",
+    "dailyNotifyDesc": "A positive message once a day: in the app when you open it, and as a system notification if you grant permission (with the app closed you need it installed and push enabled).",
     "notifyError": "Enable notifications in your browser or system settings to receive the daily reminder.",
     "densityTitle": "Compact view",
     "densityDesc": "In fixed and variable expense lists, tighter spacing and slightly smaller text so you see more rows.",
@@ -357,7 +357,10 @@
     "installBodyIos": "In Safari: Share → “Add to Home Screen”. Opens full screen without the browser bar.",
     "installBodyAndroid": "In Chrome: menu ⋮ → “Install app” or “Add to Home screen”.",
     "installBodyDesktop": "In the browser: install icon in the address bar, or menu → Install GastoDeHoy.",
-    "installDismiss": "Got it"
+    "installDismiss": "Got it",
+    "notifyNeedInstall": "In-app reminder enabled. On iPhone, for system notifications: add GastoDeHoy to the Home Screen, open it from there, and allow notifications.",
+    "notifyDeniedInApp": "In-app reminder enabled. Notifications are blocked in the browser; enable them in system/browser settings for alerts when the app is closed.",
+    "notifyInAppOnly": "In-app reminder enabled. This device cannot show system notifications right now; you will see the message when you open GastoDeHoy."
   },
   "deleteAccount": {
     "title": "Delete account",

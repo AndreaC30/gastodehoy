@@ -345,8 +345,8 @@
     "description": "Einkommen, Kategorien und Ziele sind im Hauptmenü. Hier verwaltest du App-Einstellungen, die Sitzung und, falls nötig, die Kontoschließung.",
     "prefsTitle": "Einstellungen",
     "dailyNotifyTitle": "Tägliche Erinnerung",
-    "dailyNotifyDesc": "Beim Öffnen der App eine kurze Motivationsnachricht (höchstens eine pro Tag). Der Browser fragt nach Benachrichtigungsberechtigung.",
-    "notifyError": "Aktiviere Benachrichtigungen in den Browser- oder Systemeinstellungen, um die tägliche Erinnerung zu erhalten.",
+    "dailyNotifyDesc": "Eine positive Nachricht einmal täglich: in der App beim Öffnen und, mit Erlaubnis, auch als Systembenachrichtigung (bei geschlossener App: Installation + Push nötig).",
+    "notifyError": "Aktiviere Benachrichtigungen in den Browser- oder Systemeinstellungen für die tägliche Erinnerung.",
     "densityTitle": "Kompakte Ansicht",
     "densityDesc": "In den Listen der festen und variablen Ausgaben engerer Abstand und etwas kleinere Schrift, damit mehr Zeilen sichtbar sind.",
     "logout": "Abmelden",
@@ -358,7 +358,10 @@
     "installBodyIos": "In Safari: Teilen → „Zum Home-Bildschirm“. Öffnet ohne Browserleiste.",
     "installBodyAndroid": "In Chrome: Menü ⋮ → „App installieren“ oder „Zum Startbildschirm“.",
     "installBodyDesktop": "Im Browser: Installieren-Symbol in der Adressleiste oder Menü → GastoDeHoy installieren.",
-    "installDismiss": "Verstanden"
+    "installDismiss": "Verstanden",
+    "notifyNeedInstall": "In-App-Erinnerung aktiv. Auf dem iPhone für Systembenachrichtigungen: GastoDeHoy zum Home-Bildschirm hinzufügen, von dort öffnen und Benachrichtigungen erlauben.",
+    "notifyDeniedInApp": "In-App-Erinnerung aktiv. Benachrichtigungen sind im Browser blockiert; aktiviere sie in den Einstellungen für Hinweise bei geschlossener App.",
+    "notifyInAppOnly": "In-App-Erinnerung aktiv. Dieses Gerät kann gerade keine Systembenachrichtigungen zeigen; du siehst die Nachricht beim Öffnen von GastoDeHoy."
   },
   "deleteAccount": {
     "title": "Konto löschen",
