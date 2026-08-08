@@ -227,6 +227,13 @@
     "gastosFijos": "Fixed",
     "fabAddExpense": "Add expense"
   },
+  "emptyStates": {
+    "noVariableExpenses": "No expenses this month",
+    "noVariableExpensesDesc": "You haven't logged any variable expenses yet. Add the first one to start tracking your budget.",
+    "noFixedExpenses": "No fixed expenses",
+    "noFixedExpensesDesc": "You have no fixed expenses yet. Add rent, subscriptions or insurance for a more accurate calculation.",
+    "ctaAdd": "Add"
+  },
   "variableExpenses": {
     "title": "Day-to-day expenses",
     "subtitle": "Add your daily purchases and one-off spending here",
@@ -297,6 +304,10 @@
     "dailyNotifyTitle": "Daily reminder",
     "dailyNotifyDesc": "Positive message when opening the app and, if the server has VAPID, also via push with the app closed (daily cron). One per day max.",
     "notifyError": "Enable notifications in your browser or system settings to receive the daily reminder.",
+    "densityTitle": "Compact view",
+    "densityDesc": "Reduce spacing between elements to see more content on screen",
+    "densityComfortable": "Comfortable",
+    "densityCompact": "Compact",
     "extraDesc": "Bonus, extra pay… Only counts if the date falls in this month. What you reserve here won't add to «You can spend today»; the rest will.",
     "extraAmount": "Amount (€)",
     "extraAmountPlaceholder": "e.g. 150",
@@ -537,6 +548,10 @@
     "expenseRegistered": "Expense recorded",
     "fixedRemoved": "Fixed expense removed",
     "expenseDeleted": "Expense deleted",
+    "undoDelete": "Expense deleted",
+    "undoAction": "Undo",
+    "expenseDeletedUndo": "Expense deleted",
+    "fixedRemovedUndo": "Fixed expense removed",
     "done": "Done",
     "extraIncomeUpdated": "Extra income updated",
     "changesSaved": "Changes saved",
