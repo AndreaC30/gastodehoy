@@ -15,11 +15,8 @@ import {
   IoCalendar,
 } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
-import { AccountModal } from "@/components/account-modal";
-import { DeleteAccountModal } from "@/components/delete-account-modal";
 import { AppSheet } from "@/components/ui/app-sheet";
 import { logout } from "@/lib/session";
-import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { BTN_SECONDARY, FOCUS_RING } from "@/lib/ui-a11y";
 import { TYPE_EYEBROW } from "@/lib/typography";
 import type { DashboardSection } from "@/lib/dashboard-state";
@@ -53,6 +50,7 @@ const ALL_NAV: NavItem[] = [
   { id: "categorias", labelKey: "header.sectionCategorias", Icon: IoPricetagsOutline },
   { id: "metas", labelKey: "header.sectionMetas", Icon: IoFlagOutline },
   { id: "tour", labelKey: "header.sectionTour", Icon: IoHelpCircleOutline },
+  { id: "cuenta", labelKey: "header.sectionCuenta", Icon: IoPersonOutline },
 ];
 
 const SECONDARY_NAV = ALL_NAV.filter((item) => !PRIMARY_IDS.includes(item.id));
@@ -70,10 +68,6 @@ export function Sidebar({
   const [mobileOpenLocal, setMobileOpenLocal] = useState(false);
   const mobileOpen = mobileOpenProp ?? mobileOpenLocal;
   const setMobileOpen = onMobileOpenChange ?? setMobileOpenLocal;
-  const [accountOpen, setAccountOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-
-  useBodyScrollLock(accountOpen || deleteOpen);
 
   const isExportBusy = exportBusy ?? false;
 
@@ -85,11 +79,6 @@ export function Sidebar({
   function handleLogout() {
     setMobileOpen(false);
     void logout();
-  }
-
-  function openAccountFromMenu() {
-    setMobileOpen(false);
-    setAccountOpen(true);
   }
 
   function LanguageRow() {
@@ -198,30 +187,11 @@ export function Sidebar({
 
       <div className="shrink-0 border-t border-[var(--color-border)] px-1.5 py-2 md:pb-2">
         <div className="mb-2 px-2">
-          <p className={TYPE_EYEBROW}>
-            {t("nav.account")}
-          </p>
+          <p className={TYPE_EYEBROW}>{t("nav.account")}</p>
           <p className="mt-0.5 truncate text-sm font-semibold text-[var(--color-accent)]">
             {profileName}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openAccountFromMenu}
-          className={`mb-1 flex min-h-11 w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-panel)] ${FOCUS_RING}`}
-        >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-accent)]">
-            <IoPersonOutline className="gdh-icon" aria-hidden />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium text-[var(--color-text)]">
-              {t("nav.account")}
-            </span>
-            <span className="block truncate text-[11px] text-[var(--color-text-dim)]">
-              {t("nav.accountDesc")}
-            </span>
-          </span>
-        </button>
         <button
           type="button"
           onClick={handleLogout}
@@ -271,23 +241,6 @@ export function Sidebar({
                 {isExportBusy ? t("nav.exporting") : t("nav.exportCsv")}
               </span>
             </button>
-            <button
-              type="button"
-              onClick={openAccountFromMenu}
-              className={`flex min-h-11 w-full items-center gap-3 rounded-xl border border-transparent px-3.5 py-3 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] ${FOCUS_RING}`}
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] text-[var(--color-accent)]">
-                <IoPersonOutline className="gdh-icon" aria-hidden />
-              </span>
-              <span className="min-w-0 flex-1 text-left">
-                <span className="block text-sm font-medium text-[var(--color-text)]">
-                  {t("nav.account")}
-                </span>
-                <span className="block text-xs text-[var(--color-text-dim)]">
-                  {t("nav.accountDesc")}
-                </span>
-              </span>
-            </button>
           </div>
 
           <div className="mt-4 border-t border-[var(--color-border)] pt-4">
@@ -309,21 +262,6 @@ export function Sidebar({
       <aside className="sticky top-0 z-20 hidden h-screen shrink-0 md:block">
         {desktopSidebar}
       </aside>
-
-      <AccountModal
-        open={accountOpen}
-        profileName={profileName}
-        onClose={() => setAccountOpen(false)}
-        onRequestDelete={() => {
-          setAccountOpen(false);
-          setDeleteOpen(true);
-        }}
-      />
-
-      <DeleteAccountModal
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-      />
     </>
   );
 }

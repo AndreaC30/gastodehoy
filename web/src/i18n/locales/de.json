@@ -161,7 +161,8 @@
     "sectionIngresos": "Einkommen",
     "sectionCategorias": "Kategorien",
     "sectionMetas": "Ziele",
-    "sectionTour": "Tour"
+    "sectionTour": "Tour",
+    "sectionCuenta": "Konto"
   },
   "nav": {
     "yourIncome": "Dein Einkommen",

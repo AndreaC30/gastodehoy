@@ -1,8 +1,17 @@
 /** Dashboard section state management with localStorage persistence. */
 
-export type DashboardSection = 'hoy' | 'gastos' | 'analisis' | 'historico' | 'ingresos' | 'categorias' | 'metas' | 'tour';
+export type DashboardSection =
+  | "hoy"
+  | "gastos"
+  | "analisis"
+  | "historico"
+  | "ingresos"
+  | "categorias"
+  | "metas"
+  | "tour"
+  | "cuenta";
 
-const SECTION_KEY = 'gastodehoy_active_section';
+const SECTION_KEY = "gastodehoy_active_section";
 
 export function getActiveSection(): DashboardSection {
   try {
@@ -16,6 +25,7 @@ export function getActiveSection(): DashboardSection {
       "categorias",
       "metas",
       "tour",
+      "cuenta",
     ];
     if (stored && (allowed as string[]).includes(stored)) {
       return stored as DashboardSection;
@@ -35,12 +45,13 @@ export function setActiveSection(section: DashboardSection): void {
 }
 
 export const SECTIONS: { id: DashboardSection; label: string }[] = [
-  { id: 'hoy', label: 'Hoy' },
-  { id: 'gastos', label: 'Gastos' },
-  { id: 'analisis', label: 'Análisis' },
-  { id: 'ingresos', label: 'Ingresos' },
-  { id: 'historico', label: 'Histórico' },
-  { id: 'categorias', label: 'Categorías' },
-  { id: 'metas', label: 'Metas' },
-  { id: 'tour', label: 'Tour' },
+  { id: "hoy", label: "Hoy" },
+  { id: "gastos", label: "Gastos" },
+  { id: "analisis", label: "Análisis" },
+  { id: "ingresos", label: "Ingresos" },
+  { id: "historico", label: "Histórico" },
+  { id: "categorias", label: "Categorías" },
+  { id: "metas", label: "Metas" },
+  { id: "tour", label: "Tour" },
+  { id: "cuenta", label: "Cuenta" },
 ];

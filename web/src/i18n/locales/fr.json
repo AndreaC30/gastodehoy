@@ -161,7 +161,8 @@
     "sectionIngresos": "Revenus",
     "sectionCategorias": "Catégories",
     "sectionMetas": "Objectifs",
-    "sectionTour": "Guide"
+    "sectionTour": "Guide",
+    "sectionCuenta": "Compte"
   },
   "nav": {
     "yourIncome": "Vos revenus",

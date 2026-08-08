@@ -11,6 +11,7 @@ import { Sidebar } from "@/components/dashboard/sidebar-nav";
 import { IncomeSettingsSection } from "@/components/dashboard/income-settings-section";
 import { CategoriesSection } from "@/components/dashboard/categories-section";
 import { SavingsGoalsSection } from "@/components/dashboard/savings-goals-section";
+import { AccountSection } from "@/components/dashboard/account-section";
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -70,6 +71,7 @@ const SECTION_TITLE_KEY: Record<DashboardSection, string> = {
   categorias: "header.sectionCategorias",
   metas: "header.sectionMetas",
   tour: "header.sectionTour",
+  cuenta: "header.sectionCuenta",
 };
 
 async function loadSummary() {
@@ -622,6 +624,11 @@ export function Dashboard({ profileName }: Props) {
             onStart={startGuidedTour}
             onNavigate={handleSectionChange}
           />
+        )}
+
+        {/* Section: CUENTA */}
+        {activeSection === "cuenta" && (
+          <AccountSection profileName={profileName} />
         )}
         </div>
 
