@@ -196,8 +196,8 @@ export function MonthHistoryStrip() {
         </div>
       </div>
 
-      {/* Mobile: stacked. md+: compact calendar left, expense list right. */}
-      <div className="mt-4 grid gap-5 md:grid-cols-[minmax(0,18.5rem)_minmax(0,1fr)] md:items-start md:gap-6 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+      {/* Mobile: stacked. md+: compact calendar left; list height locked to calendar + scrolls. */}
+      <div className="mt-4 grid gap-5 md:grid-cols-[minmax(0,18.5rem)_minmax(0,1fr)] md:items-stretch md:gap-6 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
         <div className="mx-auto w-full max-w-[22rem] md:mx-0 md:max-w-none">
           <div className="flex items-center justify-between gap-1">
             <button
@@ -310,8 +310,12 @@ export function MonthHistoryStrip() {
           </div>
         </div>
 
-        <div className="min-w-0 border-t border-[var(--color-border)] pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
-          <div className="flex flex-wrap items-end justify-between gap-2">
+        {/*
+          Desktop: height:0 + min-height:100% so this column does not grow the grid
+          past the calendar; the list scrolls inside that height instead.
+        */}
+        <div className="flex min-h-0 min-w-0 flex-col border-t border-[var(--color-border)] pt-4 md:h-0 md:min-h-full md:border-l md:border-t-0 md:pl-6 md:pt-0">
+          <div className="flex shrink-0 flex-wrap items-end justify-between gap-2">
             <div className="min-w-0">
               <h3 className="text-sm font-semibold text-[var(--color-text)]">
                 {selectedDay != null
@@ -349,7 +353,7 @@ export function MonthHistoryStrip() {
                 : t("monthHistory.emptyMonth")}
             </p>
           ) : (
-            <ul className="mt-3 max-h-[min(28rem,55vh)] space-y-2 overflow-y-auto overscroll-y-contain md:max-h-[min(32rem,60vh)]">
+            <ul className="mt-3 max-h-[min(20rem,45vh)] space-y-2 overflow-y-auto overscroll-y-contain md:max-h-none md:min-h-0 md:flex-1">
               {selectedItems.map((it) => {
                 const CatIcon = getCategoryIcon(it.category_icon);
                 return (
