@@ -170,7 +170,8 @@
     "sending": "Sending…",
     "sendEmail": "Send email",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "accessTabs": "Account access"
   },
   "common": {
     "loading": "Loading…",
@@ -183,7 +184,10 @@
     "close": "Close",
     "create": "Create",
     "remove": "Remove",
-    "swipeHint": "Tap to edit · swipe left to delete"
+    "swipeHint": "Tap to edit · swipe left to delete",
+    "saving": "Saving…",
+    "update": "Update",
+    "mainNav": "Main navigation"
   },
   "header": {
     "tagline": "Your daily margin, clear and instant.",
@@ -267,7 +271,8 @@
     "showLess": "Show less",
     "showMore": "View {{count}} more fixed expense",
     "showMore_other": "View {{count}} more fixed expenses",
-    "empty": "No fixed expenses yet."
+    "empty": "No fixed expenses yet.",
+    "nameError": "Enter a name for the fixed expense"
   },
   "savingsGoals": {
     "title": "Savings goals",
@@ -391,7 +396,12 @@
     "budgetHint": "If you spend more than this amount in the month, the app will alert you.",
     "color": "Color",
     "icon": "Icon",
-    "perMonth": "{{amount}}€/month"
+    "perMonth": "{{amount}}€/month",
+    "empty": "No categories yet. Create the first one!",
+    "add": "Add category",
+    "deleteConfirm": "Delete “{{name}}”?",
+    "chooseIcon": "Choose icon",
+    "icons": "Icons"
   },
   "spendingChart": {
     "title": "Spending by category",
@@ -459,7 +469,9 @@
     "step6": {
       "title": "Menu",
       "body": "Income, categories and more."
-    }
+    },
+    "introTitle": "New to GastoDeHoy?",
+    "start": "Start guided tour"
   },
   "footer": {
     "legal": "Content, design and software are the property of their owners. Copying, reproduction or commercial use without authorization is prohibited.",
@@ -479,7 +491,9 @@
   },
   "editVariableExpense": {
     "category": "Category",
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "title": "Edit expense",
+    "date": "Date"
   },
   "legal": {
     "title": "Legal Notice and Terms of Use",
@@ -556,7 +570,8 @@
     "extraIncomeUpdated": "Extra income updated",
     "changesSaved": "Changes saved",
     "fixedUpdated": "Fixed expense updated",
-    "expenseUpdated": "Expense updated"
+    "expenseUpdated": "Expense updated",
+    "csvDownloaded": "CSV downloaded"
   },
   "errors": {
     "emailOrPasswordIncorrect": "Incorrect email or password",

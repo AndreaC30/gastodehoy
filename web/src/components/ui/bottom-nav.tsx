@@ -51,7 +51,7 @@ export function BottomNav({ activeSection, onSectionChange }: Props) {
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[var(--color-panel)] pb-[env(safe-area-inset-bottom,0px)] md:hidden"
       role="navigation"
-      aria-label="Navegación principal"
+      aria-label={t("common.mainNav")}
     >
       <ul className="flex h-[60px] items-center justify-around">
         {MAIN_SECTIONS.map((section) => {

@@ -1,5 +1,6 @@
 /** Icon picker as a compact dropdown beside the expense name field. */
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { IoChevronDown } from "react-icons/io5";
 import {
   CATEGORY_ICON_PICKER,
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function IconSelectDropdown({ value, onChange, className }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const SelectedIcon = getCategoryIcon(value);
@@ -47,7 +49,7 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={`flex h-11 min-w-11 items-center justify-center gap-0.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-1.5 hover:border-[var(--color-border-subtle)] ${FOCUS_RING}`}
-        aria-label="Elegir icono"
+        aria-label={t("categoryManager.chooseIcon")}
         aria-expanded={open}
         aria-haspopup="listbox"
       >
@@ -61,7 +63,7 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
       {open && (
         <div
           role="listbox"
-          aria-label="Iconos"
+          aria-label={t("categoryManager.icons")}
           className="modal-scroll absolute left-0 top-[calc(100%+4px)] z-30 max-h-44 w-[min(14rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] p-2 shadow-[var(--shadow-overlay)]"
         >
           <div className="grid grid-cols-5 gap-1">

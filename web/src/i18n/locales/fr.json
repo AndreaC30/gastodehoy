@@ -170,7 +170,8 @@
     "sending": "Envoi…",
     "sendEmail": "Envoyer l'email",
     "showPassword": "Afficher le mot de passe",
-    "hidePassword": "Masquer le mot de passe"
+    "hidePassword": "Masquer le mot de passe",
+    "accessTabs": "Accès au compte"
   },
   "common": {
     "loading": "Chargement…",
@@ -183,7 +184,10 @@
     "close": "Fermer",
     "create": "Créer",
     "remove": "Retirer",
-    "swipeHint": "Touchez pour modifier · glissez à gauche pour supprimer"
+    "swipeHint": "Touchez pour modifier · glissez à gauche pour supprimer",
+    "saving": "Enregistrement…",
+    "update": "Mettre à jour",
+    "mainNav": "Navigation principale"
   },
   "header": {
     "tagline": "Votre marge quotidienne, claire et instantanée.",
@@ -267,7 +271,8 @@
     "showLess": "Afficher moins",
     "showMore": "Voir {{count}} dépense fixe de plus",
     "showMore_other": "Voir {{count}} dépenses fixes de plus",
-    "empty": "Aucune dépense fixe pour l'instant."
+    "empty": "Aucune dépense fixe pour l'instant.",
+    "nameError": "Entrez un nom pour la dépense fixe"
   },
   "savingsGoals": {
     "title": "Objectifs d'épargne",
@@ -393,7 +398,12 @@
     "budgetHint": "Si vous dépassez ce montant dans le mois, l'app vous alertera.",
     "color": "Couleur",
     "icon": "Icône",
-    "perMonth": "{{amount}}€/mois"
+    "perMonth": "{{amount}}€/mois",
+    "empty": "Aucune catégorie. Créez la première !",
+    "add": "Ajouter une catégorie",
+    "deleteConfirm": "Supprimer « {{name}} » ?",
+    "chooseIcon": "Choisir une icône",
+    "icons": "Icônes"
   },
   "spendingChart": {
     "title": "Dépenses par catégorie",
@@ -461,7 +471,9 @@
     "step6": {
       "title": "Menu",
       "body": "Revenus, catégories et plus."
-    }
+    },
+    "introTitle": "Nouveau sur GastoDeHoy ?",
+    "start": "Lancer le tour guidé"
   },
   "footer": {
     "legal": "Le contenu, le design et le logiciel sont la propriété de leurs titulaires. La copie, reproduction ou utilisation commerciale sans autorisation est interdite.",
@@ -481,7 +493,9 @@
   },
   "editVariableExpense": {
     "category": "Catégorie",
-    "uncategorized": "Sans catégorie"
+    "uncategorized": "Sans catégorie",
+    "title": "Modifier la dépense",
+    "date": "Date"
   },
   "legal": {
     "title": "Mentions Légales et Conditions d'Utilisation",
@@ -558,7 +572,8 @@
     "changesSaved": "Modifications enregistrées",
     "fixedUpdated": "Dépense fixe mise à jour",
     "fixedRemoved": "Dépense fixe retirée",
-    "expenseUpdated": "Dépense mise à jour"
+    "expenseUpdated": "Dépense mise à jour",
+    "csvDownloaded": "CSV téléchargé"
   },
   "errors": {
     "emailOrPasswordIncorrect": "Email ou mot de passe incorrect",

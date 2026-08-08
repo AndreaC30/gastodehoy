@@ -26,7 +26,7 @@ export function TourSection({ onStart, onNavigate }: Props) {
             <IoPlay className="h-10 w-10 text-[var(--color-accent)]" aria-hidden />
           </div>
           <h3 className="mb-2 font-display text-lg font-semibold text-[var(--color-text)]">
-            {t("tour.introTitle", { defaultValue: "¿Nuevo en GastoDeHoy?" })}
+            {t("tour.introTitle")}
           </h3>
           <p className="mx-auto max-w-md text-sm text-[var(--color-text-muted)]">
             {t("nav.guidedTourDesc")}
@@ -36,7 +36,7 @@ export function TourSection({ onStart, onNavigate }: Props) {
         <div className="flex flex-col justify-center gap-3 pt-2 sm:flex-row">
           <button type="button" onClick={onStart} className={BTN_PRIMARY}>
             <IoPlay className="mr-2 h-4 w-4" aria-hidden />
-            {t("tour.start", { defaultValue: "Iniciar tour guiado" })}
+            {t("tour.start")}
           </button>
           <button
             type="button"

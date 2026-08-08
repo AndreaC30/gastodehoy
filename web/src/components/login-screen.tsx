@@ -75,7 +75,7 @@ export function LoginScreen({
           <div
             className="mt-6 flex rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/60 p-1 text-sm"
             role="tablist"
-            aria-label="Acceso a la cuenta"
+            aria-label={t("login.accessTabs")}
           >
               <TabButton
                 active={mode === "login"}

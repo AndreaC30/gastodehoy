@@ -121,7 +121,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
         <form onSubmit={handleSubmit} className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-soft)] p-4 space-y-4">
           <div>
             <label className={`mb-1 block ${TYPE_LABEL}`}>
-              Nombre
+              {t("categoryManager.name")}
             </label>
             <input
               type="text"
@@ -129,13 +129,13 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
               onChange={(e) => setFormName(e.target.value)}
               required
               className={`w-full ${INPUT_CLASS}`}
-              placeholder="Ej. Comida"
+              placeholder={t("categoryManager.namePlaceholder")}
             />
           </div>
 
           <div>
             <label className={`mb-2 block ${TYPE_LABEL}`}>
-              Color
+              {t("categoryManager.color")}
             </label>
             <div className="flex flex-wrap gap-2">
               {PRESET_COLORS.map((color) => (
@@ -155,9 +155,9 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
 
           <div>
             <label className={`mb-2 block ${TYPE_LABEL}`}>
-              Icono
+              {t("categoryManager.icon")}
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" role="group" aria-label={t("categoryManager.chooseIcon")}>
               {CATEGORY_ICON_PICKER.map((opt) => {
                 const OptIcon = opt.Icon;
                 return (
@@ -181,7 +181,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
 
           <div>
             <label className={`mb-1 block ${TYPE_LABEL}`}>
-              Presupuesto mensual (€)
+              {t("categoryManager.budget")}
             </label>
             <input
               type="text"
@@ -189,7 +189,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
               value={formBudget}
               onChange={(e) => setFormBudget(e.target.value)}
               className={`w-full ${INPUT_CLASS}`}
-              placeholder="0.00"
+              placeholder={t("categoryManager.budgetPlaceholder")}
             />
           </div>
 
@@ -199,14 +199,14 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
               disabled={createMut.isPending || updateMut.isPending}
               className={`flex-1 ${BTN_PRIMARY} disabled:opacity-50`}
             >
-              {editingId !== null ? "Actualizar" : "Crear"}
+              {editingId !== null ? t("common.update") : t("common.create")}
             </button>
             <button
               type="button"
               onClick={resetForm}
               className={`px-4 ${BTN_SECONDARY}`}
             >
-              Cancelar
+              {t("common.cancel")}
             </button>
           </div>
         </form>
@@ -216,7 +216,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {categories.length === 0 ? (
           <p className="col-span-full py-8 text-center text-sm text-[var(--color-text-muted)]">
-            No hay categorías. ¡Crea la primera!
+            {t("categoryManager.empty")}
           </p>
         ) : (
           categories.map((cat) => {
@@ -236,7 +236,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
                     <span className="block truncate text-sm font-medium text-[var(--color-text)]">{cat.name}</span>
                     {cat.monthly_budget != null && cat.monthly_budget !== "" && (
                       <div className="truncate text-xs text-[var(--color-text-dim)]">
-                        {String(cat.monthly_budget)}€/mes
+                        {t("categoryManager.perMonth", { amount: String(cat.monthly_budget) })}
                       </div>
                     )}
                   </div>
@@ -246,19 +246,19 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
                     type="button"
                     onClick={() => handleEdit(cat)}
                     className={ICON_BTN}
-                    aria-label="Editar"
+                    aria-label={t("categoryManager.editCategory", { name: cat.name })}
                   >
                     <IoPencil className="h-4 w-4" />
                   </button>
                   <button
                     type="button"
                     onClick={() => {
-                      if (confirm(`¿Eliminar "${cat.name}"?`)) {
+                      if (confirm(t("categoryManager.deleteConfirm", { name: cat.name }))) {
                         deleteMut.mutate(cat.id);
                       }
                     }}
                     className={`${ICON_BTN} hover:text-[var(--color-crit)]`}
-                    aria-label="Eliminar"
+                    aria-label={t("categoryManager.deleteCategory", { name: cat.name })}
                   >
                     <IoTrash className="h-4 w-4" />
                   </button>
@@ -275,7 +275,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
           onClick={() => setShowForm(true)}
           className={`mt-4 w-full ${BTN_SECONDARY}`}
         >
-          + Añadir categoría
+          + {t("categoryManager.add")}
         </button>
       )}
     </section>

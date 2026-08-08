@@ -2,6 +2,7 @@
  * Maps category icon names (stored in DB, same as former Lucide names) to
  * react-icons (Ionicons 5) components. Wire format stays unchanged — no DB migration.
  */
+import { useTranslation } from "react-i18next";
 import type { IconType } from "react-icons";
 import {
   IoAirplaneOutline,
@@ -84,8 +85,9 @@ export function CategoryIconPickerStrip({
   onChange,
   className,
 }: IconPickerStripProps) {
+  const { t } = useTranslation();
   return (
-    <div className={className} role="group" aria-label="Elegir icono">
+    <div className={className} role="group" aria-label={t("categoryManager.chooseIcon")}>
       <div className="flex flex-wrap gap-1.5">
         {CATEGORY_ICON_PICKER.map((opt) => {
           const OptIcon = opt.Icon;

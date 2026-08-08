@@ -109,7 +109,7 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
             className={`flex-1 ${BTN_PRIMARY}`}
           >
             {saveMut.isPending
-              ? t("common.saving", { defaultValue: "Guardando…" })
+              ? t("common.saving")
               : t("common.save")}
           </button>
         </div>

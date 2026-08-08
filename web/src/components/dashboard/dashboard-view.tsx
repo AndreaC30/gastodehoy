@@ -333,7 +333,7 @@ export function Dashboard({ profileName }: Props) {
       const now = new Date();
       const filename = `gastodehoy-export-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}.csv`;
       await downloadCsv("/api/export/csv", filename);
-      setToastMsg("CSV descargado");
+      setToastMsg(t("toasts.csvDownloaded"));
     } catch (e) {
       setToastMsg((e as Error).message);
     } finally {
@@ -607,7 +607,7 @@ export function Dashboard({ profileName }: Props) {
             categories={categories}
             onNavigate={handleSectionChange}
             onChanged={() => {
-              setToastMsg("Categorías actualizadas");
+              setToastMsg(t("toasts.categoriesUpdated"));
               void invalidateAll();
             }}
           />

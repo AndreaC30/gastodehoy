@@ -62,7 +62,7 @@ export function EditVariableExpenseModal({
     <AppSheet
       open
       onClose={onClose}
-      title={t("editVariableExpense.title", { defaultValue: "Editar gasto" })}
+      title={t("editVariableExpense.title")}
       zClass="z-50"
       labelledById="edit-variable-title"
     >
@@ -94,7 +94,7 @@ export function EditVariableExpenseModal({
         </div>
         <div>
           <label htmlFor="edit-var-date" className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
-            {t("editVariableExpense.date", { defaultValue: "Fecha" })}
+            {t("editVariableExpense.date")}
           </label>
           <input
             id="edit-var-date"
@@ -145,7 +145,7 @@ export function EditVariableExpenseModal({
             className={`flex-1 ${BTN_PRIMARY}`}
           >
             {saveMut.isPending
-              ? t("common.saving", { defaultValue: "Guardando…" })
+              ? t("common.saving")
               : t("common.save")}
           </button>
         </div>

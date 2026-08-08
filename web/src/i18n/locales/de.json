@@ -170,7 +170,8 @@
     "sending": "Sende…",
     "sendEmail": "E-Mail senden",
     "showPassword": "Passwort anzeigen",
-    "hidePassword": "Passwort ausblenden"
+    "hidePassword": "Passwort ausblenden",
+    "accessTabs": "Kontozugang"
   },
   "common": {
     "loading": "Laden…",
@@ -183,7 +184,10 @@
     "close": "Schließen",
     "create": "Erstellen",
     "remove": "Entfernen",
-    "swipeHint": "Tippen zum Bearbeiten · nach links wischen zum Löschen"
+    "swipeHint": "Tippen zum Bearbeiten · nach links wischen zum Löschen",
+    "saving": "Speichere…",
+    "update": "Aktualisieren",
+    "mainNav": "Hauptnavigation"
   },
   "header": {
     "tagline": "Deine tägliche Marge, klar und sofort.",
@@ -267,7 +271,8 @@
     "showLess": "Weniger anzeigen",
     "showMore": "{{count}} weitere Fixkosten anzeigen",
     "showMore_other": "{{count}} weitere Fixkosten anzeigen",
-    "empty": "Noch keine Fixkosten."
+    "empty": "Noch keine Fixkosten.",
+    "nameError": "Gib einen Namen für die Fixkosten ein"
   },
   "savingsGoals": {
     "title": "Sparziele",
@@ -393,7 +398,12 @@
     "budgetHint": "Wenn du diesen Betrag im Monat überschreitest, warnt dich die App.",
     "color": "Farbe",
     "icon": "Symbol",
-    "perMonth": "{{amount}}€/Monat"
+    "perMonth": "{{amount}}€/Monat",
+    "empty": "Noch keine Kategorien. Erstelle die erste!",
+    "add": "Kategorie hinzufügen",
+    "deleteConfirm": "„{{name}}“ löschen?",
+    "chooseIcon": "Icon wählen",
+    "icons": "Icons"
   },
   "spendingChart": {
     "title": "Ausgaben nach Kategorie",
@@ -461,7 +471,9 @@
     "step6": {
       "title": "Menü",
       "body": "Einkommen, Kategorien und mehr."
-    }
+    },
+    "introTitle": "Neu bei GastoDeHoy?",
+    "start": "Geführte Tour starten"
   },
   "footer": {
     "legal": "Inhalt, Design und Software sind Eigentum ihrer Inhaber. Kopie, Vervielfältigung oder kommerzielle Nutzung ohne Genehmigung ist untersagt.",
@@ -481,7 +493,9 @@
   },
   "editVariableExpense": {
     "category": "Kategorie",
-    "uncategorized": "Ohne Kategorie"
+    "uncategorized": "Ohne Kategorie",
+    "title": "Ausgabe bearbeiten",
+    "date": "Datum"
   },
   "legal": {
     "title": "Impressum und Nutzungsbedingungen",
@@ -558,7 +572,8 @@
     "changesSaved": "Änderungen gespeichert",
     "fixedUpdated": "Fixkosten aktualisiert",
     "fixedRemoved": "Fixkosten entfernt",
-    "expenseUpdated": "Ausgabe aktualisiert"
+    "expenseUpdated": "Ausgabe aktualisiert",
+    "csvDownloaded": "CSV heruntergeladen"
   },
   "errors": {
     "emailOrPasswordIncorrect": "E-Mail oder Passwort falsch",

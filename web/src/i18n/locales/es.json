@@ -170,11 +170,13 @@
     "sending": "Enviando…",
     "sendEmail": "Enviar correo",
     "showPassword": "Mostrar contraseña",
-    "hidePassword": "Ocultar contraseña"
+    "hidePassword": "Ocultar contraseña",
+    "accessTabs": "Acceso a la cuenta"
   },
   "common": {
     "loading": "Cargando…",
     "save": "Guardar",
+    "saving": "Guardando…",
     "cancel": "Cancelar",
     "delete": "Eliminar",
     "edit": "Editar",
@@ -182,7 +184,9 @@
     "retry": "Reintentar",
     "close": "Cerrar",
     "create": "Crear",
+    "update": "Actualizar",
     "remove": "Quitar",
+    "mainNav": "Navegación principal",
     "swipeHint": "Toca para editar · desliza a la izquierda para borrar"
   },
   "header": {
@@ -267,7 +271,8 @@
     "showLess": "Mostrar menos",
     "showMore": "Ver {{count}} gasto fijo más",
     "showMore_other": "Ver {{count}} gastos fijos más",
-    "empty": "Ningún gasto fijo aún."
+    "empty": "Ningún gasto fijo aún.",
+    "nameError": "Escribe un nombre para el gasto fijo"
   },
   "savingsGoals": {
     "title": "Metas de ahorro",
@@ -391,7 +396,12 @@
     "budgetHint": "Si gastas más de este importe en el mes, la app te avisará.",
     "color": "Color",
     "icon": "Icono",
-    "perMonth": "{{amount}}€/mes"
+    "perMonth": "{{amount}}€/mes",
+    "empty": "No hay categorías. ¡Crea la primera!",
+    "add": "Añadir categoría",
+    "deleteConfirm": "¿Eliminar «{{name}}»?",
+    "chooseIcon": "Elegir icono",
+    "icons": "Iconos"
   },
   "spendingChart": {
     "title": "Gastos por categoría",
@@ -459,7 +469,9 @@
     "step6": {
       "title": "Menú",
       "body": "Ingresos, categorías y más."
-    }
+    },
+    "introTitle": "¿Nuevo en GastoDeHoy?",
+    "start": "Iniciar tour guiado"
   },
   "footer": {
     "legal": "Contenido, diseño y software son propiedad de sus titulares. Queda prohibida la copia, reproducción o uso comercial sin autorización.",
@@ -479,7 +491,9 @@
   },
   "editVariableExpense": {
     "category": "Categoría",
-    "uncategorized": "Sin categoría"
+    "uncategorized": "Sin categoría",
+    "title": "Editar gasto",
+    "date": "Fecha"
   },
   "legal": {
     "title": "Aviso Legal y Condiciones de Uso",
@@ -556,7 +570,8 @@
     "extraIncomeUpdated": "Ingresos extra actualizados",
     "changesSaved": "Cambios guardados",
     "fixedUpdated": "Gasto fijo actualizado",
-    "expenseUpdated": "Gasto actualizado"
+    "expenseUpdated": "Gasto actualizado",
+    "csvDownloaded": "CSV descargado"
   },
   "errors": {
     "emailOrPasswordIncorrect": "Email o contraseña incorrectos",
