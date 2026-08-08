@@ -183,7 +183,7 @@
     "close": "Close",
     "create": "Create",
     "remove": "Remove",
-    "swipeHint": "Swipe left to edit or delete"
+    "swipeHint": "Tap to edit · swipe left to delete"
   },
   "header": {
     "tagline": "Your daily margin, clear and instant.",

@@ -135,6 +135,7 @@ export function FixedExpensesSection({
                   <SwipeableRow
                     key={it.id}
                     density={density}
+                    onActivate={() => onEdit(it)}
                     actions={
                       <>
                         <button

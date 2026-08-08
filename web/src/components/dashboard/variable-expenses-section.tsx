@@ -102,6 +102,7 @@ export function VariableExpensesSection({
                   <SwipeableRow
                     key={it.id}
                     density={density}
+                    onActivate={() => onEdit(it)}
                     actions={
                       <>
                         <button

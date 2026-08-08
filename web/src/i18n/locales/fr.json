@@ -148,7 +148,7 @@
     "close": "Fermer",
     "create": "Créer",
     "remove": "Retirer",
-    "swipeHint": "Glissez vers la gauche pour modifier ou supprimer"
+    "swipeHint": "Touchez pour modifier · glissez à gauche pour supprimer"
   },
   "header": {
     "tagline": "Votre marge quotidienne, claire et instantanée.",
