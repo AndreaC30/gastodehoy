@@ -15,8 +15,8 @@ import { AccountSection } from "@/components/dashboard/account-section";
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { IoEllipsisHorizontal } from "react-icons/io5";
-import { FOCUS_RING } from "@/lib/ui-a11y";
+import { IoMenu } from "react-icons/io5";
+import { FOCUS_RING, ICON_BTN } from "@/lib/ui-a11y";
 import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
 import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
 import { FixedExpensesSection } from "@/components/dashboard/fixed-expenses-section";
@@ -387,24 +387,24 @@ export function Dashboard({ profileName }: Props) {
         <AppBackdrop />
 
         <header className="relative z-10 border-b border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 sm:px-4 sm:py-3.5">
-          <div className="mx-auto flex max-w-lg items-center gap-3 md:max-w-4xl lg:max-w-6xl">
-            {/* Mobile: section title + account/menu icon */}
-            <div className="flex min-w-0 flex-1 items-center md:hidden">
-              <h1 className="m-0 truncate text-lg font-semibold tracking-tight text-[var(--color-text)]">
-                {t(SECTION_TITLE_KEY[activeSection])}
-              </h1>
-            </div>
+          <div className="mx-auto flex max-w-lg items-center gap-2 sm:gap-3 md:max-w-4xl lg:max-w-6xl">
+            {/* Mobile: menu left (same side as desktop sidebar) + section title */}
             <button
               type="button"
               data-tour="menu"
               onClick={() => setMobileMenuOpen(true)}
-              className={`inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-text)] md:hidden ${FOCUS_RING}`}
-              aria-label={t("nav.moreTitle")}
+              className={`${ICON_BTN} shrink-0 md:hidden`}
+              aria-label={t("header.menu")}
               aria-expanded={mobileMenuOpen}
               aria-haspopup="dialog"
             >
-              <IoEllipsisHorizontal className="gdh-icon" aria-hidden />
+              <IoMenu className="gdh-icon-lg" aria-hidden />
             </button>
+            <div className="flex min-w-0 flex-1 items-center md:hidden">
+              <h1 className="m-0 truncate font-display text-lg font-semibold tracking-tight text-[var(--color-text)]">
+                {t(SECTION_TITLE_KEY[activeSection])}
+              </h1>
+            </div>
 
             {/* Desktop: brand + tagline */}
             <div className="hidden min-w-0 flex-1 md:block">
