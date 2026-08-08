@@ -182,7 +182,8 @@
     "retry": "Reintentar",
     "close": "Cerrar",
     "create": "Crear",
-    "remove": "Quitar"
+    "remove": "Quitar",
+    "swipeHint": "Desliza a la izquierda para editar o borrar"
   },
   "header": {
     "tagline": "Tu margen para hoy, claro y al instante.",

@@ -50,6 +50,7 @@
   --color-text-dim: #8fa3b3;
 
   --shadow-surface: 0 1px 0 rgb(0 0 0 / 0.12);
+  --shadow-overlay: 0 16px 48px rgb(0 0 0 / 0.45);
 }
 
 html {

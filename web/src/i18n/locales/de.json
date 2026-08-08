@@ -147,7 +147,8 @@
     "retry": "Wiederholen",
     "close": "Schließen",
     "create": "Erstellen",
-    "remove": "Entfernen"
+    "remove": "Entfernen",
+    "swipeHint": "Nach links wischen zum Bearbeiten oder Löschen"
   },
   "header": {
     "tagline": "Deine tägliche Marge, klar und sofort.",

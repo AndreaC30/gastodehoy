@@ -715,7 +715,7 @@ export function Dashboard({ profileName }: Props) {
       )}
 
       <div
-        className={`pointer-events-none fixed left-4 right-4 z-50 mx-auto max-w-md break-words rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-4 py-3 text-center text-base text-[var(--color-text)] shadow-2xl transition-all duration-200 ${
+        className={`pointer-events-none fixed left-4 right-4 z-50 mx-auto max-w-md break-words rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-4 py-3 text-center text-base text-[var(--color-text)] shadow-[var(--shadow-overlay)] transition-all duration-200 ${
           toastMsg ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         } ${toastUndo ? "pointer-events-auto" : ""}`}
         style={{

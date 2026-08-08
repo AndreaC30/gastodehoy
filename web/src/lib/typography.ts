@@ -29,4 +29,8 @@ export const TYPE_HERO_NUMBER =
 
 /** Display headings — Space Grotesk para títulos principales. */
 export const TYPE_DISPLAY =
-  "font-display text-xl font-semibold tracking-tight text-[var(--color-text)] sm:text-2xl md:text-[1.35rem]";
+  "font-display text-xl font-semibold tracking-tight text-[var(--color-text)] sm:text-2xl";
+
+/** Bottom nav / compact chrome labels (≥12px). */
+export const TYPE_NAV_LABEL =
+  "text-xs font-medium leading-none";

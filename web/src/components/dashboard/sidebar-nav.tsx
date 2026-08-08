@@ -20,7 +20,8 @@ import { AccountModal } from "@/components/account-modal";
 import { DeleteAccountModal } from "@/components/delete-account-modal";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
-import { FOCUS_RING } from "@/lib/ui-a11y";
+import { FOCUS_RING, MODAL_SHADOW } from "@/lib/ui-a11y";
+import { TYPE_EYEBROW } from "@/lib/typography";
 import type { DashboardSection } from "@/lib/dashboard-state";
 import type { IconType } from "react-icons";
 
@@ -114,7 +115,7 @@ export function Sidebar({
               onClick={() => {
                 void i18n.changeLanguage(lang);
               }}
-              className={`min-h-10 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+              className={`min-h-11 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
                 active
                   ? "border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] text-[var(--color-accent)]"
                   : "border border-[var(--color-border)] text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
@@ -166,7 +167,7 @@ export function Sidebar({
     >
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="border-b border-[var(--color-border)] px-1.5 py-2">
-          <p className="mb-1.5 px-2 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--color-text-dim)]">
+          <p className={`mb-1.5 px-2 ${TYPE_EYEBROW}`}>
             {t("nav.accountMenu")}
           </p>
           <ul className="space-y-0.5">
@@ -195,7 +196,7 @@ export function Sidebar({
         </div>
 
         <div className="border-t border-[var(--color-border)] px-1.5 py-2">
-          <p className="mb-1.5 px-2 text-[0.6rem] font-semibold uppercase tracking-widest text-[var(--color-text-dim)]">
+          <p className={`mb-1.5 px-2 ${TYPE_EYEBROW}`}>
             {t("nav.language")}
           </p>
           <div className="px-1">
@@ -206,7 +207,7 @@ export function Sidebar({
 
       <div className="shrink-0 border-t border-[var(--color-border)] px-1.5 py-2 md:pb-2">
         <div className="mb-2 px-2">
-          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--color-text-dim)]">
+          <p className={TYPE_EYEBROW}>
             {t("nav.account")}
           </p>
           <p className="mt-0.5 truncate text-sm font-semibold text-[var(--color-accent)]">
@@ -258,7 +259,7 @@ export function Sidebar({
             aria-modal="true"
             aria-label={t("nav.moreTitle")}
             data-tour="menu"
-            className="modal-scroll flex max-h-[min(88dvh,100%)] w-full touch-auto flex-col overflow-hidden rounded-t-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] shadow-2xl"
+            className={`modal-scroll flex max-h-[min(88dvh,100%)] w-full touch-auto flex-col overflow-hidden rounded-t-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] ${MODAL_SHADOW}`}
             style={{
               paddingBottom: "max(0.75rem, var(--gdh-overlay-footer-pad, env(safe-area-inset-bottom)))",
             }}

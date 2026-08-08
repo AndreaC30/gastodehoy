@@ -7,7 +7,7 @@ import { IoClose } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useDialogA11y } from "@/lib/use-dialog-a11y";
-import { FOCUS_RING } from "@/lib/ui-a11y";
+import { FOCUS_RING, MODAL_SHADOW } from "@/lib/ui-a11y";
 
 type Props = {
   open: boolean;
@@ -75,7 +75,7 @@ export function AppSheet({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`modal-scroll flex max-h-[min(92dvh,100%)] w-full max-w-lg touch-auto flex-col overflow-hidden rounded-t-2xl border ${border} bg-[var(--color-panel)] shadow-2xl md:max-h-[min(90vh,100dvh)] md:rounded-2xl ${panelClassName}`}
+        className={`modal-scroll flex max-h-[min(92dvh,100%)] w-full max-w-lg touch-auto flex-col overflow-hidden rounded-t-2xl border ${border} bg-[var(--color-panel)] ${MODAL_SHADOW} md:max-h-[min(90vh,100dvh)] md:rounded-2xl ${panelClassName}`}
         style={{
           paddingBottom:
             "max(0.75rem, var(--gdh-overlay-footer-pad, env(safe-area-inset-bottom)))",

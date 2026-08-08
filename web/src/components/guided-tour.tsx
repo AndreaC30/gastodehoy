@@ -12,7 +12,7 @@ import {
   tourScrollLockEnable,
   tourScrollToTarget,
 } from "@/lib/tour-scroll-lock";
-import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING } from "@/lib/ui-a11y";
+import { BTN_PRIMARY, BTN_SECONDARY, FOCUS_RING, ICON_BTN, MODAL_SHADOW } from "@/lib/ui-a11y";
 
 type Props = {
   steps: TourStep[];
@@ -190,7 +190,7 @@ export function GuidedTour({
       {/* Controls panel: fixed to bottom, scrollable on small screens */}
       <div
         data-guided-tour-controls
-        className="absolute inset-x-3 z-[3] mx-auto max-h-[45vh] max-w-md overflow-y-auto rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-4 shadow-2xl sm:inset-x-4 sm:max-h-none sm:p-5"
+        className={`absolute inset-x-3 z-[3] mx-auto max-h-[45vh] max-w-md overflow-y-auto rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-4 ${MODAL_SHADOW} sm:inset-x-4 sm:max-h-none sm:p-5`}
         style={{
           bottom:
             "calc(var(--gdh-bottom-chrome-offset, 0px) + 0.75rem)",
@@ -205,7 +205,7 @@ export function GuidedTour({
           <button
             type="button"
             onClick={finishSkip}
-            className={`shrink-0 rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
+            className={`shrink-0 ${ICON_BTN}`}
             aria-label={t("tour.close")}
           >
             <IoClose className="h-5 w-5" aria-hidden />

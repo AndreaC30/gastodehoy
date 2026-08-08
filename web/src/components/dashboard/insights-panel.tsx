@@ -102,7 +102,7 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
   }
 }
 
-const PANEL_CLASS = `${SECTION_CARD} p-3 sm:p-4`;
+const PANEL_CLASS = `${SECTION_CARD} p-5`;
 
 export function InsightsPanel({ data, isLoading, error }: Props) {
   const { t } = useTranslation();

@@ -124,6 +124,9 @@ export function FixedExpensesSection({
           </div>
         ) : (
           <>
+            {visibleItems.length > 0 ? (
+              <p className={`mt-4 md:hidden ${TYPE_CAPTION}`}>{t("common.swipeHint")}</p>
+            ) : null}
             <ul className="mt-4 space-y-2">
               {visibleItems.length > 0 ? (
                 visibleItems.map((it) => {

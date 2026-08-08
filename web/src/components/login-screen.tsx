@@ -108,7 +108,7 @@ export function LoginScreen({
           </div>
         )}
 
-        <div className="mt-4 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/70 p-5 shadow-xl shadow-black/30">
+        <div className="mt-4 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/70 p-5 shadow-[var(--shadow-overlay)]">
           {mode === "login" && (
             <LoginForm
               onError={setError}

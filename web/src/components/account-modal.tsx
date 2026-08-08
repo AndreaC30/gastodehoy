@@ -95,7 +95,7 @@ export function AccountModal({
           </p>
           <button
             type="button"
-            className={`mt-3 min-h-10 text-sm font-medium text-[var(--color-accent)] ${FOCUS_RING}`}
+            className={`mt-3 min-h-11 text-sm font-medium text-[var(--color-accent)] ${FOCUS_RING}`}
             onClick={() => {
               try {
                 localStorage.setItem(INSTALL_HINT_DISMISS_KEY, "1");

@@ -62,7 +62,7 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
         <div
           role="listbox"
           aria-label="Iconos"
-          className="modal-scroll absolute left-0 top-[calc(100%+4px)] z-30 max-h-44 w-[min(14rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] p-2 shadow-xl shadow-black/40"
+          className="modal-scroll absolute left-0 top-[calc(100%+4px)] z-30 max-h-44 w-[min(14rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] p-2 shadow-[var(--shadow-overlay)]"
         >
           <div className="grid grid-cols-5 gap-1">
             {CATEGORY_ICON_PICKER.map((opt) => {

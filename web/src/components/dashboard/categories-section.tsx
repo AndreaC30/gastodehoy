@@ -7,7 +7,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import type { ExpenseCategory } from "@/api/types";
 import { getCategoryIcon, CATEGORY_ICON_PICKER } from "@/components/dashboard/category-icon";
-import { INPUT_CLASS, BTN_PRIMARY, BTN_SECONDARY, SECTION_CARD } from "@/lib/ui-a11y";
+import { INPUT_CLASS, BTN_PRIMARY, BTN_SECONDARY, ICON_BTN, SECTION_CARD } from "@/lib/ui-a11y";
+import { TYPE_DISPLAY, TYPE_LABEL } from "@/lib/typography";
 import type { DashboardSection } from "@/lib/dashboard-state";
 
 type Props = {
@@ -112,14 +113,14 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
   return (
     <section className={`${SECTION_CARD} p-4 sm:p-5`}>
       <div className="mb-4 md:mb-5">
-        <h2 className="text-xl font-bold text-[var(--color-text)]">{t("nav.categories")}</h2>
+        <h2 className={TYPE_DISPLAY}>{t("nav.categories")}</h2>
       </div>
 
       {/* Create/Edit Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-soft)] p-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
+            <label className={`mb-1 block ${TYPE_LABEL}`}>
               Nombre
             </label>
             <input
@@ -133,7 +134,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">
+            <label className={`mb-2 block ${TYPE_LABEL}`}>
               Color
             </label>
             <div className="flex flex-wrap gap-2">
@@ -142,7 +143,8 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
                   key={color}
                   type="button"
                   onClick={() => setFormColor(color)}
-                  className={`h-8 w-8 rounded-full border-2 transition ${
+                  aria-label={color}
+                  className={`min-h-11 min-w-11 rounded-full border-2 transition ${
                     formColor === color ? "border-[var(--color-text)]" : "border-transparent"
                   }`}
                   style={{ backgroundColor: color }}
@@ -152,7 +154,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">
+            <label className={`mb-2 block ${TYPE_LABEL}`}>
               Icono
             </label>
             <div className="flex flex-wrap gap-2">
@@ -163,7 +165,8 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
                     key={opt.name}
                     type="button"
                     onClick={() => setFormIcon(opt.name)}
-                    className={`h-10 w-10 flex items-center justify-center rounded-lg border transition ${
+                    aria-label={opt.name}
+                    className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border transition ${
                       formIcon === opt.name
                         ? "border-[var(--color-accent)] bg-[var(--color-accent)]/10"
                         : "border-[var(--color-border)] hover:bg-[var(--color-panel)]"
@@ -177,7 +180,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
+            <label className={`mb-1 block ${TYPE_LABEL}`}>
               Presupuesto mensual (€)
             </label>
             <input
@@ -242,7 +245,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
                   <button
                     type="button"
                     onClick={() => handleEdit(cat)}
-                    className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                    className={ICON_BTN}
                     aria-label="Editar"
                   >
                     <IoPencil className="h-4 w-4" />
@@ -254,7 +257,7 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
                         deleteMut.mutate(cat.id);
                       }
                     }}
-                    className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-crit)]"
+                    className={`${ICON_BTN} hover:text-[var(--color-crit)]`}
                     aria-label="Eliminar"
                   >
                     <IoTrash className="h-4 w-4" />

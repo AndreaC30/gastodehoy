@@ -10,7 +10,7 @@ import { money } from "@/lib/format";
 import { budgetReferenceDate, formatMonthLong } from "@/lib/month-context";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import { FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
-import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
+import { TYPE_BODY, TYPE_CAPTION, TYPE_EYEBROW } from "@/lib/typography";
 import { type FormEvent, useSyncExternalStore } from "react";
 import { IoReceiptOutline } from "react-icons/io5";
 
@@ -80,9 +80,12 @@ export function VariableExpensesSection({
           pending={addPending}
           onSubmit={onSubmit}
         />
-        <h3 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-dim)]">
+        <h3 className={`mb-2 mt-6 ${TYPE_EYEBROW}`}>
           {t("variableExpenses.thisMonth", { month })}
         </h3>
+        {visibleItems.length > 0 ? (
+          <p className={`mb-2 md:hidden ${TYPE_CAPTION}`}>{t("common.swipeHint")}</p>
+        ) : null}
         {isLoading ? (
           <div className="space-y-2" aria-label={t("common.loading")}>
             <Skeleton className="h-16 w-full rounded-lg" />

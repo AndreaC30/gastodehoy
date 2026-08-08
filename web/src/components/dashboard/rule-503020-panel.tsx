@@ -71,7 +71,7 @@ export function Rule503020Panel() {
 
   return (
     <section
-      className={`h-full ${SECTION_CARD} px-3 py-3 sm:px-4 sm:py-4`}
+      className={`h-full ${SECTION_CARD} px-5 py-5`}
       aria-label={t("rule503020.title")}
     >
       <div className="flex items-start gap-2">

@@ -14,7 +14,7 @@ import {
 import { BrandLogo } from "@/components/brand-logo";
 import type { AuthEntryTab } from "@/components/login-screen";
 import { TYPE_BODY, TYPE_EYEBROW } from "@/lib/typography";
-import { SECTION_CARD } from "@/lib/ui-a11y";
+import { BTN_PRIMARY, BTN_SECONDARY, SECTION_CARD } from "@/lib/ui-a11y";
 
 type Props = {
   onEnter: (mode: AuthEntryTab) => void;
@@ -38,7 +38,7 @@ function TodayPreview() {
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div className="rounded-lg bg-[var(--color-bg-soft)] px-3 py-2.5">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-dim)]">
+            <p className={TYPE_EYEBROW}>
               {t("landing.previewMonthLabel")}
             </p>
             <p className="mt-0.5 font-display text-sm font-semibold tabular-nums text-[var(--color-text)]">
@@ -46,7 +46,7 @@ function TodayPreview() {
             </p>
           </div>
           <div className="rounded-lg bg-[var(--color-bg-soft)] px-3 py-2.5">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-dim)]">
+            <p className={TYPE_EYEBROW}>
               {t("landing.previewDaysLabel")}
             </p>
             <p className="mt-0.5 font-display text-sm font-semibold tabular-nums text-[var(--color-text)]">
@@ -100,14 +100,14 @@ export function LandingPage({ onEnter }: Props) {
             <button
               type="button"
               onClick={() => onEnter("login")}
-              className="min-h-10 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-3 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-panel-elevated)] sm:px-4"
+              className={BTN_SECONDARY}
             >
               {t("landing.ctaLogin")}
             </button>
             <button
               type="button"
               onClick={() => onEnter("register")}
-              className="min-h-10 rounded-xl bg-[var(--color-accent)] px-3 py-2 text-sm font-semibold text-[var(--color-accent-ink)] transition hover:brightness-110 sm:px-4"
+              className={BTN_PRIMARY}
             >
               {t("landing.ctaRegister")}
             </button>

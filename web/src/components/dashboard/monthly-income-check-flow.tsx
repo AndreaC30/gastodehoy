@@ -74,7 +74,7 @@ function ChoiceDialog({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="modal-scroll max-h-[min(85dvh,100dvh)] w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-2xl shadow-black/50 md:max-h-none md:rounded-2xl md:p-5"
+        className="modal-scroll max-h-[min(85dvh,100dvh)] w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-overlay)] md:max-h-none md:rounded-2xl md:p-5"
       >
         <header className="mb-4 flex items-start justify-between gap-3">
           <h2 id={titleId} className="min-w-0 flex-1 text-lg font-bold tracking-tight text-[var(--color-text)] md:text-xl">

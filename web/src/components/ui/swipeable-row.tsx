@@ -1,5 +1,6 @@
 import { type ReactNode, useRef, useState, useEffect, useCallback } from "react";
 import { INNER_CARD } from "@/lib/ui-a11y";
+import { IoChevronBack } from "react-icons/io5";
 
 const SWIPE_THRESHOLD = 80; // px to reveal actions
 const MAX_SWIPE = 140; // maximum swipe distance
@@ -82,6 +83,7 @@ export function SwipeableRow({ children, actions, density }: Props) {
 
   // ---------- Touch device: swipeable row ----------
   const isRevealed = offset > SWIPE_THRESHOLD;
+  const showHint = offset < 8;
 
   return (
     <li
@@ -99,7 +101,7 @@ export function SwipeableRow({ children, actions, density }: Props) {
         style={{
           transform: `translateX(-${offset}px)`,
         }}
-        className={`flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 data-[density=compact]:py-1.5 ${
+        className={`relative flex flex-col gap-2 px-3 py-2.5 pr-8 sm:flex-row sm:items-center sm:justify-between sm:gap-3 data-[density=compact]:py-1.5 ${
           swiping ? "" : "transition-transform duration-200 ease-out"
         } bg-[var(--color-panel)]`}
         onTouchStart={handleTouchStart}
@@ -107,6 +109,14 @@ export function SwipeableRow({ children, actions, density }: Props) {
         onTouchEnd={handleTouchEnd}
       >
         {children}
+        {showHint ? (
+          <span
+            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-dim)]/50"
+            aria-hidden
+          >
+            <IoChevronBack className="h-4 w-4" />
+          </span>
+        ) : null}
       </div>
     </li>
   );

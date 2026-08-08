@@ -77,7 +77,7 @@ export function SpendingChart({ breakdown, total }: Props) {
   );
 
   return (
-    <section className={`h-full ${SECTION_CARD} p-3 sm:p-4`}>
+    <section className={`h-full ${SECTION_CARD} p-5`}>
       <h2 className="text-base font-bold tracking-tight text-[var(--color-text)] md:text-lg">
         {t("spendingChart.title")}
       </h2>

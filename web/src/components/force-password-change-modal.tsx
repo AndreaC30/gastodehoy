@@ -50,7 +50,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
 
   return (
     <div className="relative z-10 flex w-full flex-col items-center px-4 py-6 sm:min-h-screen sm:justify-center sm:py-12">
-      <div className="w-full max-w-md rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/80 p-6 shadow-xl shadow-black/30">
+      <div className="w-full max-w-md rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/80 p-6 shadow-[var(--shadow-overlay)]">
         <h2 className="text-xl font-bold tracking-tight">
           {t("forcePassword.title")}
         </h2>

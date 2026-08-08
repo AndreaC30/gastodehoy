@@ -182,7 +182,8 @@
     "retry": "Retry",
     "close": "Close",
     "create": "Create",
-    "remove": "Remove"
+    "remove": "Remove",
+    "swipeHint": "Swipe left to edit or delete"
   },
   "header": {
     "tagline": "Your daily margin, clear and instant.",

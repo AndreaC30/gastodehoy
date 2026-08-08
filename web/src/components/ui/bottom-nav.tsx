@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DashboardSection } from '@/lib/dashboard-state';
 import { FOCUS_RING } from '@/lib/ui-a11y';
+import { TYPE_NAV_LABEL } from '@/lib/typography';
 import {
   IoHome,
   IoHomeOutline,
@@ -75,7 +76,7 @@ export function BottomNav({ activeSection, onSectionChange }: Props) {
                   aria-hidden
                 />
                 <span
-                  className={`text-[10px] font-medium transition-colors ${
+                  className={`${TYPE_NAV_LABEL} transition-colors ${
                     isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
                   }`}
                 >

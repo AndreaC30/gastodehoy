@@ -7,7 +7,7 @@ import { api } from "@/api/client";
 import type { SavingsGoal } from "@/api/types";
 import { money } from "@/lib/format";
 import { hapticSuccess } from "@/lib/haptics";
-import { FOCUS_RING, BTN_PRIMARY } from "@/lib/ui-a11y";
+import { FOCUS_RING, BTN_PRIMARY, ICON_BTN } from "@/lib/ui-a11y";
 
 async function loadGoals() {
   return api<SavingsGoal[]>("/api/savings-goals");
@@ -99,7 +99,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
           type="button"
           onClick={() => onDelete(goal.id)}
           disabled={deleting}
-          className="shrink-0 rounded-lg p-1.5 text-[var(--color-text-dim)] hover:bg-[var(--color-panel)] hover:text-[var(--color-crit)] disabled:opacity-40"
+          className={`${ICON_BTN} hover:text-[var(--color-crit)] disabled:opacity-40`}
           aria-label={t("savingsGoals.deleteLabel", { name: goal.name })}
         >
           <IoTrashOutline className="h-4 w-4" aria-hidden />
@@ -127,7 +127,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
             type="button"
             onClick={() => adjust(-10)}
             disabled={patchMut.isPending}
-            className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-1.5 text-[var(--color-text)] hover:border-[var(--color-border)] disabled:opacity-40"
+            className={`${ICON_BTN} border border-[var(--color-border-subtle)] bg-[var(--color-panel)] hover:border-[var(--color-border)] disabled:opacity-40`}
             aria-label={t("savingsGoals.subtract10")}
           >
             <IoRemove className="h-4 w-4" aria-hidden />
@@ -148,7 +148,7 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
             type="button"
             onClick={() => adjust(10)}
             disabled={patchMut.isPending}
-            className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel)] p-1.5 text-[var(--color-text)] hover:border-[var(--color-border)] disabled:opacity-40"
+            className={`${ICON_BTN} border border-[var(--color-border-subtle)] bg-[var(--color-panel)] hover:border-[var(--color-border)] disabled:opacity-40`}
             aria-label={t("savingsGoals.add10")}
           >
             <IoAdd className="h-4 w-4" aria-hidden />

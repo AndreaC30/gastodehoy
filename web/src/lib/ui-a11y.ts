@@ -39,3 +39,9 @@ export const INNER_CARD =
 /** Inline error / destructive alert surface. */
 export const ALERT_CRIT =
   "rounded-xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] text-sm text-[var(--color-crit)]";
+
+/** Overlay elevation (sheets, toasts, dialogs) — not for section cards. */
+export const MODAL_SHADOW = "shadow-[var(--shadow-overlay)]";
+
+/** Icon-only control with ≥44px hit area. */
+export const ICON_BTN = `inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-panel-elevated)] hover:text-[var(--color-text)] ${FOCUS_RING}`;
