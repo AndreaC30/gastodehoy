@@ -2,13 +2,13 @@
  * On the 1st of each month, asks whether income changed; reuses SettingsModal
  * for income-only and savings-only steps when the user says no.
  */
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { IoClose } from "react-icons/io5";
 import type { ExtraIncome, Settings } from "@/api/types";
 import { SettingsModal } from "@/components/settings-modal";
-import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
-import { useDialogA11y } from "@/lib/use-dialog-a11y";
+import { AppSheet } from "@/components/ui/app-sheet";
+import { BTN_PRIMARY, BTN_SECONDARY } from "@/lib/ui-a11y";
+import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
 import { isFirstDayOfMonth } from "@/lib/month-income-check";
 import {
   isIncomeCheckAnsweredForMonth,
@@ -49,70 +49,26 @@ function ChoiceDialog({
   onNo: () => void;
   onClose?: () => void;
 }) {
-  const { t } = useTranslation();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const titleId = useId();
-
-  useBodyScrollLock(true);
-  useDialogA11y(true, panelRef);
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && onClose) onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
   return (
-    <div
-      className="fixed inset-0 z-[95] flex touch-none items-end justify-center overflow-hidden bg-black/60 px-3 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:items-center md:px-4 md:py-6"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-    >
-      <div
-        ref={panelRef}
-        tabIndex={-1}
-        className="modal-scroll max-h-[min(85dvh,100dvh)] w-full max-w-md touch-auto overflow-y-auto overscroll-y-contain rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-overlay)] md:max-h-none md:rounded-2xl md:p-5"
-      >
-        <header className="mb-4 flex items-start justify-between gap-3">
-          <h2 id={titleId} className="min-w-0 flex-1 text-lg font-bold tracking-tight text-[var(--color-text)] md:text-xl">
-            {title}
-          </h2>
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label={t("common.close")}
-              className="min-h-11 min-w-11 shrink-0 rounded-lg border border-[var(--color-border)] p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)]"
-            >
-              <IoClose className="mx-auto h-5 w-5" aria-hidden />
-            </button>
-          )}
-        </header>
-        <p className="text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-base">{body}</p>
-        {hint && (
-          <p className="mt-3 text-xs leading-relaxed text-[var(--color-text-dim)] sm:text-sm">{hint}</p>
-        )}
-        <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-end sm:gap-2">
-          <button
-            type="button"
-            onClick={onNo}
-            className="min-h-11 w-full rounded-lg border border-[var(--color-border-subtle)] px-4 py-2.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel)] sm:w-auto"
-          >
+    <AppSheet
+      open
+      onClose={onClose ?? onYes}
+      title={title}
+      zClass="z-[95]"
+      footer={
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button type="button" onClick={onNo} className={`w-full sm:w-auto ${BTN_SECONDARY}`}>
             {noLabel}
           </button>
-          <button
-            type="button"
-            onClick={onYes}
-            className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 sm:w-auto"
-          >
+          <button type="button" onClick={onYes} className={`w-full sm:w-auto ${BTN_PRIMARY}`}>
             {yesLabel}
           </button>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <p className={TYPE_BODY}>{body}</p>
+      {hint ? <p className={`mt-3 ${TYPE_CAPTION}`}>{hint}</p> : null}
+    </AppSheet>
   );
 }
 

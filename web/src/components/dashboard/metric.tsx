@@ -1,3 +1,4 @@
+/** KPI compacto al estilo mockup V11 — plano dentro de SECTION_CARD (sin card-in-card). */
 import type { ReactNode } from "react";
 import { TYPE_EYEBROW } from "@/lib/typography";
 
@@ -7,14 +8,11 @@ type Props = {
   highlight?: boolean;
 };
 
-/** KPI compacto al estilo mockup V11. */
 export function Metric({ label, value, highlight }: Props) {
   return (
     <div
-      className={`rounded-lg border px-3 py-2.5 ${
-        highlight
-          ? "border-[var(--color-ok-border)] bg-[var(--color-ok-dim)]"
-          : "border-[var(--color-border)] bg-[var(--color-bg-soft)]"
+      className={`rounded-lg px-2.5 py-2 ${
+        highlight ? "bg-[var(--color-ok-dim)]" : "bg-[var(--color-bg-soft)]/80"
       }`}
     >
       <p className={`${TYPE_EYEBROW} line-clamp-2 leading-tight`}>{label}</p>

@@ -12,9 +12,14 @@ import type {
   Settings,
 } from "@/api/types";
 import { FormField } from "@/components/ui/form-field";
-import { ModalMenuFooter } from "@/components/modal-menu-footer";
 import { money } from "@/lib/format";
-import { INPUT_CLASS, INPUT_FLEX_CLASS } from "@/lib/ui-a11y";
+import {
+  ALERT_CRIT,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  INPUT_CLASS,
+  INPUT_FLEX_CLASS,
+} from "@/lib/ui-a11y";
 
 export type SettingsFocus = "full" | "incomeOnly" | "savingsOnly";
 
@@ -70,7 +75,7 @@ export function IncomeSettingsContent({
   saveLabel,
   variant = "page",
   onClose,
-  onBackToMenu,
+  onBackToMenu: _onBackToMenu,
   idPrefix = "income",
 }: Props) {
   const { t } = useTranslation();
@@ -183,7 +188,7 @@ export function IncomeSettingsContent({
     <button
       type="submit"
       disabled={busy}
-      className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60 sm:w-auto"
+      className={`w-full sm:w-auto ${BTN_PRIMARY}`}
     >
       {busy ? t("incomeSettings.saving") : (saveLabel ?? t("common.save"))}
     </button>
@@ -192,11 +197,7 @@ export function IncomeSettingsContent({
   return (
     <div>
       {error && (
-        <div
-          className="mb-3 rounded-xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2 text-sm text-[var(--color-crit)]"
-          role="alert"
-          aria-live="polite"
-        >
+        <div className={`mb-3 px-3 py-2 ${ALERT_CRIT}`} role="alert" aria-live="polite">
           {error}
         </div>
       )}
@@ -301,14 +302,14 @@ export function IncomeSettingsContent({
           )}
 
           {isModal ? (
-            <ModalMenuFooter
-              className="pt-2"
-              onBackToMenu={isFocused ? undefined : onBackToMenu}
-              onClose={onClose}
-              closeLabel={t("common.cancel")}
-            >
+            <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-border)] pt-4 sm:flex-row sm:justify-end">
+              {onClose ? (
+                <button type="button" onClick={onClose} className={BTN_SECONDARY}>
+                  {t("common.cancel")}
+                </button>
+              ) : null}
               {saveBtn}
-            </ModalMenuFooter>
+            </div>
           ) : (
             <div className="border-t border-[var(--color-border)] pt-4">{saveBtn}</div>
           )}
@@ -448,7 +449,7 @@ export function IncomeSettingsContent({
                     type="button"
                     onClick={() => delExtra.mutate(it.id)}
                     disabled={delExtra.isPending}
-                    className="shrink-0 rounded-lg border border-[var(--color-crit-border)] px-2 py-1 text-xs font-medium text-[var(--color-crit)] hover:bg-[var(--color-crit-dim)] disabled:opacity-50"
+                    className={`min-h-11 shrink-0 rounded-lg border border-[var(--color-crit-border)] px-3 text-sm font-medium text-[var(--color-crit)] hover:bg-[var(--color-crit-dim)] disabled:opacity-50`}
                   >
                     {t("incomeSettings.extraDelete")}
                   </button>
@@ -456,14 +457,6 @@ export function IncomeSettingsContent({
               ))
             )}
           </ul>
-
-          {isModal && (
-            <ModalMenuFooter
-              className="pt-2"
-              onBackToMenu={onBackToMenu}
-              onClose={onClose}
-            />
-          )}
         </div>
       ) : null}
     </div>
@@ -560,7 +553,7 @@ function ModeBtn({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-lg px-3 py-2 font-medium transition ${
+      className={`min-h-11 rounded-lg px-3 py-2 font-medium transition ${
         active
           ? "bg-[var(--color-panel)] text-[var(--color-text)] shadow-inner"
           : "text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"

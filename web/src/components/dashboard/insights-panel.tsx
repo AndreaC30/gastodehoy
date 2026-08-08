@@ -16,7 +16,7 @@ import {
 } from "react-icons/io5";
 import type { InsightItem, Insights } from "@/api/types";
 import { money } from "@/lib/format";
-import { TYPE_CAPTION } from "@/lib/typography";
+import { TYPE_CAPTION, TYPE_DISPLAY } from "@/lib/typography";
 import { SECTION_CARD } from "@/lib/ui-a11y";
 
 type Props = {
@@ -145,7 +145,7 @@ export function InsightsPanel({ data, isLoading, error }: Props) {
         <div className="min-w-0">
           <h2
             id="insights-panel-title"
-            className="flex items-center gap-2 text-lg font-bold tracking-tight text-[var(--color-text)]"
+            className={`flex items-center gap-2 ${TYPE_DISPLAY}`}
           >
             <IoBulbOutline
               className="h-5 w-5 shrink-0 text-[var(--color-accent)]"

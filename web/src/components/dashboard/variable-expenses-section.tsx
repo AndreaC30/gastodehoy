@@ -10,7 +10,7 @@ import { money } from "@/lib/format";
 import { budgetReferenceDate, formatMonthLong } from "@/lib/month-context";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import { FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
-import { TYPE_BODY, TYPE_CAPTION, TYPE_EYEBROW } from "@/lib/typography";
+import { TYPE_BODY, TYPE_CAPTION, TYPE_DISPLAY, TYPE_EYEBROW } from "@/lib/typography";
 import { type FormEvent, useSyncExternalStore } from "react";
 import { IoReceiptOutline } from "react-icons/io5";
 
@@ -61,7 +61,7 @@ export function VariableExpensesSection({
       className={SECTION_CARD}
     >
       <div className="border-b border-[var(--color-border)] px-5 py-5">
-        <h2 className="text-lg font-bold tracking-tight sm:text-xl">
+        <h2 className={TYPE_DISPLAY}>
           {t("variableExpenses.title")}
         </h2>
         <p className={`mt-1.5 normal-case ${TYPE_CAPTION}`}>

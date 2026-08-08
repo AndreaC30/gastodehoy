@@ -5,7 +5,7 @@ import { IoPieChartOutline, IoCheckmarkCircle, IoWarningOutline, IoInformationCi
 import { api } from "@/api/client";
 import type { Rule503020 } from "@/api/types";
 import { money } from "@/lib/format";
-import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
+import { TYPE_BODY, TYPE_CAPTION, TYPE_DISPLAY } from "@/lib/typography";
 import { SECTION_CARD } from "@/lib/ui-a11y";
 
 async function loadRule503020(lang: string) {
@@ -52,7 +52,7 @@ export function Rule503020Panel() {
 
   if (error) {
     return (
-      <p className="rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-3 text-sm text-[var(--color-text-muted)]">
+      <p className={`${SECTION_CARD} px-4 py-3 text-sm text-[var(--color-text-muted)]`}>
         {t("rule503020.error")}
       </p>
     );
@@ -80,7 +80,7 @@ export function Rule503020Panel() {
           aria-hidden
         />
         <div className="min-w-0 flex-1">
-          <h2 className="text-base font-semibold tracking-tight text-[var(--color-text)] sm:text-lg">
+          <h2 className={TYPE_DISPLAY}>
             {t("rule503020.title")}
           </h2>
           <p className={`mt-0.5 ${TYPE_CAPTION}`}>

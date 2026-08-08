@@ -19,6 +19,7 @@ import {
 } from "@/components/dashboard/category-icon";
 import { IconSelectDropdown } from "@/components/dashboard/icon-select-dropdown";
 import { money } from "@/lib/format";
+import { SECTION_CARD } from "@/lib/ui-a11y";
 
 type Props = {
   userName: string;
@@ -101,7 +102,7 @@ export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
 
       <Stepper step={step} />
 
-      <section className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/70 p-5 shadow-[var(--shadow-overlay)] md:p-6">
+      <section className={`${SECTION_CARD} p-5 md:p-6`}>
         {error && (
           <div className="mb-4 rounded-xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-4 py-3 text-sm text-[var(--color-crit)]">
             {error}

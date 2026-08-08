@@ -11,7 +11,7 @@ import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
-import { TYPE_BODY, TYPE_CAPTION } from "@/lib/typography";
+import { TYPE_BODY, TYPE_CAPTION, TYPE_DISPLAY } from "@/lib/typography";
 import { IoWalletOutline } from "react-icons/io5";
 
 const inputClass = INPUT_CLASS;
@@ -61,7 +61,7 @@ export function FixedExpensesSection({
       className={SECTION_CARD}
     >
       <div className="border-b border-[var(--color-border)] px-5 py-5">
-        <h2 className="text-lg font-bold tracking-tight sm:text-xl">{t("fixedExpenses.title")}</h2>
+        <h2 className={TYPE_DISPLAY}>{t("fixedExpenses.title")}</h2>
         <p className={`mt-1.5 ${TYPE_CAPTION}`}>{t("fixedExpenses.subtitle")}</p>
         <p className={`mt-1.5 ${TYPE_CAPTION} text-[var(--color-accent)]/70`}>
           {t("monthContext.fixedRepeats")}

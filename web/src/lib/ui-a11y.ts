@@ -30,7 +30,7 @@ export const BTN_GHOST = `inline-flex min-h-11 items-center justify-center round
 
 /** Section card: panel + soft border (mockup kpi / plant-panel). */
 export const SECTION_CARD =
-  "rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] sm:rounded-[10px]";
+  "rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]";
 
 /** Inner card / panel inside a section. */
 export const INNER_CARD =

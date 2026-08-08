@@ -19,7 +19,7 @@ type Props = {
   footer?: ReactNode;
   /** Tailwind z-index class, default z-[70] */
   zClass?: string;
-  /** Rose/danger border tone */
+  /** Crit/danger border tone */
   danger?: boolean;
   /** Show drag handle on mobile */
   showHandle?: boolean;
@@ -92,7 +92,7 @@ export function AppSheet({
           <div className="min-w-0 flex-1">
             <h2
               id={titleId}
-              className={`text-lg font-bold tracking-tight ${danger ? "text-[var(--color-crit)]" : "text-[var(--color-text)]"}`}
+              className={`font-display text-lg font-semibold tracking-tight ${danger ? "text-[var(--color-crit)]" : "text-[var(--color-text)]"}`}
             >
               {title}
             </h2>

@@ -7,7 +7,7 @@ import type { MonthHistoryItem, MonthHistoryRead, PaginatedVariableExpenses } fr
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { money } from "@/lib/format";
 import { FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
-import { TYPE_CAPTION, TYPE_EYEBROW } from "@/lib/typography";
+import { TYPE_CAPTION, TYPE_DISPLAY, TYPE_EYEBROW } from "@/lib/typography";
 
 const MONTH_OPTIONS = [3, 6, 12] as const;
 type MonthCount = (typeof MONTH_OPTIONS)[number];
@@ -40,7 +40,7 @@ function gridClass(months: MonthCount): string {
 
 function cardClass(months: MonthCount, selected: boolean, isCurrentMonth: boolean): string {
   const base =
-    "rounded-2xl border px-3 py-3 text-center sm:px-3 shrink-0 min-w-[5rem] sm:min-w-0 min-h-[4.75rem] transition-colors";
+    "rounded-[10px] border px-3 py-3 text-center sm:px-3 shrink-0 min-w-[5rem] sm:min-w-0 min-h-[4.75rem] transition-colors";
   let tone: string;
   if (selected) {
     tone = "border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] ring-1 ring-[var(--color-accent-border)]";
@@ -88,7 +88,7 @@ export function MonthHistoryStrip() {
 
   if (error) {
     return (
-      <p className="rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-3 text-sm text-[var(--color-text-muted)]">
+      <p className={`${SECTION_CARD} px-4 py-3 text-sm text-[var(--color-text-muted)]`}>
         {t("monthHistory.loadError", { defaultValue: "No se pudo cargar el historial mensual." })}
       </p>
     );
@@ -100,7 +100,7 @@ export function MonthHistoryStrip() {
         {Array.from({ length: months }, (_, i) => (
           <div
             key={i}
-            className="h-[4.5rem] animate-pulse rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)]"
+            className="h-[4.5rem] animate-pulse rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)]"
           />
         ))}
       </div>
@@ -118,7 +118,7 @@ export function MonthHistoryStrip() {
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="font-display text-lg font-semibold tracking-tight text-[var(--color-text)] sm:text-xl">
+          <h2 className={TYPE_DISPLAY}>
             {historyTitle(t, months)}
           </h2>
           <p className={`mt-1 ${TYPE_CAPTION}`}>
@@ -217,10 +217,10 @@ export function MonthHistoryStrip() {
                 return (
                   <li
                     key={it.id}
-                    className="flex items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-2.5"
+                    className="flex items-center gap-3 rounded-lg bg-[var(--color-bg-soft)]/80 px-3 py-2.5"
                   >
                     <span
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)]"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-panel)]"
                       style={{
                         backgroundColor: `${it.category_color ?? "#223040"}22`,
                         color: it.category_color ?? "var(--color-accent)",

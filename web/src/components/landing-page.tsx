@@ -24,7 +24,7 @@ function TodayPreview() {
   const { t } = useTranslation();
   return (
     <div className="gdh-landing-preview relative mx-auto w-full max-w-sm" aria-hidden>
-      <div className="rounded-[14px] border border-[var(--color-border)] bg-[var(--color-panel)] p-5 shadow-[var(--shadow-surface)]">
+      <div className={`${SECTION_CARD} p-5`}>
         <p className={TYPE_EYEBROW}>{t("landing.previewEyebrow")}</p>
         <p className="mt-1 font-display text-sm font-medium text-[var(--color-text-muted)]">
           {t("landing.previewDate")}

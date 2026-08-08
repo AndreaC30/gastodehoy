@@ -4,6 +4,7 @@ import type { CategorySpending } from "@/api/types";
 import { money } from "@/lib/format";
 import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { SECTION_CARD } from "@/lib/ui-a11y";
+import { TYPE_DISPLAY } from "@/lib/typography";
 
 type Props = {
   breakdown: CategorySpending[];
@@ -78,7 +79,7 @@ export function SpendingChart({ breakdown, total }: Props) {
 
   return (
     <section className={`h-full ${SECTION_CARD} p-5`}>
-      <h2 className="text-base font-bold tracking-tight text-[var(--color-text)] md:text-lg">
+      <h2 className={TYPE_DISPLAY}>
         {t("spendingChart.title")}
       </h2>
       <p className="mt-1 text-sm text-[var(--color-text-dim)]">

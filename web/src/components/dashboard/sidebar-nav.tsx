@@ -1,8 +1,7 @@
 /** Sidebar (desktop) + bottom sheet “Más” (móvil). */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-  IoClose,
   IoDownloadOutline,
   IoFlagOutline,
   IoHelpCircleOutline,
@@ -18,9 +17,10 @@ import {
 import { useTranslation } from "react-i18next";
 import { AccountModal } from "@/components/account-modal";
 import { DeleteAccountModal } from "@/components/delete-account-modal";
+import { AppSheet } from "@/components/ui/app-sheet";
 import { logout } from "@/lib/session";
 import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
-import { FOCUS_RING, MODAL_SHADOW } from "@/lib/ui-a11y";
+import { BTN_SECONDARY, FOCUS_RING } from "@/lib/ui-a11y";
 import { TYPE_EYEBROW } from "@/lib/typography";
 import type { DashboardSection } from "@/lib/dashboard-state";
 import type { IconType } from "react-icons";
@@ -73,18 +73,9 @@ export function Sidebar({
   const [accountOpen, setAccountOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  useBodyScrollLock(mobileOpen || accountOpen || deleteOpen);
+  useBodyScrollLock(accountOpen || deleteOpen);
 
   const isExportBusy = exportBusy ?? false;
-
-  useEffect(() => {
-    if (!mobileOpen) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setMobileOpen(false);
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [mobileOpen, setMobileOpen]);
 
   const handleSectionChange = (section: DashboardSection) => {
     setMobileOpen(false);
@@ -247,109 +238,73 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile: bottom sheet (app pattern), not side drawer */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-[60] flex touch-none items-end justify-center overflow-hidden bg-black/60 px-0 pt-8 md:hidden"
-          role="presentation"
-          onClick={() => setMobileOpen(false)}
+      <div className="md:hidden">
+        <AppSheet
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          title={t("nav.moreTitle")}
+          subtitle={
+            <span className="truncate text-[var(--color-accent)]">{profileName}</span>
+          }
+          zClass="z-[60]"
+          labelledById="gdh-more-sheet-title"
         >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={t("nav.moreTitle")}
-            data-tour="menu"
-            className={`modal-scroll flex max-h-[min(88dvh,100%)] w-full touch-auto flex-col overflow-hidden rounded-t-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] ${MODAL_SHADOW}`}
-            style={{
-              paddingBottom: "max(0.75rem, var(--gdh-overlay-footer-pad, env(safe-area-inset-bottom)))",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex shrink-0 flex-col border-b border-[var(--color-border)]">
-              <div className="flex justify-center pt-2.5 pb-1" aria-hidden>
-                <div className="h-1 w-10 rounded-full bg-[var(--color-border-subtle)]" />
-              </div>
-              <div className="flex items-center justify-between gap-3 px-4 pb-3">
-                <div className="min-w-0">
-                  <p className="text-base font-semibold text-[var(--color-text)]">
-                    {t("nav.moreTitle")}
-                  </p>
-                  <p className="mt-0.5 truncate text-sm text-[var(--color-accent)]">
-                    {profileName}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setMobileOpen(false)}
-                  className={`inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-text-dim)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
-                  aria-label={t("nav.closeMenu")}
-                >
-                  <IoClose className="gdh-icon" aria-hidden />
-                </button>
-              </div>
-            </div>
+          <ul className="space-y-1.5" data-tour="menu">
+            {SECONDARY_NAV.map((item) => (
+              <li key={item.id}>
+                <NavButton {...item} />
+              </li>
+            ))}
+          </ul>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 py-3">
-              <ul className="space-y-1.5">
-                {SECONDARY_NAV.map((item) => (
-                  <li key={item.id}>
-                    <NavButton {...item} />
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-4 space-y-1.5 border-t border-[var(--color-border)] pt-4">
-                <button
-                  type="button"
-                  onClick={() => onExport?.()}
-                  disabled={isExportBusy}
-                  className={`flex min-h-12 w-full items-center gap-3 rounded-xl border border-transparent px-3.5 py-3 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] disabled:cursor-not-allowed disabled:opacity-45 ${FOCUS_RING}`}
-                >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] text-[var(--color-accent)]">
-                    <IoDownloadOutline className="gdh-icon" aria-hidden />
-                  </span>
-                  <span className="text-sm font-medium text-[var(--color-text)]">
-                    {isExportBusy ? t("nav.exporting") : t("nav.exportCsv")}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={openAccountFromMenu}
-                  className={`flex min-h-12 w-full items-center gap-3 rounded-xl border border-transparent px-3.5 py-3 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] ${FOCUS_RING}`}
-                >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] text-[var(--color-accent)]">
-                    <IoPersonOutline className="gdh-icon" aria-hidden />
-                  </span>
-                  <span className="min-w-0 flex-1 text-left">
-                    <span className="block text-sm font-medium text-[var(--color-text)]">
-                      {t("nav.account")}
-                    </span>
-                    <span className="block text-xs text-[var(--color-text-dim)]">
-                      {t("nav.accountDesc")}
-                    </span>
-                  </span>
-                </button>
-              </div>
-
-              <div className="mt-4 border-t border-[var(--color-border)] pt-4">
-                <p className="mb-2 px-1 text-[0.65rem] font-semibold uppercase tracking-widest text-[var(--color-text-dim)]">
-                  {t("nav.language")}
-                </p>
-                <LanguageRow />
-              </div>
-
-              <button
-                type="button"
-                onClick={handleLogout}
-                className={`mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-4 text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
-              >
-                <IoLogOutOutline className="h-5 w-5 shrink-0" aria-hidden />
-                {t("nav.logout")}
-              </button>
-            </div>
+          <div className="mt-4 space-y-1.5 border-t border-[var(--color-border)] pt-4">
+            <button
+              type="button"
+              onClick={() => onExport?.()}
+              disabled={isExportBusy}
+              className={`flex min-h-11 w-full items-center gap-3 rounded-xl border border-transparent px-3.5 py-3 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] disabled:cursor-not-allowed disabled:opacity-45 ${FOCUS_RING}`}
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] text-[var(--color-accent)]">
+                <IoDownloadOutline className="gdh-icon" aria-hidden />
+              </span>
+              <span className="text-sm font-medium text-[var(--color-text)]">
+                {isExportBusy ? t("nav.exporting") : t("nav.exportCsv")}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={openAccountFromMenu}
+              className={`flex min-h-11 w-full items-center gap-3 rounded-xl border border-transparent px-3.5 py-3 text-left transition-colors hover:border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] ${FOCUS_RING}`}
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] text-[var(--color-accent)]">
+                <IoPersonOutline className="gdh-icon" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1 text-left">
+                <span className="block text-sm font-medium text-[var(--color-text)]">
+                  {t("nav.account")}
+                </span>
+                <span className="block text-xs text-[var(--color-text-dim)]">
+                  {t("nav.accountDesc")}
+                </span>
+              </span>
+            </button>
           </div>
-        </div>
-      )}
+
+          <div className="mt-4 border-t border-[var(--color-border)] pt-4">
+            <p className={`mb-2 px-1 ${TYPE_EYEBROW}`}>{t("nav.language")}</p>
+            <LanguageRow />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className={`mt-4 w-full gap-2 ${BTN_SECONDARY}`}
+          >
+            <IoLogOutOutline className="h-5 w-5 shrink-0" aria-hidden />
+            {t("nav.logout")}
+          </button>
+        </AppSheet>
+      </div>
 
       <aside className="sticky top-0 z-20 hidden h-screen shrink-0 md:block">
         {desktopSidebar}

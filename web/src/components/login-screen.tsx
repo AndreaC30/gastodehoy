@@ -16,7 +16,7 @@ import type {
 import { setUser } from "@/auth";
 import { BrandLogo } from "@/components/brand-logo";
 import { showLegalPage } from "@/lib/legal-pages-state";
-import { ALERT_CRIT, BTN_PRIMARY, FOCUS_RING, INPUT_CLASS } from "@/lib/ui-a11y";
+import { ALERT_CRIT, BTN_PRIMARY, FOCUS_RING, INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
 import { translateBackendError } from "@/lib/backend-errors";
 
 type Mode = "login" | "register" | "forgot";
@@ -108,7 +108,7 @@ export function LoginScreen({
           </div>
         )}
 
-        <div className="mt-4 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/70 p-5 shadow-[var(--shadow-overlay)]">
+        <div className={`mt-4 ${SECTION_CARD} p-5`}>
           {mode === "login" && (
             <LoginForm
               onError={setError}
