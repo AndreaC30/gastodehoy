@@ -20,7 +20,7 @@ from sqlalchemy import select
 
 from app.config import settings
 from app.database import SessionLocal
-from app.models import PushSubscription, User
+from app.models import PushSubscription, User, UserSettings
 from app.services.budget import compute_summary, month_bounds, today_in_app_timezone
 from app.services.insights import compute_insights
 from app.services.notification_message import pick_daily_notification
@@ -64,7 +64,11 @@ def main() -> None:
                 continue
             summary = compute_summary(db, user_id, today)
             insights_data = compute_insights(db, user_id, start, end, summary=summary)
-            msg = pick_daily_notification(insights_data, summary)
+            settings_row = db.scalar(
+                select(UserSettings).where(UserSettings.user_id == user_id)
+            )
+            lang = (settings_row.language if settings_row else None) or "es"
+            msg = pick_daily_notification(insights_data, summary, lang=lang)
             if msg is None:
                 skipped += 1
                 continue
