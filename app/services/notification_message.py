@@ -18,7 +18,8 @@ def pick_daily_notification(
 ) -> dict[str, str] | None:
     """Pick one encouraging notification from insights and/or budget summary.
 
-    Returns ``None`` when there is nothing positive to say (avoids nagging).
+    When the month is tight/overspent, returns a soft re-engagement nudge
+    instead of silence so push subscribers still hear from the app.
     """
     from app.services.insight_i18n import get_insight_text
 
@@ -67,5 +68,13 @@ def pick_daily_notification(
                 "title": title,
                 "body": item["message"],
             }
+
+    # Soft re-engagement when the month is tight/overspent (no nagging copy).
+    if summary is not None:
+        return {
+            "tag": "gdh-daily-nudge",
+            "title": _t("nudge_title"),
+            "body": _t("nudge_body"),
+        }
 
     return None
