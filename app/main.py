@@ -39,6 +39,7 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
     "manifest.webmanifest": "application/manifest+json",
     "sw.js": "application/javascript; charset=utf-8",
     "registerSW.js": "application/javascript; charset=utf-8",
+    "push-handler.js": "application/javascript; charset=utf-8",
     "gastodehoy-favicon-16.png": "image/png",
     "gastodehoy-favicon-32.png": "image/png",
     "gastodehoy-favicon-192.png": "image/png",
@@ -282,6 +283,14 @@ def pwa_service_worker() -> FileResponse | JSONResponse:
 @app.get("/registerSW.js", response_model=None)
 def pwa_register_sw() -> FileResponse | JSONResponse:
     return _dist_root_file("registerSW.js", DIST_ROOT_STATIC_FILES["registerSW.js"])
+
+
+@app.get("/push-handler.js", response_model=None)
+def pwa_push_handler() -> FileResponse | JSONResponse:
+    """Web Push event handler imported by the service worker via importScripts."""
+    return _dist_root_file(
+        "push-handler.js", DIST_ROOT_STATIC_FILES["push-handler.js"]
+    )
 
 
 @app.get("/gastodehoy-favicon-192.png", response_model=None)
