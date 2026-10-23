@@ -40,7 +40,7 @@ export function LoginScreen({
   const { t } = useTranslation();
 
   return (
-    <div className="relative z-10 flex w-full flex-col items-center px-4 py-6 pb-[max(2rem,env(safe-area-inset-bottom))] sm:min-h-[100dvh] sm:justify-center sm:py-12">
+    <div className="relative z-10 flex min-h-full w-full flex-col items-center px-4 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))] sm:justify-center sm:py-12">
       <div className="w-full max-w-md">
         <h1 className="m-0 leading-none">
           {onBackToLanding ? (

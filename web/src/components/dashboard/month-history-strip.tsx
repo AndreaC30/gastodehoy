@@ -233,7 +233,7 @@ export function MonthHistoryStrip() {
         </div>
       </header>
 
-      <div className="grid md:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)] md:items-stretch">
+      <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)] lg:items-stretch">
         {/* Month grid */}
         <div className="px-2 py-3 sm:px-4 sm:py-4">
           <div
@@ -347,13 +347,13 @@ export function MonthHistoryStrip() {
                   );
                 })}
           </div>
-          <p className={`mt-3 px-1 md:hidden ${TYPE_CAPTION}`}>
+          <p className={`mt-3 px-1 lg:hidden ${TYPE_CAPTION}`}>
             {t("monthHistory.calendarHint")}
           </p>
         </div>
 
         {/* Day agenda — selected day detail */}
-        <aside className="flex min-h-0 flex-col border-t border-[var(--color-border)] bg-[var(--color-bg-soft)]/40 md:border-l md:border-t-0">
+        <aside className="flex min-h-0 flex-col border-t border-[var(--color-border)] bg-[var(--color-bg-soft)]/40 lg:border-l lg:border-t-0">
           <div className="shrink-0 border-b border-[var(--color-border)] px-4 py-3 sm:px-5">
             <p className={TYPE_DISPLAY}>{selectedLabel}</p>
             <p className={`mt-1 ${TYPE_CAPTION}`}>
@@ -366,7 +366,7 @@ export function MonthHistoryStrip() {
             </p>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-3 sm:px-5 md:max-h-[min(28rem,55vh)]">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-3 sm:px-5 lg:max-h-[min(28rem,55vh)]">
             {expensesQ.isPending ? (
               <div className="space-y-2" aria-busy>
                 <div className="h-14 animate-pulse rounded-lg bg-[var(--color-panel)]" />

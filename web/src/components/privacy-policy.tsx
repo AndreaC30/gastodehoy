@@ -9,7 +9,7 @@ export function PrivacyPolicy({ onBack }: Props) {
   const { t } = useTranslation();
 
   return (
-    <div className="relative z-10 flex min-h-screen flex-col px-4 py-12">
+    <div className="relative z-10 flex min-h-full flex-col px-4 pt-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:py-12">
       {/* Top bar */}
       <div className="mx-auto w-full max-w-3xl">
         <button

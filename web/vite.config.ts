@@ -39,10 +39,12 @@ export default defineConfig(({ mode }) => {
           theme_color: "#070A0D",
           background_color: "#070A0D",
           display: "standalone",
+          id: "/",
+          scope: "/",
           start_url: "/",
           lang: "es",
           icons: [
-            /* PWA install: calendar on #0f172a (opaque — not the transparent tab favicons). */
+            /* Solo iconos opacos grandes: los favicon pequeños se ven mal al instalar. */
             {
               src: "/gastodehoy-app-icon.png",
               sizes: "512x512",
@@ -62,19 +64,10 @@ export default defineConfig(({ mode }) => {
               purpose: "maskable",
             },
             {
-              src: "/gastodehoy-favicon-16.png",
-              sizes: "16x16",
-              type: "image/png",
-            },
-            {
-              src: "/gastodehoy-favicon-32.png",
-              sizes: "32x32",
-              type: "image/png",
-            },
-            {
               src: "/gastodehoy-apple-touch-180.png",
               sizes: "180x180",
               type: "image/png",
+              purpose: "any",
             },
           ],
         },

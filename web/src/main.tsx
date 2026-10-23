@@ -12,6 +12,9 @@ import App from "./App.tsx";
 import "./fonts/fonts.css";
 import "./i18n/index.js";
 import "./index.css";
+import { installVisualViewport } from "./lib/install-visual-viewport";
+
+installVisualViewport();
 
 if (typeof localStorage !== "undefined") {
   localStorage.removeItem("gdh_cookie_consent");

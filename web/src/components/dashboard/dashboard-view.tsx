@@ -26,11 +26,6 @@ import { InsightsPanel } from "@/components/dashboard/insights-panel";
 import { MonthHistoryStrip } from "@/components/dashboard/month-history-strip";
 import { MonthContextBadge } from "@/components/dashboard/month-context-badge";
 import { MonthContextBanner } from "@/components/dashboard/month-context-banner";
-import {
-  budgetReferenceDate,
-  capitalizeFirstLetter,
-  formatMonthYear,
-} from "@/lib/month-context";
 import { MonthlyIncomeCheckFlow } from "@/components/dashboard/monthly-income-check-flow";
 import { Rule503020Panel } from "@/components/dashboard/rule-503020-panel";
 import { GuidedTour } from "@/components/guided-tour";
@@ -61,6 +56,7 @@ import type {
 } from "@/api/types";
 
 type GastosTab = "variables" | "fijos";
+type AnalisisTab = "insights" | "categorias" | "regla";
 
 const SECTION_TITLE_KEY: Record<DashboardSection, string> = {
   hoy: "header.sectionHoy",
@@ -134,6 +130,7 @@ export function Dashboard({ profileName }: Props) {
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [gastosTab, setGastosTab] = useState<GastosTab>("variables");
+  const [analisisTab, setAnalisisTab] = useState<AnalisisTab>("insights");
   const density = useSyncExternalStore(
     subscribeDensity,
     getDensity,
@@ -368,6 +365,7 @@ export function Dashboard({ profileName }: Props) {
       gastosTab?: (typeof DASHBOARD_TOUR_STEPS)[number]["gastosTab"],
     ) => {
       if (gastosTab) setGastosTab(gastosTab);
+      if (section === "analisis") setAnalisisTab("insights");
       handleSectionChange(section);
     },
     [handleSectionChange],
@@ -380,7 +378,8 @@ export function Dashboard({ profileName }: Props) {
   }
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden">
+    <div className="gdh-app-frame">
+      <div className="flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
       <Sidebar
         profileName={profileName}
         exportBusy={exportBusy}
@@ -433,7 +432,7 @@ export function Dashboard({ profileName }: Props) {
           id="main-content"
           tabIndex={-1}
           data-density={density}
-          className="relative z-10 mx-auto w-full max-w-lg flex-1 space-y-8 px-4 py-6 pb-[8.5rem] sm:space-y-7 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-6 md:pb-20 lg:max-w-6xl"
+          className="relative z-10 mx-auto flex w-full min-w-0 max-w-lg flex-1 flex-col space-y-8 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-7 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-6 md:pb-8 lg:max-w-6xl"
         >
         {error && (
           <div
@@ -446,22 +445,17 @@ export function Dashboard({ profileName }: Props) {
 
         <div
           key={activeSection}
+          className="flex flex-1 flex-col"
           style={{ animation: "gdhSectionIn 180ms ease-out" }}
         >
         {/* Section: HOY */}
         {activeSection === 'hoy' && (
-          <div className="space-y-5 md:space-y-4">
+          <div className="flex flex-1 flex-col gap-3 lg:flex-none lg:gap-4">
             <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
             <MonthContextBanner referenceDate={summaryQ.data?.reference_date} />
             <DailyHero
               summary={summaryQ.data}
               summaryPending={summaryQ.isPending}
-              monthLabel={capitalizeFirstLetter(
-                formatMonthYear(
-                  budgetReferenceDate(summaryQ.data?.reference_date),
-                  i18n.language,
-                ),
-              )}
               onRefresh={() => {
                 void invalidateAll().then(() => setToastMsg(t("toasts.done")));
               }}
@@ -472,40 +466,43 @@ export function Dashboard({ profileName }: Props) {
 
         {/* Section: GASTOS */}
         {activeSection === 'gastos' && (
-          <>
+          <div className="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] lg:contents">
             <div
-              className="flex rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-1 md:hidden"
+              className="flex border-b border-[var(--color-border)] lg:hidden"
               role="tablist"
               aria-label={t("header.sectionGastos")}
             >
               {([
                 { id: "variables" as const, label: t("nav.gastosVariables") },
                 { id: "fijos" as const, label: t("nav.gastosFijos") },
-              ]).map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={gastosTab === tab.id}
-                  onClick={() => {
-                    hapticTick();
-                    setGastosTab(tab.id);
-                  }}
-                  className={`min-h-11 flex-1 rounded-lg text-sm font-semibold transition-colors ${FOCUS_RING} ${
-                    gastosTab === tab.id
-                      ? "bg-[var(--color-accent)] text-[var(--color-accent-ink)]"
-                      : "text-[var(--color-text-muted)]"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              ]).map((tab) => {
+                const selected = gastosTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    onClick={() => {
+                      hapticTick();
+                      setGastosTab(tab.id);
+                    }}
+                    className={`-mb-px min-h-11 flex-1 border-b-2 text-sm font-semibold transition-colors ${FOCUS_RING} ${
+                      selected
+                        ? "border-[var(--color-accent)] text-[var(--color-text)]"
+                        : "border-transparent text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="grid min-w-0 grid-cols-1 gap-6 sm:gap-5 md:grid-cols-2 md:items-start lg:gap-6">
+            <div className="grid min-w-0 grid-cols-1 gap-6 sm:gap-5 max-lg:[&_section]:rounded-none max-lg:[&_section]:border-0 max-lg:[&_section]:bg-transparent max-lg:[&_section]:shadow-none lg:grid-cols-2 lg:items-start lg:gap-6">
               <div
                 id="add-expense"
-                className={`min-w-0 ${gastosTab === "variables" ? "block" : "hidden"} md:block`}
+                className={`min-w-0 ${gastosTab === "variables" ? "block" : "hidden"} lg:block`}
               >
               <VariableExpensesSection
                 referenceDate={summaryQ.data?.reference_date}
@@ -532,7 +529,7 @@ export function Dashboard({ profileName }: Props) {
               />
               </div>
               <div
-                className={`min-w-0 ${gastosTab === "fijos" ? "block" : "hidden"} md:block`}
+                className={`min-w-0 ${gastosTab === "fijos" ? "block" : "hidden"} lg:block`}
               >
               <FixedExpensesSection
                 items={fixedItems}
@@ -559,26 +556,65 @@ export function Dashboard({ profileName }: Props) {
               />
               </div>
             </div>
-          </>
+          </div>
         )}
 
         {/* Section: ANALISIS */}
         {activeSection === 'analisis' && (
-          <div className="space-y-5">
-            <InsightsPanel
-              data={insightsQ.data}
-              isLoading={insightsQ.isPending}
-              error={insightsQ.error as Error | null}
-              onNavigate={handleSectionChange}
-            />
-
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-5">
-              <SpendingChart
-                breakdown={insightsQ.data?.category_breakdown ?? []}
-                total={insightsQ.data?.total_spent ?? 0}
-                onAddExpense={goToAddExpense}
-              />
-              <Rule503020Panel />
+          <div className="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]">
+            <div
+              className="flex border-b border-[var(--color-border)]"
+              role="tablist"
+              aria-label={t("header.sectionAnalisis")}
+            >
+              {([
+                { id: "insights" as const, label: t("insights.title") },
+                { id: "categorias" as const, label: t("spendingChart.title") },
+                { id: "regla" as const, label: t("rule503020.title") },
+              ]).map((tab) => {
+                const selected = analisisTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    onClick={() => {
+                      hapticTick();
+                      setAnalisisTab(tab.id);
+                    }}
+                    className={`-mb-px min-h-11 flex-1 px-2 py-2.5 text-center text-[13px] font-semibold leading-tight transition-colors sm:text-sm ${FOCUS_RING} ${
+                      selected
+                        ? "border-b-2 border-[var(--color-accent)] text-[var(--color-text)]"
+                        : "border-b-2 border-transparent text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="[&>div>*]:rounded-none [&>div>*]:border-0 [&>div>*]:bg-transparent [&>div>*]:shadow-none">
+              <div className={analisisTab === "insights" ? "block" : "hidden"} role="tabpanel">
+                <InsightsPanel
+                  embedded
+                  data={insightsQ.data}
+                  isLoading={insightsQ.isPending}
+                  error={insightsQ.error as Error | null}
+                  onNavigate={handleSectionChange}
+                />
+              </div>
+              <div className={analisisTab === "categorias" ? "block" : "hidden"} role="tabpanel">
+                <SpendingChart
+                  embedded
+                  breakdown={insightsQ.data?.category_breakdown ?? []}
+                  total={insightsQ.data?.total_spent ?? 0}
+                  onAddExpense={goToAddExpense}
+                />
+              </div>
+              <div className={analisisTab === "regla" ? "block" : "hidden"} role="tabpanel">
+                <Rule503020Panel embedded />
+              </div>
             </div>
           </div>
         )}
@@ -644,8 +680,9 @@ export function Dashboard({ profileName }: Props) {
         </div>
       </main>
       </div>
+      </div>
 
-      {/* Bottom navigation (mobile only) */}
+      {/* Bottom navigation (mobile only). En el flujo, no fixed: si no, iOS la deja elevada al hacer scroll. */}
       <BottomNav
         activeSection={activeSection}
         onSectionChange={handleSectionChange}

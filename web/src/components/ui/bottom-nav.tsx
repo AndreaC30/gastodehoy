@@ -49,7 +49,7 @@ export function BottomNav({ activeSection, onSectionChange }: Props) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[var(--color-panel)] pb-[env(safe-area-inset-bottom,0px)] md:hidden"
+      className="z-40 shrink-0 border-t border-[var(--color-border)] bg-[var(--color-panel)] pb-[env(safe-area-inset-bottom,0px)] md:hidden"
       role="navigation"
       aria-label={t("common.mainNav")}
     >

@@ -242,7 +242,8 @@
   "variableExpenses": {
     "title": "Tägliche Ausgaben",
     "subtitle": "Füge hier deine täglichen Einkäufe und Einzelausgaben hinzu",
-    "description": "Jeder Eintrag aktualisiert, wie viel dir bleibt und deine Tagesobergrenze. Für wiederkehrende Ausgaben nutze Fixkosten.",
+    "description": "Jeder Eintrag aktualisiert, wie viel dir bleibt und deine Tagesobergrenze. Für wiederkehrende Ausgaben nutze ",
+    "fixedLink": "Fixkosten",
     "descriptionSuffixDesktop": " (rechte Spalte)",
     "descriptionSuffixMobile": " (nächster Block)",
     "thisMonth": "Ausgaben im {{month}}",

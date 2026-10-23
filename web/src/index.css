@@ -58,6 +58,54 @@ html {
   -webkit-text-size-adjust: 100%;
   /* Cookie banner / overlays sit above mobile BottomNav when it is mounted. */
   --gdh-bottom-chrome-offset: 0px;
+  height: var(--gdh-vvh, 100dvh);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/*
+ * El documento no se desplaza. Cada pantalla hace scroll dentro de
+ * .gdh-app-frame. Así la barra inferior no se despega al subir o bajar
+ * (iOS PWA y ventana instalada en el escritorio).
+ */
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+.gdh-app-frame {
+  box-sizing: border-box;
+  display: flex;
+  min-height: 0;
+  width: 100%;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+@media (min-width: 768px) {
+  .gdh-app-frame {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+.gdh-app-frame--scroll {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 html[data-mobile-bottom-nav="1"] {

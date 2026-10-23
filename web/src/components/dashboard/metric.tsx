@@ -11,13 +11,13 @@ type Props = {
 export function Metric({ label, value, highlight }: Props) {
   return (
     <div
-      className={`rounded-lg px-2.5 py-2 ${
+      className={`flex h-full flex-col justify-center rounded-lg px-3 py-2.5 ${
         highlight ? "bg-[var(--color-ok-dim)]" : "bg-[var(--color-bg-soft)]/80"
       }`}
     >
       <p className={`${TYPE_EYEBROW} line-clamp-2 leading-tight`}>{label}</p>
       <p
-        className={`mt-1 break-words font-display text-lg font-semibold tabular-nums leading-tight sm:text-xl ${
+        className={`mt-1 break-words font-display text-lg font-semibold tabular-nums leading-tight ${
           highlight ? "text-[var(--color-ok)]" : "text-[var(--color-text)]"
         }`}
       >

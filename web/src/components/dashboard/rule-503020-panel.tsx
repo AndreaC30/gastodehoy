@@ -43,7 +43,7 @@ function pctBar(
   );
 }
 
-export function Rule503020Panel() {
+export function Rule503020Panel({ embedded = false }: { embedded?: boolean }) {
   const { t, i18n } = useTranslation();
   const { data, isPending, error } = useQuery({
     queryKey: ["rule-503020", i18n.language],
@@ -75,12 +75,14 @@ export function Rule503020Panel() {
       aria-label={t("rule503020.title")}
     >
       <div className="flex items-start gap-2">
-        <IoPieChartOutline
-          className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-accent)]"
-          aria-hidden
-        />
+        {embedded ? null : (
+          <IoPieChartOutline
+            className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-accent)]"
+            aria-hidden
+          />
+        )}
         <div className="min-w-0 flex-1">
-          <h2 className={TYPE_DISPLAY}>
+          <h2 className={embedded ? "sr-only" : TYPE_DISPLAY}>
             {t("rule503020.title")}
           </h2>
           <p className={`mt-0.5 ${TYPE_CAPTION}`}>

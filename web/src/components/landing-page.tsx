@@ -83,11 +83,11 @@ export function LandingPage({ onEnter }: Props) {
   ];
 
   return (
-    <div className="gdh-landing relative z-10 min-h-dvh overflow-x-clip text-[var(--color-text)]">
+    <div className="gdh-landing relative z-10 min-h-full overflow-x-clip text-[var(--color-text)]">
       <div className="gdh-landing-atmosphere pointer-events-none absolute inset-0" aria-hidden />
 
       <header className="relative z-20 border-b border-[var(--color-border)]/80 bg-[var(--color-bg)]/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

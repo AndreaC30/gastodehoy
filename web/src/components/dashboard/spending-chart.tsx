@@ -12,6 +12,8 @@ type Props = {
   breakdown: CategorySpending[];
   total: string | number;
   onAddExpense?: () => void;
+  /** El título ya está en la pestaña del bloque de análisis. */
+  embedded?: boolean;
 };
 
 /* ── tiny donut for desktop (kept simple, 120×120) ────────────── */
@@ -65,14 +67,14 @@ function MiniDonut({
 
 /* ── main component ────────────────────────────────────────────── */
 
-export function SpendingChart({ breakdown, total, onAddExpense }: Props) {
+export function SpendingChart({ breakdown, total, onAddExpense, embedded }: Props) {
   const { t } = useTranslation();
   const totalNum = Number(total);
 
   if (totalNum === 0 || breakdown.length === 0) {
     return (
       <section className={`h-full ${SECTION_CARD} p-5`}>
-        <h2 className={TYPE_DISPLAY}>{t("spendingChart.title")}</h2>
+        <h2 className={embedded ? "sr-only" : TYPE_DISPLAY}>{t("spendingChart.title")}</h2>
         <p className="mt-1 text-sm text-[var(--color-text-dim)]">
           {t("spendingChart.subtitle")}
         </p>
@@ -104,7 +106,7 @@ export function SpendingChart({ breakdown, total, onAddExpense }: Props) {
 
   return (
     <section className={`h-full ${SECTION_CARD} p-5`}>
-      <h2 className={TYPE_DISPLAY}>
+      <h2 className={embedded ? "sr-only" : TYPE_DISPLAY}>
         {t("spendingChart.title")}
       </h2>
       <p className="mt-1 text-sm text-[var(--color-text-dim)]">

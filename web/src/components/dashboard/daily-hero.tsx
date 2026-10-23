@@ -5,15 +5,13 @@ import { money, savingsLabel } from "@/lib/format";
 import { useAnimatedNumber } from "@/lib/use-animated-number";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BTN_PRIMARY, FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
-import { TYPE_BODY, TYPE_EYEBROW, TYPE_HERO_NUMBER } from "@/lib/typography";
+import { TYPE_BODY, TYPE_EYEBROW } from "@/lib/typography";
 
 type Props = {
   summary: Summary | undefined;
   summaryPending: boolean;
   onRefresh: () => void;
   onAddExpense?: () => void;
-  /** Optional month label rendered inside the hero (avoids a separate cramped card). */
-  monthLabel?: string;
 };
 
 export function DailyHero({
@@ -21,7 +19,6 @@ export function DailyHero({
   summaryPending,
   onRefresh,
   onAddExpense,
-  monthLabel,
 }: Props) {
   const { t } = useTranslation();
   const animatedSpend = useAnimatedNumber(
@@ -29,7 +26,7 @@ export function DailyHero({
   );
 
   const metrics = (
-    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
+    <div className="grid content-start grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
       <Metric
         label={t("metrics.savings")}
         value={
@@ -105,20 +102,14 @@ export function DailyHero({
   return (
     <section
       data-tour="hero"
-      className={`${SECTION_CARD} overflow-hidden p-5 sm:p-6`}
+      className={`${SECTION_CARD} flex max-h-[40rem] flex-1 flex-col p-4 sm:p-5 lg:max-h-none lg:flex-none lg:p-6`}
       style={{ boxShadow: "inset 3px 0 0 var(--color-accent)" }}
       aria-live="polite"
     >
-      {monthLabel ? (
-        <p className="mb-4 text-sm font-medium text-[var(--color-text-muted)] md:hidden">
-          {monthLabel}
-        </p>
-      ) : null}
-
-      <div className="grid gap-6 md:grid-cols-[minmax(0,0.95fr)_1.35fr] md:items-stretch md:gap-8">
-        <div className="flex flex-col justify-center">
+      <div className="lg:grid lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-stretch lg:gap-8">
+        <div className="lg:flex lg:flex-col lg:justify-center">
           <p className={TYPE_EYEBROW}>{t("hero.dailyBudget")}</p>
-          <div className="mt-3 min-h-[3.25rem]">
+          <div className="mt-1.5 lg:mt-3">
             {summaryPending ? (
               <div
                 className="h-12 w-44 animate-pulse rounded-lg bg-[var(--color-panel-elevated)]"
@@ -126,7 +117,7 @@ export function DailyHero({
               />
             ) : (
               <p
-                className={TYPE_HERO_NUMBER}
+                className="font-display text-[clamp(2.35rem,6.5vh,3.15rem)] font-semibold tabular-nums tracking-tight text-[var(--color-accent)]"
                 aria-label={
                   summary?.suggested_spend_today != null
                     ? money(summary.suggested_spend_today)
@@ -138,34 +129,33 @@ export function DailyHero({
             )}
           </div>
 
-          {onAddExpense ? (
-            <button
-              type="button"
-              onClick={onAddExpense}
-              className={`mt-6 w-full md:w-auto ${BTN_PRIMARY}`}
-            >
-              {t("hero.addExpense")}
-            </button>
-          ) : null}
-
-          <div className="mt-4">
+          <div className="mt-3 flex items-center gap-2 lg:mt-6">
+            {onAddExpense ? (
+              <button
+                type="button"
+                onClick={onAddExpense}
+                className={`min-w-0 flex-1 lg:flex-none ${BTN_PRIMARY}`}
+              >
+                {t("hero.addExpense")}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={onRefresh}
               aria-label={t("hero.refresh")}
-              className={`min-h-11 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+              className={`min-h-11 shrink-0 px-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
             >
               {t("hero.refresh")}
             </button>
           </div>
 
-          <div className="mt-5 md:hidden">{metrics}</div>
+          <div className="mt-4 lg:hidden">{metrics}</div>
         </div>
 
-        <div className="hidden md:block">{metrics}</div>
+        <div className="hidden lg:block">{metrics}</div>
       </div>
 
-      <p className={`mt-6 border-t border-[var(--color-border)] pt-4 ${TYPE_BODY}`}>
+      <p className={`mt-3 border-t border-[var(--color-border)] pt-3 lg:mt-6 lg:pt-4 ${TYPE_BODY}`}>
         {t("hero.explanation")}
       </p>
     </section>
