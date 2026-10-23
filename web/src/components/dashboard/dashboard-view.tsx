@@ -56,6 +56,7 @@ import type {
 } from "@/api/types";
 
 type GastosTab = "variables" | "fijos";
+type AnalisisTab = "insights" | "categorias" | "regla";
 
 const SECTION_TITLE_KEY: Record<DashboardSection, string> = {
   hoy: "header.sectionHoy",
@@ -129,6 +130,7 @@ export function Dashboard({ profileName }: Props) {
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [gastosTab, setGastosTab] = useState<GastosTab>("variables");
+  const [analisisTab, setAnalisisTab] = useState<AnalisisTab>("insights");
   const density = useSyncExternalStore(
     subscribeDensity,
     getDensity,
@@ -363,6 +365,7 @@ export function Dashboard({ profileName }: Props) {
       gastosTab?: (typeof DASHBOARD_TOUR_STEPS)[number]["gastosTab"],
     ) => {
       if (gastosTab) setGastosTab(gastosTab);
+      if (section === "analisis") setAnalisisTab("insights");
       handleSectionChange(section);
     },
     [handleSectionChange],
@@ -558,21 +561,60 @@ export function Dashboard({ profileName }: Props) {
 
         {/* Section: ANALISIS */}
         {activeSection === 'analisis' && (
-          <div className="space-y-5">
-            <InsightsPanel
-              data={insightsQ.data}
-              isLoading={insightsQ.isPending}
-              error={insightsQ.error as Error | null}
-              onNavigate={handleSectionChange}
-            />
-
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start lg:gap-5">
-              <SpendingChart
-                breakdown={insightsQ.data?.category_breakdown ?? []}
-                total={insightsQ.data?.total_spent ?? 0}
-                onAddExpense={goToAddExpense}
-              />
-              <Rule503020Panel />
+          <div className="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]">
+            <div
+              className="flex border-b border-[var(--color-border)]"
+              role="tablist"
+              aria-label={t("header.sectionAnalisis")}
+            >
+              {([
+                { id: "insights" as const, label: t("insights.title") },
+                { id: "categorias" as const, label: t("spendingChart.title") },
+                { id: "regla" as const, label: t("rule503020.title") },
+              ]).map((tab) => {
+                const selected = analisisTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    onClick={() => {
+                      hapticTick();
+                      setAnalisisTab(tab.id);
+                    }}
+                    className={`-mb-px min-h-11 flex-1 px-2 py-2.5 text-center text-[13px] font-semibold leading-tight transition-colors sm:text-sm ${FOCUS_RING} ${
+                      selected
+                        ? "border-b-2 border-[var(--color-accent)] text-[var(--color-text)]"
+                        : "border-b-2 border-transparent text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="[&>div>*]:rounded-none [&>div>*]:border-0 [&>div>*]:bg-transparent [&>div>*]:shadow-none">
+              <div className={analisisTab === "insights" ? "block" : "hidden"} role="tabpanel">
+                <InsightsPanel
+                  embedded
+                  data={insightsQ.data}
+                  isLoading={insightsQ.isPending}
+                  error={insightsQ.error as Error | null}
+                  onNavigate={handleSectionChange}
+                />
+              </div>
+              <div className={analisisTab === "categorias" ? "block" : "hidden"} role="tabpanel">
+                <SpendingChart
+                  embedded
+                  breakdown={insightsQ.data?.category_breakdown ?? []}
+                  total={insightsQ.data?.total_spent ?? 0}
+                  onAddExpense={goToAddExpense}
+                />
+              </div>
+              <div className={analisisTab === "regla" ? "block" : "hidden"} role="tabpanel">
+                <Rule503020Panel embedded />
+              </div>
             </div>
           </div>
         )}

@@ -25,6 +25,8 @@ type Props = {
   isLoading: boolean;
   error: Error | null;
   onNavigate?: (section: DashboardSection) => void;
+  /** El título ya está en la pestaña del bloque de análisis. */
+  embedded?: boolean;
 };
 
 /** Misma estructura flex + shrink-0 que rule-503020 (no falla en Android). */
@@ -106,7 +108,7 @@ function getInsightIcon(insight: InsightItem): { Icon: IconType; colorClass: str
 
 const PANEL_CLASS = `${SECTION_CARD} p-5`;
 
-export function InsightsPanel({ data, isLoading, error, onNavigate }: Props) {
+export function InsightsPanel({ data, isLoading, error, onNavigate, embedded }: Props) {
   const { t } = useTranslation();
 
   if (isLoading) {
@@ -147,12 +149,18 @@ export function InsightsPanel({ data, isLoading, error, onNavigate }: Props) {
         <div className="min-w-0">
           <h2
             id="insights-panel-title"
-            className={`flex items-center gap-2 ${TYPE_DISPLAY}`}
+            className={
+              embedded
+                ? "sr-only"
+                : `flex items-center gap-2 ${TYPE_DISPLAY}`
+            }
           >
-            <IoBulbOutline
-              className="h-5 w-5 shrink-0 text-[var(--color-accent)]"
-              aria-hidden
-            />
+            {embedded ? null : (
+              <IoBulbOutline
+                className="h-5 w-5 shrink-0 text-[var(--color-accent)]"
+                aria-hidden
+              />
+            )}
             {t("insights.title")}
           </h2>
           <p className={`mt-1 ${TYPE_CAPTION}`}>{t("insights.subtitle")}</p>
