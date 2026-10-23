@@ -6,20 +6,22 @@ type Props = {
   label: string;
   value: ReactNode;
   highlight?: boolean;
+  /** Menos alto, para que el bloque de hoy quepa en un iPhone. */
+  compact?: boolean;
 };
 
-export function Metric({ label, value, highlight }: Props) {
+export function Metric({ label, value, highlight, compact }: Props) {
   return (
     <div
-      className={`rounded-lg px-2.5 py-2 ${
+      className={`rounded-lg ${compact ? "px-2 py-1.5" : "px-2.5 py-2"} ${
         highlight ? "bg-[var(--color-ok-dim)]" : "bg-[var(--color-bg-soft)]/80"
       }`}
     >
       <p className={`${TYPE_EYEBROW} line-clamp-2 leading-tight`}>{label}</p>
       <p
-        className={`mt-1 break-words font-display text-lg font-semibold tabular-nums leading-tight sm:text-xl ${
-          highlight ? "text-[var(--color-ok)]" : "text-[var(--color-text)]"
-        }`}
+        className={`break-words font-display font-semibold tabular-nums leading-tight ${
+          compact ? "mt-0.5 text-base" : "mt-1 text-lg sm:text-xl"
+        } ${highlight ? "text-[var(--color-ok)]" : "text-[var(--color-text)]"}`}
       >
         {value}
       </p>

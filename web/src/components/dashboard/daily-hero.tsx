@@ -12,8 +12,6 @@ type Props = {
   summaryPending: boolean;
   onRefresh: () => void;
   onAddExpense?: () => void;
-  /** Optional month label rendered inside the hero (avoids a separate cramped card). */
-  monthLabel?: string;
 };
 
 export function DailyHero({
@@ -21,7 +19,6 @@ export function DailyHero({
   summaryPending,
   onRefresh,
   onAddExpense,
-  monthLabel,
 }: Props) {
   const { t } = useTranslation();
   const animatedSpend = useAnimatedNumber(
@@ -29,8 +26,9 @@ export function DailyHero({
   );
 
   const metrics = (
-    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
       <Metric
+        compact
         label={t("metrics.savings")}
         value={
           summaryPending ? (
@@ -47,6 +45,7 @@ export function DailyHero({
         }
       />
       <Metric
+        compact
         label={t("metrics.fixedExpenses")}
         value={
           summaryPending ? (
@@ -57,6 +56,7 @@ export function DailyHero({
         }
       />
       <Metric
+        compact
         label={t("metrics.variableExpenses")}
         value={
           summaryPending ? (
@@ -67,6 +67,7 @@ export function DailyHero({
         }
       />
       <Metric
+        compact
         label={t("metrics.extraIncome")}
         value={
           summaryPending ? (
@@ -77,6 +78,7 @@ export function DailyHero({
         }
       />
       <Metric
+        compact
         label={t("metrics.remaining")}
         value={
           summaryPending ? (
@@ -88,6 +90,7 @@ export function DailyHero({
         highlight
       />
       <Metric
+        compact
         label={t("metrics.daysLeft")}
         value={
           summaryPending ? (
@@ -105,20 +108,14 @@ export function DailyHero({
   return (
     <section
       data-tour="hero"
-      className={`${SECTION_CARD} overflow-hidden p-5 sm:p-6`}
+      className={`${SECTION_CARD} overflow-hidden p-4 sm:p-5 lg:p-6`}
       style={{ boxShadow: "inset 3px 0 0 var(--color-accent)" }}
       aria-live="polite"
     >
-      {monthLabel ? (
-        <p className="mb-4 text-sm font-medium text-[var(--color-text-muted)] lg:hidden">
-          {monthLabel}
-        </p>
-      ) : null}
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-stretch lg:gap-8">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-stretch lg:gap-8">
         <div className="flex flex-col justify-center">
           <p className={TYPE_EYEBROW}>{t("hero.dailyBudget")}</p>
-          <div className="mt-3 min-h-[3.25rem]">
+          <div className="mt-1 min-h-[2.75rem] lg:mt-3 lg:min-h-[3.25rem]">
             {summaryPending ? (
               <div
                 className="h-12 w-44 animate-pulse rounded-lg bg-[var(--color-panel-elevated)]"
@@ -138,34 +135,33 @@ export function DailyHero({
             )}
           </div>
 
-          {onAddExpense ? (
-            <button
-              type="button"
-              onClick={onAddExpense}
-              className={`mt-6 w-full lg:w-auto ${BTN_PRIMARY}`}
-            >
-              {t("hero.addExpense")}
-            </button>
-          ) : null}
-
-          <div className="mt-4">
+          <div className="mt-3 flex items-center gap-2 lg:mt-6">
+            {onAddExpense ? (
+              <button
+                type="button"
+                onClick={onAddExpense}
+                className={`min-w-0 flex-1 lg:flex-none ${BTN_PRIMARY}`}
+              >
+                {t("hero.addExpense")}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={onRefresh}
               aria-label={t("hero.refresh")}
-              className={`min-h-11 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+              className={`min-h-11 shrink-0 px-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
             >
               {t("hero.refresh")}
             </button>
           </div>
 
-          <div className="mt-5 lg:hidden">{metrics}</div>
+          <div className="mt-3 lg:hidden">{metrics}</div>
         </div>
 
         <div className="hidden lg:block">{metrics}</div>
       </div>
 
-      <p className={`mt-6 border-t border-[var(--color-border)] pt-4 ${TYPE_BODY}`}>
+      <p className={`mt-3 border-t border-[var(--color-border)] pt-3 lg:mt-6 lg:pt-4 ${TYPE_BODY}`}>
         {t("hero.explanation")}
       </p>
     </section>

@@ -26,11 +26,6 @@ import { InsightsPanel } from "@/components/dashboard/insights-panel";
 import { MonthHistoryStrip } from "@/components/dashboard/month-history-strip";
 import { MonthContextBadge } from "@/components/dashboard/month-context-badge";
 import { MonthContextBanner } from "@/components/dashboard/month-context-banner";
-import {
-  budgetReferenceDate,
-  capitalizeFirstLetter,
-  formatMonthYear,
-} from "@/lib/month-context";
 import { MonthlyIncomeCheckFlow } from "@/components/dashboard/monthly-income-check-flow";
 import { Rule503020Panel } from "@/components/dashboard/rule-503020-panel";
 import { GuidedTour } from "@/components/guided-tour";
@@ -451,18 +446,12 @@ export function Dashboard({ profileName }: Props) {
         >
         {/* Section: HOY */}
         {activeSection === 'hoy' && (
-          <div className="space-y-5 md:space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
             <MonthContextBanner referenceDate={summaryQ.data?.reference_date} />
             <DailyHero
               summary={summaryQ.data}
               summaryPending={summaryQ.isPending}
-              monthLabel={capitalizeFirstLetter(
-                formatMonthYear(
-                  budgetReferenceDate(summaryQ.data?.reference_date),
-                  i18n.language,
-                ),
-              )}
               onRefresh={() => {
                 void invalidateAll().then(() => setToastMsg(t("toasts.done")));
               }}
