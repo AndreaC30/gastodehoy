@@ -110,12 +110,12 @@ export function DailyHero({
       aria-live="polite"
     >
       {monthLabel ? (
-        <p className="mb-4 text-sm font-medium text-[var(--color-text-muted)] md:hidden">
+        <p className="mb-4 text-sm font-medium text-[var(--color-text-muted)] lg:hidden">
           {monthLabel}
         </p>
       ) : null}
 
-      <div className="grid gap-6 md:grid-cols-[minmax(0,0.95fr)_1.35fr] md:items-stretch md:gap-8">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-stretch lg:gap-8">
         <div className="flex flex-col justify-center">
           <p className={TYPE_EYEBROW}>{t("hero.dailyBudget")}</p>
           <div className="mt-3 min-h-[3.25rem]">
@@ -142,7 +142,7 @@ export function DailyHero({
             <button
               type="button"
               onClick={onAddExpense}
-              className={`mt-6 w-full md:w-auto ${BTN_PRIMARY}`}
+              className={`mt-6 w-full lg:w-auto ${BTN_PRIMARY}`}
             >
               {t("hero.addExpense")}
             </button>
@@ -159,10 +159,10 @@ export function DailyHero({
             </button>
           </div>
 
-          <div className="mt-5 md:hidden">{metrics}</div>
+          <div className="mt-5 lg:hidden">{metrics}</div>
         </div>
 
-        <div className="hidden md:block">{metrics}</div>
+        <div className="hidden lg:block">{metrics}</div>
       </div>
 
       <p className={`mt-6 border-t border-[var(--color-border)] pt-4 ${TYPE_BODY}`}>

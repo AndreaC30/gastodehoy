@@ -75,10 +75,9 @@ export function AppSheet({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`modal-scroll flex max-h-[min(92dvh,100%)] w-full max-w-lg touch-auto flex-col overflow-hidden rounded-t-2xl border ${border} bg-[var(--color-panel)] ${MODAL_SHADOW} md:max-h-[min(90vh,100dvh)] md:rounded-2xl ${panelClassName}`}
+        className={`modal-scroll flex max-h-[min(92%,var(--gdh-vvh,92dvh))] w-full max-w-lg touch-auto flex-col overflow-hidden rounded-t-2xl border ${border} bg-[var(--color-panel)] ${MODAL_SHADOW} md:max-h-[min(90%,var(--gdh-vvh,90dvh))] md:rounded-2xl ${panelClassName}`}
         style={{
-          paddingBottom:
-            "max(0.75rem, var(--gdh-overlay-footer-pad, env(safe-area-inset-bottom)))",
+          paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0px))",
         }}
         onClick={(e) => e.stopPropagation()}
       >

@@ -242,7 +242,8 @@
   "variableExpenses": {
     "title": "Day-to-day expenses",
     "subtitle": "Add your daily purchases and one-off spending here",
-    "description": "Each entry updates how much you have left and your daily cap. For recurring monthly expenses, use Fixed expenses.",
+    "description": "Each entry updates how much you have left and your daily cap. For recurring monthly expenses, use ",
+    "fixedLink": "Fixed expenses",
     "descriptionSuffixDesktop": " (right column)",
     "descriptionSuffixMobile": " (next block)",
     "thisMonth": "{{month}} expenses",

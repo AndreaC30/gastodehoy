@@ -165,7 +165,7 @@ export function InsightsPanel({ data, isLoading, error, onNavigate }: Props) {
         </div>
       </div>
 
-      <ul className="mt-4 list-none grid grid-cols-1 gap-3 p-0 md:mt-4 md:grid-cols-2 md:gap-3">
+      <ul className="mt-4 grid list-none grid-cols-1 gap-3 p-0 lg:grid-cols-2 lg:gap-3">
         {data.insights.map((insight) => {
           const { Icon, colorClass } = getInsightIcon(insight);
           const cardStyle = TYPE_STYLES[insight.type] ?? TYPE_STYLES.info;

@@ -242,7 +242,8 @@
   "variableExpenses": {
     "title": "Gastos del día a día",
     "subtitle": "Suma aquí compras y gastos sueltos del mes",
-    "description": "Cada registro actualiza cuánto te queda y tu techo diario. Para gastos que se repiten cada mes, usa Gastos fijos.",
+    "description": "Cada registro actualiza cuánto te queda y tu techo diario. Para gastos que se repiten cada mes, usa ",
+    "fixedLink": "Gastos fijos",
     "descriptionSuffixDesktop": " (columna de la derecha)",
     "descriptionSuffixMobile": " (bloque siguiente)",
     "thisMonth": "Gastos de {{month}}",

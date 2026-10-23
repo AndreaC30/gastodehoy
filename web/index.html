@@ -4,7 +4,7 @@
     <!-- MUST be first — blocks paint and prevents white flash on any refresh -->
     <script>document.documentElement.style.backgroundColor="#070A0D";window.__gdhSplashStart=Date.now();</script>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description" content="App de presupuesto personal gratis. Calcula cuánto puedes gastar hoy, controla tus gastos diarios, organiza tus finanzas y ahorra más cada mes." />
     <meta name="keywords" content="gastos, control de gastos, presupuesto, finanzas personales, ahorro, dinero, gestión financiera, gastos diarios" />
     <meta name="author" content="GastoDeHoy" />
@@ -47,12 +47,16 @@
     <title>GastoDeHoy — App de Presupuesto Personal | Controla tus Gastos</title>
     <style>
       /* Critical CSS: splash before JS/CSS bundle (PWA + hard refresh) */
-      html, body {
+      html, body, #root {
         background: #070A0D !important;
         margin: 0;
-        min-height: 100dvh;
+        height: 100%;
+        overflow: hidden;
         color: #e2e8f0;
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      html {
+        height: 100dvh;
       }
       #boot-splash {
         position: fixed;
@@ -111,7 +115,7 @@
     }
     </script>
 </head>
-  <body class="antialiased" style="background:#070A0D;margin:0;min-height:100dvh">
+  <body class="antialiased" style="background:#070A0D;margin:0">
     <div id="boot-splash" role="status" aria-live="polite" aria-busy="true">
       <div class="boot-splash__inner">
         <img

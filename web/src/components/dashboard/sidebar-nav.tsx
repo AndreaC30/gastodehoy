@@ -223,7 +223,7 @@ export function Sidebar({
 
   const desktopSidebar = (
     <nav
-      className="flex h-full w-[230px] flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-soft)]"
+      className="flex h-full w-[12.75rem] flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-soft)] xl:w-[230px]"
       aria-label={t("nav.accountMenu")}
       data-tour="menu"
     >
@@ -262,7 +262,7 @@ export function Sidebar({
         </div>
       </AppDrawer>
 
-      <aside className="sticky top-0 z-20 hidden h-screen shrink-0 md:block">
+      <aside className="z-20 hidden h-full min-h-0 shrink-0 md:block">
         {desktopSidebar}
       </aside>
     </>

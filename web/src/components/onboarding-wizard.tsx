@@ -87,7 +87,7 @@ export function OnboardingWizard({ userName, onDone, onSkip }: Props) {
   }
 
   return (
-    <div className="relative z-10 mx-auto flex w-full max-w-xl flex-col px-4 py-6 sm:min-h-screen sm:justify-center sm:py-12">
+    <div className="relative z-10 mx-auto flex min-h-full w-full max-w-xl flex-col px-4 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:justify-center sm:py-12">
       <header className="mb-6 text-center">
         <p className="text-xs uppercase tracking-widest text-[var(--color-text-dim)]">
           {t("onboarding.greeting", { name: userName })}

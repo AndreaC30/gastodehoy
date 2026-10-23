@@ -380,7 +380,8 @@ export function Dashboard({ profileName }: Props) {
   }
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden">
+    <div className="gdh-app-frame">
+      <div className="flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
       <Sidebar
         profileName={profileName}
         exportBusy={exportBusy}
@@ -433,7 +434,7 @@ export function Dashboard({ profileName }: Props) {
           id="main-content"
           tabIndex={-1}
           data-density={density}
-          className="relative z-10 mx-auto w-full max-w-lg flex-1 space-y-8 px-4 py-6 pb-[8.5rem] sm:space-y-7 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-6 md:pb-20 lg:max-w-6xl"
+          className="relative z-10 mx-auto w-full min-w-0 max-w-lg flex-1 space-y-8 px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:space-y-7 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-6 md:pb-8 lg:max-w-6xl"
         >
         {error && (
           <div
@@ -474,7 +475,7 @@ export function Dashboard({ profileName }: Props) {
         {activeSection === 'gastos' && (
           <>
             <div
-              className="flex rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-1 md:hidden"
+              className="flex rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-1 lg:hidden"
               role="tablist"
               aria-label={t("header.sectionGastos")}
             >
@@ -502,10 +503,10 @@ export function Dashboard({ profileName }: Props) {
               ))}
             </div>
 
-            <div className="grid min-w-0 grid-cols-1 gap-6 sm:gap-5 md:grid-cols-2 md:items-start lg:gap-6">
+            <div className="grid min-w-0 grid-cols-1 gap-6 sm:gap-5 lg:grid-cols-2 lg:items-start lg:gap-6">
               <div
                 id="add-expense"
-                className={`min-w-0 ${gastosTab === "variables" ? "block" : "hidden"} md:block`}
+                className={`min-w-0 ${gastosTab === "variables" ? "block" : "hidden"} lg:block`}
               >
               <VariableExpensesSection
                 referenceDate={summaryQ.data?.reference_date}
@@ -532,7 +533,7 @@ export function Dashboard({ profileName }: Props) {
               />
               </div>
               <div
-                className={`min-w-0 ${gastosTab === "fijos" ? "block" : "hidden"} md:block`}
+                className={`min-w-0 ${gastosTab === "fijos" ? "block" : "hidden"} lg:block`}
               >
               <FixedExpensesSection
                 items={fixedItems}
@@ -644,8 +645,9 @@ export function Dashboard({ profileName }: Props) {
         </div>
       </main>
       </div>
+      </div>
 
-      {/* Bottom navigation (mobile only) */}
+      {/* Bottom navigation (mobile only). En el flujo, no fixed: si no, iOS la deja elevada al hacer scroll. */}
       <BottomNav
         activeSection={activeSection}
         onSectionChange={handleSectionChange}

@@ -71,7 +71,7 @@ export function VariableExpensesSection({
       <div className="p-5 sm:p-5">
         <p className={`mb-5 ${TYPE_BODY}`}>
           {t("variableExpenses.description")}
-          <strong className="text-[var(--color-text-muted)]">Gastos fijos</strong>
+          <strong className="text-[var(--color-text-muted)]">{t("variableExpenses.fixedLink")}</strong>
           <span className="hidden lg:inline">{t("variableExpenses.descriptionSuffixDesktop")}</span>
           <span className="lg:hidden">{t("variableExpenses.descriptionSuffixMobile")}</span>.
         </p>

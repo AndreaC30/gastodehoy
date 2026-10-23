@@ -242,7 +242,8 @@
   "variableExpenses": {
     "title": "Dépenses quotidiennes",
     "subtitle": "Ajoutez ici vos achats et dépenses ponctuelles du mois",
-    "description": "Chaque entrée met à jour ce qu'il vous reste et votre plafond quotidien. Pour les dépenses récurrentes, utilisez Dépenses fixes.",
+    "description": "Chaque entrée met à jour ce qu'il vous reste et votre plafond quotidien. Pour les dépenses récurrentes, utilisez ",
+    "fixedLink": "Dépenses fixes",
     "descriptionSuffixDesktop": " (colonne de droite)",
     "descriptionSuffixMobile": " (bloc suivant)",
     "thisMonth": "Dépenses de {{month}}",
