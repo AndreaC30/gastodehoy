@@ -463,37 +463,40 @@ export function Dashboard({ profileName }: Props) {
 
         {/* Section: GASTOS */}
         {activeSection === 'gastos' && (
-          <>
+          <div className="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] lg:contents">
             <div
-              className="flex rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-1 lg:hidden"
+              className="flex border-b border-[var(--color-border)] lg:hidden"
               role="tablist"
               aria-label={t("header.sectionGastos")}
             >
               {([
                 { id: "variables" as const, label: t("nav.gastosVariables") },
                 { id: "fijos" as const, label: t("nav.gastosFijos") },
-              ]).map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={gastosTab === tab.id}
-                  onClick={() => {
-                    hapticTick();
-                    setGastosTab(tab.id);
-                  }}
-                  className={`min-h-11 flex-1 rounded-lg text-sm font-semibold transition-colors ${FOCUS_RING} ${
-                    gastosTab === tab.id
-                      ? "bg-[var(--color-accent)] text-[var(--color-accent-ink)]"
-                      : "text-[var(--color-text-muted)]"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              ]).map((tab) => {
+                const selected = gastosTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    onClick={() => {
+                      hapticTick();
+                      setGastosTab(tab.id);
+                    }}
+                    className={`-mb-px min-h-11 flex-1 border-b-2 text-sm font-semibold transition-colors ${FOCUS_RING} ${
+                      selected
+                        ? "border-[var(--color-accent)] text-[var(--color-text)]"
+                        : "border-transparent text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="grid min-w-0 grid-cols-1 gap-6 sm:gap-5 lg:grid-cols-2 lg:items-start lg:gap-6">
+            <div className="grid min-w-0 grid-cols-1 gap-6 sm:gap-5 max-lg:[&_section]:rounded-none max-lg:[&_section]:border-0 max-lg:[&_section]:bg-transparent max-lg:[&_section]:shadow-none lg:grid-cols-2 lg:items-start lg:gap-6">
               <div
                 id="add-expense"
                 className={`min-w-0 ${gastosTab === "variables" ? "block" : "hidden"} lg:block`}
@@ -550,7 +553,7 @@ export function Dashboard({ profileName }: Props) {
               />
               </div>
             </div>
-          </>
+          </div>
         )}
 
         {/* Section: ANALISIS */}
