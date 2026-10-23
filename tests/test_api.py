@@ -51,10 +51,40 @@ def test_protected_endpoints_require_auth(anon_client) -> None:
     assert anon_client.get("/api/auth/me").status_code == 401
 
 
-def test_register_sets_cookie_and_me_works(anon_client) -> None:
+def test_register_rejects_missing_terms(anon_client) -> None:
+    r = anon_client.post(
+        "/api/auth/register",
+        json={"email": "no-terms@example.com", "name": "No", "password": "supersecret1"},
+    )
+    assert r.status_code == 422
+
     r = anon_client.post(
         "/api/auth/register",
         json={
+            "email": "no-terms@example.com",
+            "name": "No",
+            "password": "supersecret1",
+            "accepts_terms": False,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-10-23.2",
+        },
+    )
+    assert r.status_code == 400
+
+
+def test_legal_version_matches_frontend() -> None:
+    from pathlib import Path
+
+    from app.legal import LEGAL_TERMS_VERSION
+
+    text = (Path(__file__).resolve().parents[1] / "web/src/lib/legal.ts").read_text()
+    assert f'"{LEGAL_TERMS_VERSION}"' in text
+
+
+def test_register_sets_cookie_and_me_works(anon_client) -> None:
+    r = anon_client.post(
+        "/api/auth/register",
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", 
             "email": "Pablo@Example.com",
             "name": "Pablo",
             "password": "supersecret1",
@@ -64,6 +94,7 @@ def test_register_sets_cookie_and_me_works(anon_client) -> None:
     body = r.json()
     assert body["user"]["email"] == "pablo@example.com"
     assert body["user"]["name"] == "Pablo"
+    assert body["user"]["lifetime_free"] is True
 
     me = anon_client.get("/api/auth/me")
     assert me.status_code == 200
@@ -95,7 +126,7 @@ def test_forgot_password_sends_mail_and_sets_temp_password(
 
     anon_client.post(
         "/api/auth/register",
-        json={"email": "fp@e.com", "name": "FP", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "fp@e.com", "name": "FP", "password": "supersecret1"},
     )
     anon_client.post("/api/auth/logout")
 
@@ -164,7 +195,7 @@ def test_forgot_password_rate_limited(anon_client, monkeypatch) -> None:
 
     anon_client.post(
         "/api/auth/register",
-        json={"email": "rlfp@e.com", "name": "RL", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "rlfp@e.com", "name": "RL", "password": "supersecret1"},
     )
     anon_client.post("/api/auth/logout")
 
@@ -183,11 +214,11 @@ def test_forgot_password_rate_limited(anon_client, monkeypatch) -> None:
 def test_register_duplicate_email_conflicts(anon_client) -> None:
     anon_client.post(
         "/api/auth/register",
-        json={"email": "ana@example.com", "name": "Ana", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "ana@example.com", "name": "Ana", "password": "supersecret1"},
     )
     dup = anon_client.post(
         "/api/auth/register",
-        json={"email": "ANA@EXAMPLE.com", "name": "Ana 2", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "ANA@EXAMPLE.com", "name": "Ana 2", "password": "supersecret1"},
     )
     assert dup.status_code == 409
 
@@ -195,7 +226,7 @@ def test_register_duplicate_email_conflicts(anon_client) -> None:
 def test_login_and_logout_cycle(anon_client) -> None:
     anon_client.post(
         "/api/auth/register",
-        json={"email": "u@e.com", "name": "U", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "u@e.com", "name": "U", "password": "supersecret1"},
     )
     anon_client.post("/api/auth/logout")
     assert anon_client.get("/api/auth/me").status_code == 401
@@ -218,7 +249,7 @@ def test_login_rate_limit(anon_client, monkeypatch) -> None:
     monkeypatch.setattr(app_settings, "environment", "production")
     anon_client.post(
         "/api/auth/register",
-        json={"email": "r@e.com", "name": "R", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "r@e.com", "name": "R", "password": "supersecret1"},
     )
     anon_client.post("/api/auth/logout")
     for _ in range(5):
@@ -236,7 +267,7 @@ def test_login_rate_limit(anon_client, monkeypatch) -> None:
 def test_users_are_isolated(anon_client) -> None:
     anon_client.post(
         "/api/auth/register",
-        json={"email": "a@e.com", "name": "A", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "a@e.com", "name": "A", "password": "supersecret1"},
     )
     anon_client.put(
         "/api/settings", json={"monthly_income": "1000.00", "savings_percent": "10"}
@@ -246,7 +277,7 @@ def test_users_are_isolated(anon_client) -> None:
 
     anon_client.post(
         "/api/auth/register",
-        json={"email": "b@e.com", "name": "B", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "b@e.com", "name": "B", "password": "supersecret1"},
     )
     s = anon_client.get("/api/summary").json()
     assert Decimal(str(s["monthly_income"])) == Decimal("0")
@@ -496,7 +527,7 @@ def test_delete_variable_expense(client) -> None:
 def test_change_password_flow(anon_client) -> None:
     anon_client.post(
         "/api/auth/register",
-        json={"email": "c@e.com", "name": "C", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "c@e.com", "name": "C", "password": "supersecret1"},
     )
     bad = anon_client.put(
         "/api/auth/me/password",
@@ -523,7 +554,7 @@ def test_change_password_invalidates_other_sessions(anon_client) -> None:
 
     anon_client.post(
         "/api/auth/register",
-        json={"email": "x@e.com", "name": "X", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "x@e.com", "name": "X", "password": "supersecret1"},
     )
     old_cookie = anon_client.cookies.get("gdh_session")
     assert old_cookie
@@ -553,7 +584,7 @@ def test_register_invalid_email_format(anon_client) -> None:
     for bad in ["no-at-sign", "missing-domain@", "@nodomain", "spaces in@email"]:
         r = anon_client.post(
             "/api/auth/register",
-            json={"email": bad, "name": "Bad", "password": "supersecret1"},
+            json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": bad, "name": "Bad", "password": "supersecret1"},
         )
         assert r.status_code == 422, f"Expected 422 for email '{bad}', got {r.status_code}"
 
@@ -597,7 +628,7 @@ def test_forgot_password_no_enumeration_by_timing(anon_client, monkeypatch) -> N
 
     anon_client.post(
         "/api/auth/register",
-        json={"email": "real@e.com", "name": "Real", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "real@e.com", "name": "Real", "password": "supersecret1"},
     )
     anon_client.post("/api/auth/logout")
 

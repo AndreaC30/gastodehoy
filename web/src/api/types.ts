@@ -151,6 +151,10 @@ export type User = {
   name: string;
   /** True hasta que cambie la contraseña temporal enviada por correo. */
   must_change_password?: boolean;
+  /** Versión de condiciones aceptada. Null si la cuenta es anterior. */
+  terms_version?: string | null;
+  /** Cuenta inicial: no se cobra aunque exista un plan de pago. */
+  lifetime_free?: boolean;
 };
 
 export type RegisterResponse = {

@@ -171,7 +171,8 @@
     "sendEmail": "E-Mail senden",
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort ausblenden",
-    "accessTabs": "Kontozugang"
+    "accessTabs": "Kontozugang",
+    "ageConfirm": "Ich bestätige, dass ich mindestens 14 Jahre alt bin. Der Dienst richtet sich nicht an jüngere Personen."
   },
   "common": {
     "loading": "Laden…",
@@ -361,7 +362,11 @@
     "installDismiss": "Verstanden",
     "notifyNeedInstall": "In-App-Erinnerung aktiv. Auf dem iPhone für Systembenachrichtigungen: GastoDeHoy zum Home-Bildschirm hinzufügen, von dort öffnen und Benachrichtigungen erlauben.",
     "notifyDeniedInApp": "In-App-Erinnerung aktiv. Benachrichtigungen sind im Browser blockiert; aktiviere sie in den Einstellungen für Hinweise bei geschlossener App.",
-    "notifyInAppOnly": "In-App-Erinnerung aktiv. Dieses Gerät kann gerade keine Systembenachrichtigungen zeigen; du siehst die Nachricht beim Öffnen von GastoDeHoy."
+    "notifyInAppOnly": "In-App-Erinnerung aktiv. Dieses Gerät kann gerade keine Systembenachrichtigungen zeigen; du siehst die Nachricht beim Öffnen von GastoDeHoy.",
+    "planTitle": "Dein Plan",
+    "planBody": "Das Konto ist kostenlos. Es gibt keine Abbuchung, keine automatische Verlängerung und keine Verbindung zu deiner Bank. Ein kostenpflichtiger Plan wird nicht aktiviert, ohne vorher in diesem Konto den Preis einschließlich Steuern, den Zeitraum, die Verlängerung und die Kündigung zu zeigen.",
+    "planEnd": "Um den Dienst zu beenden und deine Daten zu löschen, nutze Konto löschen. Exportiere vorher das CSV, wenn du eine Kopie behalten willst.",
+    "planBodyFounder": "Dies ist ein Anfangskonto. Es bleibt kostenlos und dir wird nichts berechnet, auch wenn es später einen kostenpflichtigen Plan für neue Konten gibt."
   },
   "deleteAccount": {
     "title": "Konto löschen",
@@ -439,13 +444,6 @@
     "emptyDay": "Keine Ausgaben an diesem Tag.",
     "loadError": "Monatsverlauf konnte nicht geladen werden."
   },
-  "cookieConsent": {
-    "message": "GastoDeHoy verwendet notwendige technische Cookies. Mit deiner Erlaubnis nutzen wir anonyme Analytics (keine Drittanbieter-Cookies) zur Verbesserung der App.",
-    "privacyLink": "Mehr Infos in der Datenschutzerklärung.",
-    "manage": "Cookies verwalten",
-    "necessaryOnly": "Nur notwendige",
-    "accept": "Akzeptieren"
-  },
   "tour": {
     "moving": "Ansicht wird bewegt…",
     "close": "Anleitung schließen",
@@ -505,63 +503,167 @@
   },
   "legal": {
     "title": "Impressum und Nutzungsbedingungen",
-    "lastUpdatedLabel": "Zuletzt aktualisiert:",
-    "lastUpdatedDate": "Mai 2026",
-    "section1Title": "1. Inhaber der Website",
-    "section1Owner": "Inhaber:",
-    "section1OwnerValue": "Andrea Cruz",
-    "section1Email": "E-Mail:",
-    "section1EmailValue": "gastodehoy@gmail.com",
-    "section2Title": "2. Nutzungsbedingungen",
-    "section2Text": "Der Zugriff auf und die Nutzung von GastoDeHoy setzt die Akzeptanz dieser Bedingungen voraus. Wenn du nicht einverstanden bist, nutze den Dienst nicht.",
-    "section3Title": "3. Nutzung des Dienstes",
-    "section3Intro": "GastoDeHoy ist ein Tool zur Verwaltung persönlicher Ausgaben. Du verpflichtest dich:",
-    "section3Item1": "Den Dienst nicht für illegale Aktivitäten zu nutzen",
-    "section3Item2": "Wahrheitsgemäße Informationen bereitzustellen",
-    "section3Item3": "Nicht zu versuchen, auf Daten anderer Benutzer zuzugreifen",
-    "section4Title": "4. Geistiges Eigentum",
-    "section4Text": "Das Design, der Quellcode, die Logos und Inhalte von GastoDeHoy sind Eigentum ihrer Inhaber. Die Vervielfältigung ohne Genehmigung ist untersagt.",
-    "section5Title": "5. Haftungsbeschränkung",
-    "section5Text": "GastoDeHoy wird \"wie besehen\" bereitgestellt. Wir garantieren keine ununterbrochene Verfügbarkeit oder Fehlerfreiheit. Wir übernehmen keine Haftung für finanzielle Entscheidungen, die auf Basis der App-Berechnungen getroffen werden.",
-    "section6Title": "6. Änderungen",
-    "section6Text": "Wir behalten uns das Recht vor, diese Bedingungen jederzeit zu ändern. Änderungen werden per E-Mail mitgeteilt.",
-    "section7Title": "7. Anwendbares Recht",
-    "section7Text": "Diese Bedingungen unterliegen spanischem Recht. Streitigkeiten werden vor den Gerichten von Madrid verhandelt."
+    "lastUpdatedLabel": "Letzte Aktualisierung:",
+    "lastUpdatedDate": "23. Oktober 2026",
+    "versionLabel": "Fassung:",
+    "versionValue": "2026-10-23.2",
+    "sections": [
+      {
+        "title": "1. Anbieterin",
+        "paragraphs": [
+          "Anbieterin: Andrea Cruz. E-Mail: gastodehoy@gmail.com. Web: https://gastodehoy.es.",
+          "Der Dienst ist kostenlos, ohne Werbung und ohne Preis. Steuerliche Identifikation und Anschrift nach Artikel 10 des spanischen Gesetzes 34/2002 werden in diesem Hinweis veröffentlicht, bevor ein Plan berechnet wird. Bis dahin gibt es keinen Preis auszuweisen."
+        ]
+      },
+      {
+        "title": "2. Was dieser Dienst ist",
+        "paragraphs": [
+          "GastoDeHoy dient dazu, Einnahmen und Ausgaben zu notieren und aus deinen Angaben einen täglichen Spielraum zu schätzen. Es ist keine Bank, kein Zahlungsinstitut, es eröffnet keine Konten, führt keine Überweisungen aus und verbindet sich nicht mit deiner Bank. Es ist kein Zahlungsdienst im Sinne der Richtlinie (EU) 2015/2366.",
+          "Die Beträge sind Schätzungen. Sie sind keine Finanz-, Steuer- oder Arbeitsberatung."
+        ]
+      },
+      {
+        "title": "3. Der heutige Vertrag",
+        "paragraphs": [
+          "Das Konto ist kostenlos. Es gibt keine automatische Verlängerung und keine Abbuchung. Du kannst jederzeit aufhören.",
+          "Zum Beenden und Löschen gibt es im Konto «Konto löschen», bestätigt mit dem Passwort. Du kannst auch an gastodehoy@gmail.com schreiben. Exportiere vorher das CSV, wenn du deine Zahlen behalten willst: sie gehören dir."
+        ]
+      },
+      {
+        "title": "4. Falls später ein kostenpflichtiger Plan kommt",
+        "paragraphs": [
+          "Konten, die entstehen solange der Dienst kostenlos ist, einschließlich der schon bestehenden, sind Anfangskonten. Sie werden nicht in einen kostenpflichtigen Plan umgewandelt und es wird nichts abgebucht. Ein späterer kostenpflichtiger Plan, falls es ihn gibt, gilt nur für neue Konten, die ihn abschließen.",
+          "Heute gibt es keinen kostenpflichtigen Plan. Er wird nicht aktiviert, ohne dir vorher und auf demselben Bildschirm zu zeigen: den Inhalt, den Gesamtpreis der Periode einschließlich Steuern, den Rhythmus, ob er sich verlängert, wie du kündigst und das Widerrufsrecht.",
+          "Die Zahlungsfläche wird angeben, dass die Bestellung eine Zahlungspflicht begründet.",
+          "Die Kündigung liegt im Konto, auf demselben Online-Weg, ohne Telefon oder Brief zu erzwingen. Das verlangt Artikel 62.3 des spanischen Verbrauchergesetzes.",
+          "Wenn eine feste Laufzeit sich automatisch verlängerte, gäben wir mindestens 15 Tage vor der Abbuchung Bescheid, mit den Folgen einer nicht erfolgten Kündigung, nach dem spanischen Gesetz 10/2025 und Artikel 97.1.p des Verbrauchergesetzes.",
+          "Du hast 14 Tage, um ohne Angabe von Gründen zu widerrufen. Im Konto wird eine sichtbare Funktion stehen, «Vertrag widerrufen», mit einer Bestätigung gegen ein versehentliches Tippen und einer Eingangsbestätigung per E-Mail. Solange diese Funktion nicht veröffentlicht ist, übst du den Widerruf mit dem Formular im nächsten Abschnitt aus, an gastodehoy@gmail.com.",
+          "Wenn du verlangst, dass der kostenpflichtige Dienst in diesen 14 Tagen beginnt, kannst du einen anteiligen Betrag für die bereits erbrachten Tage schulden. Einen vollständigen Verzicht auf den Widerruf verlangen wir nicht."
+        ]
+      },
+      {
+        "title": "5. Widerrufsformular",
+        "paragraphs": [
+          "An Andrea Cruz, gastodehoy@gmail.com.",
+          "«Ich widerrufe den Vertrag über den Dienst GastoDeHoy. Name, E-Mail des Kontos und Vertragsdatum, falls bekannt.» Datum dieses Hinweises."
+        ]
+      },
+      {
+        "title": "6. Nutzung des Kontos",
+        "paragraphs": [
+          "Du verpflichtest dich zu zutreffenden Angaben, den Dienst nicht für etwas Unerlaubtes zu nutzen und nicht auf Daten anderer Personen zuzugreifen. Du bestätigst, 14 Jahre oder älter zu sein."
+        ]
+      },
+      {
+        "title": "7. Urheberrecht und deine Inhalte",
+        "paragraphs": [
+          "Gestaltung, Code und Marke gehören der Anbieterin. Deine Budgetdaten gehören dir. Du kannst sie als CSV exportieren. Mit dem Vertragsende hören wir auf, sie zu nutzen, außer die Rechtsordnung verlangt eine Aufbewahrung."
+        ]
+      },
+      {
+        "title": "8. Wenn der Dienst nicht der Beschreibung entspricht",
+        "paragraphs": [
+          "Der digitale Dienst muss dem entsprechen, was die Anwendung zeigt. Wenn nicht, kannst du Nachbesserung verlangen. Sobald ein Preis besteht, auch eine anteilige Minderung oder die Beendigung, mit Erstattung des nicht vertragsgemäßen Teils. Das ist der Schutz der Richtlinie (EU) 2019/770 in der spanischen Umsetzung."
+        ]
+      },
+      {
+        "title": "9. Haftung",
+        "paragraphs": [
+          "Wir haften nicht für Entscheidungen, die du aus deinen eigenen Zahlen triffst: die App gleicht sie nicht mit deiner Bank ab. Wir schließen weder Vorsatz noch eine Haftung aus, die das Gesetz gegenüber Verbrauchern nicht beschränken lässt. Eine ununterbrochene Verfügbarkeit sagen wir nicht zu."
+        ]
+      },
+      {
+        "title": "10. Änderungen, Recht und Beschwerden",
+        "paragraphs": [
+          "Eine Änderung, die Rechte verkürzt, gilt erst, wenn du sie in der App akzeptierst. Wenn nicht, kannst du das Konto löschen. Die akzeptierte Fassung wird gespeichert.",
+          "Es gilt spanisches Recht. Als Verbraucher kannst du die Gerichte deines Wohnsitzes anrufen. Du kannst auch die Beschwerdeformulare und die Verbraucherbehörden deiner autonomen Gemeinschaft nutzen."
+        ]
+      }
+    ]
   },
   "privacy": {
     "title": "Datenschutzerklärung",
-    "lastUpdatedLabel": "Zuletzt aktualisiert:",
-    "lastUpdatedDate": "Mai 2026",
-    "section1Title": "1. Verantwortlicher",
-    "section1Owner": "Inhaber:",
-    "section1OwnerValue": "Andrea Cruz",
-    "section1Email": "E-Mail:",
-    "section1EmailValue": "gastodehoy@gmail.com",
-    "section1Web": "Webseite:",
-    "section1WebValue": "gastodehoy.es",
-    "section2Title": "2. Erhobene Daten",
-    "section2Item1": "E-Mail und Name (bei der Kontoerstellung)",
-    "section2Item2": "Von dir freiwillig eingegebene Ausgaben- und Einkommensdaten",
-    "section2Item3": "Anonyme Nutzungsdaten (Analytics, nur wenn du Cookies akzeptierst)",
-    "section3Title": "3. Zweck der Verarbeitung",
-    "section3Item1": "Bereitstellung des Dienstes zur Verwaltung persönlicher Ausgaben",
-    "section3Item2": "Authentifizierung und Aufrechterhaltung deiner Sitzung",
-    "section3Item3": "Verbesserung der App durch anonymes Analytics (mit deiner Einwilligung)",
-    "section4Title": "4. Rechtsgrundlage",
-    "section4Item1Label": "Erbringung des Dienstes (Art. 6.1 lit. b DSGVO):",
-    "section4Item1Text": "für die für den Betrieb notwendigen Daten",
-    "section4Item2Label": "Einwilligung (Art. 6.1 lit. a DSGVO):",
-    "section4Item2Text": "für Analytics",
-    "section5Title": "5. Datenspeicherung",
-    "section5Text": "Deine Daten werden gespeichert, solange dein Konto aktiv ist. Du kannst dein Konto und alle deine Daten jederzeit unter Einstellungen > Konto löschen entfernen.",
-    "section6Title": "6. Cookies",
-    "section6Part1": "Wir verwenden ein technisches Sitzungscookie (",
-    "section6Part2": "), das zur Aufrechterhaltung deiner Anmeldung erforderlich ist. Es bedarf keiner Einwilligung. Wenn du zustimmst, verwenden wir anonymes Analytics (keine Drittanbieter-Cookies).",
-    "section7Title": "7. Deine Rechte",
-    "section7Part1": "Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung und Widerspruch gegen die Verarbeitung deiner Daten. Schreibe uns an",
-    "section7Part2": ".",
-    "section8Title": "8. Sicherheit",
-    "section8Text": "Deine Daten werden auf Servern innerhalb der EU mit HTTPS und Verschlüsselung gespeichert. Wir geben deine Daten nicht an Dritte weiter."
+    "lastUpdatedLabel": "Letzte Aktualisierung:",
+    "lastUpdatedDate": "23. Oktober 2026",
+    "versionLabel": "Fassung:",
+    "versionValue": "2026-10-23.2",
+    "sections": [
+      {
+        "title": "1. Verantwortliche Stelle",
+        "paragraphs": [
+          "Verantwortliche Stelle ist Andrea Cruz. E-Mail: gastodehoy@gmail.com. Website: https://gastodehoy.es. Es gibt keine Datenschutzbeauftragte; Anfragen gehen an diese Adresse.",
+          "Steuernummer und Anschrift werden im Impressum veröffentlicht, bevor ein kostenpflichtiger Plan angeboten wird. Der Dienst ist heute kostenlos und es gibt keinen Preis auszuweisen."
+        ]
+      },
+      {
+        "title": "2. Welche Daten wir verarbeiten",
+        "paragraphs": [
+          "Konto: E-Mail, Name, Passwort (nur der Hash), Sprache und die Zeitpunkte von Registrierung, letzter Anmeldung und Passwortänderung. Außerdem speichern wir die akzeptierte Fassung der Bedingungen und deine Bestätigung, dass du mindestens 14 Jahre alt bist.",
+          "Budget: Einnahmen, Ausgaben, Kategorien, Ziele und Notizen, die du selbst einträgst. Wir fragen keine Bankzugangsdaten ab und verbinden uns nicht mit deiner Bank. GastoDeHoy ist keine Bank und kein Zahlungsdienst.",
+          "Wenn du Systemhinweise aktivierst, speichern wir die Push-Kennung und die Schlüssel, die der Browser erzeugt.",
+          "Sicherheit: IP-Adresse und Zeitpunkt von Anmeldeversuchen, um Missbrauch zu begrenzen. Das Fenster beträgt fünf Minuten.",
+          "Auf deinem Gerät speichert der Browser Oberflächeneinstellungen (Sprache, Dichte, Hinweise, Einführung). Sie gehen nicht an Dritte.",
+          "Technisches Cookie gdh_session, HttpOnly und SameSite=Lax (Secure in Produktion), nur für die Sitzung."
+        ]
+      },
+      {
+        "title": "3. Zwecke und Rechtsgrundlagen",
+        "paragraphs": [
+          "Bereitstellung des Budgets sowie Willkommensmail oder temporäres Passwort: Vertragserfüllung, Art. 6 Abs. 1 lit. b DSGVO.",
+          "Begrenzung von Anmeldeversuchen und technische Sicherheitsprotokolle: berechtigtes Interesse, Art. 6 Abs. 1 lit. f. Du kannst widersprechen.",
+          "Push-Hinweise: Einwilligung. Du widerrufst sie, indem du den Hinweis im Konto oder im System abschaltest.",
+          "Bei einer Registrierung erhält die Betreiberin einen internen Hinweis mit Name, E-Mail und Datum, um den Dienst zu führen. Grundlage: berechtigtes Interesse.",
+          "Es gibt keine Analyse, keine Werbung und keine automatisierte Entscheidung mit rechtlicher Wirkung. Wir senden keine regelmäßigen Zusammenfassungen deiner Zahlen. Das ginge nur nach ausdrücklicher Aktivierung, und das Konto bietet diese Option heute nicht an."
+        ]
+      },
+      {
+        "title": "4. Empfänger und Übermittlungen",
+        "paragraphs": [
+          "Wir verkaufen keine Daten. Das Hosting speichert die Datenbank für die Verantwortliche.",
+          "Das Postfach gastodehoy@gmail.com liegt bei Google. Google LLC ist im EU-US Data Privacy Framework als aktiv geführt (Prüfung auf dataprivacyframework.gov). Das ist das Mittel der Übermittlung, wenn du an diese Adresse schreibst oder die Registrierung den internen Hinweis auslöst.",
+          "Willkommensmail und temporäres Passwort laufen über den SMTP-Server der Verantwortlichen, der nur für diese Nachrichten als Auftragsverarbeiter tätig wird.",
+          "Wenn du Push aktivierst, läuft der Hinweis über den Dienst deines Browsers (Google, Mozilla oder Apple). Eine Übermittlung außerhalb des EWR kann auf einem Angemessenheitsbeschluss oder den Klauseln dieses Anbieters beruhen.",
+          "Die Schriftarten der Oberfläche kommen von dieser Website. Sie werden nicht von Google oder einem anderen Dritten geladen."
+        ]
+      },
+      {
+        "title": "5. Speicherdauer",
+        "paragraphs": [
+          "Kontodaten bleiben, solange das Konto besteht. Du kannst es im Konto löschen: Konto, Ausgaben, Ziele und Push-Abonnements werden entfernt.",
+          "Die IP von Anmeldeversuchen bleibt im Fünf-Minuten-Fenster der Versuchsbeschränkung.",
+          "Technische Protokolle bleiben so lange, wie es zur Erkennung von Missbrauch nötig ist, und werden nicht anders verwendet. Falls Sicherungskopien bestehen, enthalten sie das Konto nicht mehr, sobald diese Kopie ersetzt wird."
+        ]
+      },
+      {
+        "title": "6. Cookies",
+        "paragraphs": [
+          "Wir verwenden nur das technische Cookie gdh_session. Die spanische Cookie-Leitlinie nimmt Cookies aus, die für den angeforderten Dienst nötig sind, deshalb gibt es kein Einwilligungsbanner. Abmelden löscht es. Lokale Einstellungen entfernst du über die Website-Daten im Browser."
+        ]
+      },
+      {
+        "title": "7. Deine Rechte",
+        "paragraphs": [
+          "Du kannst Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch und Datenübertragbarkeit verlangen. Der CSV-Export der App umfasst deine Ausgaben; du kannst ihn auch per E-Mail verlangen.",
+          "Die Einwilligung für Hinweise kannst du jederzeit widerrufen. Das Konto bleibt davon unberührt.",
+          "Beschwerde bei der Agencia Española de Protección de Datos: https://www.aepd.es.",
+          "Schreib an gastodehoy@gmail.com. Die Frist beträgt einen Monat und kann nach der DSGVO verlängert werden."
+        ]
+      },
+      {
+        "title": "8. Pflichtangaben und Alter",
+        "paragraphs": [
+          "E-Mail, Name und Passwort sind nötig, um das Konto anzulegen. Die übrigen Beträge gibst du ein, wenn du das Budget nutzen willst.",
+          "Der Dienst richtet sich nicht an Kinder unter 14 Jahren. Bei der Registrierung bestätigst du dieses Alter (Artikel 7 des spanischen LOPDGDD)."
+        ]
+      },
+      {
+        "title": "9. Sicherheit und Änderungen",
+        "paragraphs": [
+          "Die Verbindung nutzt HTTPS. Das Passwort wird als Hash gespeichert, nicht im Klartext. Das Sitzungscookie ist aus JavaScript nicht lesbar.",
+          "Wenn sich diese Erklärung wesentlich ändert, bitten wir dich, sie in der App erneut zu akzeptieren, bevor du weitermachst. Die akzeptierte Fassung wird im Konto gespeichert."
+        ]
+      }
+    ]
   },
   "toasts": {
     "tourComplete": "Anleitung abgeschlossen. Du kannst sie jederzeit über das Menü erneut ansehen.",
@@ -587,6 +689,14 @@
     "invalidEmailDomain": "Ungültige E-Mail-Domain",
     "accountAlreadyExists": "Ein Konto mit dieser E-Mail existiert bereits",
     "currentPasswordIncorrect": "Aktuelles Passwort ist falsch",
-    "passwordIncorrect": "Falsches Passwort"
+    "passwordIncorrect": "Falsches Passwort",
+    "termsNotAccepted": "Du musst die geltenden Bedingungen akzeptieren und bestätigen, dass du mindestens 14 Jahre alt bist."
+  },
+  "termsGate": {
+    "title": "Aktualisierte Bedingungen",
+    "body": "Um GastoDeHoy weiter zu nutzen, akzeptiere die Fassung {{version}} der Bedingungen und der Datenschutzerklärung. Wenn du nicht einverstanden bist, melde dich ab oder lösche das Konto.",
+    "acceptTerms": "Ich habe die geltenden Bedingungen und die Datenschutzerklärung gelesen und akzeptiere sie.",
+    "accept": "Akzeptieren und fortfahren",
+    "saving": "Speichern…"
   }
 }

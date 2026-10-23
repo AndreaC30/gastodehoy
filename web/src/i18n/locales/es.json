@@ -171,7 +171,8 @@
     "sendEmail": "Enviar correo",
     "showPassword": "Mostrar contraseña",
     "hidePassword": "Ocultar contraseña",
-    "accessTabs": "Acceso a la cuenta"
+    "accessTabs": "Acceso a la cuenta",
+    "ageConfirm": "Confirmo que tengo al menos 14 años. El servicio no está dirigido a menores de esa edad."
   },
   "common": {
     "loading": "Cargando…",
@@ -360,7 +361,11 @@
     "installDismiss": "Entendido",
     "notifyNeedInstall": "Aviso activado dentro de la app. En iPhone, para notificaciones del sistema: instala GastoDeHoy en la pantalla de inicio y vuelve a activar el permiso desde la app instalada.",
     "notifyDeniedInApp": "Aviso activado dentro de la app. El navegador tiene las notificaciones bloqueadas; actívalas en Ajustes del sistema/navegador si quieres el aviso con la app cerrada.",
-    "notifyInAppOnly": "Aviso activado dentro de la app. Este dispositivo no puede mostrar notificaciones del sistema ahora; verás el mensaje al abrir GastoDeHoy."
+    "notifyInAppOnly": "Aviso activado dentro de la app. Este dispositivo no puede mostrar notificaciones del sistema ahora; verás el mensaje al abrir GastoDeHoy.",
+    "planTitle": "Tu plan",
+    "planBody": "La cuenta es gratuita. No hay cobro, ni renovación automática, ni conexión con tu banco. Un plan de pago no se activará sin mostrar antes, en esta misma cuenta, el precio con impuestos, el periodo, la renovación y la forma de cancelarlo.",
+    "planEnd": "Para terminar el servicio y borrar tus datos, usa Eliminar mi cuenta. Exporta el CSV antes si quieres quedarte una copia.",
+    "planBodyFounder": "Esta cuenta es inicial. Seguirá siendo gratuita y no se te cobrará nada, aunque más adelante exista un plan de pago para cuentas nuevas."
   },
   "deleteAccount": {
     "title": "Eliminar cuenta",
@@ -437,13 +442,6 @@
     "emptyDay": "No hay gastos este día.",
     "loadError": "No se pudo cargar el historial mensual."
   },
-  "cookieConsent": {
-    "message": "GastoDeHoy usa cookies técnicas necesarias para funcionar. Con tu permiso, usamos analytics anónimo (sin cookies de terceros) para mejorar la app.",
-    "privacyLink": "Más info en la política de privacidad.",
-    "manage": "Gestionar cookies",
-    "necessaryOnly": "Solo necesarias",
-    "accept": "Aceptar"
-  },
   "tour": {
     "moving": "Moviendo vista…",
     "close": "Cerrar guía",
@@ -502,64 +500,168 @@
     "date": "Fecha"
   },
   "legal": {
-    "title": "Aviso Legal y Condiciones de Uso",
+    "title": "Aviso legal y condiciones de uso",
     "lastUpdatedLabel": "Última actualización:",
-    "lastUpdatedDate": "Mayo 2026",
-    "section1Title": "1. Titularidad",
-    "section1Owner": "Titular:",
-    "section1OwnerValue": "Andrea Cruz",
-    "section1Email": "Email:",
-    "section1EmailValue": "gastodehoy@gmail.com",
-    "section2Title": "2. Condiciones de Uso",
-    "section2Text": "El acceso y uso de GastoDeHoy implica la aceptación de estas condiciones. Si no estás de acuerdo, no uses el servicio.",
-    "section3Title": "3. Uso del Servicio",
-    "section3Intro": "GastoDeHoy es una herramienta de gestión de gastos personales. Te comprometes a:",
-    "section3Item1": "No usar el servicio para actividades ilícitas",
-    "section3Item2": "Proporcionar información veraz",
-    "section3Item3": "No intentar acceder a datos de otros usuarios",
-    "section4Title": "4. Propiedad Intelectual",
-    "section4Text": "El diseño, código fuente, logotipos y contenidos de GastoDeHoy son propiedad de sus titulares. Queda prohibida su reproducción sin autorización.",
-    "section5Title": "5. Limitación de Responsabilidad",
-    "section5Text": "GastoDeHoy se ofrece \"tal cual\". No garantizamos disponibilidad ininterrumpida ni ausencia de errores. No somos responsables de decisiones financieras tomadas basándose en los cálculos de la app.",
-    "section6Title": "6. Modificaciones",
-    "section6Text": "Nos reservamos el derecho a modificar estas condiciones en cualquier momento. Los cambios se notificarán por correo electrónico.",
-    "section7Title": "7. Ley Aplicable",
-    "section7Text": "Estas condiciones se rigen por la legislación española. Cualquier disputa se someterá a los juzgados de Madrid."
+    "lastUpdatedDate": "23 de octubre de 2026",
+    "versionLabel": "Versión:",
+    "versionValue": "2026-10-23.2",
+    "sections": [
+      {
+        "title": "1. Titular",
+        "paragraphs": [
+          "Titular: Andrea Cruz. Correo: gastodehoy@gmail.com. Web: https://gastodehoy.es.",
+          "El servicio es gratuito, sin publicidad y sin precio. El NIF y el domicilio del artículo 10 de la Ley 34/2002 se publicarán en este aviso antes de cobrar cualquier plan. Hasta entonces no hay un precio que informar."
+        ]
+      },
+      {
+        "title": "2. Qué es este servicio",
+        "paragraphs": [
+          "GastoDeHoy sirve para anotar ingresos y gastos y estimar un margen diario a partir de lo que escribes. No es un banco, no es una entidad de pago, no abre cuentas, no ejecuta transferencias y no se conecta a tu entidad. No es un servicio de pago de la Directiva (UE) 2015/2366.",
+          "Los importes son estimaciones. No son asesoramiento financiero, fiscal ni laboral."
+        ]
+      },
+      {
+        "title": "3. El contrato de hoy",
+        "paragraphs": [
+          "Crear la cuenta es gratuito. No hay renovación automática ni cobro. Puedes dejar de usarlo cuando quieras.",
+          "Para terminar y borrar los datos, en la cuenta está «Eliminar mi cuenta», con confirmación mediante contraseña. También puedes escribir a gastodehoy@gmail.com. Si quieres conservar tus cifras, exporta el CSV antes: son tuyas."
+        ]
+      },
+      {
+        "title": "4. Si más adelante hay un plan de pago",
+        "paragraphs": [
+          "Las cuentas creadas mientras el servicio es gratuito, incluidas las que ya existen, son cuentas iniciales. No se convertirán en un plan de pago ni se les cobrará nada. Un plan de pago futuro, si llega a existir, será solo para cuentas nuevas que lo contraten.",
+          "Hoy no existe un plan de pago y no se activará sin mostrarte, antes del pago y en la misma pantalla: qué incluye, el precio total del periodo con impuestos incluidos, cada cuánto se cobra, si se renueva solo, cómo cancelarlo y el derecho de desistimiento.",
+          "El botón de pago indicará que el pedido implica obligación de pagar.",
+          "La baja será en la propia cuenta, por el mismo medio online, sin obligarte a llamar o a escribir una carta. Así lo exige el artículo 62.3 del texto refundido de la Ley de consumidores.",
+          "Si un plazo fijo se renovara solo, avisaríamos al menos 15 días antes del cobro, con las consecuencias de no cancelar, conforme a la Ley 10/2025 y al artículo 97.1.p de esa ley de consumidores.",
+          "Tienes 14 días para desistir desde la contratación, sin dar explicaciones. En la cuenta habrá una función visible, «Desistir del contrato», con una confirmación para evitar una pulsación accidental y un acuse por correo. Mientras esa función no esté publicada, el desistimiento se ejerce con el formulario de la sección siguiente, enviado a gastodehoy@gmail.com.",
+          "Si pides que el servicio de pago empiece durante esos 14 días, puedes deber la parte proporcional de los días ya prestados. No pediremos una renuncia total al desistimiento."
+        ]
+      },
+      {
+        "title": "5. Formulario de desistimiento",
+        "paragraphs": [
+          "A la atención de Andrea Cruz, gastodehoy@gmail.com.",
+          "«Comunico que desisto del contrato del servicio GastoDeHoy. Nombre, email de la cuenta y fecha del contrato, si la conoces.» Fecha de este aviso."
+        ]
+      },
+      {
+        "title": "6. Uso de la cuenta",
+        "paragraphs": [
+          "Te comprometes a dar información veraz, a no usar el servicio para algo ilícito y a no intentar acceder a datos de otras personas. Confirmas que tienes 14 años o más."
+        ]
+      },
+      {
+        "title": "7. Propiedad intelectual y tus contenidos",
+        "paragraphs": [
+          "El diseño, el código y la marca son del titular. Tus datos de presupuesto son tuyos. Puedes exportarlos en CSV. Al terminar el contrato dejamos de usarlos, salvo lo que la ley obligue a conservar."
+        ]
+      },
+      {
+        "title": "8. Si el servicio no responde a lo descrito",
+        "paragraphs": [
+          "El servicio digital debe ajustarse a lo que muestra la aplicación. Si no es así, puedes pedir que se corrija. Cuando haya un precio, también una rebaja proporcional o resolver el contrato, con el reembolso que corresponda a lo no conforme. Es la protección de la Directiva (UE) 2019/770, traspuesta en España."
+        ]
+      },
+      {
+        "title": "9. Responsabilidad",
+        "paragraphs": [
+          "No respondemos de las decisiones que tomes con tus propias cifras: la app no las contrasta con tu banco. No excluimos la responsabilidad por dolo ni la que la ley impide limitar frente a una persona consumidora. Tampoco prometemos una disponibilidad ininterrumpida."
+        ]
+      },
+      {
+        "title": "10. Cambios, ley y reclamaciones",
+        "paragraphs": [
+          "Un cambio que reduzca derechos no se aplica hasta que lo aceptes en la app. Si no lo aceptas, puedes eliminar la cuenta. La versión aceptada queda registrada.",
+          "Se aplica la ley española. Si eres consumidor, puedes acudir a los juzgados de tu domicilio. También puedes usar las hojas de reclamaciones y los organismos de consumo de tu comunidad autónoma."
+        ]
+      }
+    ]
   },
   "privacy": {
-    "title": "Política de Privacidad",
+    "title": "Política de privacidad",
     "lastUpdatedLabel": "Última actualización:",
-    "lastUpdatedDate": "Mayo 2026",
-    "section1Title": "1. Responsable del Tratamiento",
-    "section1Owner": "Titular:",
-    "section1OwnerValue": "Andrea Cruz",
-    "section1Email": "Email:",
-    "section1EmailValue": "gastodehoy@gmail.com",
-    "section1Web": "Web:",
-    "section1WebValue": "gastodehoy.es",
-    "section2Title": "2. Datos que Recogemos",
-    "section2Item1": "Email y nombre (al crear cuenta)",
-    "section2Item2": "Datos de gastos e ingresos que introduces voluntariamente",
-    "section2Item3": "Datos de uso anónimos (analytics, solo si aceptas cookies)",
-    "section3Title": "3. Finalidad del Tratamiento",
-    "section3Item1": "Prestarte el servicio de gestión de gastos personales",
-    "section3Item2": "Autenticarte y mantener tu sesión",
-    "section3Item3": "Mejorar la aplicación mediante analytics anónimo (con tu consentimiento)",
-    "section4Title": "4. Base Legal",
-    "section4Item1Label": "Ejecución del servicio (art. 6.1.b RGPD):",
-    "section4Item1Text": "para los datos necesarios para el funcionamiento",
-    "section4Item2Label": "Consentimiento (art. 6.1.a RGPD):",
-    "section4Item2Text": "para analytics",
-    "section5Title": "5. Conservación de Datos",
-    "section5Text": "Tus datos se conservan mientras mantengas tu cuenta activa. Puedes eliminar tu cuenta y todos tus datos en cualquier momento desde Ajustes > Eliminar cuenta.",
-    "section6Title": "6. Cookies",
-    "section6Part1": "Usamos una cookie técnica de sesión (",
-    "section6Part2": ") necesaria para mantener tu inicio de sesión. No requiere consentimiento. Si aceptas, usamos analytics anónimo (sin cookies de terceros).",
-    "section7Title": "7. Tus Derechos",
-    "section7Part1": "Tienes derecho a acceder, rectificar, suprimir, limitar y oponerte al tratamiento de tus datos. Escríbenos a",
-    "section7Part2": ".",
-    "section8Title": "8. Seguridad",
-    "section8Text": "Tus datos se almacenan en servidores dentro de la UE con HTTPS y cifrado. No compartimos tus datos con terceros."
+    "lastUpdatedDate": "23 de octubre de 2026",
+    "versionLabel": "Versión:",
+    "versionValue": "2026-10-23.2",
+    "sections": [
+      {
+        "title": "1. Responsable",
+        "paragraphs": [
+          "El responsable del tratamiento es Andrea Cruz. Correo: gastodehoy@gmail.com. Sitio: https://gastodehoy.es. No hay delegado de protección de datos; las solicitudes se atienden en ese correo.",
+          "El NIF y el domicilio se publicarán en el aviso legal antes de ofrecer cualquier plan de pago. Hoy el servicio es gratuito y no hay un precio que informar."
+        ]
+      },
+      {
+        "title": "2. Datos que tratamos",
+        "paragraphs": [
+          "Cuenta: email, nombre, contraseña (solo el hash), idioma y las fechas de alta, último acceso y cambio de contraseña. También guardamos la versión de las condiciones que aceptaste y la confirmación de que tienes al menos 14 años.",
+          "Presupuesto: ingresos, gastos, categorías, metas y notas que escribes tú. No pedimos credenciales del banco ni nos conectamos a tu entidad. GastoDeHoy no es un banco ni un servicio de pago.",
+          "Si activas los avisos del sistema, guardamos el identificador de la suscripción push y las claves que genera el navegador.",
+          "Seguridad: dirección IP y hora de los intentos de acceso, para limitar abusos. La ventana es de cinco minutos.",
+          "En tu dispositivo el navegador guarda preferencias de la interfaz (idioma, densidad, avisos, guía). No se envían a terceros.",
+          "Cookie técnica gdh_session, HttpOnly y SameSite=Lax (Secure en producción), solo para mantener la sesión."
+        ]
+      },
+      {
+        "title": "3. Finalidad y base legal",
+        "paragraphs": [
+          "Prestar el presupuesto y enviarte el correo de bienvenida o la contraseña temporal: ejecución del contrato, artículo 6.1.b del RGPD.",
+          "Limitar intentos de acceso y conservar registros técnicos de seguridad: interés legítimo, artículo 6.1.f. Puedes oponerte.",
+          "Avisos push: consentimiento. Lo retiras desactivando el aviso en la cuenta o en el sistema.",
+          "Cuando alguien se registra, el titular recibe un aviso interno con nombre, email y fecha, para administrar el servicio. Base: interés legítimo.",
+          "No hay analítica, ni publicidad, ni decisiones automatizadas que produzcan efectos jurídicos. No enviamos resúmenes periódicos de tus cifras. Ese envío solo es posible si lo activas de forma expresa, y hoy la cuenta no ofrece esa opción."
+        ]
+      },
+      {
+        "title": "4. Destinatarios y transferencias",
+        "paragraphs": [
+          "No vendemos datos. El alojamiento guarda la base de datos por cuenta del titular.",
+          "El buzón gastodehoy@gmail.com está en Google. Google LLC figura como activo en el EU-US Data Privacy Framework (certificación revisable en dataprivacyframework.gov). Ese es el mecanismo de la transferencia cuando escribes a ese correo o cuando el alta genera el aviso interno.",
+          "El correo de bienvenida y la contraseña temporal salen por el servidor SMTP del titular, que actúa como encargado y solo para esos mensajes.",
+          "Si activas el push, el aviso pasa por el servicio de tu navegador (Google, Mozilla o Apple). Puede haber una transferencia fuera del EEE amparada por una decisión de adecuación o por las cláusulas de ese proveedor.",
+          "Las fuentes de la interfaz se sirven desde el propio sitio. No se cargan desde Google ni desde otro tercero."
+        ]
+      },
+      {
+        "title": "5. Conservación",
+        "paragraphs": [
+          "Los datos de la cuenta se conservan mientras la cuenta existe. Desde la cuenta puedes eliminarla: se borran la cuenta, los gastos, las metas y las suscripciones push.",
+          "La IP de los intentos de acceso se conserva en la ventana de cinco minutos del límite de intentos.",
+          "Los registros técnicos se conservan el tiempo necesario para detectar abusos y no se usan para otra finalidad. Si hay copias de seguridad, dejan de incluir la cuenta cuando esa copia se sustituye."
+        ]
+      },
+      {
+        "title": "6. Cookies",
+        "paragraphs": [
+          "Solo usamos la cookie técnica gdh_session. La guía de cookies de la AEPD exceptúa las cookies necesarias para el servicio que pides, así que no hay banner de aceptación. Cerrar sesión la borra. Las preferencias locales se limpian borrando los datos del sitio en el navegador."
+        ]
+      },
+      {
+        "title": "7. Derechos",
+        "paragraphs": [
+          "Puedes acceder, rectificar, suprimir, limitar el tratamiento, oponerte y pedir la portabilidad. La exportación CSV de la app cubre tus gastos; también puedes pedirla por correo.",
+          "Puedes retirar el consentimiento de los avisos en cualquier momento, sin que eso afecte a la cuenta.",
+          "Puedes reclamar ante la Agencia Española de Protección de Datos: https://www.aepd.es.",
+          "Escribe a gastodehoy@gmail.com. El plazo de respuesta es de un mes, ampliable según el RGPD."
+        ]
+      },
+      {
+        "title": "8. Obligatoriedad y edad",
+        "paragraphs": [
+          "El email, el nombre y la contraseña son necesarios para crear la cuenta. El resto de cifras las aportas si quieres usar el presupuesto.",
+          "El servicio no está dirigido a menores de 14 años. Para registrarte confirmas que tienes al menos esa edad (artículo 7 de la LOPDGDD)."
+        ]
+      },
+      {
+        "title": "9. Seguridad y cambios",
+        "paragraphs": [
+          "La conexión usa HTTPS. La contraseña se guarda como hash, no en claro. La cookie de sesión no es legible desde JavaScript.",
+          "Si esta política cambia de forma relevante, te pediremos aceptarla de nuevo en la app antes de seguir. La versión aceptada queda guardada en la cuenta."
+        ]
+      }
+    ]
   },
   "toasts": {
     "tourComplete": "Guía completada. Puedes volver a verla desde el menú.",
@@ -585,6 +687,14 @@
     "invalidEmailDomain": "El dominio del email no es válido",
     "accountAlreadyExists": "Ya existe una cuenta con ese email",
     "currentPasswordIncorrect": "Contraseña actual incorrecta",
-    "passwordIncorrect": "Contraseña incorrecta"
+    "passwordIncorrect": "Contraseña incorrecta",
+    "termsNotAccepted": "Debes aceptar las condiciones vigentes y confirmar que tienes al menos 14 años."
+  },
+  "termsGate": {
+    "title": "Condiciones actualizadas",
+    "body": "Para seguir usando GastoDeHoy acepta la versión {{version}} de las condiciones y de la política de privacidad. Si no estás de acuerdo, cierra la sesión o elimina la cuenta.",
+    "acceptTerms": "He leído y acepto las condiciones y la política de privacidad vigentes.",
+    "accept": "Aceptar y continuar",
+    "saving": "Guardando…"
   }
 }

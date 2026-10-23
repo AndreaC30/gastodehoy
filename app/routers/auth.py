@@ -34,9 +34,11 @@ from app.auth import (
 )
 from app.config import settings
 from app.database import get_db
+from app.legal import GRANT_FOUNDER_FREE, LEGAL_TERMS_VERSION
 from app.mail import send_forgot_password_email, send_email, send_welcome_email
 from app.models import User, UserSettings
 from app.schemas import (
+    AcceptTermsRequest,
     ChangePassword,
     DeleteAccount,
     ForgotPasswordRequest,
@@ -55,6 +57,28 @@ _FORGOT_PASSWORD_MESSAGE = (
     "Si existe una cuenta con ese correo, te hemos enviado una contraseña temporal. "
     "Revisa la bandeja de entrada y la carpeta de spam."
 )
+
+
+def _require_current_terms(accepts_terms: bool, confirms_minimum_age: bool, terms_version: str) -> None:
+    """El alta y la renovación exigen la versión vigente y la edad mínima."""
+    if (
+        accepts_terms
+        and confirms_minimum_age
+        and terms_version == LEGAL_TERMS_VERSION
+    ):
+        return
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=(
+            "Debes aceptar las condiciones vigentes y confirmar que tienes al menos 14 años"
+        ),
+    )
+
+
+def _stamp_terms(user: User) -> None:
+    user.terms_version = LEGAL_TERMS_VERSION
+    user.terms_accepted_at = datetime.now(timezone.utc)
+    user.minimum_age_confirmed = True
 
 
 def _normalize_email(email: str) -> str:
@@ -128,6 +152,11 @@ def register(
     db: Session = Depends(get_db),
 ) -> RegisterResponse:
     """Crea la cuenta, fija la cookie de sesión y devuelve el usuario."""
+    _require_current_terms(
+        payload.accepts_terms,
+        payload.confirms_minimum_age,
+        payload.terms_version,
+    )
     email = _normalize_email(payload.email)
 
     # Validar formato de email antes de tocar la BD
@@ -155,6 +184,10 @@ def register(
         password_changed_at=now,
         recovery_hash=None,
         must_change_password=False,
+        terms_version=LEGAL_TERMS_VERSION,
+        terms_accepted_at=now,
+        minimum_age_confirmed=True,
+        lifetime_free=GRANT_FOUNDER_FREE,
     )
     user.settings = UserSettings(language=payload.language)
     db.add(user)
@@ -197,6 +230,24 @@ def register(
     _notify_admin_new_user(email, payload.name)
 
     return RegisterResponse(user=UserPublic.model_validate(user))
+
+
+@router.post("/accept-terms", response_model=UserPublic)
+def accept_terms(
+    payload: AcceptTermsRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> UserPublic:
+    """Guarda la aceptación de la versión vigente en una cuenta ya creada."""
+    _require_current_terms(
+        payload.accepts_terms,
+        payload.confirms_minimum_age,
+        payload.terms_version,
+    )
+    _stamp_terms(user)
+    db.commit()
+    db.refresh(user)
+    return UserPublic.model_validate(user)
 
 
 @router.post("/login", response_model=UserPublic)

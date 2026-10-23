@@ -209,6 +209,26 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                     "BOOLEAN NOT NULL DEFAULT 0"
                 )
             )
+        if "terms_version" not in colnames:
+            conn.execute(text("ALTER TABLE users ADD COLUMN terms_version VARCHAR(32)"))
+        if "terms_accepted_at" not in colnames:
+            conn.execute(
+                text("ALTER TABLE users ADD COLUMN terms_accepted_at DATETIME")
+            )
+        if "minimum_age_confirmed" not in colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE users ADD COLUMN minimum_age_confirmed "
+                    "BOOLEAN NOT NULL DEFAULT 0"
+                )
+            )
+        if "lifetime_free" not in colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE users ADD COLUMN lifetime_free "
+                    "BOOLEAN NOT NULL DEFAULT 1"
+                )
+            )
 
         # Nueva tabla: expense_categories
         conn.execute(
@@ -339,6 +359,13 @@ def apply_sqlite_migrations(engine: Engine) -> None:
             conn.execute(
                 text(
                     "ALTER TABLE user_settings ADD COLUMN income_check_month VARCHAR(7)"
+                )
+            )
+        if "weekly_digest_opt_in" not in us_colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE user_settings ADD COLUMN weekly_digest_opt_in "
+                    "BOOLEAN NOT NULL DEFAULT 0"
                 )
             )
 

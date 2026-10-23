@@ -9,6 +9,8 @@ export const BACKEND_ERROR_MAP: Record<string, string> = {
   "Ya existe una cuenta con ese email": "errors.accountAlreadyExists",
   "Contraseña actual incorrecta": "errors.currentPasswordIncorrect",
   "Contraseña incorrecta": "errors.passwordIncorrect",
+  "Debes aceptar las condiciones vigentes y confirmar que tienes al menos 14 años":
+    "errors.termsNotAccepted",
 };
 
 /**

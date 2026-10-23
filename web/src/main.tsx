@@ -9,8 +9,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import "./fonts/fonts.css";
 import "./i18n/index.js";
 import "./index.css";
+
+if (typeof localStorage !== "undefined") {
+  localStorage.removeItem("gdh_cookie_consent");
+}
 
 // Clear app icon badge when the app opens (PWA Badging API)
 if (typeof navigator !== "undefined" && "clearAppBadge" in navigator) {

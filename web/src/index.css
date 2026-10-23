@@ -73,12 +73,6 @@ html[data-mobile-bottom-nav="1"] {
   }
 }
 
-/* Banner de consentimiento (solo si aún no hay decisión) no tapa overlays */
-html[data-overlay-open="1"] .gdh-cookie-chrome {
-  visibility: hidden;
-  pointer-events: none;
-}
-
 body {
   font-family: var(--font-sans);
   font-size: 14px;

@@ -1,4 +1,4 @@
-"""Send weekly digest emails to all users (requires SMTP).
+"""Send weekly digest emails only to users who opted in (requires SMTP).
 
 Usage:
 
@@ -15,12 +15,20 @@ import logging
 import sys
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.config import settings
 from app.database import SessionLocal
 from app.mail import SMTPNotConfiguredError, send_weekly_digest_email
 from app.models import User
 from app.services.weekly_digest import build_digest_for_user
+
+
+def digest_opted_in(user: User) -> bool:
+    """El resumen incluye cifras de gasto: sin opt-in expreso no se envía."""
+    settings_row = user.settings
+    return bool(settings_row and settings_row.weekly_digest_opt_in)
+
 
 _log = logging.getLogger(__name__)
 
@@ -36,7 +44,7 @@ def _smtp_configured() -> bool:
 def main() -> None:
     """CLI entry point. See module docstring for usage."""
     parser = argparse.ArgumentParser(
-        description="Envía el resumen semanal por correo a todos los usuarios."
+        description="Envía el resumen semanal solo a quien activó esa opción."
     )
     parser.add_argument(
         "--dry-run",
@@ -55,9 +63,13 @@ def main() -> None:
     failed = 0
 
     with SessionLocal() as db:
-        users = list(db.scalars(select(User).order_by(User.id)))
+        users = list(
+            db.scalars(
+                select(User).options(selectinload(User.settings)).order_by(User.id)
+            )
+        )
         for user in users:
-            if not user.email or not user.email.strip():
+            if not user.email or not user.email.strip() or not digest_opted_in(user):
                 continue
             digest = build_digest_for_user(db, user)
             if args.dry_run:

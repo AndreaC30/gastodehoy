@@ -15,6 +15,7 @@ import type {
 } from "@/api/types";
 import { setUser } from "@/auth";
 import { BrandLogo } from "@/components/brand-logo";
+import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 import { showLegalPage } from "@/lib/legal-pages-state";
 import { ALERT_CRIT, BTN_PRIMARY, FOCUS_RING, INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
 import { translateBackendError } from "@/lib/backend-errors";
@@ -240,6 +241,7 @@ function RegisterForm({
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [confirmedAge, setConfirmedAge] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -257,7 +259,15 @@ function RegisterForm({
     try {
       await api<RegisterResponse>("/api/auth/register", {
         method: "POST",
-        body: JSON.stringify({ email, name: name.trim(), password, language: i18n.language || "es" }),
+        body: JSON.stringify({
+          email,
+          name: name.trim(),
+          password,
+          language: i18n.language || "es",
+          accepts_terms: true,
+          confirms_minimum_age: true,
+          terms_version: LEGAL_TERMS_VERSION,
+        }),
       });
       const me = await api<User>("/api/auth/me");
       setUser(me);
@@ -322,9 +332,18 @@ function RegisterForm({
           <button type="button" onClick={() => showLegalPage("legal")} className="text-[var(--color-accent)] underline hover:text-[var(--color-accent)]">{t("login.termsOfUse")}</button>
         </span>
       </label>
+      <label className="flex cursor-pointer items-start gap-2 text-xs text-[var(--color-text-muted)]">
+        <input
+          type="checkbox"
+          checked={confirmedAge}
+          onChange={(e) => setConfirmedAge(e.target.checked)}
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
+        />
+        <span>{t("login.ageConfirm")}</span>
+      </label>
       <button
         type="submit"
-        disabled={busy || !email || !name || !password || !password2 || !acceptedTerms}
+        disabled={busy || !email || !name || !password || !password2 || !acceptedTerms || !confirmedAge}
         className={`mt-2 w-full ${BTN_PRIMARY}`}
       >
         {busy ? t("login.creating") : t("login.tabRegister")}

@@ -53,6 +53,15 @@ class RegisterRequest(BaseModel):
     name: NameStr
     password: PasswordStr
     language: str | None = Field(default=None, max_length=5)
+    accepts_terms: bool
+    confirms_minimum_age: bool
+    terms_version: str = Field(min_length=1, max_length=32)
+
+
+class AcceptTermsRequest(BaseModel):
+    accepts_terms: bool
+    confirms_minimum_age: bool
+    terms_version: str = Field(min_length=1, max_length=32)
 
 
 class LoginRequest(BaseModel):
@@ -65,6 +74,8 @@ class UserPublic(BaseModel):
     email: EmailStr
     name: str
     must_change_password: bool = False
+    terms_version: str | None = None
+    lifetime_free: bool = True
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -75,6 +86,13 @@ class UserPublic(BaseModel):
         if v in (True, 1, "1", "true", "True"):
             return True
         return False
+
+    @field_validator("lifetime_free", mode="before")
+    @classmethod
+    def _coerce_lifetime_free(cls, v: object) -> bool:
+        if v in (False, 0, "0", "false", "False"):
+            return False
+        return True
 
 
 class RegisterResponse(BaseModel):
