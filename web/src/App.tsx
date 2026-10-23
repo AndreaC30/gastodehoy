@@ -181,6 +181,14 @@ function Authed({ userName }: { userName: string }) {
     }
   }, [settingsQ.data, langSynced, i18n]);
 
+  const termsPending = Boolean(
+    auth.user && auth.user.terms_version !== LEGAL_TERMS_VERSION,
+  );
+  const settingsReady = mustChange || termsPending || !settingsQ.isPending;
+  const holdAuthedSplash = useBootSplashGate(
+    !mustChange && !termsPending && settingsReady,
+  );
+
   if (mustChange && auth.user) {
     return (
       <div className={APP_SHELL_CLASS}>
@@ -190,7 +198,7 @@ function Authed({ userName }: { userName: string }) {
     );
   }
 
-  if (auth.user && auth.user.terms_version !== LEGAL_TERMS_VERSION) {
+  if (termsPending) {
     return (
       <div className={APP_SHELL_CLASS}>
         <AppBackdrop />
@@ -198,9 +206,6 @@ function Authed({ userName }: { userName: string }) {
       </div>
     );
   }
-
-  const settingsReady = mustChange || !settingsQ.isPending;
-  const holdAuthedSplash = useBootSplashGate(settingsReady);
 
   if (settingsQ.isPending || holdAuthedSplash) {
     return <LoadingSplash />;

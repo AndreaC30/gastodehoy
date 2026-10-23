@@ -44,8 +44,8 @@ export function TermsAcceptanceGate({ onDone }: Props) {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center px-4 py-10">
-      <section className={`${SECTION_CARD} p-5 sm:p-6`}>
+    <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col overflow-y-auto px-4 py-8">
+      <section className={`my-auto w-full ${SECTION_CARD} p-5 sm:p-6`}>
         <h1 className="text-xl font-semibold text-[var(--color-text)]">{t("termsGate.title")}</h1>
         <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
           {t("termsGate.body", { version: LEGAL_TERMS_VERSION })}
