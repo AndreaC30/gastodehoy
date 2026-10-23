@@ -46,7 +46,9 @@ function setSnapshot(next: AuthSnapshot): void {
     next.user?.id === current.user?.id &&
     next.user?.email === current.user?.email &&
     next.user?.name === current.user?.name &&
-    next.user?.must_change_password === current.user?.must_change_password
+    next.user?.must_change_password === current.user?.must_change_password &&
+    next.user?.terms_version === current.user?.terms_version &&
+    next.user?.lifetime_free === current.user?.lifetime_free
   ) {
     return;
   }

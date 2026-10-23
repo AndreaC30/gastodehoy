@@ -4,8 +4,9 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { IoLogOutOutline } from "react-icons/io5";
 import { DeleteAccountModal } from "@/components/delete-account-modal";
-import { requestCookieConsentReview } from "@/components/cookie-consent-banner";
+import { snapshot, subscribe } from "@/auth";
 import { logout } from "@/lib/session";
+import { showLegalPage } from "@/lib/legal-pages-state";
 import {
   isDailyNotificationEnabled,
   setDailyNotificationEnabled,
@@ -34,6 +35,8 @@ type Props = {
 
 export function AccountSection({ profileName }: Props) {
   const { t } = useTranslation();
+  const auth = useSyncExternalStore(subscribe, snapshot);
+  const founder = auth.user?.lifetime_free !== false;
   const [dailyNotify, setDailyNotify] = useState(isDailyNotificationEnabled);
   const [prefError, setPrefError] = useState<string | null>(null);
   const [prefNotice, setPrefNotice] = useState<string | null>(null);
@@ -208,12 +211,31 @@ export function AccountSection({ profileName }: Props) {
               </span>
             </label>
 
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] p-4">
+          <h3 className={TYPE_EYEBROW}>{t("account.planTitle")}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+            {t(founder ? "account.planBodyFounder" : "account.planBody")}
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+            {t("account.planEnd")}
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
-              onClick={() => requestCookieConsentReview()}
+              onClick={() => showLegalPage("privacy")}
               className={`w-full ${BTN_SECONDARY}`}
             >
-              {t("cookieConsent.manage")}
+              {t("footer.privacy")}
+            </button>
+            <button
+              type="button"
+              onClick={() => showLegalPage("legal")}
+              className={`w-full ${BTN_SECONDARY}`}
+            >
+              {t("footer.legalLink")}
             </button>
           </div>
         </div>

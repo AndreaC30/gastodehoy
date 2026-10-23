@@ -47,6 +47,24 @@ class User(Base):
         default=False,
         server_default="0",
     )
+    # Versión de condiciones aceptada. NULL en cuentas anteriores a 2026-10-23.
+    terms_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    terms_accepted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    minimum_age_confirmed: Mapped[bool] = mapped_column(
+        Boolean(),
+        nullable=False,
+        default=False,
+        server_default="0",
+    )
+    # Cuenta inicial: no se convierte en plan de pago ni se le cobra.
+    lifetime_free: Mapped[bool] = mapped_column(
+        Boolean(),
+        nullable=False,
+        default=True,
+        server_default="1",
+    )
 
     settings: Mapped["UserSettings"] = relationship(
         back_populates="user",
@@ -113,6 +131,13 @@ class UserSettings(Base):
     )
     language: Mapped[str | None] = mapped_column(
         String(5), nullable=True, default=None
+    )
+    # El resumen semanal solo se envía si la persona lo activa. Por defecto, no.
+    weekly_digest_opt_in: Mapped[bool] = mapped_column(
+        Boolean(),
+        nullable=False,
+        default=False,
+        server_default="0",
     )
 
     user: Mapped[User] = relationship(back_populates="settings")

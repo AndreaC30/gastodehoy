@@ -10,7 +10,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { Dashboard } from "@/components/dashboard/dashboard-view";
-import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { LandingPage } from "@/components/landing-page";
 import { BootSplashContent } from "@/components/boot-splash-content";
 import { LoadingSplash } from "@/components/loading-splash";
@@ -22,6 +21,8 @@ import {
 } from "@/components/login-screen";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
 import { ForcePasswordChangeModal } from "@/components/force-password-change-modal";
+import { TermsAcceptanceGate } from "@/components/terms-acceptance-gate";
+import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 import {
   clearOnboardingSkipped,
   isOnboardingSkipped,
@@ -144,12 +145,7 @@ export default function App() {
     content = <Authed userName={auth.user.name} />;
   }
 
-  return (
-    <>
-      {content}
-      <CookieConsentBanner />
-    </>
-  );
+  return content;
 }
 
 function Authed({ userName }: { userName: string }) {
@@ -185,6 +181,14 @@ function Authed({ userName }: { userName: string }) {
     }
   }, [settingsQ.data, langSynced, i18n]);
 
+  const termsPending = Boolean(
+    auth.user && auth.user.terms_version !== LEGAL_TERMS_VERSION,
+  );
+  const settingsReady = mustChange || termsPending || !settingsQ.isPending;
+  const holdAuthedSplash = useBootSplashGate(
+    !mustChange && !termsPending && settingsReady,
+  );
+
   if (mustChange && auth.user) {
     return (
       <div className={APP_SHELL_CLASS}>
@@ -194,8 +198,14 @@ function Authed({ userName }: { userName: string }) {
     );
   }
 
-  const settingsReady = mustChange || !settingsQ.isPending;
-  const holdAuthedSplash = useBootSplashGate(settingsReady);
+  if (termsPending) {
+    return (
+      <div className={APP_SHELL_CLASS}>
+        <AppBackdrop />
+        <TermsAcceptanceGate onDone={setAuthUser} />
+      </div>
+    );
+  }
 
   if (settingsQ.isPending || holdAuthedSplash) {
     return <LoadingSplash />;

@@ -171,7 +171,8 @@
     "sendEmail": "Send email",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
-    "accessTabs": "Account access"
+    "accessTabs": "Account access",
+    "ageConfirm": "I confirm that I am at least 14. The service is not directed at children under that age."
   },
   "common": {
     "loading": "Loading…",
@@ -360,7 +361,11 @@
     "installDismiss": "Got it",
     "notifyNeedInstall": "In-app reminder enabled. On iPhone, for system notifications: add GastoDeHoy to the Home Screen, open it from there, and allow notifications.",
     "notifyDeniedInApp": "In-app reminder enabled. Notifications are blocked in the browser; enable them in system/browser settings for alerts when the app is closed.",
-    "notifyInAppOnly": "In-app reminder enabled. This device cannot show system notifications right now; you will see the message when you open GastoDeHoy."
+    "notifyInAppOnly": "In-app reminder enabled. This device cannot show system notifications right now; you will see the message when you open GastoDeHoy.",
+    "planTitle": "Your plan",
+    "planBody": "The account is free. There is no charge, no automatic renewal and no connection to your bank. A paid plan will not be switched on without first showing, in this same account, the price including tax, the period, the renewal and how to cancel it.",
+    "planEnd": "To end the service and delete your data, use Delete my account. Export the CSV first if you want a copy.",
+    "planBodyFounder": "This is an initial account. It stays free and you will not be charged, even if a paid plan later exists for new accounts."
   },
   "deleteAccount": {
     "title": "Delete account",
@@ -437,13 +442,6 @@
     "emptyDay": "No expenses on this day.",
     "loadError": "Could not load monthly history."
   },
-  "cookieConsent": {
-    "message": "GastoDeHoy uses necessary technical cookies to work. With your permission, we use anonymous analytics (no third-party cookies) to improve the app.",
-    "privacyLink": "More info in the privacy policy.",
-    "manage": "Manage cookies",
-    "necessaryOnly": "Necessary only",
-    "accept": "Accept"
-  },
   "tour": {
     "moving": "Moving view…",
     "close": "Close guide",
@@ -502,64 +500,168 @@
     "date": "Date"
   },
   "legal": {
-    "title": "Legal Notice and Terms of Use",
+    "title": "Legal notice and terms of use",
     "lastUpdatedLabel": "Last updated:",
-    "lastUpdatedDate": "May 2026",
-    "section1Title": "1. Ownership",
-    "section1Owner": "Owner:",
-    "section1OwnerValue": "Andrea Cruz",
-    "section1Email": "Email:",
-    "section1EmailValue": "gastodehoy@gmail.com",
-    "section2Title": "2. Terms of Use",
-    "section2Text": "Accessing and using GastoDeHoy implies acceptance of these terms. If you do not agree, do not use the service.",
-    "section3Title": "3. Use of the Service",
-    "section3Intro": "GastoDeHoy is a personal expense management tool. You agree to:",
-    "section3Item1": "Not use the service for illegal activities",
-    "section3Item2": "Provide truthful information",
-    "section3Item3": "Not attempt to access other users' data",
-    "section4Title": "4. Intellectual Property",
-    "section4Text": "The design, source code, logos and contents of GastoDeHoy are the property of their owners. Reproduction without authorization is prohibited.",
-    "section5Title": "5. Limitation of Liability",
-    "section5Text": "GastoDeHoy is provided \"as is\". We do not guarantee uninterrupted availability or absence of errors. We are not responsible for financial decisions made based on the app's calculations.",
-    "section6Title": "6. Modifications",
-    "section6Text": "We reserve the right to modify these terms at any time. Changes will be notified by email.",
-    "section7Title": "7. Applicable Law",
-    "section7Text": "These terms are governed by Spanish law. Any dispute shall be submitted to the courts of Madrid."
+    "lastUpdatedDate": "23 October 2026",
+    "versionLabel": "Version:",
+    "versionValue": "2026-10-23.2",
+    "sections": [
+      {
+        "title": "1. Provider",
+        "paragraphs": [
+          "Provider: Andrea Cruz. Email: gastodehoy@gmail.com. Web: https://gastodehoy.es.",
+          "The service is free, with no advertising and no price. The tax ID and address required by Article 10 of Spanish Law 34/2002 will be published in this notice before any plan is charged. Until then there is no price to display."
+        ]
+      },
+      {
+        "title": "2. What this service is",
+        "paragraphs": [
+          "GastoDeHoy is for recording income and expenses and estimating a daily margin from what you type. It is not a bank, not a payment institution, it does not open accounts, it does not execute transfers and it does not connect to your bank. It is not a payment service under Directive (EU) 2015/2366.",
+          "The amounts are estimates. They are not financial, tax or employment advice."
+        ]
+      },
+      {
+        "title": "3. Today's contract",
+        "paragraphs": [
+          "Creating the account is free. There is no automatic renewal and no charge. You can stop using it whenever you want.",
+          "To end it and delete the data, the account has «Delete my account», confirmed with your password. You can also write to gastodehoy@gmail.com. Export the CSV first if you want to keep your figures: they are yours."
+        ]
+      },
+      {
+        "title": "4. If a paid plan is added later",
+        "paragraphs": [
+          "Accounts created while the service is free, including those that already exist, are initial accounts. They will not be converted into a paid plan and they will not be charged. A future paid plan, if it ever exists, will be only for new accounts that choose it.",
+          "There is no paid plan today. One will not be switched on without showing you, before payment and on the same screen: what it includes, the total price for the period including taxes, how often it is charged, whether it renews, how to cancel, and the right of withdrawal.",
+          "The pay button will state that the order creates an obligation to pay.",
+          "Cancellation will be in the account, by the same online means, without forcing a phone call or a letter. That is Article 62.3 of the Spanish consumer act.",
+          "If a fixed term renewed automatically, we would give at least 15 days' notice before the charge, with the consequences of not cancelling, under Spanish Law 10/2025 and Article 97.1.p of the consumer act.",
+          "You have 14 days to withdraw from the contract without giving a reason. The account will have a visible function, «Withdraw from the contract», with a confirmation to avoid an accidental tap and an acknowledgement by email. Until that function is published, withdrawal is exercised with the form in the next section, sent to gastodehoy@gmail.com.",
+          "If you ask the paid service to start during those 14 days, you may owe a proportionate amount for the days already supplied. We will not ask you to waive withdrawal entirely."
+        ]
+      },
+      {
+        "title": "5. Withdrawal form",
+        "paragraphs": [
+          "To Andrea Cruz, gastodehoy@gmail.com.",
+          "«I withdraw from the GastoDeHoy service contract. Name, account email and contract date, if you know it.» Date of this notice."
+        ]
+      },
+      {
+        "title": "6. Use of the account",
+        "paragraphs": [
+          "You agree to provide accurate information, not to use the service for anything unlawful, and not to try to access other people's data. You confirm that you are 14 or older."
+        ]
+      },
+      {
+        "title": "7. Intellectual property and your content",
+        "paragraphs": [
+          "The design, the code and the mark belong to the provider. Your budget data is yours. You can export it as CSV. When the contract ends we stop using it, except where the law requires retention."
+        ]
+      },
+      {
+        "title": "8. If the service does not match the description",
+        "paragraphs": [
+          "The digital service must match what the application shows. If it does not, you can ask for it to be brought into conformity. When there is a price, you can also ask for a proportionate reduction or to end the contract, with a refund for the part that was not in conformity. That is the protection in Directive (EU) 2019/770, as transposed in Spain."
+        ]
+      },
+      {
+        "title": "9. Liability",
+        "paragraphs": [
+          "We are not responsible for decisions you make from your own figures: the app does not check them against your bank. We do not exclude liability for intent, or any liability that the law forbids limiting towards a consumer. We also do not promise uninterrupted availability."
+        ]
+      },
+      {
+        "title": "10. Changes, law and complaints",
+        "paragraphs": [
+          "A change that reduces rights does not apply until you accept it in the app. If you do not accept it, you can delete the account. The accepted version is stored.",
+          "Spanish law applies. If you are a consumer, you can go to the courts of your home. You can also use the consumer complaint forms and the consumer bodies of your autonomous community."
+        ]
+      }
+    ]
   },
   "privacy": {
-    "title": "Privacy Policy",
+    "title": "Privacy policy",
     "lastUpdatedLabel": "Last updated:",
-    "lastUpdatedDate": "May 2026",
-    "section1Title": "1. Data Controller",
-    "section1Owner": "Owner:",
-    "section1OwnerValue": "Andrea Cruz",
-    "section1Email": "Email:",
-    "section1EmailValue": "gastodehoy@gmail.com",
-    "section1Web": "Website:",
-    "section1WebValue": "gastodehoy.es",
-    "section2Title": "2. Data We Collect",
-    "section2Item1": "Email and name (when creating an account)",
-    "section2Item2": "Expense and income data that you voluntarily enter",
-    "section2Item3": "Anonymous usage data (analytics, only if you accept cookies)",
-    "section3Title": "3. Purpose of Processing",
-    "section3Item1": "To provide the personal expense management service",
-    "section3Item2": "To authenticate you and maintain your session",
-    "section3Item3": "To improve the app through anonymous analytics (with your consent)",
-    "section4Title": "4. Legal Basis",
-    "section4Item1Label": "Performance of the service (Art. 6.1(b) GDPR):",
-    "section4Item1Text": "for the data necessary for the service to function",
-    "section4Item2Label": "Consent (Art. 6.1(a) GDPR):",
-    "section4Item2Text": "for analytics",
-    "section5Title": "5. Data Retention",
-    "section5Text": "Your data is kept as long as your account is active. You can delete your account and all your data at any time from Settings > Delete account.",
-    "section6Title": "6. Cookies",
-    "section6Part1": "We use a technical session cookie (",
-    "section6Part2": ") necessary to keep you logged in. It does not require consent. If you accept, we use anonymous analytics (no third-party cookies).",
-    "section7Title": "7. Your Rights",
-    "section7Part1": "You have the right to access, rectify, delete, limit and object to the processing of your data. Write to us at",
-    "section7Part2": ".",
-    "section8Title": "8. Security",
-    "section8Text": "Your data is stored on servers within the EU with HTTPS and encryption. We do not share your data with third parties."
+    "lastUpdatedDate": "23 October 2026",
+    "versionLabel": "Version:",
+    "versionValue": "2026-10-23.2",
+    "sections": [
+      {
+        "title": "1. Controller",
+        "paragraphs": [
+          "The controller is Andrea Cruz. Email: gastodehoy@gmail.com. Site: https://gastodehoy.es. There is no data protection officer; requests are handled at that address.",
+          "The tax ID and postal address will be published in the legal notice before any paid plan is offered. The service is free today and there is no price to display."
+        ]
+      },
+      {
+        "title": "2. Data we process",
+        "paragraphs": [
+          "Account: email, name, password (hash only), language, and the dates of signup, last login and password change. We also store the terms version you accepted and your confirmation that you are at least 14.",
+          "Budget: income, expenses, categories, goals and notes you type. We do not ask for bank credentials and we do not connect to your bank. GastoDeHoy is not a bank and not a payment service.",
+          "If you turn on system notifications, we store the push subscription identifier and the keys generated by the browser.",
+          "Security: IP address and time of sign-in attempts, to limit abuse. The window is five minutes.",
+          "On your device the browser stores interface preferences (language, density, notifications, tour). They are not sent to third parties.",
+          "Technical cookie gdh_session, HttpOnly and SameSite=Lax (Secure in production), only to keep the session."
+        ]
+      },
+      {
+        "title": "3. Purposes and legal basis",
+        "paragraphs": [
+          "To provide the budget and to send the welcome email or a temporary password: performance of the contract, GDPR Article 6(1)(b).",
+          "To limit sign-in attempts and keep technical security logs: legitimate interest, Article 6(1)(f). You can object.",
+          "Push notifications: consent. You withdraw it by turning the notice off in the account or in the system.",
+          "When someone registers, the operator receives an internal notice with name, email and date, to run the service. Basis: legitimate interest.",
+          "There is no analytics, no advertising and no automated decision-making with legal effects. We do not send periodic summaries of your figures. That email can exist only if you opt in, and the account does not offer that option today."
+        ]
+      },
+      {
+        "title": "4. Recipients and transfers",
+        "paragraphs": [
+          "We do not sell data. The host stores the database for the controller.",
+          "The mailbox gastodehoy@gmail.com is on Google. Google LLC is listed as active under the EU-US Data Privacy Framework (check dataprivacyframework.gov). That is the transfer tool when you write to that address or when signup creates the internal notice.",
+          "The welcome email and the temporary password go through the controller's SMTP server, acting as a processor and only for those messages.",
+          "If you enable push, the notice goes through your browser's service (Google, Mozilla or Apple). A transfer outside the EEA may rely on an adequacy decision or on that provider's clauses.",
+          "Interface fonts are served from this site. They are not loaded from Google or from any other third party."
+        ]
+      },
+      {
+        "title": "5. Retention",
+        "paragraphs": [
+          "Account data is kept while the account exists. You can delete it from the account: the account, expenses, goals and push subscriptions are removed.",
+          "The IP of sign-in attempts is kept for the five-minute rate-limit window.",
+          "Technical logs are kept as long as needed to detect abuse and are not used for another purpose. If backups exist, they stop including the account when that copy is replaced."
+        ]
+      },
+      {
+        "title": "6. Cookies",
+        "paragraphs": [
+          "We only use the technical cookie gdh_session. The Spanish cookie guidance exempts cookies that are necessary for the service you ask for, so there is no consent banner. Logging out deletes it. Local preferences are cleared by deleting the site data in the browser."
+        ]
+      },
+      {
+        "title": "7. Your rights",
+        "paragraphs": [
+          "You can access, rectify, erase, restrict, object and request portability. The app's CSV export covers your expenses; you can also request it by email.",
+          "You can withdraw consent for notifications at any time. That does not affect the account.",
+          "You can lodge a complaint with the Agencia Española de Protección de Datos: https://www.aepd.es.",
+          "Write to gastodehoy@gmail.com. The response period is one month, extendable under the GDPR."
+        ]
+      },
+      {
+        "title": "8. Required data and age",
+        "paragraphs": [
+          "Email, name and password are required to create the account. The other figures are there if you want to use the budget.",
+          "The service is not directed at children under 14. To register you confirm that you are at least that age (Article 7 of the Spanish LOPDGDD)."
+        ]
+      },
+      {
+        "title": "9. Security and changes",
+        "paragraphs": [
+          "The connection uses HTTPS. The password is stored as a hash, not in clear text. The session cookie is not readable from JavaScript.",
+          "If this policy changes in a relevant way, we will ask you to accept it again in the app before you continue. The accepted version is stored on the account."
+        ]
+      }
+    ]
   },
   "toasts": {
     "tourComplete": "Guide completed. You can view it again from the menu.",
@@ -585,6 +687,14 @@
     "invalidEmailDomain": "Invalid email domain",
     "accountAlreadyExists": "An account with that email already exists",
     "currentPasswordIncorrect": "Current password is incorrect",
-    "passwordIncorrect": "Incorrect password"
+    "passwordIncorrect": "Incorrect password",
+    "termsNotAccepted": "You must accept the current terms and confirm that you are at least 14."
+  },
+  "termsGate": {
+    "title": "Updated terms",
+    "body": "To keep using GastoDeHoy, accept version {{version}} of the terms and the privacy policy. If you do not agree, log out or delete the account.",
+    "acceptTerms": "I have read and accept the current terms and privacy policy.",
+    "accept": "Accept and continue",
+    "saving": "Saving…"
   }
 }

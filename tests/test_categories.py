@@ -68,7 +68,7 @@ def test_register_seeds_default_categories(anon_client) -> None:
     """New user should get default categories automatically."""
     r = anon_client.post(
         "/api/auth/register",
-        json={"email": "cat@e.com", "name": "Cat", "password": "supersecret1"},
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "cat@e.com", "name": "Cat", "password": "supersecret1"},
     )
     assert r.status_code == 201
     cats = anon_client.get("/api/categories").json()

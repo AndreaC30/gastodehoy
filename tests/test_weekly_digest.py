@@ -58,6 +58,14 @@ def test_build_digest_weekly_spend_and_month_snapshot(db_session, user) -> None:
     assert "savings_amount" in digest
 
 
+def test_digest_is_off_unless_the_user_opts_in(user) -> None:
+    from app.cli.send_weekly_digests import digest_opted_in
+
+    assert digest_opted_in(user) is False
+    user.settings.weekly_digest_opt_in = True
+    assert digest_opted_in(user) is True
+
+
 def test_send_weekly_digests_exits_without_smtp(monkeypatch) -> None:
     monkeypatch.setattr(app_settings, "smtp_host", None)
     from app.cli import send_weekly_digests
