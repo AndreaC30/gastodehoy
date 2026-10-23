@@ -5,7 +5,7 @@ import { money, savingsLabel } from "@/lib/format";
 import { useAnimatedNumber } from "@/lib/use-animated-number";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BTN_PRIMARY, FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
-import { TYPE_BODY, TYPE_EYEBROW, TYPE_HERO_NUMBER } from "@/lib/typography";
+import { TYPE_BODY, TYPE_EYEBROW } from "@/lib/typography";
 
 type Props = {
   summary: Summary | undefined;
@@ -26,9 +26,8 @@ export function DailyHero({
   );
 
   const metrics = (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+    <div className="grid content-start grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
       <Metric
-        compact
         label={t("metrics.savings")}
         value={
           summaryPending ? (
@@ -45,7 +44,6 @@ export function DailyHero({
         }
       />
       <Metric
-        compact
         label={t("metrics.fixedExpenses")}
         value={
           summaryPending ? (
@@ -56,7 +54,6 @@ export function DailyHero({
         }
       />
       <Metric
-        compact
         label={t("metrics.variableExpenses")}
         value={
           summaryPending ? (
@@ -67,7 +64,6 @@ export function DailyHero({
         }
       />
       <Metric
-        compact
         label={t("metrics.extraIncome")}
         value={
           summaryPending ? (
@@ -78,7 +74,6 @@ export function DailyHero({
         }
       />
       <Metric
-        compact
         label={t("metrics.remaining")}
         value={
           summaryPending ? (
@@ -90,7 +85,6 @@ export function DailyHero({
         highlight
       />
       <Metric
-        compact
         label={t("metrics.daysLeft")}
         value={
           summaryPending ? (
@@ -108,14 +102,14 @@ export function DailyHero({
   return (
     <section
       data-tour="hero"
-      className={`${SECTION_CARD} overflow-hidden p-4 sm:p-5 lg:p-6`}
+      className={`${SECTION_CARD} flex max-h-[40rem] flex-1 flex-col p-4 sm:p-5 lg:max-h-none lg:flex-none lg:p-6`}
       style={{ boxShadow: "inset 3px 0 0 var(--color-accent)" }}
       aria-live="polite"
     >
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-stretch lg:gap-8">
-        <div className="flex flex-col justify-center">
+      <div className="lg:grid lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-stretch lg:gap-8">
+        <div className="lg:flex lg:flex-col lg:justify-center">
           <p className={TYPE_EYEBROW}>{t("hero.dailyBudget")}</p>
-          <div className="mt-1 min-h-[2.75rem] lg:mt-3 lg:min-h-[3.25rem]">
+          <div className="mt-1.5 lg:mt-3">
             {summaryPending ? (
               <div
                 className="h-12 w-44 animate-pulse rounded-lg bg-[var(--color-panel-elevated)]"
@@ -123,7 +117,7 @@ export function DailyHero({
               />
             ) : (
               <p
-                className={TYPE_HERO_NUMBER}
+                className="font-display text-[clamp(2.35rem,6.5vh,3.15rem)] font-semibold tabular-nums tracking-tight text-[var(--color-accent)]"
                 aria-label={
                   summary?.suggested_spend_today != null
                     ? money(summary.suggested_spend_today)
@@ -155,7 +149,7 @@ export function DailyHero({
             </button>
           </div>
 
-          <div className="mt-3 lg:hidden">{metrics}</div>
+          <div className="mt-4 lg:hidden">{metrics}</div>
         </div>
 
         <div className="hidden lg:block">{metrics}</div>
