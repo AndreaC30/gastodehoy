@@ -108,6 +108,29 @@ body,
   -webkit-overflow-scrolling: touch;
 }
 
+/*
+ * En el iPhone, flex:1 (basis 0) dentro del scroll no estira la tarjeta
+ * de Hoy y deja un hueco negro sobre la barra. Altura explícita + grid
+ * reparte el alto visible: cabecera y, debajo, el resto de la pantalla.
+ */
+@media (max-width: 767px) {
+  .gdh-dashboard-scroll {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-rows: auto minmax(min-content, 1fr);
+    height: calc(
+      var(--gdh-vvh, 100dvh) - env(safe-area-inset-top, 0px) - 3.75rem -
+        env(safe-area-inset-bottom, 0px)
+    );
+  }
+
+  .gdh-dashboard-scroll > main {
+    height: 100%;
+    min-height: min-content;
+  }
+}
+
 html[data-mobile-bottom-nav="1"] {
   --gdh-bottom-chrome-offset: calc(3.75rem + env(safe-area-inset-bottom, 0px));
   /* Holgura sobre bottom nav para footers de menú/modal */
