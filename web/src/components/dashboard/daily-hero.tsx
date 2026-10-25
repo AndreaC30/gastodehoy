@@ -4,20 +4,18 @@ import { Metric } from "@/components/dashboard/metric";
 import { money, savingsLabel } from "@/lib/format";
 import { useAnimatedNumber } from "@/lib/use-animated-number";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BTN_PRIMARY, FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
+import { BTN_PRIMARY, SECTION_CARD } from "@/lib/ui-a11y";
 import { TYPE_BODY, TYPE_EYEBROW } from "@/lib/typography";
 
 type Props = {
   summary: Summary | undefined;
   summaryPending: boolean;
-  onRefresh: () => void;
   onAddExpense?: () => void;
 };
 
 export function DailyHero({
   summary,
   summaryPending,
-  onRefresh,
   onAddExpense,
 }: Props) {
   const { t } = useTranslation();
@@ -129,25 +127,15 @@ export function DailyHero({
             )}
           </div>
 
-          <div className="mt-3 flex items-center gap-2 lg:mt-6">
-            {onAddExpense ? (
-              <button
-                type="button"
-                onClick={onAddExpense}
-                className={`min-w-0 flex-1 lg:flex-none ${BTN_PRIMARY}`}
-              >
-                {t("hero.addExpense")}
-              </button>
-            ) : null}
+          {onAddExpense ? (
             <button
               type="button"
-              onClick={onRefresh}
-              aria-label={t("hero.refresh")}
-              className={`min-h-11 shrink-0 px-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+              onClick={onAddExpense}
+              className={`mt-3 lg:mt-6 ${BTN_PRIMARY}`}
             >
-              {t("hero.refresh")}
+              {t("hero.addExpense")}
             </button>
-          </div>
+          ) : null}
 
           <div className="mt-4 lg:hidden">{metrics}</div>
         </div>
