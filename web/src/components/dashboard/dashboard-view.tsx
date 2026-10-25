@@ -432,7 +432,7 @@ export function Dashboard({ profileName }: Props) {
           id="main-content"
           tabIndex={-1}
           data-density={density}
-          className="relative z-10 mx-auto flex w-full min-w-0 max-w-lg flex-1 flex-col space-y-8 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-7 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-6 md:pb-8 lg:max-w-6xl"
+          className="relative z-10 mx-auto flex w-full min-w-0 max-w-lg flex-1 flex-col space-y-8 px-4 py-4 pb-4 sm:space-y-7 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-6 md:pb-8 lg:max-w-6xl"
         >
         {error && (
           <div
@@ -445,12 +445,12 @@ export function Dashboard({ profileName }: Props) {
 
         <div
           key={activeSection}
-          className="flex flex-1 flex-col"
+          className="flex grow flex-col"
           style={{ animation: "gdhSectionIn 180ms ease-out" }}
         >
         {/* Section: HOY */}
         {activeSection === 'hoy' && (
-          <div className="flex flex-1 flex-col gap-3 lg:flex-none lg:gap-4">
+          <div className="flex grow flex-col gap-3 lg:grow-0 lg:gap-4">
             <MonthContextBadge referenceDate={summaryQ.data?.reference_date} />
             <MonthContextBanner referenceDate={summaryQ.data?.reference_date} />
             <DailyHero
