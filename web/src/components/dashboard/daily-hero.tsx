@@ -102,7 +102,7 @@ export function DailyHero({
   return (
     <section
       data-tour="hero"
-      className={`${SECTION_CARD} flex max-h-[40rem] flex-1 flex-col p-4 sm:p-5 lg:max-h-none lg:flex-none lg:p-6`}
+      className={`${SECTION_CARD} flex max-h-[40rem] grow flex-col p-4 sm:p-5 lg:max-h-none lg:grow-0 lg:p-6`}
       style={{ boxShadow: "inset 3px 0 0 var(--color-accent)" }}
       aria-live="polite"
     >
@@ -155,7 +155,7 @@ export function DailyHero({
         <div className="hidden lg:block">{metrics}</div>
       </div>
 
-      <p className={`mt-3 border-t border-[var(--color-border)] pt-3 lg:mt-6 lg:pt-4 ${TYPE_BODY}`}>
+      <p className={`mt-auto border-t border-[var(--color-border)] pt-3 lg:mt-6 lg:pt-4 ${TYPE_BODY}`}>
         {t("hero.explanation")}
       </p>
     </section>
