@@ -456,9 +456,6 @@ export function Dashboard({ profileName }: Props) {
             <DailyHero
               summary={summaryQ.data}
               summaryPending={summaryQ.isPending}
-              onRefresh={() => {
-                void invalidateAll().then(() => setToastMsg(t("toasts.done")));
-              }}
               onAddExpense={goToAddExpense}
             />
           </div>
