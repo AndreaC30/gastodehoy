@@ -3,7 +3,7 @@
  *
  * Decides what to render based on the auth store:
  *   loading -> splash while we ask `/api/auth/me`
- *   anon    -> Landing (primera visita) o LoginScreen
+ *   anon    -> Landing en el navegador; login si es la PWA instalada
  *   auth    -> Authed (OnboardingWizard or Dashboard).
  */
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -41,7 +41,7 @@ import { api, UnauthorizedError } from "@/api/client";
 import type { Settings, User } from "./api/types";
 import { getStoredAnonPhase, setStoredAnonPhase } from "@/lib/anon-phase-session";
 import { APP_SHELL_CLASS } from "@/lib/app-layout";
-import { hasSeenLanding, markLandingSeen } from "@/lib/landing-preference";
+import { isStandaloneDisplay } from "@/lib/pwa-display";
 import { markIncomeCheckAnswered } from "@/lib/income-check-preference";
 import { isFirstDayOfMonth } from "@/lib/month-income-check";
 import { todayDate } from "@/lib/month-context";
@@ -279,12 +279,14 @@ function BootstrapErrorSplash({
   );
 }
 
-/** Usuario no autenticado: landing o login; F5 conserva la vista gracias a sessionStorage. */
+/**
+ * Sin sesión: la web abre la portada; la PWA instalada abre el login.
+ * En el navegador, F5 conserva portada o login de esta pestaña.
+ */
 function AnonFlow() {
   const [phase, setPhase] = useState<"landing" | "auth">(() => {
-    const fromSession = getStoredAnonPhase();
-    if (fromSession) return fromSession;
-    return hasSeenLanding() ? "auth" : "landing";
+    if (isStandaloneDisplay()) return "auth";
+    return getStoredAnonPhase() ?? "landing";
   });
   const [entryTab, setEntryTab] = useState<AuthEntryTab>("login");
 
@@ -298,7 +300,6 @@ function AnonFlow() {
         <AppBackdrop />
         <LandingPage
           onEnter={(mode) => {
-            markLandingSeen();
             setEntryTab(mode);
             setPhase("auth");
           }}
