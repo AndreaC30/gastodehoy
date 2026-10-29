@@ -43,6 +43,9 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
     "gastodehoy-favicon-16.png": "image/png",
     "gastodehoy-favicon-32.png": "image/png",
     "gastodehoy-favicon-192.png": "image/png",
+    # El service worker precachea todos los PNG de public/. Si este 404,
+    # Workbox aborta la instalación y en Android no hay PWA (push, offline, updates).
+    "gastodehoy-favicon.png": "image/png",
     "gastodehoy-app-icon.png": "image/png",
     "gastodehoy-apple-touch-180.png": "image/png",
     "gastodehoy-app-icon-maskable.png": "image/png",
@@ -297,6 +300,13 @@ def pwa_push_handler() -> FileResponse | JSONResponse:
 def pwa_icon_192() -> FileResponse | JSONResponse:
     return _dist_root_file(
         "gastodehoy-favicon-192.png", DIST_ROOT_STATIC_FILES["gastodehoy-favicon-192.png"]
+    )
+
+
+@app.get("/gastodehoy-favicon.png", response_model=None)
+def pwa_favicon_png() -> FileResponse | JSONResponse:
+    return _dist_root_file(
+        "gastodehoy-favicon.png", DIST_ROOT_STATIC_FILES["gastodehoy-favicon.png"]
     )
 
 
