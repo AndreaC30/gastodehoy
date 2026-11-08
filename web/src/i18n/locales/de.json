@@ -692,6 +692,7 @@
   },
   "errors": {
     "emailOrPasswordIncorrect": "E-Mail oder Passwort falsch",
+    "tooManyAttempts": "Zu viele Versuche. Warte ein paar Minuten.",
     "invalidEmailFormat": "Ungültiges E-Mail-Format",
     "invalidEmailDomain": "Ungültige E-Mail-Domain",
     "accountAlreadyExists": "Ein Konto mit dieser E-Mail existiert bereits",
