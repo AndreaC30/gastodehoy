@@ -511,9 +511,9 @@
   "legal": {
     "title": "Mentions légales et conditions d'utilisation",
     "lastUpdatedLabel": "Dernière mise à jour :",
-    "lastUpdatedDate": "23 octobre 2026",
+    "lastUpdatedDate": "8 novembre 2026",
     "versionLabel": "Version :",
-    "versionValue": "2026-10-23.2",
+    "versionValue": "2026-11-08.1",
     "sections": [
       {
         "title": "1. Titulaire",
@@ -591,9 +591,9 @@
   "privacy": {
     "title": "Politique de confidentialité",
     "lastUpdatedLabel": "Dernière mise à jour :",
-    "lastUpdatedDate": "23 octobre 2026",
+    "lastUpdatedDate": "8 novembre 2026",
     "versionLabel": "Version :",
-    "versionValue": "2026-10-23.2",
+    "versionValue": "2026-11-08.1",
     "sections": [
       {
         "title": "1. Responsable",
@@ -616,7 +616,7 @@
       {
         "title": "3. Finalités et bases",
         "paragraphs": [
-          "Fournir le budget et envoyer le message de bienvenue ou le mot de passe temporaire : exécution du contrat, article 6.1.b du RGPD.",
+          "Fournir le budget et envoyer le message de bienvenue ou un lien à usage unique, valable une heure, pour choisir un nouveau mot de passe : exécution du contrat, article 6.1.b du RGPD.",
           "Limiter les tentatives de connexion et conserver des journaux techniques de sécurité : intérêt légitime, article 6.1.f. Vous pouvez vous y opposer.",
           "Notifications push : consentement. Vous le retirez en désactivant l'avis dans le compte ou dans le système.",
           "Lors d'une inscription, la titulaire reçoit un avis interne avec le nom, l'e-mail et la date, pour administrer le service. Base : intérêt légitime.",
@@ -627,8 +627,9 @@
         "title": "4. Destinataires et transferts",
         "paragraphs": [
           "Nous ne vendons pas les données. L'hébergement conserve la base pour la responsable.",
+          "Une automatisation interne (n8n), qui agit pour la responsable, peut recevoir l'e-mail de chaque compte et des chiffres d'usage pour administrer le service : totaux de comptes, de comptes avec des dépenses, avec un revenu mensuel indiqué et avec le guide terminé, de dépenses variables et fixes, et de comptes actifs à 7 et à 30 jours ; et, pour chaque compte, l'e-mail, le nombre de dépenses variables et les jours distincts avec une dépense sur les 30 derniers jours. Ce n'est pas une vente de données.",
           "La boîte gastodehoy@gmail.com est chez Google. Google LLC est inscrite comme active au EU-US Data Privacy Framework (vérifiable sur dataprivacyframework.gov). C'est le mécanisme du transfert lorsque vous écrivez à cette adresse ou lorsque l'inscription crée l'avis interne.",
-          "Le message de bienvenue et le mot de passe temporaire passent par le serveur SMTP de la titulaire, sous-traitant uniquement pour ces messages.",
+          "Le message de bienvenue et le lien à usage unique pour réinitialiser le mot de passe passent par le serveur SMTP de la titulaire, sous-traitant uniquement pour ces messages.",
           "Si vous activez le push, l'avis passe par le service de votre navigateur (Google, Mozilla ou Apple). Un transfert hors de l'EEE peut reposer sur une décision d'adéquation ou sur les clauses de ce prestataire.",
           "Les polices de l'interface sont servies par le site lui-même. Elles ne sont pas chargées depuis Google ni depuis un autre tiers."
         ]
@@ -637,7 +638,7 @@
         "title": "5. Conservation",
         "paragraphs": [
           "Les données du compte sont conservées tant que le compte existe. Vous pouvez le supprimer depuis le compte : le compte, les dépenses, les objectifs et les abonnements push sont effacés.",
-          "L'IP des tentatives de connexion est conservée pendant la fenêtre de cinq minutes de la limitation.",
+          "L'adresse IP et l'heure des tentatives de connexion sont effacées dès qu'elles sortent de la fenêtre de cinq minutes de la limitation.",
           "Les journaux techniques sont conservés le temps nécessaire pour détecter des abus et ne servent pas à autre chose. S'il existe des sauvegardes, elles cessent d'inclure le compte lorsque cette copie est remplacée."
         ]
       },

@@ -143,6 +143,36 @@ class TestLoginRateLimit:
 
             check_login_rate(mock_request_ip2, db_session, "other@e.com")
 
+    def test_rate_limit_deletes_attempts_outside_window(self, db_session):
+        """En producción borra los intentos que ya salieron de los 5 minutos."""
+        mock_request = MagicMock()
+        mock_request.client.host = "192.168.1.100"
+        mock_request.headers.get.return_value = None
+
+        now = datetime.now(timezone.utc)
+        db_session.add(
+            LoginAttempt(
+                ip="203.0.113.10",
+                email="old@e.com",
+                attempted_at=now - timedelta(days=30),
+            )
+        )
+        db_session.add(
+            LoginAttempt(
+                ip="203.0.113.10",
+                email="recent@e.com",
+                attempted_at=now - timedelta(minutes=1),
+            )
+        )
+        db_session.commit()
+
+        with patch("app.config.settings.environment", "production"):
+            check_login_rate(mock_request, db_session)
+
+        rows = db_session.query(LoginAttempt).all()
+        assert len(rows) == 1
+        assert rows[0].email == "recent@e.com"
+
 
 class TestLoginAttemptModel:
     """Tests para el modelo LoginAttempt."""

@@ -509,9 +509,9 @@
   "legal": {
     "title": "Aviso legal y condiciones de uso",
     "lastUpdatedLabel": "Última actualización:",
-    "lastUpdatedDate": "23 de octubre de 2026",
+    "lastUpdatedDate": "8 de noviembre de 2026",
     "versionLabel": "Versión:",
-    "versionValue": "2026-10-23.2",
+    "versionValue": "2026-11-08.1",
     "sections": [
       {
         "title": "1. Titular",
@@ -589,9 +589,9 @@
   "privacy": {
     "title": "Política de privacidad",
     "lastUpdatedLabel": "Última actualización:",
-    "lastUpdatedDate": "23 de octubre de 2026",
+    "lastUpdatedDate": "8 de noviembre de 2026",
     "versionLabel": "Versión:",
-    "versionValue": "2026-10-23.2",
+    "versionValue": "2026-11-08.1",
     "sections": [
       {
         "title": "1. Responsable",
@@ -614,7 +614,7 @@
       {
         "title": "3. Finalidad y base legal",
         "paragraphs": [
-          "Prestar el presupuesto y enviarte el correo de bienvenida o la contraseña temporal: ejecución del contrato, artículo 6.1.b del RGPD.",
+          "Prestar el presupuesto y enviarte el correo de bienvenida o un enlace de un solo uso, válido una hora, para elegir una contraseña nueva: ejecución del contrato, artículo 6.1.b del RGPD.",
           "Limitar intentos de acceso y conservar registros técnicos de seguridad: interés legítimo, artículo 6.1.f. Puedes oponerte.",
           "Avisos push: consentimiento. Lo retiras desactivando el aviso en la cuenta o en el sistema.",
           "Cuando alguien se registra, el titular recibe un aviso interno con nombre, email y fecha, para administrar el servicio. Base: interés legítimo.",
@@ -625,8 +625,9 @@
         "title": "4. Destinatarios y transferencias",
         "paragraphs": [
           "No vendemos datos. El alojamiento guarda la base de datos por cuenta del titular.",
+          "Una automatización interna (n8n), que actúa por cuenta del responsable, puede recibir el correo de cada cuenta y cifras de uso para administrar el servicio: número de cuentas, cuentas con gastos, con un ingreso mensual indicado y con la guía terminada, total de gastos variables y de gastos fijos, cuentas activas a 7 y a 30 días, y por cada cuenta el correo, el número de gastos variables y los días distintos con gasto de los últimos 30 días. No es una venta de datos.",
           "El buzón gastodehoy@gmail.com está en Google. Google LLC figura como activo en el EU-US Data Privacy Framework (certificación revisable en dataprivacyframework.gov). Ese es el mecanismo de la transferencia cuando escribes a ese correo o cuando el alta genera el aviso interno.",
-          "El correo de bienvenida y la contraseña temporal salen por el servidor SMTP del titular, que actúa como encargado y solo para esos mensajes.",
+          "El correo de bienvenida y el enlace de un solo uso para restablecer la contraseña salen por el servidor SMTP del titular, que actúa como encargado y solo para esos mensajes.",
           "Si activas el push, el aviso pasa por el servicio de tu navegador (Google, Mozilla o Apple). Puede haber una transferencia fuera del EEE amparada por una decisión de adecuación o por las cláusulas de ese proveedor.",
           "Las fuentes de la interfaz se sirven desde el propio sitio. No se cargan desde Google ni desde otro tercero."
         ]
@@ -635,7 +636,7 @@
         "title": "5. Conservación",
         "paragraphs": [
           "Los datos de la cuenta se conservan mientras la cuenta existe. Desde la cuenta puedes eliminarla: se borran la cuenta, los gastos, las metas y las suscripciones push.",
-          "La IP de los intentos de acceso se conserva en la ventana de cinco minutos del límite de intentos.",
+          "La dirección IP y la hora de los intentos de acceso se eliminan en cuanto salen de la ventana de cinco minutos del límite de intentos.",
           "Los registros técnicos se conservan el tiempo necesario para detectar abusos y no se usan para otra finalidad. Si hay copias de seguridad, dejan de incluir la cuenta cuando esa copia se sustituye."
         ]
       },

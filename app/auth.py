@@ -51,7 +51,6 @@ RECOVERY_CODE_GROUP_LEN: Final = 4
 # Rate limiter constants
 _LOGIN_WINDOW_S: Final = 5 * 60
 _LOGIN_MAX_ATTEMPTS: Final = 5
-_LOGIN_MAX_ENTRIES: Final = 10000
 
 
 def password_exceeds_bcrypt(password: str) -> bool:
@@ -326,7 +325,8 @@ def check_login_rate(
     """Raise 429 when this IP or email already has 5 failures in 5 minutes.
 
     Does not insert a row. Development skips the limit so the test suite can
-    opt in by setting production.
+    opt in by setting production. In production, rows older than the window
+    are deleted on every check; rows still inside the window stay and count.
     """
     if settings.environment == "development":
         # Local and tests. Production compose sets ENV=production; startup
@@ -337,11 +337,8 @@ def check_login_rate(
     normalized = _normalize_rate_email(email)
     now = datetime.now(timezone.utc)
 
-    # Periodic cleanup to bound table size
-    total = db.scalar(select(func.count(LoginAttempt.id))) or 0
-    if total > _LOGIN_MAX_ENTRIES:
-        _cleanup_old_attempts_db(db, _LOGIN_WINDOW_S)
-        db.commit()
+    _cleanup_old_attempts_db(db, _LOGIN_WINDOW_S)
+    db.commit()
 
     cutoff = now - timedelta(seconds=_LOGIN_WINDOW_S)
     ip_count = _recent_attempt_count(db, cutoff=cutoff, ip=ip)
