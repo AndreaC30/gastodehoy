@@ -13,7 +13,7 @@ import socket
 from datetime import datetime, timezone
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -24,6 +24,7 @@ from app.auth import (
     PASSWORD_MAX_LEN,
     PASSWORD_MIN_LEN,
     RESET_TOKEN_TTL,
+    SESSION_COOKIE,
     _client_ip,
     check_login_rate,
     clear_session_cookie,
@@ -34,6 +35,7 @@ from app.auth import (
     password_exceeds_bcrypt,
     record_login_failure,
     reset_tokens_match,
+    revoke_session_from_cookie,
     set_session_cookie,
     verify_password,
     verify_password_or_dummy,
@@ -310,8 +312,18 @@ def login(
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(response: Response) -> None:
-    """Clear the session cookie. Idempotent."""
+def logout(
+    response: Response,
+    session: str | None = Cookie(default=None, alias=SESSION_COOKIE),
+    db: Session = Depends(get_db),
+) -> None:
+    """Revoke this cookie's session id, then clear it. Idempotent.
+
+    No cookie, or one that does not decode, still returns 204. Other sessions
+    of the same account stay valid until they log out or the password changes.
+    """
+    if session:
+        revoke_session_from_cookie(db, session)
     clear_session_cookie(response)
 
 

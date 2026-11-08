@@ -466,6 +466,21 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                 )
             )
 
+        conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS revoked_sessions ("
+                "  sid VARCHAR(64) NOT NULL PRIMARY KEY,"
+                "  revoked_at DATETIME NOT NULL"
+                ")"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_revoked_sessions_revoked_at "
+                "ON revoked_sessions(revoked_at)"
+            )
+        )
+
 
 def get_db() -> Generator[Session, None, None]:
     """Yield a Session bound to the current request and close it on exit."""
