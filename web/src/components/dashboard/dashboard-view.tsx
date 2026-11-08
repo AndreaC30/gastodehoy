@@ -3,7 +3,7 @@
  * category selector, spending chart, and financial insights.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { type FormEvent, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { AppBackdrop } from "@/components/app-backdrop";
 import { DailyHero } from "@/components/dashboard/daily-hero";
@@ -126,6 +126,7 @@ export function Dashboard({ profileName }: Props) {
     null,
   );
   const [exportBusy, setExportBusy] = useState(false);
+  const expenseSubmitLocked = useRef(false);
   const [showTour, setShowTour] = useState(false);
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -317,15 +318,25 @@ export function Dashboard({ profileName }: Props) {
 
   function onExpenseSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    if (expenseSubmitLocked.current || addExpense.isPending) return;
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     const note = String(fd.get("note") ?? "").trim();
     const catId = fd.get("category_id");
-    addExpense.mutate({
-      amount: String(fd.get("amount") ?? ""),
-      note: note || null,
-      category_id: catId ? Number(catId) : null,
-    });
-    e.currentTarget.reset();
+    expenseSubmitLocked.current = true;
+    addExpense.mutate(
+      {
+        amount: String(fd.get("amount") ?? ""),
+        note: note || null,
+        category_id: catId ? Number(catId) : null,
+      },
+      {
+        onSettled: () => {
+          expenseSubmitLocked.current = false;
+        },
+      },
+    );
+    form.reset();
   }
 
   async function handleExport() {
