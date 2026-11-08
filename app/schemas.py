@@ -71,8 +71,14 @@ class AcceptTermsRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
+    """Login accepts any password string so a too-short value still counts as a failure.
+
+    Length rules apply when setting a password (register, reset, change), not here.
+    A huge body is rejected before the handler; 256 covers the bcrypt limit.
+    """
+
     email: EmailStr
-    password: PasswordStr
+    password: str = Field(max_length=256)
 
 
 class UserPublic(BaseModel):

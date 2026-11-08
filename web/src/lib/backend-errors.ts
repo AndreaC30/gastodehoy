@@ -4,6 +4,7 @@
  */
 export const BACKEND_ERROR_MAP: Record<string, string> = {
   "Email o contraseña incorrectos": "errors.emailOrPasswordIncorrect",
+  "Demasiados intentos. Espera unos minutos.": "errors.tooManyAttempts",
   "El formato del email no es válido": "errors.invalidEmailFormat",
   "El dominio del email no es válido": "errors.invalidEmailDomain",
   "Ya existe una cuenta con ese email": "errors.accountAlreadyExists",
@@ -24,5 +25,7 @@ export function translateBackendError(
   message: string,
   t: (key: string) => string,
 ): string {
-  return BACKEND_ERROR_MAP[message] ? t(BACKEND_ERROR_MAP[message]) : message;
+  const plain = message.replace(/^HTTP \d+:\s*/, "");
+  const key = BACKEND_ERROR_MAP[plain] ?? BACKEND_ERROR_MAP[message];
+  return key ? t(key) : message;
 }

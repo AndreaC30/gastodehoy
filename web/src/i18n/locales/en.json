@@ -690,6 +690,7 @@
   },
   "errors": {
     "emailOrPasswordIncorrect": "Incorrect email or password",
+    "tooManyAttempts": "Too many attempts. Wait a few minutes.",
     "invalidEmailFormat": "Invalid email format",
     "invalidEmailDomain": "Invalid email domain",
     "accountAlreadyExists": "An account with that email already exists",
