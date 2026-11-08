@@ -34,6 +34,8 @@ services:
       COOKIE_DOMAIN: ${SITE_DOMAIN}
       TRUST_FORWARDED_FOR: "true"
       CORS_ORIGINS: ${CORS_ORIGINS:-}
+      ADMIN_NOTIFY_EMAIL: ${ADMIN_NOTIFY_EMAIL:-}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
     networks:
       backend:
         aliases:

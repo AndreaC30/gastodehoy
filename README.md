@@ -260,14 +260,17 @@ techo diario = (ingreso mensual − ahorro − fijos − gastos variables del me
 
 - Contraseñas con **bcrypt**, nunca en texto plano.
 - Sesión por **cookie firmada** (`HttpOnly`, `SameSite=Lax`); `Secure` solo en producción.
-- **Rate limit** en login y recuperación: 5 intentos por IP cada 5 minutos.
+- **Rate limit** en login, registro y recuperación: 5 intentos por IP cada 5 minutos. Solo se omite con `ENV=development` (el arranque lo avisa). Producción debe usar `ENV=production`.
+- Con `TRUST_FORWARDED_FOR=true` la IP del límite es la **última** de `X-Forwarded-For` (la que añade nginx con `$proxy_add_x_forwarded_for`). Las anteriores las puede poner el cliente.
+- **Recuperar contraseña** envía un enlace de un solo uso (1 hora). La contraseña no cambia hasta que se usa. Hace falta SMTP y `PUBLIC_BASE_URL` o `COOKIE_DOMAIN`.
 - **Cambiar la contraseña invalida todas las sesiones** y obliga a iniciar sesión otra vez.
 - Cada cuenta solo ve sus propios datos.
 - En producción, el proxy (Caddy/nginx) puede añadir HSTS, CSP, `X-Frame-Options=DENY`, etc.
 - `/api/admin/*` exige la cabecera `X-Admin-Key` con `ADMIN_API_KEY` (obligatoria con `ENV=production`).
+- Los avisos de alta y `/api/admin/send-notification` van a `ADMIN_NOTIFY_EMAIL`. Sin esa variable no se envían.
 - La BBDD es un único archivo SQLite con permisos de filesystem; sin puerto abierto ni usuario remoto. Para protegerla del robo físico del disco, cifra el filesystem del VPS (LUKS o equivalente).
 - Validación de dominio MX en registro y recuperación de contraseña (desde v2026.05.13).
-- Respuestas de tiempo constante en auth para evitar enumeración de usuarios.
+- El login ejecuta bcrypt también si el email no existe, para no delatar cuentas por tiempo. El registro sí responde 409 si el email ya existe: hace falta para el alta.
 
 ---
 

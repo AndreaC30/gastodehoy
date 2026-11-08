@@ -229,6 +229,16 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                     "BOOLEAN NOT NULL DEFAULT 1"
                 )
             )
+        if "password_reset_hash" not in colnames:
+            conn.execute(
+                text("ALTER TABLE users ADD COLUMN password_reset_hash VARCHAR(64)")
+            )
+        if "password_reset_expires_at" not in colnames:
+            conn.execute(
+                text(
+                    "ALTER TABLE users ADD COLUMN password_reset_expires_at DATETIME"
+                )
+            )
 
         # Nueva tabla: expense_categories
         conn.execute(

@@ -30,11 +30,11 @@ class TestClientIP:
         """Usa X-Forwarded-For cuando trust_forwarded_for está activo."""
         mock_request = MagicMock()
         mock_request.client.host = "10.0.0.1"
-        mock_request.headers.get.return_value = "203.0.113.50, 10.0.0.1"
+        mock_request.headers.get.return_value = "203.0.113.50, 198.51.100.20"
         
         with patch("app.config.settings.trust_forwarded_for", True):
             ip = _client_ip(mock_request)
-            assert ip == "203.0.113.50"
+            assert ip == "198.51.100.20"
 
     def test_client_ip_unknown(self):
         """Retorna 'unknown' si no hay client."""

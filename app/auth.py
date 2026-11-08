@@ -7,6 +7,8 @@ and a persistent SQLite-backed IP rate limiter for login and forgot-password.
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import ipaddress
 import logging
 import secrets
@@ -32,6 +34,13 @@ NAME_MAX_LEN: Final = 80
 SESSION_COOKIE: Final = "gdh_session"
 
 _BCRYPT_MAX_BYTES: Final = 72
+RESET_TOKEN_TTL: Final = timedelta(hours=1)
+
+# Hash fijo para comparar bcrypt cuando el email no existe. Sin esto, el
+# login responde antes y delata qué correos están registrados.
+_DUMMY_PASSWORD_HASH: Final[str] = bcrypt.hashpw(
+    b"not-a-real-password", bcrypt.gensalt()
+).decode("utf-8")
 
 # Alfabeto sin caracteres ambiguos al copiar a mano (sin 0/O, 1/I/L).
 _RECOVERY_ALPHABET: Final = "abcdefghjkmnpqrstuvwxyz23456789"
@@ -44,9 +53,14 @@ _LOGIN_MAX_ATTEMPTS: Final = 5
 _LOGIN_MAX_ENTRIES: Final = 10000
 
 
+def password_exceeds_bcrypt(password: str) -> bool:
+    """True when UTF-8 length is past bcrypt's 72-byte input limit."""
+    return len(password.encode("utf-8")) > _BCRYPT_MAX_BYTES
+
+
 def hash_password(password: str) -> str:
     """Return a bcrypt hash for the given plaintext password."""
-    if len(password.encode("utf-8")) > _BCRYPT_MAX_BYTES:
+    if password_exceeds_bcrypt(password):
         raise ValueError("password too long for bcrypt")
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
@@ -60,6 +74,24 @@ def verify_password(password: str, hashed: str) -> bool:
         return bcrypt.checkpw(pwd, hashed.encode("utf-8"))
     except ValueError:
         return False
+
+
+def verify_password_or_dummy(password: str, hashed: str | None) -> bool:
+    """Run bcrypt even when the account does not exist.
+
+    ``hashed is None`` compares against a dummy hash so unknown emails
+    cost the same as a wrong password.
+    """
+    return verify_password(password, hashed if hashed is not None else _DUMMY_PASSWORD_HASH)
+
+
+def hash_reset_token(token: str) -> str:
+    """SHA-256 hex of a reset token. The raw token is only emailed once."""
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def reset_tokens_match(token: str, stored_hash: str) -> bool:
+    return hmac.compare_digest(hash_reset_token(token), stored_hash)
 
 
 def generate_recovery_code() -> str:
@@ -229,15 +261,18 @@ def _client_ip(request: Request) -> str:
     """Client IP for rate limiting.
 
     By default uses the TCP peer (safe on direct uvicorn). Set
-    ``TRUST_FORWARDED_FOR=true`` only behind a reverse proxy that sets
-    ``X-Forwarded-For`` correctly.
+    ``TRUST_FORWARDED_FOR=true`` only behind one reverse proxy that
+    *appends* the peer address (nginx ``$proxy_add_x_forwarded_for``).
+    The rightmost valid address is the one the proxy added; earlier
+    values are whatever the client sent and must not be trusted.
     """
     if settings.trust_forwarded_for:
         fwd = request.headers.get("x-forwarded-for")
         if fwd:
-            candidate = fwd.split(",")[0].strip()
-            if _is_valid_ip(candidate):
-                return candidate
+            parts = [part.strip() for part in fwd.split(",") if part.strip()]
+            for candidate in reversed(parts):
+                if _is_valid_ip(candidate):
+                    return candidate
     return request.client.host if request.client else "unknown"
 
 
@@ -256,6 +291,8 @@ def check_login_rate(request: Request, db: Session) -> None:
     across multiple workers.
     """
     if settings.environment == "development":
+        # Local and tests. Production compose sets ENV=production; startup
+        # logs a warning when this skip is active.
         return
 
     ip = _client_ip(request)

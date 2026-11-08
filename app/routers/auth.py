@@ -1,8 +1,8 @@
 """HTTP endpoints for authentication.
 
 Register / login / logout use ``HttpOnly`` signed cookies.
-``forgot-password`` envía una contraseña temporal por correo (requiere SMTP).
-Cambiar contraseña o recuperar invalida sesiones anteriores cuando aplique.
+``forgot-password`` envía un enlace de un solo uso (requiere SMTP).
+La contraseña no cambia hasta ``reset-password``. Cambiarla invalida sesiones.
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ import logging
 import secrets
 import socket
 from datetime import datetime, timezone
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import func, select
@@ -20,17 +21,19 @@ from sqlalchemy.orm import Session
 _log = logging.getLogger(__name__)
 
 from app.auth import (
-    PASSWORD_MAX_LEN,
-    PASSWORD_MIN_LEN,
+    RESET_TOKEN_TTL,
     _client_ip,
     check_login_rate,
     clear_session_cookie,
     get_current_user,
     hash_password,
+    hash_reset_token,
     make_session_token,
     reset_login_rate,
+    reset_tokens_match,
     set_session_cookie,
     verify_password,
+    verify_password_or_dummy,
 )
 from app.config import settings
 from app.database import get_db
@@ -46,6 +49,8 @@ from app.schemas import (
     LoginRequest,
     RegisterRequest,
     RegisterResponse,
+    ResetPasswordRequest,
+    ResetPasswordResponse,
     UpdateName,
     UserPublic,
 )
@@ -54,9 +59,11 @@ from app.services.categories import seed_default_categories
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 _FORGOT_PASSWORD_MESSAGE = (
-    "Si existe una cuenta con ese correo, te hemos enviado una contraseña temporal. "
-    "Revisa la bandeja de entrada y la carpeta de spam."
+    "Si existe una cuenta con ese correo, te hemos enviado un enlace para elegir "
+    "una contraseña nueva. Caduca en 1 hora. Revisa la bandeja de entrada y el spam."
 )
+_RESET_PASSWORD_OK = "Contraseña actualizada. Ya puedes entrar con la nueva."
+_RESET_PASSWORD_INVALID = "El enlace no es válido o ha caducado."
 
 
 def _require_current_terms(accepts_terms: bool, confirms_minimum_age: bool, terms_version: str) -> None:
@@ -112,25 +119,15 @@ def _domain_has_mx(domain: str) -> bool:
         return False
 
 
-ADMIN_EMAIL = "gastodehoy@gmail.com"
-
-
-def _random_password() -> str:
-    """Contraseña temporal segura y dentro del rango de validación."""
-    pw = secrets.token_urlsafe(32)
-    while len(pw) < PASSWORD_MIN_LEN:
-        pw += secrets.token_urlsafe(8)
-    if len(pw) > PASSWORD_MAX_LEN:
-        return pw[:PASSWORD_MAX_LEN]
-    return pw
-
-
 def _notify_admin_new_user(email: str, name: str) -> None:
-    """Envía un correo a la administradora cuando alguien se registra."""
+    """Avisa por correo de un alta, si ADMIN_NOTIFY_EMAIL está definido."""
+    admin_email = (settings.admin_notify_email or "").strip()
+    if not admin_email:
+        return
     try:
         send_email(
-            ADMIN_EMAIL,
-            f"🆕 Nuevo registro en GastoDeHoy",
+            admin_email,
+            "Nuevo registro en GastoDeHoy",
             f"Se ha registrado un nuevo usuario:\n\n"
             f"  Nombre: {name}\n"
             f"  Email: {email}\n"
@@ -138,6 +135,17 @@ def _notify_admin_new_user(email: str, name: str) -> None:
         )
     except Exception as exc:
         _log.warning("admin notification failed for %s: %s", email, exc)
+
+
+def _reset_link(token: str) -> str:
+    base = settings.site_base_url()
+    return f"{base}/reset-password?token={quote(token, safe='')}"
+
+
+def _as_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value
 
 
 @router.post(
@@ -152,6 +160,7 @@ def register(
     db: Session = Depends(get_db),
 ) -> RegisterResponse:
     """Crea la cuenta, fija la cookie de sesión y devuelve el usuario."""
+    check_login_rate(request, db)
     _require_current_terms(
         payload.accepts_terms,
         payload.confirms_minimum_age,
@@ -261,7 +270,11 @@ def login(
     check_login_rate(request, db)
     email = _normalize_email(payload.email)
     user = db.scalar(select(User).where(func.lower(User.email) == email))
-    if user is None or not verify_password(payload.password, user.password_hash):
+    password_ok = verify_password_or_dummy(
+        payload.password,
+        user.password_hash if user is not None else None,
+    )
+    if user is None or not password_ok:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email o contraseña incorrectos",
@@ -286,11 +299,10 @@ def forgot_password(
     request: Request,
     db: Session = Depends(get_db),
 ) -> ForgotPasswordResponse:
-    """Genera una contraseña nueva y la envía por correo si el usuario existe.
+    """Envía un enlace de un solo uso. No cambia la contraseña.
 
-    Sin SMTP configurado responde 503. Misma respuesta 200 para correo
-    inexistente (no revelar cuentas). Valida que el dominio del email
-    tenga registros MX antes de intentar enviar (anti-abuso SMTP).
+    Sin SMTP o sin URL pública responde 503. La misma respuesta 200 vale
+    si el correo no existe. El dominio tiene que resolver antes de enviar.
     """
     check_login_rate(request, db)
     if not (settings.smtp_host and settings.smtp_host.strip()):
@@ -301,15 +313,21 @@ def forgot_password(
                 "en el servidor (SMTP_HOST, remitente, credenciales)."
             ),
         )
+    if not settings.site_base_url():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "La recuperación por correo no está disponible: falta PUBLIC_BASE_URL "
+                "o COOKIE_DOMAIN para construir el enlace."
+            ),
+        )
 
     email = _normalize_email(payload.email)
 
-    # Validar formato de email antes de tocar la BD ni el DNS
     if not _is_valid_email_format(email):
         _log.warning("forgot-password: formato invalido desde %s", _client_ip(request))
         return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)
 
-    # Validar que el dominio tiene registros MX (anti-envio a dominios falsos)
     domain = email.split("@")[-1]
     if not _domain_has_mx(domain):
         _log.warning(
@@ -317,23 +335,22 @@ def forgot_password(
             domain,
             _client_ip(request),
         )
-        # Misma respuesta generica — no revelar que el dominio es invalido
         return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)
 
     user = db.scalar(select(User).where(func.lower(User.email) == email))
-
+    # Mismo trabajo de token si el correo no existe, para no adelantar la respuesta.
+    token = secrets.token_urlsafe(32)
     if user is None:
+        hash_reset_token(token)
         return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)
 
-    temp_pw = _random_password()
-    user.password_hash = hash_password(temp_pw)
-    user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
-    user.recovery_hash = None
-    user.must_change_password = True
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    user.password_reset_hash = hash_reset_token(token)
+    user.password_reset_expires_at = now + RESET_TOKEN_TTL
 
     try:
         db.flush()
-        send_forgot_password_email(email, temp_pw)
+        send_forgot_password_email(email, _reset_link(token))
         db.commit()
     except Exception as exc:
         db.rollback()
@@ -342,10 +359,44 @@ def forgot_password(
             detail="No se pudo enviar el correo. Inténtalo más tarde o contacta al administrador.",
         ) from exc
 
-    # No llamamos a reset_login_rate: cada solicitud cuenta para el limite,
-    # igual que intentos fallidos de login (anti-abuso del correo).
-
     return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)
+
+
+@router.post("/reset-password", response_model=ResetPasswordResponse)
+def reset_password(
+    payload: ResetPasswordRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> ResetPasswordResponse:
+    """Cambia la contraseña con el enlace de un solo uso y lo invalida."""
+    check_login_rate(request, db)
+    token = payload.token.strip()
+    digest = hash_reset_token(token)
+    user = db.scalar(select(User).where(User.password_reset_hash == digest))
+    if user is None or not user.password_reset_hash or not reset_tokens_match(
+        token, user.password_reset_hash
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=_RESET_PASSWORD_INVALID,
+        )
+    expires = user.password_reset_expires_at
+    if expires is None or _as_utc(expires) < datetime.now(timezone.utc):
+        user.password_reset_hash = None
+        user.password_reset_expires_at = None
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=_RESET_PASSWORD_INVALID,
+        )
+
+    user.password_hash = hash_password(payload.new_password)
+    user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
+    user.password_reset_hash = None
+    user.password_reset_expires_at = None
+    user.must_change_password = False
+    db.commit()
+    return ResetPasswordResponse(detail=_RESET_PASSWORD_OK)
 
 
 @router.get("/me", response_model=UserPublic)
@@ -376,9 +427,9 @@ def change_password(
 ) -> UserPublic:
     """Cambia la contraseña.
 
-    Si venías de una contraseña temporal (recuperación por correo), se
-    emite una cookie nueva y sigues dentro. Si no, se cierra la sesión
-    actual como antes (re-login obligatorio; otras cookies ya eran inválidas).
+    Si venías de una contraseña temporal antigua, se emite una cookie nueva
+    y sigues dentro. Si no, se cierra la sesión actual. Un enlace de
+    recuperación pendiente queda invalidado.
     """
     if not verify_password(payload.current_password, user.password_hash):
         raise HTTPException(
@@ -391,6 +442,8 @@ def change_password(
     # quedar alineado con este timestamp para no invalidar la sesión recién emitida.
     user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
     user.must_change_password = False
+    user.password_reset_hash = None
+    user.password_reset_expires_at = None
     db.commit()
     db.refresh(user)
     if forced:
