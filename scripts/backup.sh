@@ -5,9 +5,21 @@
 #   scripts/backup.sh                    # vuelca a ./backups/
 #   BACKUP_DIR=/var/backups scripts/backup.sh
 #   KEEP_DAYS=14 scripts/backup.sh
+#   scripts/backup.sh check backups/gastodehoy-YYYYMMDDTHHMMSSZ.db.gz
 #
-# Cron diario a las 3:30:
-#   30 3 * * * cd /opt/gastodehoy && ./scripts/backup.sh >> /var/log/gastodehoy-backup.log 2>&1
+# BACKUP_DIR se puede sobreescribir para que el .gz viva fuera del
+# directorio de la app. El servidor tiene un solo disco: no hay segundo
+# montaje ni bucket remoto. El valor por defecto sigue siendo ./backups/.
+#
+# Cron diario a las 3:30 (producción; esta es la línea a instalar):
+#   30 3 * * * cd /root/gastodehoy && ./scripts/backup.sh >> /var/log/gastodehoy-backup.log 2>&1
+# Staging, solo como comentario (no es la línea por defecto):
+#   # cd /root/gastodehoy-dev && ./scripts/backup.sh >> /var/log/gastodehoy-backup.log 2>&1
+#
+# `check` descomprime un gastodehoy-*.db.gz a un temporal, lo abre con
+# sqlite3, ejecuta PRAGMA integrity_check y borra el temporal. Sale con
+# código distinto de 0 si el resultado no es exactamente ok. No sustituye
+# la base en vivo (data/gastodehoy.db).
 #
 # Detalles:
 # - Usa la API "online backup" de SQLite (vía app.cli.backup) dentro del
@@ -17,6 +29,21 @@
 #   volumen.
 
 set -euo pipefail
+
+# Comprueba un dump ya escrito. No llama a Docker y no escribe la BBDD viva.
+if [ "${1:-}" = "check" ]; then
+  if [ "$#" -ne 2 ]; then
+    echo "usage: scripts/backup.sh check <gastodehoy-*.db.gz>" >&2
+    exit 2
+  fi
+  root="$(cd "$(dirname "$0")/.." && pwd)"
+  case "$2" in
+    /*) archive="$2" ;;
+    *) archive="$(pwd)/$2" ;;
+  esac
+  cd "$root"
+  exec python3 -m app.cli.check_backup "$archive"
+fi
 
 cd "$(dirname "$0")/.."
 
