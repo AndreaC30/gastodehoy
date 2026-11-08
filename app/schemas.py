@@ -143,10 +143,10 @@ SavingsMode = Literal["percent", "fixed"]
 class BudgetSettings(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    monthly_income: Decimal = Field(ge=0, decimal_places=2)
+    monthly_income: Decimal = Field(ge=0, max_digits=14, decimal_places=2)
     savings_mode: SavingsMode = "percent"
     savings_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100, decimal_places=2)
-    savings_amount: Decimal = Field(default=Decimal("0"), ge=0, decimal_places=2)
+    savings_amount: Decimal = Field(default=Decimal("0"), ge=0, max_digits=14, decimal_places=2)
     dashboard_tour_completed: bool = False
     income_check_month: str | None = Field(
         default=None,
@@ -158,7 +158,7 @@ class BudgetSettings(BaseModel):
 
 class FixedExpenseCreate(BaseModel):
     name: str = Field(min_length=1, max_length=255)
-    amount: Decimal = Field(ge=0, decimal_places=2)
+    amount: Decimal = Field(ge=0, max_digits=14, decimal_places=2)
     icon: str | None = Field(default=None, max_length=40)
 
     @field_validator("name")
@@ -172,7 +172,7 @@ class FixedExpenseCreate(BaseModel):
 
 class FixedExpenseUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
-    amount: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    amount: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2)
     icon: str | None = Field(default=None, max_length=40)
 
     @field_validator("name")
@@ -196,14 +196,14 @@ class FixedExpenseRead(BaseModel):
 
 
 class VariableExpenseCreate(BaseModel):
-    amount: Decimal = Field(gt=0, decimal_places=2)
+    amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
     occurred_at: date | None = None
     note: str | None = Field(default=None, max_length=2000)
     category_id: int | None = None
 
 
 class VariableExpenseUpdate(BaseModel):
-    amount: Decimal | None = Field(default=None, gt=0, decimal_places=2)
+    amount: Decimal | None = Field(default=None, gt=0, max_digits=14, decimal_places=2)
     occurred_at: date | None = None
     note: str | None = Field(default=None, max_length=2000)
     category_id: int | None = None
@@ -231,11 +231,11 @@ class VariableExpenseRead(BaseModel):
 
 
 class ExtraIncomeCreate(BaseModel):
-    amount: Decimal = Field(gt=0, decimal_places=2)
+    amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
     received_at: date | None = None
     savings_mode: str = Field(default="none", pattern=r"^(none|all|percent|fixed)$")
     savings_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    savings_fixed: Decimal = Field(default=Decimal("0"), ge=0)
+    savings_fixed: Decimal = Field(default=Decimal("0"), ge=0, max_digits=14, decimal_places=2)
 
     @model_validator(mode="after")
     def validate_savings(self) -> "ExtraIncomeCreate":
@@ -267,7 +267,7 @@ class CategoryCreate(BaseModel):
         pattern=r"^#[0-9a-fA-F]{6}$",
     )
     icon: str | None = Field(default=None, max_length=40)
-    monthly_budget: Decimal | None = Field(default=None, ge=0)
+    monthly_budget: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2)
 
     @field_validator("name")
     @classmethod
@@ -285,7 +285,7 @@ class CategoryUpdate(BaseModel):
         pattern=r"^#[0-9a-fA-F]{6}$",
     )
     icon: str | None = Field(default=None, max_length=40)
-    monthly_budget: Decimal | None = Field(default=None, ge=0)
+    monthly_budget: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2)
 
     @field_validator("name")
     @classmethod
@@ -384,8 +384,8 @@ class PushSubscribeCreate(BaseModel):
 
 class SavingsGoalCreate(BaseModel):
     name: str = Field(min_length=1, max_length=80)
-    target_amount: Decimal = Field(gt=0, decimal_places=2)
-    current_amount: Decimal = Field(default=Decimal("0"), ge=0, decimal_places=2)
+    target_amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
+    current_amount: Decimal = Field(default=Decimal("0"), ge=0, max_digits=14, decimal_places=2)
     target_date: date | None = None
 
     @field_validator("name")
@@ -399,8 +399,8 @@ class SavingsGoalCreate(BaseModel):
 
 class SavingsGoalUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=80)
-    target_amount: Decimal | None = Field(default=None, gt=0, decimal_places=2)
-    current_amount: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    target_amount: Decimal | None = Field(default=None, gt=0, max_digits=14, decimal_places=2)
+    current_amount: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2)
     target_date: date | None = None
 
     @field_validator("name")
