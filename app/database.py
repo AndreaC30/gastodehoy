@@ -270,6 +270,10 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                     "INTEGER REFERENCES expense_categories(id) ON DELETE SET NULL"
                 )
             )
+        if "created_at" not in ve_colnames:
+            conn.execute(
+                text("ALTER TABLE variable_expenses ADD COLUMN created_at DATETIME")
+            )
         conn.execute(
             text(
                 "CREATE INDEX IF NOT EXISTS idx_variable_expenses_category "

@@ -509,9 +509,9 @@
   "legal": {
     "title": "Legal notice and terms of use",
     "lastUpdatedLabel": "Last updated:",
-    "lastUpdatedDate": "23 October 2026",
+    "lastUpdatedDate": "8 November 2026",
     "versionLabel": "Version:",
-    "versionValue": "2026-10-23.2",
+    "versionValue": "2026-11-08.1",
     "sections": [
       {
         "title": "1. Provider",
@@ -589,9 +589,9 @@
   "privacy": {
     "title": "Privacy policy",
     "lastUpdatedLabel": "Last updated:",
-    "lastUpdatedDate": "23 October 2026",
+    "lastUpdatedDate": "8 November 2026",
     "versionLabel": "Version:",
-    "versionValue": "2026-10-23.2",
+    "versionValue": "2026-11-08.1",
     "sections": [
       {
         "title": "1. Controller",
@@ -614,7 +614,7 @@
       {
         "title": "3. Purposes and legal basis",
         "paragraphs": [
-          "To provide the budget and to send the welcome email or a temporary password: performance of the contract, GDPR Article 6(1)(b).",
+          "To provide the budget and to send the welcome email or a one-time link, valid for one hour, to choose a new password: performance of the contract, GDPR Article 6(1)(b).",
           "To limit sign-in attempts and keep technical security logs: legitimate interest, Article 6(1)(f). You can object.",
           "Push notifications: consent. You withdraw it by turning the notice off in the account or in the system.",
           "When someone registers, the operator receives an internal notice with name, email and date, to run the service. Basis: legitimate interest.",
@@ -625,8 +625,9 @@
         "title": "4. Recipients and transfers",
         "paragraphs": [
           "We do not sell data. The host stores the database for the controller.",
+          "An internal automation (n8n), acting for the controller, can receive each account's email and usage figures to administer the service: counts of accounts, of accounts with expenses, with a monthly income set and with the tour finished, of variable and fixed expenses, and of accounts active over 7 and 30 days; and, for each account, the email, the number of variable expenses and the distinct days with an expense in the last 30 days. This is not a sale of data.",
           "The mailbox gastodehoy@gmail.com is on Google. Google LLC is listed as active under the EU-US Data Privacy Framework (check dataprivacyframework.gov). That is the transfer tool when you write to that address or when signup creates the internal notice.",
-          "The welcome email and the temporary password go through the controller's SMTP server, acting as a processor and only for those messages.",
+          "The welcome email and the one-time link to reset the password go through the controller's SMTP server, acting as a processor and only for those messages.",
           "If you enable push, the notice goes through your browser's service (Google, Mozilla or Apple). A transfer outside the EEA may rely on an adequacy decision or on that provider's clauses.",
           "Interface fonts are served from this site. They are not loaded from Google or from any other third party."
         ]
@@ -635,7 +636,7 @@
         "title": "5. Retention",
         "paragraphs": [
           "Account data is kept while the account exists. You can delete it from the account: the account, expenses, goals and push subscriptions are removed.",
-          "The IP of sign-in attempts is kept for the five-minute rate-limit window.",
+          "The IP address and time of sign-in attempts are deleted as soon as they leave the five-minute rate-limit window.",
           "Technical logs are kept as long as needed to detect abuse and are not used for another purpose. If backups exist, they stop including the account when that copy is replaced."
         ]
       },

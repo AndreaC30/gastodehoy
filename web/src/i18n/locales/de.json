@@ -511,9 +511,9 @@
   "legal": {
     "title": "Impressum und Nutzungsbedingungen",
     "lastUpdatedLabel": "Letzte Aktualisierung:",
-    "lastUpdatedDate": "23. Oktober 2026",
+    "lastUpdatedDate": "8. November 2026",
     "versionLabel": "Fassung:",
-    "versionValue": "2026-10-23.2",
+    "versionValue": "2026-11-08.1",
     "sections": [
       {
         "title": "1. Anbieterin",
@@ -591,9 +591,9 @@
   "privacy": {
     "title": "Datenschutzerklärung",
     "lastUpdatedLabel": "Letzte Aktualisierung:",
-    "lastUpdatedDate": "23. Oktober 2026",
+    "lastUpdatedDate": "8. November 2026",
     "versionLabel": "Fassung:",
-    "versionValue": "2026-10-23.2",
+    "versionValue": "2026-11-08.1",
     "sections": [
       {
         "title": "1. Verantwortliche Stelle",
@@ -616,7 +616,7 @@
       {
         "title": "3. Zwecke und Rechtsgrundlagen",
         "paragraphs": [
-          "Bereitstellung des Budgets sowie Willkommensmail oder temporäres Passwort: Vertragserfüllung, Art. 6 Abs. 1 lit. b DSGVO.",
+          "Bereitstellung des Budgets sowie Willkommensmail oder ein einmaliger Link, eine Stunde gültig, um ein neues Passwort zu wählen: Vertragserfüllung, Art. 6 Abs. 1 lit. b DSGVO.",
           "Begrenzung von Anmeldeversuchen und technische Sicherheitsprotokolle: berechtigtes Interesse, Art. 6 Abs. 1 lit. f. Du kannst widersprechen.",
           "Push-Hinweise: Einwilligung. Du widerrufst sie, indem du den Hinweis im Konto oder im System abschaltest.",
           "Bei einer Registrierung erhält die Betreiberin einen internen Hinweis mit Name, E-Mail und Datum, um den Dienst zu führen. Grundlage: berechtigtes Interesse.",
@@ -627,8 +627,9 @@
         "title": "4. Empfänger und Übermittlungen",
         "paragraphs": [
           "Wir verkaufen keine Daten. Das Hosting speichert die Datenbank für die Verantwortliche.",
+          "Eine interne Automatisierung (n8n), die für die Verantwortliche handelt, kann die E-Mail jedes Kontos und Nutzungszahlen erhalten, um den Dienst zu verwalten: Gesamtzahlen der Konten, der Konten mit Ausgaben, mit angegebenem Monatseinkommen und mit abgeschlossener Einführung, der variablen und festen Ausgaben sowie der aktiven Konten in 7 und 30 Tagen; und je Konto die E-Mail, die Anzahl der variablen Ausgaben und die verschiedenen Tage mit einer Ausgabe in den letzten 30 Tagen. Das ist kein Verkauf von Daten.",
           "Das Postfach gastodehoy@gmail.com liegt bei Google. Google LLC ist im EU-US Data Privacy Framework als aktiv geführt (Prüfung auf dataprivacyframework.gov). Das ist das Mittel der Übermittlung, wenn du an diese Adresse schreibst oder die Registrierung den internen Hinweis auslöst.",
-          "Willkommensmail und temporäres Passwort laufen über den SMTP-Server der Verantwortlichen, der nur für diese Nachrichten als Auftragsverarbeiter tätig wird.",
+          "Willkommensmail und der einmalige Link zum Zurücksetzen des Passworts laufen über den SMTP-Server der Verantwortlichen, der nur für diese Nachrichten als Auftragsverarbeiter tätig wird.",
           "Wenn du Push aktivierst, läuft der Hinweis über den Dienst deines Browsers (Google, Mozilla oder Apple). Eine Übermittlung außerhalb des EWR kann auf einem Angemessenheitsbeschluss oder den Klauseln dieses Anbieters beruhen.",
           "Die Schriftarten der Oberfläche kommen von dieser Website. Sie werden nicht von Google oder einem anderen Dritten geladen."
         ]
@@ -637,7 +638,7 @@
         "title": "5. Speicherdauer",
         "paragraphs": [
           "Kontodaten bleiben, solange das Konto besteht. Du kannst es im Konto löschen: Konto, Ausgaben, Ziele und Push-Abonnements werden entfernt.",
-          "Die IP von Anmeldeversuchen bleibt im Fünf-Minuten-Fenster der Versuchsbeschränkung.",
+          "IP-Adresse und Zeitpunkt der Anmeldeversuche werden gelöscht, sobald sie das Fünf-Minuten-Fenster der Versuchsbeschränkung verlassen.",
           "Technische Protokolle bleiben so lange, wie es zur Erkennung von Missbrauch nötig ist, und werden nicht anders verwendet. Falls Sicherungskopien bestehen, enthalten sie das Konto nicht mehr, sobald diese Kopie ersetzt wird."
         ]
       },

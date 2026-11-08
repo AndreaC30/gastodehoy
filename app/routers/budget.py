@@ -5,11 +5,12 @@ auth dependency, so they live in a single module to keep the surface
 small and make endpoints easy to find.
 """
 
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal
 from typing import TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
@@ -42,6 +43,9 @@ fixed_router = APIRouter(prefix="/api/fixed-expenses", tags=["fixed-expenses"])
 expenses_router = APIRouter(prefix="/api/expenses", tags=["expenses"])
 extra_income_router = APIRouter(prefix="/api/extra-income", tags=["extra-income"])
 
+# A second identical variable expense inside this window is the same tap or retry.
+EXPENSE_DUPLICATE_WINDOW = timedelta(seconds=8)
+
 _Owned = TypeVar("_Owned")
 
 
@@ -63,6 +67,52 @@ def _calendar_month_bounds(year: int | None, month: int | None) -> tuple[date, d
     y = year if year is not None else ref.year
     m = month if month is not None else ref.month
     return month_bounds(date(y, m, 1))
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _note_is_blank(note: str | None) -> bool:
+    """Same empty treatment as ``VariableExpenseUpdate``: null and whitespace are absent."""
+    return note is None or note.strip() == ""
+
+
+def _find_recent_variable_expense(
+    db: Session,
+    user_id: int,
+    *,
+    amount: Decimal,
+    occurred_at: date,
+    note: str | None,
+    category_id: int | None,
+    now: datetime,
+) -> VariableExpense | None:
+    """Return a matching variable expense created inside the duplicate window."""
+    cutoff = now - EXPENSE_DUPLICATE_WINDOW
+    filters = [
+        VariableExpense.user_id == user_id,
+        VariableExpense.amount == amount,
+        VariableExpense.occurred_at == occurred_at,
+        VariableExpense.category_id == category_id,
+        VariableExpense.created_at >= cutoff,
+    ]
+    if _note_is_blank(note):
+        filters.append(
+            or_(
+                VariableExpense.note.is_(None),
+                func.trim(VariableExpense.note) == "",
+            )
+        )
+    else:
+        filters.append(VariableExpense.note == note)
+    stmt = (
+        select(VariableExpense)
+        .where(*filters)
+        .order_by(VariableExpense.created_at.desc(), VariableExpense.id.desc())
+        .limit(1)
+    )
+    return db.scalar(stmt)
 
 
 # --- Settings ----------------------------------------------------------------
@@ -328,12 +378,25 @@ def create_expense(
                 detail="Categoría inválida o no pertenece a tu cuenta",
             )
     day = payload.occurred_at or today_in_app_timezone()
+    now = _utcnow()
+    existing = _find_recent_variable_expense(
+        db,
+        user.id,
+        amount=payload.amount,
+        occurred_at=day,
+        note=payload.note,
+        category_id=payload.category_id,
+        now=now,
+    )
+    if existing is not None:
+        return existing
     row = VariableExpense(
         user_id=user.id,
         amount=payload.amount,
         occurred_at=day,
         note=payload.note,
         category_id=payload.category_id,
+        created_at=now,
     )
     db.add(row)
     db.commit()

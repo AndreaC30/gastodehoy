@@ -202,9 +202,13 @@ function Authed({ userName }: { userName: string }) {
     auth.user && auth.user.terms_version !== LEGAL_TERMS_VERSION,
   );
   const settingsReady = mustChange || termsPending || !settingsQ.isPending;
-  const holdAuthedSplash = useBootSplashGate(
-    !mustChange && !termsPending && settingsReady,
-  );
+  // The terms gate and the forced password change are the screen, so the
+  // HTML splash has to leave. Showing either one underneath it blocks clicks.
+  const holdAuthedSplash = useBootSplashGate(settingsReady);
+
+  if (!settingsReady || holdAuthedSplash) {
+    return <LoadingSplash />;
+  }
 
   if (mustChange && auth.user) {
     return (
@@ -222,10 +226,6 @@ function Authed({ userName }: { userName: string }) {
         <TermsAcceptanceGate onDone={setAuthUser} />
       </div>
     );
-  }
-
-  if (settingsQ.isPending || holdAuthedSplash) {
-    return <LoadingSplash />;
   }
 
   const needsOnboarding =
