@@ -185,6 +185,11 @@ class VariableExpense(Base):
     amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
     occurred_at: Mapped[date] = mapped_column(Date, nullable=False)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Set on insert. NULL on rows created before this column existed, so they
+    # never match the short duplicate window.
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     user: Mapped[User] = relationship(back_populates="variable_expenses")
     category: Mapped["ExpenseCategory | None"] = relationship(
