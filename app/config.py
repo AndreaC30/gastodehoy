@@ -60,9 +60,23 @@ class Settings(BaseSettings):
         default=False,
         validation_alias=AliasChoices("TRUST_FORWARDED_FOR"),
         description=(
-            "True solo detrás de un proxy que inyecta X-Forwarded-For de forma fiable. "
-            "En false se usa la IP del socket (recomendado en dev / sin proxy)."
+            "True solo detrás de un proxy que añade la IP real al final de "
+            "X-Forwarded-For (nginx $proxy_add_x_forwarded_for). "
+            "La app usa esa última IP. En false se usa la IP del socket."
         ),
+    )
+    public_base_url: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("PUBLIC_BASE_URL"),
+        description=(
+            "Origen público para enlaces de correo (https://gastodehoy.es). "
+            "Si falta, se deduce de COOKIE_DOMAIN."
+        ),
+    )
+    admin_notify_email: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("ADMIN_NOTIFY_EMAIL"),
+        description="Destino de avisos de alta y del puente /api/admin/send-notification.",
     )
     smtp_host: str | None = Field(
         default=None,
@@ -121,6 +135,17 @@ class Settings(BaseSettings):
             "Obligatoria en ENV=production."
         ),
     )
+
+    def site_base_url(self) -> str:
+        """Absolute origin for links in email, without a trailing slash."""
+        explicit = (self.public_base_url or "").strip().rstrip("/")
+        if explicit:
+            return explicit
+        domain = (self.cookie_domain or "").strip()
+        if not domain:
+            return ""
+        scheme = "https" if self.cookie_secure else "http"
+        return f"{scheme}://{domain}"
 
     def web_push_enabled(self) -> bool:
         """True when both VAPID keys are set."""

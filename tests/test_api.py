@@ -107,22 +107,28 @@ def test_forgot_password_without_smtp_returns_503(anon_client, monkeypatch) -> N
     assert r.status_code == 503
 
 
-def test_forgot_password_sends_mail_and_sets_temp_password(
-    anon_client, monkeypatch
-) -> None:
+def _enable_reset_mail(monkeypatch) -> list[tuple[str, str]]:
     sent: list[tuple[str, str]] = []
 
-    def fake_send(to_email: str, temporary_password: str) -> None:
-        sent.append((to_email, temporary_password))
+    def fake_send(to_email: str, reset_url: str) -> None:
+        sent.append((to_email, reset_url))
 
-    monkeypatch.setattr(
-        "app.routers.auth.send_forgot_password_email", fake_send
-    )
+    monkeypatch.setattr("app.routers.auth.send_forgot_password_email", fake_send)
+    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
+    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+    monkeypatch.setattr(app_settings, "public_base_url", "https://gastodehoy.test")
+    return sent
+
+
+def test_forgot_password_sends_link_without_changing_password(
+    anon_client, monkeypatch
+) -> None:
+    from urllib.parse import parse_qs, urlparse
+
+    sent = _enable_reset_mail(monkeypatch)
     monkeypatch.setattr(
         "app.routers.auth.send_welcome_email", lambda *_a, **_k: None
     )
-    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
-    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
 
     anon_client.post(
         "/api/auth/register",
@@ -132,49 +138,48 @@ def test_forgot_password_sends_mail_and_sets_temp_password(
 
     r = anon_client.post("/api/auth/forgot-password", json={"email": "fp@e.com"})
     assert r.status_code == 200
-    detail = r.json()["detail"]
-    assert "correo" in detail.lower()
-
+    assert "enlace" in r.json()["detail"].lower()
     assert len(sent) == 1
     assert sent[0][0] == "fp@e.com"
-    temp_pw = sent[0][1]
 
-    ok = anon_client.post(
+    # La contraseña vieja sigue valiendo: el enlace aún no se ha usado.
+    still = anon_client.post(
         "/api/auth/login",
-        json={"email": "fp@e.com", "password": temp_pw},
+        json={"email": "fp@e.com", "password": "supersecret1"},
     )
-    assert ok.status_code == 200
-    me = anon_client.get("/api/auth/me")
-    assert me.status_code == 200
-    assert me.json()["must_change_password"] is True
-
-    changed = anon_client.put(
-        "/api/auth/me/password",
-        json={
-            "current_password": temp_pw,
-            "new_password": "myownsecret2",
-        },
-    )
-    assert changed.status_code == 200
-    assert changed.json()["must_change_password"] is False
-    still = anon_client.get("/api/auth/me")
     assert still.status_code == 200
     assert still.json()["must_change_password"] is False
+    anon_client.post("/api/auth/logout")
+
+    token = parse_qs(urlparse(sent[0][1]).query)["token"][0]
+    reset = anon_client.post(
+        "/api/auth/reset-password",
+        json={"token": token, "new_password": "myownsecret2"},
+    )
+    assert reset.status_code == 200
+
+    old = anon_client.post(
+        "/api/auth/login",
+        json={"email": "fp@e.com", "password": "supersecret1"},
+    )
+    assert old.status_code == 401
+    new = anon_client.post(
+        "/api/auth/login",
+        json={"email": "fp@e.com", "password": "myownsecret2"},
+    )
+    assert new.status_code == 200
+
+    reused = anon_client.post(
+        "/api/auth/reset-password",
+        json={"token": token, "new_password": "anothersecret3"},
+    )
+    assert reused.status_code == 400
 
 
 def test_forgot_password_unknown_email_same_response(anon_client, monkeypatch) -> None:
     """Does not send mail or reveal existence; still returns the generic message."""
 
-    sent: list[str] = []
-
-    def fake_send(to_email: str, temporary_password: str) -> None:
-        sent.append(to_email)
-
-    monkeypatch.setattr(
-        "app.routers.auth.send_forgot_password_email", fake_send
-    )
-    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
-    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+    sent = _enable_reset_mail(monkeypatch)
 
     r = anon_client.post(
         "/api/auth/forgot-password", json={"email": "ghost@e.com"}
@@ -186,12 +191,7 @@ def test_forgot_password_unknown_email_same_response(anon_client, monkeypatch) -
 
 def test_forgot_password_rate_limited(anon_client, monkeypatch) -> None:
     monkeypatch.setattr(app_settings, "environment", "production")
-    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
-    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
-    monkeypatch.setattr(
-        "app.routers.auth.send_forgot_password_email",
-        lambda *_a, **_k: None,
-    )
+    _enable_reset_mail(monkeypatch)
 
     anon_client.post(
         "/api/auth/register",
@@ -602,8 +602,7 @@ def test_forgot_password_invalid_email_format(anon_client, monkeypatch) -> None:
 
 def test_forgot_password_domain_without_mx_returns_generic(anon_client, monkeypatch) -> None:
     """Forgot-password for domain without MX returns same generic message."""
-    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
-    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+    _enable_reset_mail(monkeypatch)
     # Bypass the auto-use fixture to test real MX check
     monkeypatch.setattr("app.routers.auth._domain_has_mx", lambda _domain: False)
 
@@ -619,12 +618,7 @@ def test_forgot_password_no_enumeration_by_timing(anon_client, monkeypatch) -> N
 
     Both return 200 with the same generic message — no information leak.
     """
-    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
-    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
-    monkeypatch.setattr(
-        "app.routers.auth.send_forgot_password_email",
-        lambda *_a, **_k: None,
-    )
+    _enable_reset_mail(monkeypatch)
 
     anon_client.post(
         "/api/auth/register",
@@ -641,3 +635,98 @@ def test_forgot_password_no_enumeration_by_timing(anon_client, monkeypatch) -> N
 
     assert r_existing.status_code == r_unknown.status_code == 200
     assert r_existing.json()["detail"] == r_unknown.json()["detail"]
+
+
+def test_register_password_over_bcrypt_bytes_is_422(anon_client) -> None:
+    """40 ñ son 40 caracteres y 80 bytes: tiene que ser 422, no 500."""
+    r = anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-10-23.2",
+            "email": "bytes@e.com",
+            "name": "Bytes",
+            "password": "ñ" * 40,
+        },
+    )
+    assert r.status_code == 422
+
+
+def test_register_rate_limited(anon_client, monkeypatch) -> None:
+    monkeypatch.setattr(app_settings, "environment", "production")
+    monkeypatch.setattr(
+        "app.routers.auth.send_welcome_email", lambda *_a, **_k: None
+    )
+    for i in range(5):
+        ok = anon_client.post(
+            "/api/auth/register",
+            json={
+                "accepts_terms": True,
+                "confirms_minimum_age": True,
+                "terms_version": "2026-10-23.2",
+                "email": f"mass{i}@e.com",
+                "name": "Mass",
+                "password": "supersecret1",
+            },
+        )
+        assert ok.status_code == 201
+        anon_client.post("/api/auth/logout")
+    blocked = anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-10-23.2",
+            "email": "mass9@e.com",
+            "name": "Mass",
+            "password": "supersecret1",
+        },
+    )
+    assert blocked.status_code == 429
+
+
+def test_reset_password_expired_token_keeps_old_password(anon_client) -> None:
+    from datetime import datetime, timedelta, timezone
+
+    from app.auth import hash_reset_token
+    from app.database import SessionLocal
+    from app.models import User
+
+    anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-10-23.2",
+            "email": "expired@e.com",
+            "name": "Ex",
+            "password": "supersecret1",
+        },
+    )
+    anon_client.post("/api/auth/logout")
+    token = "expired-token-value-0123456789"
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.email == "expired@e.com").one()
+        user.password_reset_hash = hash_reset_token(token)
+        user.password_reset_expires_at = datetime.now(timezone.utc) - timedelta(minutes=5)
+        db.commit()
+
+    r = anon_client.post(
+        "/api/auth/reset-password",
+        json={"token": token, "new_password": "newsecret1"},
+    )
+    assert r.status_code == 400
+    login = anon_client.post(
+        "/api/auth/login",
+        json={"email": "expired@e.com", "password": "supersecret1"},
+    )
+    assert login.status_code == 200
+
+
+def test_login_unknown_email_is_401(anon_client) -> None:
+    r = anon_client.post(
+        "/api/auth/login",
+        json={"email": "nobody@e.com", "password": "supersecret1"},
+    )
+    assert r.status_code == 401

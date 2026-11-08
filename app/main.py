@@ -123,6 +123,11 @@ async def lifespan(_: FastAPI):
                 "ENV=production pero COOKIE_SECURE=false: la cookie de sesión puede enviarse sin "
                 "marcar Secure; usa HTTPS y COOKIE_SECURE=true cuando publiques."
             )
+    else:
+        _log.warning(
+            "ENV=development: el rate limit de login, registro y recuperación está desactivado. "
+            "En un servidor público usa ENV=production."
+        )
 
     Base.metadata.create_all(bind=db.engine)
     db.apply_sqlite_migrations(db.engine)
@@ -367,6 +372,12 @@ def pwa_workbox_bundle(asset_hash: str) -> FileResponse | JSONResponse:
         f"workbox-{asset_hash}.js",
         "application/javascript; charset=utf-8",
     )
+
+
+@app.get("/reset-password", response_model=None)
+def spa_reset_password() -> FileResponse | JSONResponse:
+    """Same SPA shell so the one-time reset link loads the form."""
+    return spa_index()
 
 
 @app.get("/", response_model=None)

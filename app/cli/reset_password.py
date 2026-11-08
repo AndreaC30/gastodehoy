@@ -26,6 +26,7 @@ from app.auth import (
     generate_recovery_code,
     hash_password,
     hash_recovery_code,
+    password_exceeds_bcrypt,
 )
 from app.database import SessionLocal
 from app.models import User
@@ -39,6 +40,8 @@ def _read_password() -> str:
             f"La contraseña debe tener entre {PASSWORD_MIN_LEN} y "
             f"{PASSWORD_MAX_LEN} caracteres."
         )
+    if password_exceeds_bcrypt(pw1):
+        sys.exit("La contraseña es demasiado larga para guardarla de forma segura.")
     pw2 = getpass.getpass("Repite la contraseña: ")
     if pw1 != pw2:
         sys.exit("Las contraseñas no coinciden.")
@@ -67,6 +70,8 @@ def main() -> None:
         user.password_changed_at = datetime.now(timezone.utc).replace(microsecond=0)
         user.recovery_hash = hash_recovery_code(new_code)
         user.must_change_password = False
+        user.password_reset_hash = None
+        user.password_reset_expires_at = None
         db.commit()
 
     print()

@@ -244,10 +244,15 @@ def send_notification(
 ):
     """Bridge para que n8n envíe correos usando el SMTP de GastoDeHoy.
 
-    Envía un email a gastodehoy@gmail.com (el admin). Úsalo desde n8n
+    Envía un email a ADMIN_NOTIFY_EMAIL. Úsalo desde n8n
     con un nodo HTTP Request apuntando a este endpoint.
     """
-    admin_email = "gastodehoy@gmail.com"
+    admin_email = (settings.admin_notify_email or "").strip()
+    if not admin_email:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="ADMIN_NOTIFY_EMAIL no está configurado",
+        )
     try:
         send_email(admin_email, payload.subject, payload.body)
         _log.info("admin notification sent: %s", payload.subject)

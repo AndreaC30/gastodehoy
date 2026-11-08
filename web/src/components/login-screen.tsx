@@ -1,7 +1,7 @@
 /**
  * Login / register / forgot-password screen.
  *
- * La recuperación envía una contraseña temporal por correo (requiere SMTP en el servidor).
+ * La recuperación envía un enlace de un solo uso (requiere SMTP en el servidor).
  */
 import { useTranslation } from "react-i18next";
 import { type FormEvent, useId, useState } from "react";
@@ -249,6 +249,10 @@ function RegisterForm({
     onError(null);
     if (password.length < 8) {
       onError(t("login.passwordMinError"));
+      return;
+    }
+    if (new TextEncoder().encode(password).length > 72) {
+      onError(t("login.passwordTooLong"));
       return;
     }
     if (password !== password2) {

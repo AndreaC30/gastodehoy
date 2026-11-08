@@ -143,17 +143,18 @@ def send_weekly_digest_email(to_email: str, name: str, digest: dict) -> None:
             smtp.send_message(msg)
 
 
-def send_forgot_password_email(to_email: str, temporary_password: str) -> None:
-    """Envía por correo una contraseña nueva generada en el servidor.
+def send_forgot_password_email(to_email: str, reset_url: str) -> None:
+    """Envía el enlace de un solo uso para elegir una contraseña nueva.
 
     Requiere ``SMTP_HOST`` y remitente válidos en ``settings``.
+    La contraseña actual no cambia hasta que se abra el enlace.
     """
-    subject = "GastoDeHoy — contraseña temporal"
+    subject = "GastoDeHoy — enlace para cambiar la contraseña"
     body = (
         "Has solicitado recuperar el acceso a GastoDeHoy.\n\n"
-        f"Tu contraseña temporal es: {temporary_password}\n\n"
-        "Entra en la aplicación con este correo y esa contraseña; "
-        "la pantalla te pedirá elegir una contraseña nueva en cuanto entres.\n\n"
+        "El enlace caduca en 1 hora y solo se puede usar una vez. "
+        "Tu contraseña actual sigue valiendo hasta que elijas una nueva:\n\n"
+        f"{reset_url}\n\n"
         "Si no has sido tú, ignora este mensaje.\n"
     )
     send_email(to_email, subject, body)

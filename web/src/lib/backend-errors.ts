@@ -11,6 +11,9 @@ export const BACKEND_ERROR_MAP: Record<string, string> = {
   "Contraseña incorrecta": "errors.passwordIncorrect",
   "Debes aceptar las condiciones vigentes y confirmar que tienes al menos 14 años":
     "errors.termsNotAccepted",
+  "La contraseña es demasiado larga para guardarla de forma segura":
+    "errors.passwordTooLong",
+  "El enlace no es válido o ha caducado.": "errors.resetLinkInvalid",
 };
 
 /**

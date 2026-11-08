@@ -24,6 +24,7 @@ from app.auth import (
     NAME_MIN_LEN,
     PASSWORD_MAX_LEN,
     PASSWORD_MIN_LEN,
+    password_exceeds_bcrypt,
 )
 
 
@@ -31,6 +32,11 @@ def _validate_password(value: str) -> str:
     if not (PASSWORD_MIN_LEN <= len(value) <= PASSWORD_MAX_LEN):
         raise ValueError(
             f"La contraseña debe tener entre {PASSWORD_MIN_LEN} y {PASSWORD_MAX_LEN} caracteres"
+        )
+    # 64 caracteres no-ASCII pueden superar los 72 bytes de bcrypt y acabar en 500.
+    if password_exceeds_bcrypt(value):
+        raise ValueError(
+            "La contraseña es demasiado larga para guardarla de forma segura"
         )
     return value
 
@@ -106,6 +112,15 @@ class ForgotPasswordRequest(BaseModel):
 class ForgotPasswordResponse(BaseModel):
     """Mismo texto si el correo existe o no (anti-enumeración)."""
 
+    detail: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=20, max_length=256)
+    new_password: PasswordStr
+
+
+class ResetPasswordResponse(BaseModel):
     detail: str
 
 

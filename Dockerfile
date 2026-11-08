@@ -1,6 +1,5 @@
 # ---- Frontend (Vite + React + Tailwind)
 FROM node:22-bookworm-slim AS web-build
-RUN groupadd -r appuser && useradd -r -g appuser appuser
 WORKDIR /web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci
