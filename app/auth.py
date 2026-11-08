@@ -2,7 +2,8 @@
 
 Password hashing (bcrypt), session cookies signed with itsdangerous,
 recovery-code helpers for the admin CLI, ``get_current_user`` dependency,
-and a persistent SQLite-backed IP rate limiter for login and forgot-password.
+and a persistent SQLite-backed rate limiter for login, register,
+forgot-password and reset-password (per IP and per email).
 """
 
 from __future__ import annotations
@@ -284,11 +285,48 @@ def _cleanup_old_attempts_db(db: Session, window_s: int) -> None:
     )
 
 
-def check_login_rate(request: Request, db: Session) -> None:
-    """Throttle login/forgot-password attempts: 5 per IP per 5 minutes -> 429.
+def _normalize_rate_email(email: str | None) -> str | None:
+    """Lowercase and trim. Empty input does not join the email bucket."""
+    if email is None:
+        return None
+    normalized = email.strip().lower()
+    return normalized or None
 
-    Uses SQLite-backed storage so rate limits survive restarts and work
-    across multiple workers.
+
+def _email_hint(email: str) -> str:
+    """Short HMAC so rate-limit logs can be correlated without the raw email."""
+    mac = hmac.new(
+        settings.app_secret.encode("utf-8"),
+        email.encode("utf-8"),
+        hashlib.sha256,
+    )
+    return mac.hexdigest()[:12]
+
+
+def _recent_attempt_count(
+    db: Session,
+    *,
+    cutoff: datetime,
+    ip: str | None = None,
+    email: str | None = None,
+) -> int:
+    stmt = select(func.count(LoginAttempt.id)).where(LoginAttempt.attempted_at >= cutoff)
+    if ip is not None:
+        stmt = stmt.where(LoginAttempt.ip == ip)
+    if email is not None:
+        stmt = stmt.where(LoginAttempt.email == email)
+    return db.scalar(stmt) or 0
+
+
+def check_login_rate(
+    request: Request,
+    db: Session,
+    email: str | None = None,
+) -> None:
+    """Raise 429 when this IP or email already has 5 failures in 5 minutes.
+
+    Does not insert a row. Development skips the limit so the test suite can
+    opt in by setting production.
     """
     if settings.environment == "development":
         # Local and tests. Production compose sets ENV=production; startup
@@ -296,41 +334,56 @@ def check_login_rate(request: Request, db: Session) -> None:
         return
 
     ip = _client_ip(request)
+    normalized = _normalize_rate_email(email)
     now = datetime.now(timezone.utc)
 
     # Periodic cleanup to bound table size
     total = db.scalar(select(func.count(LoginAttempt.id))) or 0
     if total > _LOGIN_MAX_ENTRIES:
         _cleanup_old_attempts_db(db, _LOGIN_WINDOW_S)
+        db.commit()
 
-    # Count attempts in the current window
     cutoff = now - timedelta(seconds=_LOGIN_WINDOW_S)
-    recent_count = db.scalar(
-        select(func.count(LoginAttempt.id)).where(
-            LoginAttempt.ip == ip,
-            LoginAttempt.attempted_at >= cutoff,
-        )
-    ) or 0
+    ip_count = _recent_attempt_count(db, cutoff=cutoff, ip=ip)
+    email_count = 0
+    if normalized is not None:
+        email_count = _recent_attempt_count(db, cutoff=cutoff, email=normalized)
 
-    if recent_count >= _LOGIN_MAX_ATTEMPTS:
+    if ip_count >= _LOGIN_MAX_ATTEMPTS or email_count >= _LOGIN_MAX_ATTEMPTS:
         _log.warning(
-            "rate-limit: IP %s blocked (%d attempts in %ds)",
-            ip, recent_count, _LOGIN_WINDOW_S,
+            "rate-limit: IP %s blocked (%d ip / %d email attempts in %ds, email_hint=%s)",
+            ip,
+            ip_count,
+            email_count,
+            _LOGIN_WINDOW_S,
+            _email_hint(normalized) if normalized is not None else "-",
         )
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Demasiados intentos. Espera unos minutos.",
         )
 
-    # Record this attempt
-    db.add(LoginAttempt(ip=ip, attempted_at=now))
-    db.commit()
 
+def record_login_failure(
+    request: Request,
+    db: Session,
+    email: str | None = None,
+) -> None:
+    """Store one failure for this IP and optional normalized email.
 
-def reset_login_rate(request: Request, db: Session) -> None:
-    """Forget previous failures for this IP after a successful auth."""
-    ip = _client_ip(request)
-    db.query(LoginAttempt).filter(LoginAttempt.ip == ip).delete(
-        synchronize_session=False
+    No-op in development. Does not delete older rows. Login calls this only
+    after a bad password or unknown email. Register, forgot-password and
+    reset-password call it for every request that passed the check, including
+    later successes, so those routes stay capped at 5 per 5 minutes.
+    """
+    if settings.environment == "development":
+        return
+
+    db.add(
+        LoginAttempt(
+            ip=_client_ip(request),
+            email=_normalize_rate_email(email),
+            attempted_at=datetime.now(timezone.utc),
+        )
     )
     db.commit()

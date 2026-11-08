@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 
 from app.auth import (
     check_login_rate,
-    reset_login_rate,
+    record_login_failure,
     _client_ip,
     _LOGIN_WINDOW_S,
     _LOGIN_MAX_ATTEMPTS,
@@ -56,24 +56,22 @@ class TestLoginRateLimit:
         mock_request.headers.get.return_value = None
         
         with patch("app.config.settings.environment", "production"):
-            # 4 intentos deberían pasar
-            for i in range(4):
-                check_login_rate(mock_request, db_session)  # No debe levantar excepción
+            for _ in range(4):
+                record_login_failure(mock_request, db_session, "user@e.com")
+            check_login_rate(mock_request, db_session, "user@e.com")
 
     def test_rate_limit_blocks_after_max(self, db_session):
-        """Bloquea después de 5 intentos en 5 minutos."""
+        """Bloquea cuando ya hay 5 fallos en 5 minutos."""
         mock_request = MagicMock()
         mock_request.client.host = "192.168.1.100"
         mock_request.headers.get.return_value = None
         
         with patch("app.config.settings.environment", "production"):
-            # 5 intentos
-            for i in range(5):
-                check_login_rate(mock_request, db_session)
+            for _ in range(5):
+                record_login_failure(mock_request, db_session, "user@e.com")
             
-            # El 6º debería ser bloqueado
             with pytest.raises(Exception) as exc_info:
-                check_login_rate(mock_request, db_session)
+                check_login_rate(mock_request, db_session, "user@e.com")
             
             assert exc_info.value.status_code == 429
             assert "Demasiados intentos" in str(exc_info.value.detail)
@@ -82,28 +80,28 @@ class TestLoginRateLimit:
         """No aplica rate limiting en desarrollo."""
         mock_request = MagicMock()
         mock_request.client.host = "192.168.1.100"
+        mock_request.headers.get.return_value = None
         
         with patch("app.config.settings.environment", "development"):
-            # 10 intentos deberían pasar en desarrollo
-            for i in range(10):
-                check_login_rate(mock_request, db_session)  # No debe levantar
+            for _ in range(10):
+                record_login_failure(mock_request, db_session, "user@e.com")
+                check_login_rate(mock_request, db_session, "user@e.com")
+            assert db_session.query(LoginAttempt).count() == 0
 
-    def test_rate_limit_resets_after_success(self, db_session):
-        """Reset tras login exitoso."""
+    def test_rate_limit_success_does_not_clear_failures(self, db_session):
+        """Un acierto no borra los fallos ya guardados."""
         mock_request = MagicMock()
         mock_request.client.host = "192.168.1.100"
         mock_request.headers.get.return_value = None
         
         with patch("app.config.settings.environment", "production"):
-            # 5 intentos
-            for i in range(5):
-                check_login_rate(mock_request, db_session)
-            
-            # Reset tras éxito
-            reset_login_rate(mock_request, db_session)
-            
-            # Ahora debería permitir de nuevo
-            check_login_rate(mock_request, db_session)  # No debe levantar
+            for _ in range(5):
+                record_login_failure(mock_request, db_session, "victim@e.com")
+            assert db_session.query(LoginAttempt).count() == 5
+            with pytest.raises(Exception) as exc_info:
+                check_login_rate(mock_request, db_session, "victim@e.com")
+            assert exc_info.value.status_code == 429
+            assert db_session.query(LoginAttempt).count() == 5
 
     def test_rate_limit_per_ip(self, db_session):
         """Rate limiting es por IP, no global."""
@@ -116,17 +114,34 @@ class TestLoginRateLimit:
         mock_request_ip2.headers.get.return_value = None
         
         with patch("app.config.settings.environment", "production"):
-            # IP1 hace 5 intentos
-            for i in range(5):
-                check_login_rate(mock_request_ip1, db_session)
+            for _ in range(5):
+                record_login_failure(mock_request_ip1, db_session)
             
-            # IP1 debería estar bloqueada
             with pytest.raises(Exception) as exc_info:
                 check_login_rate(mock_request_ip1, db_session)
             assert exc_info.value.status_code == 429
             
-            # IP2 debería estar libre
-            check_login_rate(mock_request_ip2, db_session)  # No debe levantar
+            check_login_rate(mock_request_ip2, db_session)
+
+    def test_rate_limit_per_email(self, db_session):
+        """El mismo email se bloquea en otra IP; otro email no hereda esos fallos."""
+        mock_request_ip1 = MagicMock()
+        mock_request_ip1.client.host = "192.168.1.100"
+        mock_request_ip1.headers.get.return_value = None
+
+        mock_request_ip2 = MagicMock()
+        mock_request_ip2.client.host = "192.168.1.101"
+        mock_request_ip2.headers.get.return_value = None
+
+        with patch("app.config.settings.environment", "production"):
+            for _ in range(5):
+                record_login_failure(mock_request_ip1, db_session, "Victim@E.com")
+
+            with pytest.raises(Exception) as exc_info:
+                check_login_rate(mock_request_ip2, db_session, "victim@e.com")
+            assert exc_info.value.status_code == 429
+
+            check_login_rate(mock_request_ip2, db_session, "other@e.com")
 
 
 class TestLoginAttemptModel:

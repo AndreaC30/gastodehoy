@@ -299,6 +299,9 @@ class LoginAttempt(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     ip: Mapped[str] = mapped_column(String(45), nullable=False, index=True)
+    # Normalized email when the attempt is tied to one. NULL for IP-only events
+    # (for example a reset token that does not match any account).
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     attempted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

@@ -447,6 +447,21 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                         },
                     )
 
+        # Rate limit: per-email failures on databases created before that column.
+        attempt_rows = conn.execute(text("PRAGMA table_info(login_attempts)")).fetchall()
+        if attempt_rows:
+            attempt_colnames = {str(row[1]) for row in attempt_rows}
+            if "email" not in attempt_colnames:
+                conn.execute(
+                    text("ALTER TABLE login_attempts ADD COLUMN email VARCHAR(255)")
+                )
+            conn.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_login_attempts_email "
+                    "ON login_attempts(email)"
+                )
+            )
+
 
 def get_db() -> Generator[Session, None, None]:
     """Yield a Session bound to the current request and close it on exit."""

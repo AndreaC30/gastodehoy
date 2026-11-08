@@ -264,6 +264,81 @@ def test_login_rate_limit(anon_client, monkeypatch) -> None:
     assert blocked.status_code == 429
 
 
+def test_login_success_does_not_clear_failure_limit(anon_client, monkeypatch) -> None:
+    """A successful login must not reset failures for that IP.
+
+    Four failures against one email, then a different account logs in from
+    the same IP. The fifth failure against the first email is 429. A new
+    email on a fresh IP is not blocked by those rows. The same email is
+    blocked from a second IP once it has five failures.
+    """
+    from app.database import SessionLocal
+    from app.models import LoginAttempt
+
+    def register(email: str) -> None:
+        created = anon_client.post(
+            "/api/auth/register",
+            json={
+                "accepts_terms": True,
+                "confirms_minimum_age": True,
+                "terms_version": "2026-10-23.2",
+                "email": email,
+                "name": "Rate",
+                "password": "supersecret1",
+            },
+        )
+        assert created.status_code == 201
+        anon_client.post("/api/auth/logout")
+
+    # Development skips the limiter, so setup itself stores nothing.
+    register("victim@e.com")
+    register("attacker@e.com")
+
+    monkeypatch.setattr(app_settings, "environment", "production")
+    monkeypatch.setattr(app_settings, "trust_forwarded_for", True)
+
+    ip_shared = "203.0.113.10"
+    ip_other = "203.0.113.20"
+    ip_fresh = "198.51.100.30"
+
+    def login(email: str, password: str, ip: str):
+        return anon_client.post(
+            "/api/auth/login",
+            json={"email": email, "password": password},
+            headers={"X-Forwarded-For": ip},
+        )
+
+    for _ in range(4):
+        failed = login("victim@e.com", "wrong-password", ip_shared)
+        assert failed.status_code == 401
+
+    with SessionLocal() as db:
+        assert db.query(LoginAttempt).count() == 4
+
+    ok = login("attacker@e.com", "supersecret1", ip_shared)
+    assert ok.status_code == 200
+    anon_client.post("/api/auth/logout")
+
+    with SessionLocal() as db:
+        rows = db.query(LoginAttempt).all()
+        assert len(rows) == 4
+        assert {row.email for row in rows} == {"victim@e.com"}
+
+    fifth = login("victim@e.com", "wrong-password", ip_shared)
+    assert fifth.status_code == 429
+    assert fifth.json()["detail"] == "Demasiados intentos. Espera unos minutos."
+
+    with SessionLocal() as db:
+        assert db.query(LoginAttempt).filter(LoginAttempt.email == "victim@e.com").count() == 5
+
+    other = login("stranger@e.com", "wrong-password", ip_other)
+    assert other.status_code == 401
+
+    same_email = login("Victim@E.com", "supersecret1", ip_fresh)
+    assert same_email.status_code == 429
+    assert same_email.json()["detail"] == "Demasiados intentos. Espera unos minutos."
+
+
 def test_users_are_isolated(anon_client) -> None:
     anon_client.post(
         "/api/auth/register",
