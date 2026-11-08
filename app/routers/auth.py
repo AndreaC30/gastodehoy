@@ -10,10 +10,11 @@ from __future__ import annotations
 import logging
 import secrets
 import socket
+import threading
 from datetime import datetime, timezone
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -24,6 +25,7 @@ from app.auth import (
     PASSWORD_MAX_LEN,
     PASSWORD_MIN_LEN,
     RESET_TOKEN_TTL,
+    SESSION_COOKIE,
     _client_ip,
     check_login_rate,
     clear_session_cookie,
@@ -34,6 +36,7 @@ from app.auth import (
     password_exceeds_bcrypt,
     record_login_failure,
     reset_tokens_match,
+    revoke_session_from_cookie,
     set_session_cookie,
     verify_password,
     verify_password_or_dummy,
@@ -143,6 +146,24 @@ def _notify_admin_new_user(email: str, name: str) -> None:
 def _reset_link(token: str) -> str:
     base = settings.site_base_url()
     return f"{base}/reset-password?token={quote(token, safe='')}"
+
+
+def _deliver_reset_email(to_email: str, reset_url: str) -> None:
+    """Envía el enlace fuera de la petición. Un fallo no cambia la respuesta HTTP."""
+    try:
+        send_forgot_password_email(to_email, reset_url)
+    except Exception:
+        _log.exception("forgot-password: el envío SMTP falló")
+
+
+def _send_reset_email_in_background(to_email: str, reset_url: str) -> None:
+    """Arranca el SMTP en un hilo daemon. Los tests pueden sustituir esta función."""
+    threading.Thread(
+        target=_deliver_reset_email,
+        args=(to_email, reset_url),
+        name="forgot-password-smtp",
+        daemon=True,
+    ).start()
 
 
 def _as_utc(value: datetime) -> datetime:
@@ -310,8 +331,18 @@ def login(
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(response: Response) -> None:
-    """Clear the session cookie. Idempotent."""
+def logout(
+    response: Response,
+    session: str | None = Cookie(default=None, alias=SESSION_COOKIE),
+    db: Session = Depends(get_db),
+) -> None:
+    """Revoke this cookie's session id, then clear it. Idempotent.
+
+    No cookie, or one that does not decode, still returns 204. Other sessions
+    of the same account stay valid until they log out or the password changes.
+    """
+    if session:
+        revoke_session_from_cookie(db, session)
     clear_session_cookie(response)
 
 
@@ -323,8 +354,10 @@ def forgot_password(
 ) -> ForgotPasswordResponse:
     """Envía un enlace de un solo uso. No cambia la contraseña.
 
-    Sin SMTP o sin URL pública responde 503. La misma respuesta 200 vale
-    si el correo no existe. El dominio tiene que resolver antes de enviar.
+    Sin SMTP o sin URL pública responde 503, antes de mirar si la cuenta
+    existe. La misma respuesta 200 vale si el correo no existe. El token
+    se guarda y el SMTP sale en segundo plano: la respuesta no espera al
+    envío, y un fallo de envío no cambia ese 200.
     """
     email = _normalize_email(payload.email)
     check_login_rate(request, db, email)
@@ -369,18 +402,8 @@ def forgot_password(
     now = datetime.now(timezone.utc).replace(microsecond=0)
     user.password_reset_hash = hash_reset_token(token)
     user.password_reset_expires_at = now + RESET_TOKEN_TTL
-
-    try:
-        db.flush()
-        send_forgot_password_email(email, _reset_link(token))
-        db.commit()
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="No se pudo enviar el correo. Inténtalo más tarde o contacta al administrador.",
-        ) from exc
-
+    db.commit()
+    _send_reset_email_in_background(email, _reset_link(token))
     return ForgotPasswordResponse(detail=_FORGOT_PASSWORD_MESSAGE)
 
 

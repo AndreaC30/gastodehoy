@@ -49,6 +49,7 @@ from app.models import (  # noqa: E402
     ExtraIncome,
     FixedExpense,
     LoginAttempt,
+    RevokedSession,
     SavingsGoal,
     User,
     UserSettings,
@@ -70,6 +71,7 @@ def reset_db() -> Generator[None, None, None]:
         s.execute(delete(UserSettings))
         s.execute(delete(User))
         s.execute(delete(LoginAttempt))
+        s.execute(delete(RevokedSession))
         s.commit()
     yield
 

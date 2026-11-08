@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import logging
+import threading
+import time
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
 import pytest
+from sqlalchemy import select
 
 from app.config import settings as app_settings
 from app.main import DIST_DIR
@@ -113,7 +117,12 @@ def _enable_reset_mail(monkeypatch) -> list[tuple[str, str]]:
     def fake_send(to_email: str, reset_url: str) -> None:
         sent.append((to_email, reset_url))
 
+    def deliver_now(to_email: str, reset_url: str) -> None:
+        # La petición real vuelve antes del SMTP. Aquí el enlace hace falta ya.
+        fake_send(to_email, reset_url)
+
     monkeypatch.setattr("app.routers.auth.send_forgot_password_email", fake_send)
+    monkeypatch.setattr("app.routers.auth._send_reset_email_in_background", deliver_now)
     monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
     monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
     monkeypatch.setattr(app_settings, "public_base_url", "https://gastodehoy.test")
@@ -779,6 +788,117 @@ def test_change_password_invalidates_other_sessions(anon_client) -> None:
     assert r.status_code in (200, 401)
 
 
+def test_logout_revokes_copied_cookie(anon_client) -> None:
+    """A copy of the cookie dies at logout; a later login still works."""
+    from fastapi.testclient import TestClient
+
+    from app.auth import SESSION_COOKIE
+    from app.main import app
+
+    created = anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-11-08.1",
+            "email": "copy@e.com",
+            "name": "Copy",
+            "password": "supersecret1",
+        },
+    )
+    assert created.status_code == 201
+    copied = anon_client.cookies.get("gdh_session")
+    assert copied
+
+    with TestClient(app, headers={"X-Requested-With": "XMLHttpRequest"}) as other:
+        other.cookies.set(SESSION_COOKIE, copied)
+        assert other.get("/api/auth/me").status_code == 200
+        assert anon_client.post("/api/auth/logout").status_code == 204
+        assert other.get("/api/auth/me").status_code == 401
+
+    assert anon_client.get("/api/auth/me").status_code == 401
+    again = anon_client.post(
+        "/api/auth/login",
+        json={"email": "copy@e.com", "password": "supersecret1"},
+    )
+    assert again.status_code == 200
+    assert anon_client.get("/api/auth/me").status_code == 200
+
+
+def test_logout_without_cookie_or_garbage_returns_204(anon_client) -> None:
+    assert anon_client.post("/api/auth/logout").status_code == 204
+    from app.auth import SESSION_COOKIE
+
+    anon_client.cookies.set(SESSION_COOKIE, "not-a-valid-session")
+    assert anon_client.post("/api/auth/logout").status_code == 204
+
+
+def test_password_change_rejects_other_session(anon_client) -> None:
+    """The other cookie is 401 via password_changed_at, without revoking its sid."""
+    import time
+
+    from fastapi.testclient import TestClient
+
+    from app.auth import SESSION_COOKIE, decode_session_token
+    from app.database import SessionLocal
+    from app.main import app
+    from app.models import RevokedSession
+
+    created = anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-11-08.1",
+            "email": "two@e.com",
+            "name": "Two",
+            "password": "supersecret1",
+        },
+    )
+    assert created.status_code == 201
+
+    with TestClient(app, headers={"X-Requested-With": "XMLHttpRequest"}) as other:
+        logged = other.post(
+            "/api/auth/login",
+            json={"email": "two@e.com", "password": "supersecret1"},
+        )
+        assert logged.status_code == 200
+        other_cookie = other.cookies.get("gdh_session")
+        assert other_cookie
+        # issued_at is whole seconds; wait so password_changed_at is strictly later.
+        time.sleep(1.1)
+        changed = anon_client.put(
+            "/api/auth/me/password",
+            json={"current_password": "supersecret1", "new_password": "newsecret1"},
+        )
+        assert changed.status_code == 200
+        _uid, _issued_at, sid = decode_session_token(other_cookie)
+        assert sid
+        with SessionLocal() as db:
+            assert db.get(RevokedSession, sid) is None
+        assert other.get("/api/auth/me").status_code == 401
+
+
+def test_session_token_without_sid_is_rejected(anon_client) -> None:
+    from app.auth import SESSION_COOKIE, _serializer
+
+    created = anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-11-08.1",
+            "email": "legacy@e.com",
+            "name": "Legacy",
+            "password": "supersecret1",
+        },
+    )
+    assert created.status_code == 201
+    user_id = created.json()["user"]["id"]
+    anon_client.cookies.set(SESSION_COOKIE, _serializer().dumps({"uid": user_id}))
+    assert anon_client.get("/api/auth/me").status_code == 401
+
+
 # ── Security: email validation tests ──────────────────────────────────
 
 
@@ -838,6 +958,115 @@ def test_forgot_password_no_enumeration_by_timing(anon_client, monkeypatch) -> N
 
     assert r_existing.status_code == r_unknown.status_code == 200
     assert r_existing.json()["detail"] == r_unknown.json()["detail"]
+
+
+def test_forgot_password_hanging_smtp_same_response(anon_client, monkeypatch) -> None:
+    """Existing and unknown mailboxes share the 200, and a hung send does not block it."""
+    release = threading.Event()
+    started = threading.Event()
+    calls = {"n": 0}
+
+    def hanging_send(to_email: str, reset_url: str) -> None:
+        calls["n"] += 1
+        started.set()
+        release.wait(5)
+
+    monkeypatch.setattr("app.routers.auth.send_forgot_password_email", hanging_send)
+    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
+    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+    monkeypatch.setattr(app_settings, "public_base_url", "https://gastodehoy.test")
+    monkeypatch.setattr(
+        "app.routers.auth.send_welcome_email", lambda *_a, **_k: None
+    )
+
+    anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-11-08.1",
+            "email": "hang@e.com",
+            "name": "Hang",
+            "password": "supersecret1",
+        },
+    )
+    anon_client.post("/api/auth/logout")
+
+    try:
+        started_at = time.perf_counter()
+        existing = anon_client.post(
+            "/api/auth/forgot-password", json={"email": "hang@e.com"}
+        )
+        elapsed = time.perf_counter() - started_at
+        unknown = anon_client.post(
+            "/api/auth/forgot-password", json={"email": "nobody-hang@e.com"}
+        )
+        assert existing.status_code == unknown.status_code == 200
+        assert existing.json()["detail"] == unknown.json()["detail"]
+        assert elapsed < 2
+        assert started.wait(2)
+        assert calls["n"] == 1
+
+        from app.database import SessionLocal
+        from app.models import User
+
+        with SessionLocal() as session:
+            user = session.scalar(select(User).where(User.email == "hang@e.com"))
+            assert user is not None and user.password_reset_hash
+    finally:
+        release.set()
+        for thread in threading.enumerate():
+            if thread.name == "forgot-password-smtp":
+                thread.join(timeout=1)
+
+
+def test_forgot_password_smtp_failure_still_generic_200(
+    anon_client, monkeypatch, caplog
+) -> None:
+    """A failed send is logged without the reset link and still returns the same 200."""
+    saw_attempt = threading.Event()
+
+    def failing_send(to_email: str, reset_url: str) -> None:
+        saw_attempt.set()
+        raise RuntimeError("smtp down")
+
+    monkeypatch.setattr("app.routers.auth.send_forgot_password_email", failing_send)
+    monkeypatch.setattr(app_settings, "smtp_host", "smtp.test.local")
+    monkeypatch.setattr(app_settings, "smtp_from", "noreply@test.local")
+    monkeypatch.setattr(app_settings, "public_base_url", "https://gastodehoy.test")
+    monkeypatch.setattr(
+        "app.routers.auth.send_welcome_email", lambda *_a, **_k: None
+    )
+
+    anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-11-08.1",
+            "email": "fail-smtp@e.com",
+            "name": "Fail",
+            "password": "supersecret1",
+        },
+    )
+    anon_client.post("/api/auth/logout")
+
+    with caplog.at_level(logging.ERROR, logger="app.routers.auth"):
+        existing = anon_client.post(
+            "/api/auth/forgot-password", json={"email": "fail-smtp@e.com"}
+        )
+        unknown = anon_client.post(
+            "/api/auth/forgot-password", json={"email": "nobody-fail@e.com"}
+        )
+        assert saw_attempt.wait(2)
+        for thread in threading.enumerate():
+            if thread.name == "forgot-password-smtp":
+                thread.join(timeout=2)
+
+    assert existing.status_code == unknown.status_code == 200
+    assert existing.json()["detail"] == unknown.json()["detail"]
+    assert "el envío SMTP falló" in caplog.text
+    assert "reset-password?token=" not in caplog.text
 
 
 def test_register_password_over_bcrypt_bytes_is_422(anon_client) -> None:

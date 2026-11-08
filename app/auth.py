@@ -26,7 +26,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.models import LoginAttempt, User
+from app.models import LoginAttempt, RevokedSession, User
 
 PASSWORD_MIN_LEN: Final = 8
 PASSWORD_MAX_LEN: Final = 64
@@ -139,14 +139,15 @@ def _serializer() -> URLSafeTimedSerializer:
 
 
 def make_session_token(user_id: int) -> str:
-    """Build a signed cookie value embedding ``user_id`` and an issued-at."""
-    return _serializer().dumps({"uid": user_id})
+    """Build a signed cookie value with ``user_id``, a random ``sid`` and issued-at."""
+    return _serializer().dumps({"uid": user_id, "sid": secrets.token_urlsafe(32)})
 
 
-def decode_session_token(token: str) -> tuple[int, datetime]:
+def decode_session_token(token: str) -> tuple[int, datetime, str | None]:
     """Decode a session token; raise 401 on bad signature or expiry.
 
-    Returns ``(user_id, issued_at)``. ``issued_at`` is forced to UTC because
+    Returns ``(user_id, issued_at, sid)``. ``sid`` is None when the cookie was
+    minted before session ids existed. ``issued_at`` is forced to UTC because
     ``itsdangerous`` may yield a naive datetime depending on the version.
     """
     max_age = settings.session_ttl_days * 24 * 60 * 60
@@ -160,14 +161,51 @@ def decode_session_token(token: str) -> tuple[int, datetime]:
             detail="Sesión inválida o caducada",
         ) from e
     uid = data.get("uid") if isinstance(data, dict) else None
-    if not isinstance(uid, int):
+    sid = data.get("sid") if isinstance(data, dict) else None
+    if not isinstance(uid, int) or (sid is not None and not isinstance(sid, str)):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Sesión inválida",
+        )
+    if sid == "":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Sesión inválida",
         )
     if issued_at.tzinfo is None:
         issued_at = issued_at.replace(tzinfo=timezone.utc)
-    return uid, issued_at
+    return uid, issued_at, sid
+
+
+def revoke_session_id(db: Session, sid: str) -> None:
+    """Remember ``sid`` as logged out and drop revocations older than the cookie TTL."""
+    cutoff = datetime.now(timezone.utc) - timedelta(days=settings.session_ttl_days)
+    db.query(RevokedSession).filter(RevokedSession.revoked_at < cutoff).delete(
+        synchronize_session=False
+    )
+    if db.get(RevokedSession, sid) is None:
+        db.add(RevokedSession(sid=sid, revoked_at=datetime.now(timezone.utc)))
+    db.commit()
+
+
+def revoke_session_from_cookie(db: Session, token: str) -> None:
+    """Revoke the session id inside ``token`` when the cookie decodes.
+
+    Garbage, expired, and pre-``sid`` cookies are ignored so logout can still
+    answer 204. Only this cookie's id is stored.
+    """
+    try:
+        _user_id, _issued_at, sid = decode_session_token(token)
+    except HTTPException:
+        return
+    if not sid:
+        return
+    revoke_session_id(db, sid)
+
+
+def session_is_revoked(db: Session, sid: str) -> bool:
+    """True when logout stored this id. A missing row means the session is valid."""
+    return db.get(RevokedSession, sid) is not None
 
 
 def set_session_cookie(response: Response, token: str) -> None:
@@ -221,14 +259,20 @@ def get_current_user(
     """FastAPI dependency: resolve the authenticated ``User`` or 401.
 
     Also enforces the "issued before password change" check so that any
-    cookie minted before a password reset is invalidated.
+    cookie minted before a password reset is invalidated. A missing ``sid``
+    (cookies from before per-session logout) and a revoked ``sid`` are 401.
     """
     if not session:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No has iniciado sesión",
         )
-    user_id, issued_at = decode_session_token(session)
+    user_id, issued_at, sid = decode_session_token(session)
+    if not sid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Sesión inválida o caducada",
+        )
     user = db.get(User, user_id)
     if user is None:
         clear_session_cookie(response)
@@ -245,6 +289,11 @@ def get_current_user(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Sesión invalidada por cambio de contraseña",
             )
+    if session_is_revoked(db, sid):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Sesión inválida o caducada",
+        )
     return user
 
 
