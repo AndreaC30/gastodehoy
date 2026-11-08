@@ -1,6 +1,6 @@
 # Analisis del Calculo de Dias en budget.py
 
-**Archivo:** `/root/gastodehoy/app/services/budget.py`
+**Archivo:** `app/services/budget.py`
 **Fecha de analisis:** 2026-05-12
 
 ---

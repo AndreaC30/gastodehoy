@@ -31,6 +31,7 @@ import {
 import { AppBackdrop } from "@/components/app-backdrop";
 import { PrivacyPolicy } from "@/components/privacy-policy";
 import { LegalNotice } from "@/components/legal-notice";
+import { ResetPasswordScreen } from "@/components/reset-password-screen";
 import {
   setLoading,
   setUser as setAuthUser,
@@ -52,6 +53,12 @@ import {
   showLegalPage,
   type LegalPage,
 } from "@/lib/legal-pages-state";
+
+function readResetToken(): string | null {
+  if (window.location.pathname !== "/reset-password") return null;
+  const token = new URLSearchParams(window.location.search).get("token")?.trim() ?? "";
+  return token.length >= 20 ? token : null;
+}
 
 async function loadSettings() {
   return api<Settings>("/api/settings");
@@ -113,6 +120,16 @@ export default function App() {
     return (
       <div className={APP_SHELL_CLASS}>
         <LegalNotice onBack={() => showLegalPage(null)} />
+      </div>
+    );
+  }
+
+  const resetToken = readResetToken();
+  if (resetToken) {
+    return (
+      <div className={APP_SHELL_CLASS}>
+        <AppBackdrop />
+        <ResetPasswordScreen token={resetToken} />
       </div>
     );
   }

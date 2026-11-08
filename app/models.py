@@ -40,7 +40,13 @@ class User(Base):
     # Hash bcrypt del código de recuperación de un solo uso. NULL si no hay
     # código activo (se invalida al usarse hasta generar uno nuevo).
     recovery_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    # True tras recuperación por correo con contraseña temporal hasta que elija una nueva.
+    # Hash SHA-256 del enlace de un solo uso. NULL si no hay recuperación pendiente.
+    # La contraseña no cambia hasta que se use el enlace.
+    password_reset_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    password_reset_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    # True solo en cuentas que aún tienen una contraseña temporal antigua.
     must_change_password: Mapped[bool] = mapped_column(
         Boolean(),
         nullable=False,
