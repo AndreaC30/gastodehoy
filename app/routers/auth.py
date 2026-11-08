@@ -21,6 +21,8 @@ from sqlalchemy.orm import Session
 _log = logging.getLogger(__name__)
 
 from app.auth import (
+    PASSWORD_MAX_LEN,
+    PASSWORD_MIN_LEN,
     RESET_TOKEN_TTL,
     _client_ip,
     check_login_rate,
@@ -29,6 +31,7 @@ from app.auth import (
     hash_password,
     hash_reset_token,
     make_session_token,
+    password_exceeds_bcrypt,
     record_login_failure,
     reset_tokens_match,
     set_session_cookie,
@@ -260,6 +263,22 @@ def accept_terms(
     return UserPublic.model_validate(user)
 
 
+def _login_password_ok(user: User | None, password: str) -> bool:
+    """True only when the account exists and the password matches.
+
+    A missing account, a too-short password or one bcrypt cannot store is a
+    failure. The dummy hash keeps that path about as slow as a wrong password.
+    """
+    if (
+        user is None
+        or not (PASSWORD_MIN_LEN <= len(password) <= PASSWORD_MAX_LEN)
+        or password_exceeds_bcrypt(password)
+    ):
+        verify_password_or_dummy(password, None)
+        return False
+    return verify_password(password, user.password_hash)
+
+
 @router.post("/login", response_model=UserPublic)
 def login(
     payload: LoginRequest,
@@ -274,11 +293,8 @@ def login(
     email = _normalize_email(payload.email)
     check_login_rate(request, db, email)
     user = db.scalar(select(User).where(func.lower(User.email) == email))
-    password_ok = verify_password_or_dummy(
-        payload.password,
-        user.password_hash if user is not None else None,
-    )
-    if user is None or not password_ok:
+    password_ok = _login_password_ok(user, payload.password)
+    if not password_ok:
         record_login_failure(request, db, email)
         # The failure that fills the bucket is 429; the row stays stored.
         check_login_rate(request, db, email)

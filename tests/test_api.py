@@ -245,6 +245,27 @@ def test_login_and_logout_cycle(anon_client) -> None:
     assert anon_client.get("/api/auth/me").status_code == 200
 
 
+def test_short_password_counts_toward_login_limit(anon_client, monkeypatch) -> None:
+    """A password under 8 characters used to return 422 and skip the limiter."""
+    anon_client.post(
+        "/api/auth/register",
+        json={"accepts_terms": True, "confirms_minimum_age": True, "terms_version": "2026-10-23.2", "email": "short@e.com", "name": "S", "password": "supersecret1"},
+    )
+    anon_client.post("/api/auth/logout")
+    monkeypatch.setattr(app_settings, "environment", "production")
+    for _ in range(4):
+        failed = anon_client.post(
+            "/api/auth/login",
+            json={"email": "short@e.com", "password": "abc"},
+        )
+        assert failed.status_code == 401
+    blocked = anon_client.post(
+        "/api/auth/login",
+        json={"email": "short@e.com", "password": "abc"},
+    )
+    assert blocked.status_code == 429
+
+
 def test_login_rate_limit(anon_client, monkeypatch) -> None:
     monkeypatch.setattr(app_settings, "environment", "production")
     anon_client.post(
