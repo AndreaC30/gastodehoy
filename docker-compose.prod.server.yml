@@ -8,6 +8,8 @@
 # kya / hermes desde sus propios compose (rutas del servidor):
 #   docker compose -f /root/kya-system-hermes/docker-compose.yml \
 #     -f docker-compose.prod.server.yml up -d --build kya
+#
+# KYA_* y HERMES_* deben definirse en el entorno del servidor y no deben versionarse.
 
 services:
   kya:
@@ -18,14 +20,13 @@ services:
     ports: []
     volumes:
       - kya-data:/app/data
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/log:/var/log:ro
     environment:
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
-      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-875698538}
-      - APP_SECRET=${APP_SECRET:-kya-secret-change-me}
-      - APP_USER=${APP_USER:-admin}
-      - APP_PASS=${APP_PASS:-kya2026}
+      - TELEGRAM_BOT_TOKEN=${KYA_TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${KYA_TELEGRAM_CHAT_ID:?required}
+      - APP_SECRET=${KYA_APP_SECRET:?required}
+      - APP_USER=${KYA_APP_USER:?required}
+      - APP_PASS=${KYA_APP_PASS:?required}
       - COLLECTOR_INTERVAL=30
     networks:
       backend:
@@ -41,9 +42,9 @@ services:
     volumes:
       - /root/.hermes:/root/.hermes:ro
     environment:
-      - APP_SECRET=${APP_SECRET:-hermes-secret-change-me}
-      - APP_USER=${APP_USER:-admin}
-      - APP_PASS=${APP_PASS:-hermes2026}
+      - APP_SECRET=${HERMES_APP_SECRET:?required}
+      - APP_USER=${HERMES_APP_USER:?required}
+      - APP_PASS=${HERMES_APP_PASS:?required}
       - HERMES_HOME=/root/.hermes
     networks:
       backend:

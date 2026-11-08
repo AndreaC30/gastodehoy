@@ -29,7 +29,7 @@ from app.auth import (
     hash_password,
     hash_reset_token,
     make_session_token,
-    reset_login_rate,
+    record_login_failure,
     reset_tokens_match,
     set_session_cookie,
     verify_password,
@@ -160,13 +160,14 @@ def register(
     db: Session = Depends(get_db),
 ) -> RegisterResponse:
     """Crea la cuenta, fija la cookie de sesión y devuelve el usuario."""
-    check_login_rate(request, db)
+    email = _normalize_email(payload.email)
+    check_login_rate(request, db, email)
+    record_login_failure(request, db, email)
     _require_current_terms(
         payload.accepts_terms,
         payload.confirms_minimum_age,
         payload.terms_version,
     )
-    email = _normalize_email(payload.email)
 
     # Validar formato de email antes de tocar la BD
     if not _is_valid_email_format(email):
@@ -266,20 +267,25 @@ def login(
     response: Response,
     db: Session = Depends(get_db),
 ) -> UserPublic:
-    """Verify credentials, apply IP rate-limit and set the session cookie."""
-    check_login_rate(request, db)
+    """Verify credentials, apply IP and email rate-limit, set the session cookie.
+
+    A successful login does not insert a row and does not clear earlier failures.
+    """
     email = _normalize_email(payload.email)
+    check_login_rate(request, db, email)
     user = db.scalar(select(User).where(func.lower(User.email) == email))
     password_ok = verify_password_or_dummy(
         payload.password,
         user.password_hash if user is not None else None,
     )
     if user is None or not password_ok:
+        record_login_failure(request, db, email)
+        # The failure that fills the bucket is 429; the row stays stored.
+        check_login_rate(request, db, email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email o contraseña incorrectos",
         )
-    reset_login_rate(request, db)
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(user)
@@ -304,7 +310,9 @@ def forgot_password(
     Sin SMTP o sin URL pública responde 503. La misma respuesta 200 vale
     si el correo no existe. El dominio tiene que resolver antes de enviar.
     """
-    check_login_rate(request, db)
+    email = _normalize_email(payload.email)
+    check_login_rate(request, db, email)
+    record_login_failure(request, db, email)
     if not (settings.smtp_host and settings.smtp_host.strip()):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -321,8 +329,6 @@ def forgot_password(
                 "o COOKIE_DOMAIN para construir el enlace."
             ),
         )
-
-    email = _normalize_email(payload.email)
 
     if not _is_valid_email_format(email):
         _log.warning("forgot-password: formato invalido desde %s", _client_ip(request))
@@ -373,6 +379,10 @@ def reset_password(
     token = payload.token.strip()
     digest = hash_reset_token(token)
     user = db.scalar(select(User).where(User.password_reset_hash == digest))
+    email = user.email if user is not None else None
+    if email is not None:
+        check_login_rate(request, db, email)
+    record_login_failure(request, db, email)
     if user is None or not user.password_reset_hash or not reset_tokens_match(
         token, user.password_reset_hash
     ):

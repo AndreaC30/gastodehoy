@@ -264,6 +264,81 @@ def test_login_rate_limit(anon_client, monkeypatch) -> None:
     assert blocked.status_code == 429
 
 
+def test_login_success_does_not_clear_failure_limit(anon_client, monkeypatch) -> None:
+    """A successful login must not reset failures for that IP.
+
+    Four failures against one email, then a different account logs in from
+    the same IP. The fifth failure against the first email is 429. A new
+    email on a fresh IP is not blocked by those rows. The same email is
+    blocked from a second IP once it has five failures.
+    """
+    from app.database import SessionLocal
+    from app.models import LoginAttempt
+
+    def register(email: str) -> None:
+        created = anon_client.post(
+            "/api/auth/register",
+            json={
+                "accepts_terms": True,
+                "confirms_minimum_age": True,
+                "terms_version": "2026-10-23.2",
+                "email": email,
+                "name": "Rate",
+                "password": "supersecret1",
+            },
+        )
+        assert created.status_code == 201
+        anon_client.post("/api/auth/logout")
+
+    # Development skips the limiter, so setup itself stores nothing.
+    register("victim@e.com")
+    register("attacker@e.com")
+
+    monkeypatch.setattr(app_settings, "environment", "production")
+    monkeypatch.setattr(app_settings, "trust_forwarded_for", True)
+
+    ip_shared = "203.0.113.10"
+    ip_other = "203.0.113.20"
+    ip_fresh = "198.51.100.30"
+
+    def login(email: str, password: str, ip: str):
+        return anon_client.post(
+            "/api/auth/login",
+            json={"email": email, "password": password},
+            headers={"X-Forwarded-For": ip},
+        )
+
+    for _ in range(4):
+        failed = login("victim@e.com", "wrong-password", ip_shared)
+        assert failed.status_code == 401
+
+    with SessionLocal() as db:
+        assert db.query(LoginAttempt).count() == 4
+
+    ok = login("attacker@e.com", "supersecret1", ip_shared)
+    assert ok.status_code == 200
+    anon_client.post("/api/auth/logout")
+
+    with SessionLocal() as db:
+        rows = db.query(LoginAttempt).all()
+        assert len(rows) == 4
+        assert {row.email for row in rows} == {"victim@e.com"}
+
+    fifth = login("victim@e.com", "wrong-password", ip_shared)
+    assert fifth.status_code == 429
+    assert fifth.json()["detail"] == "Demasiados intentos. Espera unos minutos."
+
+    with SessionLocal() as db:
+        assert db.query(LoginAttempt).filter(LoginAttempt.email == "victim@e.com").count() == 5
+
+    other = login("stranger@e.com", "wrong-password", ip_other)
+    assert other.status_code == 401
+
+    same_email = login("Victim@E.com", "supersecret1", ip_fresh)
+    assert same_email.status_code == 429
+    assert same_email.json()["detail"] == "Demasiados intentos. Espera unos minutos."
+
+
 def test_users_are_isolated(anon_client) -> None:
     anon_client.post(
         "/api/auth/register",
@@ -522,6 +597,113 @@ def test_delete_variable_expense(client) -> None:
 
     s = client.get("/api/summary")
     assert Decimal(str(s.json()["variable_spent_month"])) == Decimal("0")
+
+
+_TOO_BIG = "1e30"
+_FIFTEEN_DIGITS = "100000000000000"
+
+
+@pytest.mark.parametrize(
+    ("method", "path", "payload"),
+    [
+        ("put", "/api/settings", {"monthly_income": _TOO_BIG, "savings_percent": "0"}),
+        ("put", "/api/settings", {"monthly_income": _FIFTEEN_DIGITS, "savings_percent": "0"}),
+        ("put", "/api/settings", {"monthly_income": "2500.00", "savings_amount": _TOO_BIG}),
+        ("post", "/api/fixed-expenses", {"name": "Alquiler", "amount": _TOO_BIG}),
+        ("post", "/api/fixed-expenses", {"name": "Alquiler", "amount": _FIFTEEN_DIGITS}),
+        ("post", "/api/expenses", {"amount": _TOO_BIG}),
+        ("post", "/api/expenses", {"amount": 1e30}),
+        ("post", "/api/expenses", {"amount": _FIFTEEN_DIGITS}),
+        ("post", "/api/extra-income", {"amount": _TOO_BIG}),
+        (
+            "post",
+            "/api/extra-income",
+            {"amount": "10.00", "savings_mode": "fixed", "savings_fixed": _TOO_BIG},
+        ),
+        ("post", "/api/categories", {"name": "Viaje", "monthly_budget": _TOO_BIG}),
+        ("post", "/api/savings-goals", {"name": "Meta", "target_amount": _TOO_BIG}),
+        (
+            "post",
+            "/api/savings-goals",
+            {"name": "Meta", "target_amount": "100.00", "current_amount": _FIFTEEN_DIGITS},
+        ),
+    ],
+)
+def test_money_amount_over_14_digits_is_422(client, method: str, path: str, payload: dict) -> None:
+    response = getattr(client, method)(path, json=payload)
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert any(err["type"].startswith("decimal_") for err in detail)
+
+
+def test_normal_money_amounts_still_accepted(client) -> None:
+    settings = client.put(
+        "/api/settings",
+        json={"monthly_income": "2500.00", "savings_percent": "20.00"},
+    )
+    assert settings.status_code == 200
+
+    expense = client.post("/api/expenses", json={"amount": "19.99"})
+    assert expense.status_code == 200
+    assert Decimal(str(expense.json()["amount"])) == Decimal("19.99")
+
+    fixed = client.post(
+        "/api/fixed-expenses",
+        json={"name": "Cero", "amount": "0"},
+    )
+    assert fixed.status_code == 200
+
+    rejected = client.post("/api/expenses", json={"amount": "0"})
+    assert rejected.status_code == 422
+
+
+def test_patch_money_amount_over_14_digits_is_422(client) -> None:
+    expense = client.post("/api/expenses", json={"amount": "19.99"})
+    assert expense.status_code == 200
+    expense_id = expense.json()["id"]
+
+    huge = client.patch(f"/api/expenses/{expense_id}", json={"amount": "1e30"})
+    assert huge.status_code == 422
+    fifteen = client.patch(
+        f"/api/expenses/{expense_id}",
+        json={"amount": _FIFTEEN_DIGITS},
+    )
+    assert fifteen.status_code == 422
+
+    fixed = client.post(
+        "/api/fixed-expenses",
+        json={"name": "Luz", "amount": "10.00"},
+    )
+    assert fixed.status_code == 200
+    fixed_huge = client.patch(
+        f"/api/fixed-expenses/{fixed.json()['id']}",
+        json={"amount": "1e30"},
+    )
+    assert fixed_huge.status_code == 422
+
+    goal = client.post(
+        "/api/savings-goals",
+        json={"name": "Meta", "target_amount": "100.00"},
+    )
+    assert goal.status_code == 201
+    goal_id = goal.json()["id"]
+    assert client.patch(
+        f"/api/savings-goals/{goal_id}",
+        json={"target_amount": "1e30"},
+    ).status_code == 422
+    assert client.patch(
+        f"/api/savings-goals/{goal_id}",
+        json={"current_amount": _FIFTEEN_DIGITS},
+    ).status_code == 422
+
+    category_id = client.get("/api/categories").json()[0]["id"]
+    assert client.patch(
+        f"/api/categories/{category_id}",
+        json={"monthly_budget": "1e30"},
+    ).status_code == 422
+
+    ok = client.patch(f"/api/expenses/{expense_id}", json={"amount": "19.99"})
+    assert ok.status_code == 200
 
 
 def test_change_password_flow(anon_client) -> None:
