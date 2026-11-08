@@ -190,10 +190,10 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml logs app
 crontab -e
 ```
 
-Añade esta línea para un dump cada día a las 3:30 con rotación de 7 días:
+Añade esta línea para un dump cada día a las 3:30 con rotación de 7 días. Es la de producción (`/root/gastodehoy`). Staging está en `/root/gastodehoy-dev`; no la uses como línea por defecto.
 
 ```cron
-30 3 * * * cd /opt/gastodehoy && ./scripts/backup.sh >> /var/log/gastodehoy-backup.log 2>&1
+30 3 * * * cd /root/gastodehoy && ./scripts/backup.sh >> /var/log/gastodehoy-backup.log 2>&1
 ```
 
 ---
@@ -217,7 +217,13 @@ Te pedirá la nueva contraseña por terminal, invalidará las sesiones del usuar
 KEEP_DAYS=14 ./scripts/backup.sh     # rotación de 14 días
 ```
 
-Los backups se guardan en `./backups/` como `gastodehoy-YYYYMMDDTHHMMSSZ.db.gz`. Cada uno es una copia atómica del archivo SQLite (segura aunque la app esté escribiendo) ya comprimida.
+Los backups se guardan en `./backups/` como `gastodehoy-YYYYMMDDTHHMMSSZ.db.gz`. Cada uno es una copia atómica del archivo SQLite (segura aunque la app esté escribiendo) ya comprimida. `BACKUP_DIR` se puede cambiar para dejar el archivo fuera del directorio de la app; el servidor tiene un solo disco.
+
+Comprueba un dump sin sustituir `data/gastodehoy.db` (el comando falla si `PRAGMA integrity_check` no es exactamente `ok`):
+
+```bash
+./scripts/backup.sh check backups/gastodehoy-YYYYMMDDTHHMMSSZ.db.gz
+```
 
 ### Restaurar un backup
 
