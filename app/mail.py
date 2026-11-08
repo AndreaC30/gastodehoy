@@ -3,14 +3,55 @@
 from __future__ import annotations
 
 import smtplib
+import ssl
+from contextlib import contextmanager
 from decimal import Decimal
 from email.message import EmailMessage
 
 from app.config import settings
 
+_SMTP_TIMEOUT_S = 10
+
 
 class SMTPNotConfiguredError(RuntimeError):
     """Faltan variables SMTP_* en el entorno."""
+
+
+def _smtp_sender() -> tuple[str, str]:
+    """Host y remitente, o error si el envío no está configurado."""
+    host = settings.smtp_host
+    if not host or not host.strip():
+        raise SMTPNotConfiguredError("SMTP_HOST no está configurado")
+    from_addr = settings.smtp_from or settings.smtp_user
+    if not from_addr:
+        raise SMTPNotConfiguredError("SMTP_FROM o SMTP_USER deben estar configurados")
+    return host, from_addr
+
+
+@contextmanager
+def _smtp_connection(host: str):
+    """SMTP con tope de 10s. TLS exige el certificado y el nombre del servidor."""
+    context = ssl.create_default_context()
+    if settings.smtp_use_ssl:
+        client = smtplib.SMTP_SSL(
+            host,
+            settings.smtp_port,
+            timeout=_SMTP_TIMEOUT_S,
+            context=context,
+        )
+    else:
+        client = smtplib.SMTP(host, settings.smtp_port, timeout=_SMTP_TIMEOUT_S)
+    with client as smtp:
+        if not settings.smtp_use_ssl and settings.smtp_use_tls:
+            smtp.starttls(context=context)
+        yield smtp
+
+
+def _transmit(host: str, msg: EmailMessage) -> None:
+    with _smtp_connection(host) as smtp:
+        if settings.smtp_user and settings.smtp_password:
+            smtp.login(settings.smtp_user, settings.smtp_password)
+        smtp.send_message(msg)
 
 
 def send_email(to_email: str, subject: str, body: str) -> None:
@@ -24,32 +65,14 @@ def send_email(to_email: str, subject: str, body: str) -> None:
     Raises:
         SMTPNotConfiguredError: Si faltan configuraciones SMTP necesarias.
     """
-    host = settings.smtp_host
-    if not host or not host.strip():
-        raise SMTPNotConfiguredError("SMTP_HOST no está configurado")
-
-    from_addr = settings.smtp_from or settings.smtp_user
-    if not from_addr:
-        raise SMTPNotConfiguredError("SMTP_FROM o SMTP_USER deben estar configurados")
+    host, from_addr = _smtp_sender()
 
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = from_addr
     msg["To"] = to_email
     msg.set_content(body)
-
-    if settings.smtp_use_ssl:
-        with smtplib.SMTP_SSL(host, settings.smtp_port) as smtp:
-            if settings.smtp_user and settings.smtp_password:
-                smtp.login(settings.smtp_user, settings.smtp_password)
-            smtp.send_message(msg)
-    else:
-        with smtplib.SMTP(host, settings.smtp_port) as smtp:
-            if settings.smtp_use_tls:
-                smtp.starttls()
-            if settings.smtp_user and settings.smtp_password:
-                smtp.login(settings.smtp_user, settings.smtp_password)
-            smtp.send_message(msg)
+    _transmit(host, msg)
 
 
 def send_welcome_email(to_email: str, name: str) -> None:
@@ -114,13 +137,7 @@ def send_weekly_digest_email(to_email: str, name: str, digest: dict) -> None:
         "<p>Entra en la app para ver el detalle.</p>"
     )
 
-    host = settings.smtp_host
-    if not host or not host.strip():
-        raise SMTPNotConfiguredError("SMTP_HOST no está configurado")
-
-    from_addr = settings.smtp_from or settings.smtp_user
-    if not from_addr:
-        raise SMTPNotConfiguredError("SMTP_FROM o SMTP_USER deben estar configurados")
+    host, from_addr = _smtp_sender()
 
     msg = EmailMessage()
     msg["Subject"] = subject
@@ -128,19 +145,7 @@ def send_weekly_digest_email(to_email: str, name: str, digest: dict) -> None:
     msg["To"] = to_email
     msg.set_content(text)
     msg.add_alternative(html, subtype="html")
-
-    if settings.smtp_use_ssl:
-        with smtplib.SMTP_SSL(host, settings.smtp_port) as smtp:
-            if settings.smtp_user and settings.smtp_password:
-                smtp.login(settings.smtp_user, settings.smtp_password)
-            smtp.send_message(msg)
-    else:
-        with smtplib.SMTP(host, settings.smtp_port) as smtp:
-            if settings.smtp_use_tls:
-                smtp.starttls()
-            if settings.smtp_user and settings.smtp_password:
-                smtp.login(settings.smtp_user, settings.smtp_password)
-            smtp.send_message(msg)
+    _transmit(host, msg)
 
 
 def send_forgot_password_email(to_email: str, reset_url: str) -> None:
