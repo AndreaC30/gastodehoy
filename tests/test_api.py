@@ -779,6 +779,117 @@ def test_change_password_invalidates_other_sessions(anon_client) -> None:
     assert r.status_code in (200, 401)
 
 
+def test_logout_revokes_copied_cookie(anon_client) -> None:
+    """A copy of the cookie dies at logout; a later login still works."""
+    from fastapi.testclient import TestClient
+
+    from app.auth import SESSION_COOKIE
+    from app.main import app
+
+    created = anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-11-08.1",
+            "email": "copy@e.com",
+            "name": "Copy",
+            "password": "supersecret1",
+        },
+    )
+    assert created.status_code == 201
+    copied = anon_client.cookies.get("gdh_session")
+    assert copied
+
+    with TestClient(app, headers={"X-Requested-With": "XMLHttpRequest"}) as other:
+        other.cookies.set(SESSION_COOKIE, copied)
+        assert other.get("/api/auth/me").status_code == 200
+        assert anon_client.post("/api/auth/logout").status_code == 204
+        assert other.get("/api/auth/me").status_code == 401
+
+    assert anon_client.get("/api/auth/me").status_code == 401
+    again = anon_client.post(
+        "/api/auth/login",
+        json={"email": "copy@e.com", "password": "supersecret1"},
+    )
+    assert again.status_code == 200
+    assert anon_client.get("/api/auth/me").status_code == 200
+
+
+def test_logout_without_cookie_or_garbage_returns_204(anon_client) -> None:
+    assert anon_client.post("/api/auth/logout").status_code == 204
+    from app.auth import SESSION_COOKIE
+
+    anon_client.cookies.set(SESSION_COOKIE, "not-a-valid-session")
+    assert anon_client.post("/api/auth/logout").status_code == 204
+
+
+def test_password_change_rejects_other_session(anon_client) -> None:
+    """The other cookie is 401 via password_changed_at, without revoking its sid."""
+    import time
+
+    from fastapi.testclient import TestClient
+
+    from app.auth import SESSION_COOKIE, decode_session_token
+    from app.database import SessionLocal
+    from app.main import app
+    from app.models import RevokedSession
+
+    created = anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-11-08.1",
+            "email": "two@e.com",
+            "name": "Two",
+            "password": "supersecret1",
+        },
+    )
+    assert created.status_code == 201
+
+    with TestClient(app, headers={"X-Requested-With": "XMLHttpRequest"}) as other:
+        logged = other.post(
+            "/api/auth/login",
+            json={"email": "two@e.com", "password": "supersecret1"},
+        )
+        assert logged.status_code == 200
+        other_cookie = other.cookies.get("gdh_session")
+        assert other_cookie
+        # issued_at is whole seconds; wait so password_changed_at is strictly later.
+        time.sleep(1.1)
+        changed = anon_client.put(
+            "/api/auth/me/password",
+            json={"current_password": "supersecret1", "new_password": "newsecret1"},
+        )
+        assert changed.status_code == 200
+        _uid, _issued_at, sid = decode_session_token(other_cookie)
+        assert sid
+        with SessionLocal() as db:
+            assert db.get(RevokedSession, sid) is None
+        assert other.get("/api/auth/me").status_code == 401
+
+
+def test_session_token_without_sid_is_rejected(anon_client) -> None:
+    from app.auth import SESSION_COOKIE, _serializer
+
+    created = anon_client.post(
+        "/api/auth/register",
+        json={
+            "accepts_terms": True,
+            "confirms_minimum_age": True,
+            "terms_version": "2026-11-08.1",
+            "email": "legacy@e.com",
+            "name": "Legacy",
+            "password": "supersecret1",
+        },
+    )
+    assert created.status_code == 201
+    user_id = created.json()["user"]["id"]
+    anon_client.cookies.set(SESSION_COOKIE, _serializer().dumps({"uid": user_id}))
+    assert anon_client.get("/api/auth/me").status_code == 401
+
+
 # ── Security: email validation tests ──────────────────────────────────
 
 

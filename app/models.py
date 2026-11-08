@@ -297,6 +297,17 @@ class PushSubscription(Base):
     user: Mapped[User] = relationship(back_populates="push_subscriptions")
 
 
+class RevokedSession(Base):
+    """Session id invalidated by logout. A missing row is still valid."""
+
+    __tablename__ = "revoked_sessions"
+
+    sid: Mapped[str] = mapped_column(String(64), primary_key=True)
+    revoked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
+
+
 class LoginAttempt(Base):
     """Persistent login rate limiter (replaces in-memory dict)."""
 

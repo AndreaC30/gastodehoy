@@ -174,6 +174,27 @@ class TestLoginRateLimit:
         assert rows[0].email == "recent@e.com"
 
 
+class TestRevokedSessions:
+    """Logout stores one session id and drops rows past the cookie TTL."""
+
+    def test_revoke_prunes_rows_older_than_session_ttl(self, db_session):
+        from app.auth import revoke_session_id
+        from app.models import RevokedSession
+
+        now = datetime.now(timezone.utc)
+        db_session.add(
+            RevokedSession(sid="old-sid", revoked_at=now - timedelta(days=31))
+        )
+        db_session.add(RevokedSession(sid="fresh-sid", revoked_at=now))
+        db_session.commit()
+
+        revoke_session_id(db_session, "new-sid")
+
+        sids = {row.sid for row in db_session.query(RevokedSession).all()}
+        assert "old-sid" not in sids
+        assert sids == {"fresh-sid", "new-sid"}
+
+
 class TestLoginAttemptModel:
     """Tests para el modelo LoginAttempt."""
 
