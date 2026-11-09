@@ -47,35 +47,49 @@ const queryClient = new QueryClient({
   },
 });
 
-// ── PWA update detection ──
-// When a new service worker is installed, show a reload button so the user
-// gets the latest version without manually closing and reopening the PWA.
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistration().then((reg) => {
-    if (!reg) return;
-    reg.addEventListener("updatefound", () => {
-      const newWorker = reg.installing;
-      if (!newWorker) return;
-      newWorker.addEventListener("statechange", () => {
-        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-          // New version available — show reload banner
-          const banner = document.createElement("div");
-          banner.className =
-            "fixed bottom-4 left-4 right-4 z-[999] flex items-center justify-between gap-3 rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-4 py-3 text-sm text-[var(--color-accent)] shadow-[var(--shadow-overlay)] backdrop-blur sm:left-auto sm:right-4 sm:max-w-sm";
-          banner.innerHTML =
-            '<span>Nueva versión disponible.</span>' +
-            '<button class="shrink-0 rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-accent-ink)] hover:brightness-110">Actualizar</button>';
-          banner.querySelector("button")!.addEventListener("click", () => {
-            newWorker.postMessage({ type: "SKIP_WAITING" });
-            window.location.reload();
-          });
-          document.body.appendChild(banner);
-        }
-      });
-    });
-    // Check for updates every 5 minutes
-    setInterval(() => reg.update(), 5 * 60 * 1000);
+// A new service worker already calls skipWaiting. Reload when it takes
+// control so the latest version applies on phone and desktop without a button.
+// The first install has no controller yet, so opening the app does not reload.
+if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+  let reloading = false;
+  const reloadForUpdate = () => {
+    if (reloading) return;
+    reloading = true;
+    window.location.reload();
+  };
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    const active = document.activeElement;
+    const typing =
+      active instanceof HTMLInputElement ||
+      active instanceof HTMLTextAreaElement ||
+      (active instanceof HTMLElement && active.isContentEditable);
+    if (!typing) {
+      reloadForUpdate();
+      return;
+    }
+    active.addEventListener("blur", reloadForUpdate, { once: true });
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if (document.visibilityState === "hidden") reloadForUpdate();
+      },
+      { once: true },
+    );
   });
+}
+
+if ("serviceWorker" in navigator) {
+  const lookForUpdate = () => {
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      reg?.update().catch(() => undefined);
+    });
+  };
+  lookForUpdate();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") lookForUpdate();
+  });
+  window.addEventListener("pageshow", lookForUpdate);
+  setInterval(lookForUpdate, 5 * 60 * 1000);
 }
 
 createRoot(document.getElementById("root")!).render(
