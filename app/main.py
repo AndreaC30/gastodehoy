@@ -56,6 +56,7 @@ from fastapi import status
 from sqlalchemy import text
 
 from app import database as db
+from app.api_errors import install as install_api_errors
 from app.config import DEFAULT_APP_SECRET, settings as app_settings
 from app.database import Base
 from app.error_log import record_unhandled
@@ -171,6 +172,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="GastoDeHoy", lifespan=lifespan)
+install_api_errors(app)
 
 app.add_middleware(
     CORSMiddleware,
