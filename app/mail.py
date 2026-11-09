@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import smtplib
 import ssl
 from contextlib import contextmanager
@@ -75,6 +76,11 @@ def send_email(to_email: str, subject: str, body: str) -> None:
     _transmit(host, msg)
 
 
+def _header_safe(value: str) -> str:
+    """Drop CR/LF so a name cannot start a second header."""
+    return value.replace("\r", "").replace("\n", "")
+
+
 def send_welcome_email(to_email: str, name: str) -> None:
     """Envía un correo de bienvenida personalizado al registrarse.
 
@@ -82,7 +88,7 @@ def send_welcome_email(to_email: str, name: str) -> None:
         to_email: Dirección de correo del nuevo usuario.
         name: Nombre del nuevo usuario.
     """
-    subject = f"¡Bienvenido a GastoDeHoy, {name}!"
+    subject = f"¡Bienvenido a GastoDeHoy, {_header_safe(name)}!"
     body = (
         f"Hola, {name}.\n\n"
         "¡Qué alegría tenerte con nosotros! Tu cuenta en GastoDeHoy ya está "
@@ -115,7 +121,8 @@ def send_weekly_digest_email(to_email: str, name: str, digest: dict) -> None:
     week_start = digest["week_start"]
     week_end = digest["week_end"]
 
-    subject = f"GastoDeHoy — resumen semanal, {name}"
+    safe_name = html.escape(name)
+    subject = f"GastoDeHoy — resumen semanal, {_header_safe(name)}"
     text = (
         f"Hola, {name}.\n\n"
         f"Gasto variable (últimos 7 días, {week_start:%d/%m}–{week_end:%d/%m}): {weekly}\n"
@@ -124,8 +131,8 @@ def send_weekly_digest_email(to_email: str, name: str, digest: dict) -> None:
         f"Ahorro reservado: {savings}\n\n"
         "Entra en GastoDeHoy para ver el detalle.\n"
     )
-    html = (
-        f"<p>Hola, <strong>{name}</strong>.</p>"
+    html_body = (
+        f"<p>Hola, <strong>{safe_name}</strong>.</p>"
         "<p>Tu resumen semanal en <strong>GastoDeHoy</strong>:</p>"
         "<ul>"
         f"<li>Gasto variable (últimos 7 días, "
@@ -144,7 +151,7 @@ def send_weekly_digest_email(to_email: str, name: str, digest: dict) -> None:
     msg["From"] = from_addr
     msg["To"] = to_email
     msg.set_content(text)
-    msg.add_alternative(html, subtype="html")
+    msg.add_alternative(html_body, subtype="html")
     _transmit(host, msg)
 
 
