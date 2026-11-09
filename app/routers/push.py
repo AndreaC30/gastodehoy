@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, limit_authenticated_writes
 from app.config import settings
 from app.database import get_db
 from app.models import PushSubscription, User
@@ -24,7 +24,11 @@ def push_config() -> PushConfigRead:
     )
 
 
-@router.post("/subscribe", status_code=204)
+@router.post(
+    "/subscribe",
+    status_code=204,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def subscribe_push(
     payload: PushSubscribeCreate,
     db: Session = Depends(get_db),
@@ -57,7 +61,11 @@ def subscribe_push(
     db.commit()
 
 
-@router.delete("/subscribe", status_code=204)
+@router.delete(
+    "/subscribe",
+    status_code=204,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def unsubscribe_push(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),

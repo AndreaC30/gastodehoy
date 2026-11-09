@@ -4,6 +4,7 @@ Password hashing (bcrypt), session cookies signed with itsdangerous,
 recovery-code helpers for the admin CLI, ``get_current_user`` dependency,
 and a persistent SQLite-backed rate limiter for login, register,
 forgot-password and reset-password (per IP and per email).
+Authenticated mutations use a separate in-memory per-user window.
 """
 
 from __future__ import annotations
@@ -13,6 +14,9 @@ import hmac
 import ipaddress
 import logging
 import secrets
+import threading
+import time
+from collections import deque
 from datetime import datetime, timedelta, timezone
 from typing import Final
 
@@ -51,6 +55,13 @@ RECOVERY_CODE_GROUP_LEN: Final = 4
 # Rate limiter constants
 _LOGIN_WINDOW_S: Final = 5 * 60
 _LOGIN_MAX_ATTEMPTS: Final = 5
+
+# Mutating requests for one logged-in account. Not the login-failure counter.
+AUTHENTICATED_WRITE_LIMIT: Final = 30
+AUTHENTICATED_WRITE_WINDOW_S: Final = 60
+
+_write_hits: dict[int, deque[float]] = {}
+_write_lock = threading.Lock()
 
 
 def password_exceeds_bcrypt(password: str) -> bool:
@@ -433,3 +444,38 @@ def record_login_failure(
         )
     )
     db.commit()
+
+
+def limit_authenticated_writes(user: User = Depends(get_current_user)) -> None:
+    """Raise 429 after ``AUTHENTICATED_WRITE_LIMIT`` mutations in the window.
+
+    Development skips the limit, same as login, so the test suite can opt in
+    by setting production. This window is in-memory and per user. It does not
+    read or write ``LoginAttempt``: a saved expense is not a failed login.
+    Reads do not call this.
+    """
+    if settings.environment == "development":
+        return
+
+    now = time.monotonic()
+    cutoff = now - AUTHENTICATED_WRITE_WINDOW_S
+    with _write_lock:
+        stamps = _write_hits.setdefault(user.id, deque())
+        while stamps and stamps[0] <= cutoff:
+            stamps.popleft()
+        if len(stamps) >= AUTHENTICATED_WRITE_LIMIT:
+            count = len(stamps)
+        else:
+            stamps.append(now)
+            return
+
+    _log.warning(
+        "write-rate-limit: user %s blocked (%d writes in %ds)",
+        user.id,
+        count,
+        AUTHENTICATED_WRITE_WINDOW_S,
+    )
+    raise HTTPException(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        detail="Demasiados cambios. Espera un minuto.",
+    )
