@@ -171,7 +171,23 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="GastoDeHoy", lifespan=lifespan)
+def openapi_docs_kwargs() -> dict[str, str | None]:
+    """Schema and docs URLs. Production publishes neither.
+
+    The document lists admin routes, so ``/openapi.json``, ``/docs``, and
+    ``/redoc`` exist only when ``environment`` is development. Read at call
+    time: the app object is built once, at import.
+    """
+    if app_settings.environment == "production":
+        return {"openapi_url": None, "docs_url": None, "redoc_url": None}
+    return {
+        "openapi_url": "/openapi.json",
+        "docs_url": "/docs",
+        "redoc_url": "/redoc",
+    }
+
+
+app = FastAPI(title="GastoDeHoy", lifespan=lifespan, **openapi_docs_kwargs())
 install_api_errors(app)
 
 app.add_middleware(
