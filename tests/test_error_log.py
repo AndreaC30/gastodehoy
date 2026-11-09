@@ -61,7 +61,8 @@ def test_unhandled_route_logs_context_without_request_secrets(
         ]
 
     assert response.status_code == 500
-    assert response.text == "Internal Server Error"
+    assert response.json() == {"detail": "Error interno. Inténtalo de nuevo."}
+    assert "exc-secret-marker" not in response.text
     assert seen["cookie"] == "planted-cookie"
     assert "planted-authorization" in seen["authorization"]
     assert "planted-password" in seen["body"]
