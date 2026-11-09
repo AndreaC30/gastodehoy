@@ -7,12 +7,46 @@ serves the built React app from ``web/dist``.
 
 from contextlib import asynccontextmanager
 import logging
+import re
 import uuid
 from pathlib import Path
 
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 _log = logging.getLogger(__name__)
+_TOKEN_IN_QUERY = re.compile(r"([?&])token=[^&\s]*", re.IGNORECASE)
+
+
+class _RedactAccessToken(logging.Filter):
+    """Drop a reset token from uvicorn's access line.
+
+    The line is ``client - "METHOD /path?query HTTP/x" status``. The query
+    is the third format argument. A password-reset link puts the token there.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        args = record.args
+        if (
+            isinstance(args, tuple)
+            and len(args) >= 3
+            and isinstance(args[2], str)
+            and "token=" in args[2].lower()
+        ):
+            record.args = (
+                *args[:2],
+                _TOKEN_IN_QUERY.sub(r"\1token=redacted", args[2]),
+                *args[3:],
+            )
+        return True
+
+
+def _install_access_redaction() -> None:
+    access = logging.getLogger("uvicorn.access")
+    if not any(isinstance(item, _RedactAccessToken) for item in access.filters):
+        access.addFilter(_RedactAccessToken())
+
+
+_install_access_redaction()
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware

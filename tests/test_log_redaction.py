@@ -6,6 +6,7 @@ import logging
 import threading
 
 from app.auth import SESSION_COOKIE
+from app.main import _RedactAccessToken
 from app.config import settings as app_settings
 from app.legal import LEGAL_TERMS_VERSION
 
@@ -112,3 +113,27 @@ def test_logs_omit_password_session_cookie_and_reset_token(
     for cookie in cookies:
         assert cookie not in text
     assert "script-src" in text
+
+
+def test_access_log_redacts_reset_token() -> None:
+    record = logging.LogRecord(
+        name="uvicorn.access",
+        level=logging.INFO,
+        pathname="",
+        lineno=0,
+        msg='%s - "%s %s HTTP/%s" %d',
+        args=(
+            "127.0.0.1:9",
+            "GET",
+            "/reset-password?token=super-secret&x=1",
+            "1.1",
+            200,
+        ),
+        exc_info=None,
+    )
+    assert _RedactAccessToken().filter(record) is True
+    text = record.getMessage()
+    assert "super-secret" not in text
+    assert "token=redacted" in text
+    assert "/reset-password" in text
+    assert "x=1" in text
