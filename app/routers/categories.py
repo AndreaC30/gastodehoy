@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, limit_authenticated_writes
 from app.database import get_db
 from app.models import ExpenseCategory, User, VariableExpense
 from app.schemas import (
@@ -52,7 +52,12 @@ def list_categories(
     return list(db.scalars(stmt).all())
 
 
-@categories_router.post("", response_model=CategoryRead, status_code=201)
+@categories_router.post(
+    "",
+    response_model=CategoryRead,
+    status_code=201,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def create_category(
     payload: CategoryCreate,
     db: Session = Depends(get_db),
@@ -73,7 +78,11 @@ def create_category(
     return row
 
 
-@categories_router.patch("/{category_id}", response_model=CategoryRead)
+@categories_router.patch(
+    "/{category_id}",
+    response_model=CategoryRead,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def update_category(
     category_id: int,
     payload: CategoryUpdate,
@@ -96,7 +105,11 @@ def update_category(
     return row
 
 
-@categories_router.delete("/{category_id}", status_code=204)
+@categories_router.delete(
+    "/{category_id}",
+    status_code=204,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def delete_category(
     category_id: int,
     db: Session = Depends(get_db),

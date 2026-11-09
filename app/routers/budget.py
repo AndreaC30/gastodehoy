@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, limit_authenticated_writes
 from app.database import get_db
 from app.models import ExtraIncome, ExpenseCategory, FixedExpense, User, UserSettings, VariableExpense
 from app.schemas import (
@@ -150,7 +150,11 @@ def read_settings(
     return BudgetSettings.model_validate(row)
 
 
-@settings_router.put("/settings", response_model=BudgetSettings)
+@settings_router.put(
+    "/settings",
+    response_model=BudgetSettings,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def update_settings(
     payload: BudgetSettings,
     db: Session = Depends(get_db),
@@ -173,7 +177,11 @@ def update_settings(
     return BudgetSettings.model_validate(row)
 
 
-@settings_router.put("/settings/language", response_model=BudgetSettings)
+@settings_router.put(
+    "/settings/language",
+    response_model=BudgetSettings,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def update_language(
     payload: LanguageUpdate,
     db: Session = Depends(get_db),
@@ -242,7 +250,11 @@ def list_fixed(
     return list(db.scalars(stmt).all())
 
 
-@fixed_router.post("", response_model=FixedExpenseRead)
+@fixed_router.post(
+    "",
+    response_model=FixedExpenseRead,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def create_fixed(
     payload: FixedExpenseCreate,
     db: Session = Depends(get_db),
@@ -261,7 +273,11 @@ def create_fixed(
     return row
 
 
-@fixed_router.patch("/{expense_id}", response_model=FixedExpenseRead)
+@fixed_router.patch(
+    "/{expense_id}",
+    response_model=FixedExpenseRead,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def update_fixed(
     expense_id: int,
     payload: FixedExpenseUpdate,
@@ -286,7 +302,11 @@ def update_fixed(
     return row
 
 
-@fixed_router.delete("/{expense_id}", status_code=204)
+@fixed_router.delete(
+    "/{expense_id}",
+    status_code=204,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def delete_fixed(
     expense_id: int,
     db: Session = Depends(get_db),
@@ -363,7 +383,11 @@ def list_expenses(
     )
 
 
-@expenses_router.post("", response_model=VariableExpenseRead)
+@expenses_router.post(
+    "",
+    response_model=VariableExpenseRead,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def create_expense(
     payload: VariableExpenseCreate,
     db: Session = Depends(get_db),
@@ -404,7 +428,11 @@ def create_expense(
     return row
 
 
-@expenses_router.patch("/{expense_id}", response_model=VariableExpenseRead)
+@expenses_router.patch(
+    "/{expense_id}",
+    response_model=VariableExpenseRead,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def update_expense(
     expense_id: int,
     payload: VariableExpenseUpdate,
@@ -439,7 +467,11 @@ def update_expense(
     return row
 
 
-@expenses_router.delete("/{expense_id}", status_code=204)
+@expenses_router.delete(
+    "/{expense_id}",
+    status_code=204,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def delete_expense(
     expense_id: int,
     db: Session = Depends(get_db),
@@ -481,7 +513,11 @@ def list_extra_income(
     return list(db.scalars(stmt).all())
 
 
-@extra_income_router.post("", response_model=ExtraIncomeRead)
+@extra_income_router.post(
+    "",
+    response_model=ExtraIncomeRead,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def create_extra_income(
     payload: ExtraIncomeCreate,
     db: Session = Depends(get_db),
@@ -503,7 +539,11 @@ def create_extra_income(
     return row
 
 
-@extra_income_router.delete("/{entry_id}", status_code=204)
+@extra_income_router.delete(
+    "/{entry_id}",
+    status_code=204,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def delete_extra_income(
     entry_id: int,
     db: Session = Depends(get_db),
