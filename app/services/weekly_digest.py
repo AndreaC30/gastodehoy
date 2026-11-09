@@ -5,10 +5,10 @@ from __future__ import annotations
 from datetime import timedelta
 from decimal import Decimal
 
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import User, VariableExpense
+from app.money import cents_to_euros, sum_column_cents
 from app.services.budget import compute_summary, today_in_app_timezone
 
 
@@ -18,14 +18,14 @@ def _sum_variable_between(
     start,
     end,
 ) -> Decimal:
-    raw = session.scalar(
-        select(func.coalesce(func.sum(VariableExpense.amount), 0)).where(
-            VariableExpense.user_id == user_id,
-            VariableExpense.occurred_at >= start,
-            VariableExpense.occurred_at <= end,
-        )
-    ) or Decimal("0")
-    return Decimal(raw).quantize(Decimal("0.01"))
+    cents = sum_column_cents(
+        session,
+        VariableExpense.amount,
+        VariableExpense.user_id == user_id,
+        VariableExpense.occurred_at >= start,
+        VariableExpense.occurred_at <= end,
+    )
+    return cents_to_euros(cents)
 
 
 def build_digest_for_user(session: Session, user: User) -> dict:
