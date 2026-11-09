@@ -24,6 +24,7 @@ from sqlalchemy import text
 from app import database as db
 from app.config import DEFAULT_APP_SECRET, settings as app_settings
 from app.database import Base
+from app.error_log import record_unhandled
 from app.routers import admin, auth, budget, budget_rules, categories, export, goals, push
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -151,7 +152,11 @@ async def add_request_id(request: Request, call_next):
     """Attach a unique request_id to every request for log correlation."""
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4())[:8])
     request.state.request_id = request_id
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        record_unhandled(request, exc)
+        raise
     response.headers["X-Request-ID"] = request_id
     return response
 
@@ -203,12 +208,13 @@ if ASSETS_DIR.is_dir():
 
 
 @app.get("/health")
-def health() -> JSONResponse:
+def health(request: Request) -> JSONResponse:
     """Liveness/readiness probe with a trivial DB round-trip."""
     try:
         with db.SessionLocal() as session:
             session.execute(text("SELECT 1"))
-    except Exception:
+    except Exception as exc:
+        record_unhandled(request, exc)
         return JSONResponse(
             status_code=503,
             content={"status": "degraded", "database": "unreachable"},
