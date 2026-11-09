@@ -1,8 +1,8 @@
-# Mínimos revisados manualmente; sube versiones con:
-#   pip install -U -r requirements.txt
-# y comprueba: docker compose up --build
+# Rangos editados a mano. La imagen instala requirements.lock, no este archivo.
+# Tras cambiar un rango, regenera el lock en un venv limpio de Python 3.13:
+#   pip install -r requirements.txt && pip freeze > requirements.lock
 #
-# Python: ver Dockerfile (3.13+).
+# Python: ver Dockerfile (3.13).
 
 fastapi>=0.115.6,<1
 uvicorn[standard]>=0.34.0,<1
