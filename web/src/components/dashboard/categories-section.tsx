@@ -120,10 +120,11 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-soft)] p-4 space-y-4">
           <div>
-            <label className={`mb-1 block ${TYPE_LABEL}`}>
+            <label htmlFor="category-name" className={`mb-1 block ${TYPE_LABEL}`}>
               {t("categoryManager.name")}
             </label>
             <input
+              id="category-name"
               type="text"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
@@ -180,10 +181,11 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
           </div>
 
           <div>
-            <label className={`mb-1 block ${TYPE_LABEL}`}>
+            <label htmlFor="category-budget" className={`mb-1 block ${TYPE_LABEL}`}>
               {t("categoryManager.budget")}
             </label>
             <input
+              id="category-budget"
               type="text"
               inputMode="decimal"
               value={formBudget}

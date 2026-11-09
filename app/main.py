@@ -125,7 +125,8 @@ async def lifespan(_: FastAPI):
             )
     else:
         _log.warning(
-            "ENV=development: el rate limit de login, registro y recuperación está desactivado. "
+            "ENV=development: el rate limit de login, registro, recuperación "
+            "y de escrituras con sesión está desactivado. "
             "En un servidor público usa ENV=production."
         )
 

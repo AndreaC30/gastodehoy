@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import get_current_user, limit_authenticated_writes
 from app.database import get_db
 from app.models import SavingsGoal, User
 from app.schemas import SavingsGoalCreate, SavingsGoalRead, SavingsGoalUpdate
@@ -32,7 +32,12 @@ def list_goals(
     return list(db.scalars(stmt).all())
 
 
-@router.post("", response_model=SavingsGoalRead, status_code=201)
+@router.post(
+    "",
+    response_model=SavingsGoalRead,
+    status_code=201,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def create_goal(
     payload: SavingsGoalCreate,
     db: Session = Depends(get_db),
@@ -51,7 +56,11 @@ def create_goal(
     return row
 
 
-@router.patch("/{goal_id}", response_model=SavingsGoalRead)
+@router.patch(
+    "/{goal_id}",
+    response_model=SavingsGoalRead,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def update_goal(
     goal_id: int,
     payload: SavingsGoalUpdate,
@@ -73,7 +82,11 @@ def update_goal(
     return row
 
 
-@router.delete("/{goal_id}", status_code=204)
+@router.delete(
+    "/{goal_id}",
+    status_code=204,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
 def delete_goal(
     goal_id: int,
     db: Session = Depends(get_db),
