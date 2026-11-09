@@ -78,7 +78,7 @@ def main() -> None:
                 "tag": msg["tag"],
             }
             if args.dry_run:
-                _log.info("dry-run user=%s: %s — %s", user.email, msg["title"], msg["body"])
+                _log.info("dry-run user=%s tag=%s", user_id, msg["tag"])
                 sent += 1
                 continue
             s, f = send_to_user(db, user_id, payload)

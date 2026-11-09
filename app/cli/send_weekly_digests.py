@@ -73,13 +73,7 @@ def main() -> None:
                 continue
             digest = build_digest_for_user(db, user)
             if args.dry_run:
-                _log.info(
-                    "dry-run %s: weekly=%s remaining=%s savings=%s",
-                    user.email,
-                    digest["weekly_variable_spent"],
-                    digest["remaining_this_month"],
-                    digest["savings_amount"],
-                )
+                _log.info("dry-run user=%s", user.id)
                 sent += 1
                 continue
             try:
@@ -89,7 +83,11 @@ def main() -> None:
                 sys.exit("SMTP dejó de estar configurado durante el envío.")
             except Exception as exc:
                 failed += 1
-                _log.warning("weekly digest failed for %s: %s", user.email, exc)
+                _log.warning(
+                    "weekly digest failed for user %s (%s)",
+                    user.id,
+                    type(exc).__name__,
+                )
 
     print(f"Resúmenes semanales: {sent} enviados, {failed} fallidos.")
     if failed:
