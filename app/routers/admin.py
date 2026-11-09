@@ -257,5 +257,5 @@ def send_notification(
         send_email(admin_email, payload.subject, payload.body)
         _log.info("admin notification sent: %s", payload.subject)
     except Exception as exc:
-        _log.error("admin notification failed: %s", exc)
+        _log.error("admin notification failed (%s)", type(exc).__name__)
         raise

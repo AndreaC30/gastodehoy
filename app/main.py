@@ -216,12 +216,40 @@ def health() -> JSONResponse:
     return JSONResponse(content={"status": "ok", "database": "ok"})
 
 
+def _csp_log_summary(body: object) -> str:
+    """Directive and blocked resource, without the page URL or query string.
+
+    ``document-uri`` is the page the browser was on. A reset link puts the
+    one-time token in that query string, so the raw report must not be logged.
+    """
+    report: object = body
+    if isinstance(body, dict) and isinstance(body.get("csp-report"), dict):
+        report = body["csp-report"]
+    elif isinstance(body, list) and body and isinstance(body[0], dict):
+        report = body[0].get("body", body[0])
+    if not isinstance(report, dict):
+        return "unparsed"
+    directive = (
+        report.get("effective-directive")
+        or report.get("effectiveDirective")
+        or report.get("violated-directive")
+        or report.get("violatedDirective")
+        or ""
+    )
+    blocked = report.get("blocked-uri") or report.get("blockedURL") or ""
+    directive_text = str(directive).split(";", 1)[0].split(" ", 1)[0][:40]
+    blocked_text = str(blocked).split("?", 1)[0].split("#", 1)[0][:120]
+    if "token=" in blocked_text.lower():
+        blocked_text = "[redacted]"
+    return f"directive={directive_text} blocked={blocked_text}"
+
+
 @app.post("/csp-report")
 async def csp_report(request: Request):
     """Receive CSP violation reports from browsers (logging only)."""
     try:
         body = await request.json()
-        _log.warning("CSP violation: %s", body)
+        _log.warning("CSP violation: %s", _csp_log_summary(body))
     except Exception:
         pass
     return Response(status_code=204)
