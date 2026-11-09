@@ -7,12 +7,46 @@ serves the built React app from ``web/dist``.
 
 from contextlib import asynccontextmanager
 import logging
+import re
 import uuid
 from pathlib import Path
 
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 _log = logging.getLogger(__name__)
+_TOKEN_IN_QUERY = re.compile(r"([?&])token=[^&\s]*", re.IGNORECASE)
+
+
+class _RedactAccessToken(logging.Filter):
+    """Drop a reset token from uvicorn's access line.
+
+    The line is ``client - "METHOD /path?query HTTP/x" status``. The query
+    is the third format argument. A password-reset link puts the token there.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        args = record.args
+        if (
+            isinstance(args, tuple)
+            and len(args) >= 3
+            and isinstance(args[2], str)
+            and "token=" in args[2].lower()
+        ):
+            record.args = (
+                *args[:2],
+                _TOKEN_IN_QUERY.sub(r"\1token=redacted", args[2]),
+                *args[3:],
+            )
+        return True
+
+
+def _install_access_redaction() -> None:
+    access = logging.getLogger("uvicorn.access")
+    if not any(isinstance(item, _RedactAccessToken) for item in access.filters):
+        access.addFilter(_RedactAccessToken())
+
+
+_install_access_redaction()
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -216,12 +250,40 @@ def health() -> JSONResponse:
     return JSONResponse(content={"status": "ok", "database": "ok"})
 
 
+def _csp_log_summary(body: object) -> str:
+    """Directive and blocked resource, without the page URL or query string.
+
+    ``document-uri`` is the page the browser was on. A reset link puts the
+    one-time token in that query string, so the raw report must not be logged.
+    """
+    report: object = body
+    if isinstance(body, dict) and isinstance(body.get("csp-report"), dict):
+        report = body["csp-report"]
+    elif isinstance(body, list) and body and isinstance(body[0], dict):
+        report = body[0].get("body", body[0])
+    if not isinstance(report, dict):
+        return "unparsed"
+    directive = (
+        report.get("effective-directive")
+        or report.get("effectiveDirective")
+        or report.get("violated-directive")
+        or report.get("violatedDirective")
+        or ""
+    )
+    blocked = report.get("blocked-uri") or report.get("blockedURL") or ""
+    directive_text = str(directive).split(";", 1)[0].split(" ", 1)[0][:40]
+    blocked_text = str(blocked).split("?", 1)[0].split("#", 1)[0][:120]
+    if "token=" in blocked_text.lower():
+        blocked_text = "[redacted]"
+    return f"directive={directive_text} blocked={blocked_text}"
+
+
 @app.post("/csp-report")
 async def csp_report(request: Request):
     """Receive CSP violation reports from browsers (logging only)."""
     try:
         body = await request.json()
-        _log.warning("CSP violation: %s", body)
+        _log.warning("CSP violation: %s", _csp_log_summary(body))
     except Exception:
         pass
     return Response(status_code=204)

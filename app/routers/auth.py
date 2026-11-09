@@ -27,6 +27,7 @@ from app.auth import (
     RESET_TOKEN_TTL,
     SESSION_COOKIE,
     _client_ip,
+    _email_hint,
     check_login_rate,
     clear_session_cookie,
     get_current_user,
@@ -125,7 +126,7 @@ def _domain_has_mx(domain: str) -> bool:
         return False
 
 
-def _notify_admin_new_user(email: str, name: str) -> None:
+def _notify_admin_new_user(email: str, name: str, user_id: int) -> None:
     """Avisa por correo de un alta, si ADMIN_NOTIFY_EMAIL está definido."""
     admin_email = (settings.admin_notify_email or "").strip()
     if not admin_email:
@@ -140,7 +141,11 @@ def _notify_admin_new_user(email: str, name: str) -> None:
             f"  Fecha: {datetime.now(timezone.utc):%d/%m/%Y %H:%M}\n",
         )
     except Exception as exc:
-        _log.warning("admin notification failed for %s: %s", email, exc)
+        _log.warning(
+            "admin notification failed for user %s (%s)",
+            user_id,
+            type(exc).__name__,
+        )
 
 
 def _reset_link(token: str) -> str:
@@ -152,8 +157,12 @@ def _deliver_reset_email(to_email: str, reset_url: str) -> None:
     """Envía el enlace fuera de la petición. Un fallo no cambia la respuesta HTTP."""
     try:
         send_forgot_password_email(to_email, reset_url)
-    except Exception:
-        _log.exception("forgot-password: el envío SMTP falló")
+    except Exception as exc:
+        # Sin traceback: el mensaje de error puede incluir el enlace con el token.
+        _log.error(
+            "forgot-password: el envío SMTP falló (%s)",
+            type(exc).__name__,
+        )
 
 
 def _send_reset_email_in_background(to_email: str, reset_url: str) -> None:
@@ -237,11 +246,11 @@ def register(
             ) from e
         # Other UNIQUE violations (e.g., orphaned user_settings rows
         # occupying a reused user_id) should not happen after the
-        # AUTOINCREMENT migration, but we log the real cause.
+        # AUTOINCREMENT migration. The database message can repeat the email.
         _log.error(
-            "register: IntegrityError inesperado para %s: %s",
-            email,
-            orig_msg,
+            "register: IntegrityError inesperado (email_hint=%s, %s)",
+            _email_hint(email),
+            type(e.orig).__name__ if e.orig is not None else type(e).__name__,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -257,11 +266,15 @@ def register(
     # Send welcome email to the new user (non-blocking; failure is logged, not raised)
     try:
         send_welcome_email(email, payload.name)
-    except Exception:
-        _log.exception("Failed to send welcome email to %s", email)
+    except Exception as exc:
+        _log.error(
+            "Failed to send welcome email for user %s (%s)",
+            user.id,
+            type(exc).__name__,
+        )
 
     # Notify admin of new registration
-    _notify_admin_new_user(email, payload.name)
+    _notify_admin_new_user(email, payload.name, user.id)
 
     return RegisterResponse(user=UserPublic.model_validate(user))
 
