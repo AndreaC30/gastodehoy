@@ -12,6 +12,7 @@ from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Numeric, String, Tex
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.money import Cents
 
 
 class User(Base):
@@ -115,7 +116,7 @@ class UserSettings(Base):
         nullable=False,
     )
     monthly_income: Mapped[Decimal] = mapped_column(
-        Numeric(14, 2), default=Decimal("0"), nullable=False
+        Cents(), default=Decimal("0"), nullable=False
     )
     # "percent" => savings = income * savings_percent / 100
     # "fixed"   => savings = savings_amount (independiente del ingreso)
@@ -126,7 +127,7 @@ class UserSettings(Base):
         Numeric(5, 2), default=Decimal("0"), nullable=False
     )
     savings_amount: Mapped[Decimal] = mapped_column(
-        Numeric(14, 2), default=Decimal("0"), nullable=False
+        Cents(), default=Decimal("0"), nullable=False
     )
     dashboard_tour_completed: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, default=False, server_default="0"
@@ -161,7 +162,7 @@ class FixedExpense(Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Cents(), nullable=False)
     icon: Mapped[str | None] = mapped_column(String(40), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="fixed_expenses")
@@ -182,7 +183,7 @@ class VariableExpense(Base):
         ForeignKey("expense_categories.id", ondelete="SET NULL"),
         nullable=True,
     )
-    amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Cents(), nullable=False)
     occurred_at: Mapped[date] = mapped_column(Date, nullable=False)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Set on insert. NULL on rows created before this column existed, so they
@@ -213,9 +214,7 @@ class ExpenseCategory(Base):
         String(7), default="#6366f1", nullable=False
     )
     icon: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    monthly_budget: Mapped[Decimal | None] = mapped_column(
-        Numeric(14, 2), nullable=True
-    )
+    monthly_budget: Mapped[Decimal | None] = mapped_column(Cents(), nullable=True)
     is_default: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, default=False, server_default="0"
     )
@@ -237,7 +236,7 @@ class ExtraIncome(Base):
         index=True,
         nullable=False,
     )
-    amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Cents(), nullable=False)
     received_at: Mapped[date] = mapped_column(Date, nullable=False)
     # none = gastar todo; all | percent | fixed = reservar antes del margen
     savings_mode: Mapped[str] = mapped_column(
@@ -247,7 +246,7 @@ class ExtraIncome(Base):
         Numeric(5, 2), nullable=False, default=Decimal("0"), server_default="0"
     )
     savings_fixed: Mapped[Decimal] = mapped_column(
-        Numeric(14, 2), nullable=False, default=Decimal("0"), server_default="0"
+        Cents(), nullable=False, default=Decimal("0"), server_default="0"
     )
 
     user: Mapped[User] = relationship(back_populates="extra_incomes")
@@ -265,9 +264,9 @@ class SavingsGoal(Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(String(80), nullable=False)
-    target_amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    target_amount: Mapped[Decimal] = mapped_column(Cents(), nullable=False)
     current_amount: Mapped[Decimal] = mapped_column(
-        Numeric(14, 2), default=Decimal("0"), nullable=False
+        Cents(), default=Decimal("0"), nullable=False
     )
     target_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 

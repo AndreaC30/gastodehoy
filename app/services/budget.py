@@ -11,30 +11,13 @@ from datetime import date, datetime
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.models import ExtraIncome, FixedExpense, UserSettings, VariableExpense
-from app.services.extra_income_savings import saved_from_extra, spendable_from_extra
-
-
-def _sum_amount_in_month(
-    session: Session,
-    model_cls: type,
-    user_id: int,
-    date_column,
-    month_start: date,
-    month_end: date,
-) -> Decimal:
-    raw = session.scalar(
-        select(func.coalesce(func.sum(model_cls.amount), 0)).where(
-            model_cls.user_id == user_id,
-            date_column >= month_start,
-            date_column <= month_end,
-        )
-    ) or Decimal("0")
-    return Decimal(raw).quantize(Decimal("0.01"))
+from app.money import cents_to_euros, percent_of_cents, sum_column_cents, to_cents
+from app.services.extra_income_savings import saved_cents, spendable_cents
 
 
 def today_in_app_timezone() -> date:
@@ -85,36 +68,28 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
         else:
             session.refresh(us)
 
-    income = us.monthly_income
+    income_cents = to_cents(us.monthly_income)
     pct = us.savings_percent
-    fixed_savings = us.savings_amount
 
     # Ahorro efectivo segun el modo elegido por el usuario.
     # Capamos a [0, income] para no generar presupuestos negativos por
     # un "fijo" mayor que el ingreso (caso accidental).
     if us.savings_mode == "fixed":
-        savings_amount = max(Decimal("0"), min(fixed_savings, income))
+        savings_cents = max(0, min(to_cents(us.savings_amount), income_cents))
     else:
-        savings_amount = (income * pct / Decimal("100"))
-    savings_amount = savings_amount.quantize(Decimal("0.01"))
+        savings_cents = percent_of_cents(income_cents, pct)
 
     month_start, month_end = month_bounds(reference)
 
-    # Single query for all aggregates (fixed, variable, extra income)
-    fixed_total = session.scalar(
-        select(func.coalesce(func.sum(FixedExpense.amount), 0)).where(
-            FixedExpense.user_id == user_id
-        )
-    ) or Decimal("0")
-    fixed_total = Decimal(fixed_total).quantize(Decimal("0.01"))
-
-    variable_spent = _sum_amount_in_month(
+    fixed_cents = sum_column_cents(
+        session, FixedExpense.amount, FixedExpense.user_id == user_id
+    )
+    variable_cents = sum_column_cents(
         session,
-        VariableExpense,
-        user_id,
-        VariableExpense.occurred_at,
-        month_start,
-        month_end,
+        VariableExpense.amount,
+        VariableExpense.user_id == user_id,
+        VariableExpense.occurred_at >= month_start,
+        VariableExpense.occurred_at <= month_end,
     )
     extra_rows = list(
         session.scalars(
@@ -125,39 +100,33 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
             )
         ).all()
     )
-    extra_month = sum(
-        (Decimal(r.amount) for r in extra_rows), start=Decimal("0")
-    ).quantize(Decimal("0.01"))
-    extra_saved_month = sum(
-        (saved_from_extra(r) for r in extra_rows), start=Decimal("0")
-    ).quantize(Decimal("0.01"))
-    extra_spendable = sum(
-        (spendable_from_extra(r) for r in extra_rows), start=Decimal("0")
-    ).quantize(Decimal("0.01"))
+    extra_cents = sum(to_cents(row.amount) for row in extra_rows)
+    extra_saved_cents = sum(saved_cents(row) for row in extra_rows)
+    extra_spendable_cents = sum(spendable_cents(row) for row in extra_rows)
 
     # Ingreso efectivo: sueldo base + parte de extras no reservada como ahorro.
     # El ahorro del sueldo (porcentaje o fijo) sigue solo sobre el ingreso mensual.
-    effective_income = income + extra_spendable
-
-    monthly_budget = effective_income - savings_amount - fixed_total
-    remaining = monthly_budget - variable_spent
+    budget_cents = income_cents + extra_spendable_cents - savings_cents - fixed_cents
+    remaining_cents = budget_cents - variable_cents
 
     days_left = days_remaining_in_month(reference)
     divisor = Decimal(max(1, days_left))
-    suggested = (remaining / divisor).quantize(Decimal("0.01"))
+    suggested = (Decimal(remaining_cents) / Decimal(100) / divisor).quantize(
+        Decimal("0.01")
+    )
 
     return {
         "reference_date": reference,
         "days_remaining_in_month": days_left,
-        "monthly_income": income.quantize(Decimal("0.01")),
-        "extra_income_month": extra_month,
-        "extra_income_saved_month": extra_saved_month,
+        "monthly_income": cents_to_euros(income_cents),
+        "extra_income_month": cents_to_euros(extra_cents),
+        "extra_income_saved_month": cents_to_euros(extra_saved_cents),
         "savings_mode": us.savings_mode,
         "savings_percent": pct.quantize(Decimal("0.01")),
-        "savings_amount": savings_amount,
-        "fixed_expenses_total": fixed_total,
-        "variable_spent_month": variable_spent,
-        "monthly_budget_after_fixed_and_savings": monthly_budget.quantize(Decimal("0.01")),
-        "remaining_this_month": remaining.quantize(Decimal("0.01")),
+        "savings_amount": cents_to_euros(savings_cents),
+        "fixed_expenses_total": cents_to_euros(fixed_cents),
+        "variable_spent_month": cents_to_euros(variable_cents),
+        "monthly_budget_after_fixed_and_savings": cents_to_euros(budget_cents),
+        "remaining_this_month": cents_to_euros(remaining_cents),
         "suggested_spend_today": suggested,
     }

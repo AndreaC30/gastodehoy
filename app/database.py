@@ -183,6 +183,205 @@ def _cleanup_orphaned_rows(engine: Engine) -> None:
                 )
 
 
+def _qi(name: str) -> str:
+    """Quote a SQLite identifier."""
+    return '"' + name.replace('"', '""') + '"'
+
+
+def _is_integer_declared(type_name: str | None) -> bool:
+    """True when the declared column type has integer affinity."""
+    return "INT" in (type_name or "").upper()
+
+
+# Money stored as euros today. savings_percent columns are not in this map.
+_MONEY_CENTS_COLUMNS: dict[str, tuple[str, ...]] = {
+    "user_settings": ("monthly_income", "savings_amount"),
+    "fixed_expenses": ("amount",),
+    "variable_expenses": ("amount",),
+    "extra_incomes": ("amount", "savings_fixed"),
+    "expense_categories": ("monthly_budget",),
+    "savings_goals": ("target_amount", "current_amount"),
+}
+
+
+def _unique_clauses(cursor, table: str) -> list[str]:
+    clauses: list[str] = []
+    for idx in cursor.execute(f"PRAGMA index_list({_qi(table)})").fetchall():
+        # origin "u" is a UNIQUE constraint. "pk" and CREATE INDEX are not.
+        if len(idx) < 4 or idx[3] != "u":
+            continue
+        cols = cursor.execute(f"PRAGMA index_info({_qi(idx[1])})").fetchall()
+        ordered = [row[2] for row in sorted(cols, key=lambda row: row[0])]
+        if ordered:
+            clauses.append("UNIQUE (" + ", ".join(_qi(name) for name in ordered) + ")")
+    return clauses
+
+
+def _fk_clauses(cursor, table: str) -> list[str]:
+    groups: dict[int, list] = {}
+    for row in cursor.execute(f"PRAGMA foreign_key_list({_qi(table)})").fetchall():
+        groups.setdefault(row[0], []).append(row)
+    clauses: list[str] = []
+    for fid in sorted(groups):
+        group = sorted(groups[fid], key=lambda row: row[1])
+        cols = ", ".join(_qi(row[3]) for row in group)
+        refs = ", ".join(_qi(row[4]) for row in group)
+        clause = f"FOREIGN KEY({cols}) REFERENCES {_qi(group[0][2])}({refs})"
+        on_update, on_delete = group[0][5], group[0][6]
+        if on_update and str(on_update).upper() != "NO ACTION":
+            clause += f" ON UPDATE {on_update}"
+        if on_delete and str(on_delete).upper() != "NO ACTION":
+            clause += f" ON DELETE {on_delete}"
+        clauses.append(clause)
+    return clauses
+
+
+def _migrate_money_table(cursor, table: str, money_cols: tuple[str, ...]) -> None:
+    """Rebuild one table so money columns are INTEGER cents. Rows are kept."""
+    from app.money import euros_to_cents
+
+    exists = cursor.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name=?",
+        (table,),
+    ).fetchone()
+    if not exists:
+        return
+
+    info = cursor.execute(f"PRAGMA table_info({_qi(table)})").fetchall()
+    by_name = {row[1]: row for row in info}
+    present = [name for name in money_cols if name in by_name]
+    if not present:
+        return
+    if all(_is_integer_declared(by_name[name][2]) for name in present):
+        return
+
+    import logging
+
+    _log = logging.getLogger(__name__)
+    names = [row[1] for row in info]
+    pk_rows = sorted((row for row in info if row[5]), key=lambda row: row[5])
+    autoincrement = "AUTOINCREMENT" in (exists[0] or "").upper()
+    money = set(present)
+
+    col_defs: list[str] = []
+    for _cid, name, typ, notnull, dflt, pk in info:
+        declared = "INTEGER" if name in money else (typ or "")
+        qn = _qi(name)
+        if autoincrement and pk and len(pk_rows) == 1:
+            col_defs.append(f"{qn} INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT")
+            continue
+        parts = [qn]
+        if declared:
+            parts.append(declared)
+        if notnull:
+            parts.append("NOT NULL")
+        if dflt is not None:
+            parts.append(f"DEFAULT {dflt}")
+        col_defs.append(" ".join(parts))
+
+    constraints: list[str] = []
+    if pk_rows and not (autoincrement and len(pk_rows) == 1):
+        constraints.append(
+            "PRIMARY KEY (" + ", ".join(_qi(row[1]) for row in pk_rows) + ")"
+        )
+    constraints.extend(_unique_clauses(cursor, table))
+    constraints.extend(_fk_clauses(cursor, table))
+
+    index_sqls = [
+        row[0]
+        for row in cursor.execute(
+            "SELECT sql FROM sqlite_master "
+            "WHERE type='index' AND tbl_name=? AND sql IS NOT NULL",
+            (table,),
+        ).fetchall()
+    ]
+    seq = None
+    if cursor.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='sqlite_sequence'"
+    ).fetchone():
+        seq_row = cursor.execute(
+            "SELECT seq FROM sqlite_sequence WHERE name=?",
+            (table,),
+        ).fetchone()
+        if seq_row is not None:
+            seq = seq_row[0]
+
+    col_list = ", ".join(_qi(name) for name in names)
+    rows = cursor.execute(f"SELECT {col_list} FROM {_qi(table)}").fetchall()
+    converted: list[tuple] = []
+    for row in rows:
+        values = []
+        for name, value in zip(names, row):
+            if name in money and value is not None:
+                values.append(euros_to_cents(value))
+            else:
+                values.append(value)
+        converted.append(tuple(values))
+
+    new_name = f"{table}__cents_new"
+    cursor.execute(f"DROP TABLE IF EXISTS {_qi(new_name)}")
+    cursor.execute(
+        f"CREATE TABLE {_qi(new_name)} ({', '.join([*col_defs, *constraints])})"
+    )
+    if converted:
+        placeholders = ", ".join("?" * len(names))
+        cursor.executemany(
+            f"INSERT INTO {_qi(new_name)} ({col_list}) VALUES ({placeholders})",
+            converted,
+        )
+    copied = cursor.execute(f"SELECT COUNT(*) FROM {_qi(new_name)}").fetchone()[0]
+    if copied != len(rows):
+        raise RuntimeError(f"{table}: copied {copied} money rows, expected {len(rows)}")
+
+    cursor.execute(f"DROP TABLE {_qi(table)}")
+    cursor.execute(f"ALTER TABLE {_qi(new_name)} RENAME TO {_qi(table)}")
+    for sql in index_sqls:
+        cursor.execute(sql)
+    # RENAME keeps a sequence row for the copy. Raise it to the old high-water
+    # mark so AUTOINCREMENT does not reuse an id that was deleted before.
+    if seq is not None:
+        cursor.execute(
+            "UPDATE sqlite_sequence SET seq=? WHERE name=? AND seq<?",
+            (seq, table, seq),
+        )
+        found = cursor.execute(
+            "SELECT 1 FROM sqlite_sequence WHERE name=?",
+            (table,),
+        ).fetchone()
+        if found is None:
+            cursor.execute(
+                "INSERT INTO sqlite_sequence(name, seq) VALUES (?, ?)",
+                (table, seq),
+            )
+    _log.info("Migrated %s to integer cents (%d rows)", table, len(rows))
+
+
+def _migrate_money_to_integer_cents(engine: Engine) -> None:
+    """Copy legacy REAL money into INTEGER cents. A second run sees INTEGER and stops.
+
+    Each stored euro amount is rounded half-up to the nearest cent. Percent
+    columns are copied unchanged. The rebuild runs in one transaction with
+    foreign keys off, and it does not delete rows.
+    """
+    raw = engine.raw_connection()
+    try:
+        cursor = raw.cursor()
+        cursor.execute("PRAGMA foreign_keys=OFF")
+        cursor.execute("BEGIN")
+        try:
+            for table, columns in _MONEY_CENTS_COLUMNS.items():
+                _migrate_money_table(cursor, table, columns)
+            raw.commit()
+        except Exception:
+            raw.rollback()
+            raise
+        finally:
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+    finally:
+        raw.close()
+
+
 class Base(DeclarativeBase):
     """Base class for every ORM model in the project."""
 
@@ -333,7 +532,7 @@ def apply_sqlite_migrations(engine: Engine) -> None:
             conn.execute(
                 text(
                     "ALTER TABLE extra_incomes ADD COLUMN savings_fixed "
-                    "NUMERIC(14, 2) NOT NULL DEFAULT 0"
+                    "INTEGER NOT NULL DEFAULT 0"
                 )
             )
 
@@ -343,7 +542,7 @@ def apply_sqlite_migrations(engine: Engine) -> None:
             conn.execute(
                 text(
                     "ALTER TABLE expense_categories ADD COLUMN monthly_budget "
-                    "NUMERIC(14, 2)"
+                    "INTEGER"
                 )
             )
 
@@ -389,8 +588,8 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                 "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,"
                 "  name VARCHAR(80) NOT NULL,"
-                "  target_amount NUMERIC(14, 2) NOT NULL,"
-                "  current_amount NUMERIC(14, 2) NOT NULL DEFAULT 0,"
+                "  target_amount INTEGER NOT NULL,"
+                "  current_amount INTEGER NOT NULL DEFAULT 0,"
                 "  target_date DATE"
                 ")"
             )
@@ -480,6 +679,9 @@ def apply_sqlite_migrations(engine: Engine) -> None:
                 "ON revoked_sessions(revoked_at)"
             )
         )
+
+    # After column adds, so a newly added money column is part of the copy.
+    _migrate_money_to_integer_cents(engine)
 
 
 def get_db() -> Generator[Session, None, None]:
