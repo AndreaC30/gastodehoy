@@ -102,7 +102,6 @@ body,
 }
 
 .gdh-app-frame--scroll {
-  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
@@ -385,13 +384,13 @@ svg.gdh-icon-nav {
   }
 }
 
+/* Solo opacidad. Un translateY deja la sección en capa propia y, en
+   Chrome Android, esa capa se desgarra al hacer scroll (en iPhone no). */
 @keyframes gdhSectionIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }

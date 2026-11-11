@@ -474,7 +474,7 @@ export function Dashboard({ profileName }: Props) {
 
         {/* Section: GASTOS */}
         {activeSection === 'gastos' && (
-          <div className="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] lg:contents">
+          <div className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] md:overflow-clip lg:contents">
             <div
               className="flex border-b border-[var(--color-border)] lg:hidden"
               role="tablist"
@@ -569,7 +569,7 @@ export function Dashboard({ profileName }: Props) {
 
         {/* Section: ANALISIS */}
         {activeSection === 'analisis' && (
-          <div className="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]">
+          <div className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)] md:overflow-clip">
             <div
               className="flex border-b border-[var(--color-border)]"
               role="tablist"
