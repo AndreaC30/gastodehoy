@@ -1,5 +1,6 @@
 const ENABLED_KEY = "gdh_daily_notifications";
 const LAST_SHOWN_KEY = "gdh_daily_notification_date";
+const INSTALL_PROMPT_KEY = "gdh_notify_install_prompt";
 
 export function isDailyNotificationEnabled(): boolean {
   return localStorage.getItem(ENABLED_KEY) === "1";
@@ -7,6 +8,15 @@ export function isDailyNotificationEnabled(): boolean {
 
 export function setDailyNotificationEnabled(enabled: boolean): void {
   localStorage.setItem(ENABLED_KEY, enabled ? "1" : "0");
+}
+
+/** The person already chose "not now" on the first open of the installed app. */
+export function wasInstallNotifyDismissed(): boolean {
+  return localStorage.getItem(INSTALL_PROMPT_KEY) === "later";
+}
+
+export function dismissInstallNotify(): void {
+  localStorage.setItem(INSTALL_PROMPT_KEY, "later");
 }
 
 export function todayKey(): string {

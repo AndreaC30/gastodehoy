@@ -101,4 +101,5 @@ def test_push_enabled_notice_falls_back_to_spanish() -> None:
     unknown = push_enabled_notice("it")
     assert es["tag"] == "gdh-push-on"
     assert es["title"] == unknown["title"]
-    assert "cerrada" in es["body"]
+    assert es["title"] == "Listo"
+    assert "Cuenta" in es["body"]
