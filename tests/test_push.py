@@ -1,5 +1,11 @@
 """Web Push API tests."""
 
+from pywebpush import WebPushException
+
+from app.config import settings
+from app.models import PushSubscription
+from app.services.web_push import send_push_payload, send_to_user
+
 
 def test_push_config_disabled_by_default(client) -> None:
     r = client.get("/api/push/config")
@@ -123,3 +129,90 @@ def test_push_unsubscribe_only_own_subscriptions(
         )
     )
     assert other_count == 1
+
+
+class _Resp:
+    def __init__(self, status_code: int) -> None:
+        self.status_code = status_code
+
+
+def test_send_push_payload_keeps_message_for_a_day(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "vapid_public_key", "pub")
+    monkeypatch.setattr(settings, "vapid_private_key", "priv")
+    seen: dict = {}
+
+    def fake_webpush(**kwargs):
+        seen.update(kwargs)
+
+    monkeypatch.setattr("app.services.web_push.webpush", fake_webpush)
+    sub = PushSubscription(
+        user_id=1,
+        endpoint="https://push.example/sub/ttl",
+        p256dh="p",
+        auth="a",
+    )
+    assert send_push_payload(sub, {"title": "t"}) == "sent"
+    assert seen["ttl"] == 86400
+    assert seen["headers"]["Urgency"] == "high"
+
+
+def test_send_push_payload_marks_expired_subscriptions(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "vapid_public_key", "pub")
+    monkeypatch.setattr(settings, "vapid_private_key", "priv")
+
+    def gone(**_kwargs):
+        raise WebPushException("gone", response=_Resp(410))
+
+    monkeypatch.setattr("app.services.web_push.webpush", gone)
+    sub = PushSubscription(
+        user_id=1,
+        endpoint="https://push.example/sub/gone",
+        p256dh="p",
+        auth="a",
+    )
+    assert send_push_payload(sub, {"title": "t"}) == "gone"
+
+    def transient(**_kwargs):
+        raise WebPushException("down", response=_Resp(500))
+
+    monkeypatch.setattr("app.services.web_push.webpush", transient)
+    assert send_push_payload(sub, {"title": "t"}) == "failed"
+
+
+def test_send_to_user_drops_only_expired_subscriptions(
+    db_session, user, monkeypatch
+) -> None:
+    kept = PushSubscription(
+        user_id=user.id,
+        endpoint="https://push.example/sub/keep",
+        p256dh="p",
+        auth="a",
+    )
+    dropped = PushSubscription(
+        user_id=user.id,
+        endpoint="https://push.example/sub/drop",
+        p256dh="p",
+        auth="a",
+    )
+    db_session.add_all([kept, dropped])
+    db_session.commit()
+
+    def fake_send(subscription, _payload):
+        if subscription.endpoint.endswith("/drop"):
+            return "gone"
+        return "failed"
+
+    monkeypatch.setattr("app.services.web_push.send_push_payload", fake_send)
+    sent, failed = send_to_user(db_session, user.id, {"title": "t"})
+    db_session.commit()
+    assert (sent, failed) == (0, 2)
+    assert db_session.get(PushSubscription, kept.id) is not None
+    assert db_session.get(PushSubscription, dropped.id) is None
+
+
+def test_confirm_push_requires_auth(anon_client) -> None:
+    assert anon_client.post("/api/push/confirm").status_code == 401
+
+
+def test_confirm_push_without_vapid(client) -> None:
+    assert client.post("/api/push/confirm").status_code == 503

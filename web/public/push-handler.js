@@ -18,11 +18,12 @@ self.addEventListener("push", (event) => {
     data: { url: "/" },
   });
 
-  // Set app icon badge (red dot / counter) when push arrives
-  const badge = self.navigator?.setAppBadge?.(1);
-  const tasks = badge ? Promise.all([show, badge]) : show;
-
-  event.waitUntil(tasks);
+  event.waitUntil(
+    show.then(() => {
+      const badge = self.navigator?.setAppBadge?.(1);
+      return badge ? badge.catch(() => undefined) : undefined;
+    }),
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {

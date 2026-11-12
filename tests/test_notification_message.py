@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from app.services.notification_message import pick_daily_notification
+from app.services.notification_message import pick_daily_notification, push_enabled_notice
 
 
 def test_prefers_success_insight() -> None:
@@ -65,3 +65,11 @@ def test_returns_none_without_summary() -> None:
         ]
     }
     assert pick_daily_notification(insights, None) is None
+
+
+def test_push_enabled_notice_falls_back_to_spanish() -> None:
+    es = push_enabled_notice("es")
+    unknown = push_enabled_notice("it")
+    assert es["tag"] == "gdh-push-on"
+    assert es["title"] == unknown["title"]
+    assert "cerrada" in es["body"]

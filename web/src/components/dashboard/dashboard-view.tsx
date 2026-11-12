@@ -34,6 +34,8 @@ import {
   markDashboardTourCompleted,
 } from "@/lib/guided-tour-preference";
 import { maybeShowDailyNotification } from "@/lib/daily-notification";
+import { isDailyNotificationEnabled } from "@/lib/daily-notification-preference";
+import { syncWebPush } from "@/lib/push-subscription";
 import { hapticTick } from "@/lib/haptics";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
@@ -183,6 +185,11 @@ export function Dashboard({ profileName }: Props) {
     }, delay);
     return () => window.clearTimeout(t);
   }, [settingsQ.data, summaryQ.isPending, fixedQ.isPending, expensesQ.isPending]);
+
+  useEffect(() => {
+    if (!isDailyNotificationEnabled()) return;
+    void syncWebPush();
+  }, []);
 
   useEffect(() => {
     if (!summaryQ.isSuccess) return;

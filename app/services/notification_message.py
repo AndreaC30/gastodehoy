@@ -78,3 +78,29 @@ def pick_daily_notification(
         }
 
     return None
+
+
+_PUSH_ENABLED = {
+    "es": (
+        "Avisos activados",
+        "GastoDeHoy te avisará una vez al día, también con la app cerrada.",
+    ),
+    "en": (
+        "Notifications on",
+        "GastoDeHoy will notify you once a day, even when the app is closed.",
+    ),
+    "fr": (
+        "Notifications activées",
+        "GastoDeHoy vous préviendra une fois par jour, même si l'app est fermée.",
+    ),
+    "de": (
+        "Hinweise aktiv",
+        "GastoDeHoy benachrichtigt dich einmal am Tag, auch bei geschlossener App.",
+    ),
+}
+
+
+def push_enabled_notice(lang: str) -> dict[str, str]:
+    """Visible confirmation sent once, when this device opts in."""
+    title, body = _PUSH_ENABLED.get(lang, _PUSH_ENABLED["es"])
+    return {"title": title, "body": body, "tag": "gdh-push-on"}
