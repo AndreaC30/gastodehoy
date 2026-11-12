@@ -49,6 +49,8 @@ INSIGHT_TRANSLATIONS = {
         "notif_daily_limit_title": "Your daily cap",
         "notif_nudge_title": "Your day on GastoDeHoy",
         "notif_nudge_body": "Open the app to check how your month is going and today's budget.",
+        "notif_log_today_title": "Did you spend today?",
+        "notif_log_today_body": "Nothing is logged for today. If you spent, add it in GastoDeHoy.",
 
 
         "action_review_expenses": "Review expenses",
@@ -108,6 +110,8 @@ INSIGHT_TRANSLATIONS = {
         "notif_daily_limit_title": "Tu tope de hoy",
         "notif_nudge_title": "Tu día en GastoDeHoy",
         "notif_nudge_body": "Abre la app para ver cómo va tu mes y el tope de hoy.",
+        "notif_log_today_title": "¿Has gastado hoy?",
+        "notif_log_today_body": "Hoy no hay ningún gasto anotado. Si has gastado, regístralo en GastoDeHoy.",
 
 
         "action_review_expenses": "Revisar gastos",
@@ -166,6 +170,8 @@ INSIGHT_TRANSLATIONS = {
         "notif_daily_limit_title": "Votre plafond du jour",
         "notif_nudge_title": "Votre journée sur GastoDeHoy",
         "notif_nudge_body": "Ouvrez l'app pour voir comment va votre mois et le budget du jour.",
+        "notif_log_today_title": "Avez-vous dépensé aujourd'hui ?",
+        "notif_log_today_body": "Aucune dépense n'est notée aujourd'hui. Si vous avez dépensé, ajoutez-la dans GastoDeHoy.",
 
 
         "action_review_expenses": "Voir les dépenses",
@@ -224,6 +230,8 @@ INSIGHT_TRANSLATIONS = {
         "notif_daily_limit_title": "Dein Tageslimit",
         "notif_nudge_title": "Dein Tag auf GastoDeHoy",
         "notif_nudge_body": "Öffne die App, um deinen Monat und das heutige Budget zu sehen.",
+        "notif_log_today_title": "Hast du heute etwas ausgegeben?",
+        "notif_log_today_body": "Für heute ist nichts eingetragen. Wenn du ausgegeben hast, trag es in GastoDeHoy ein.",
 
 
         "action_review_expenses": "Ausgaben prüfen",

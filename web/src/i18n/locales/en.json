@@ -353,7 +353,7 @@
     "description": "Income, categories and goals are in the main menu. Here you manage app preferences, your session and, if needed, account closure.",
     "prefsTitle": "Preferences",
     "dailyNotifyTitle": "Daily reminder",
-    "dailyNotifyDesc": "One alert a day on this device, including when the app is closed.",
+    "dailyNotifyDesc": "Every day around 20:30, including when the app is closed. If you haven't logged a spend, it asks whether you spent today.",
     "notifyError": "Enable notifications in your browser or system settings to receive the daily reminder.",
     "densityTitle": "Compact view",
     "densityDesc": "In fixed and variable expense lists, tighter spacing and slightly smaller text so you see more rows.",

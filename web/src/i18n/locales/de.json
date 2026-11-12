@@ -353,7 +353,7 @@
     "description": "Einkommen, Kategorien und Ziele sind im Hauptmenü. Hier verwaltest du App-Einstellungen, die Sitzung und, falls nötig, die Kontoschließung.",
     "prefsTitle": "Einstellungen",
     "dailyNotifyTitle": "Tägliche Erinnerung",
-    "dailyNotifyDesc": "Ein Hinweis am Tag auf diesem Gerät, auch bei geschlossener App.",
+    "dailyNotifyDesc": "Jeden Tag gegen 20:30, auch bei geschlossener App. Wenn du nichts eingetragen hast, fragt sie, ob du heute etwas ausgegeben hast.",
     "notifyError": "Aktiviere Benachrichtigungen in den Browser- oder Systemeinstellungen für die tägliche Erinnerung.",
     "densityTitle": "Kompakte Ansicht",
     "densityDesc": "In den Listen der festen und variablen Ausgaben engerer Abstand und etwas kleinere Schrift, damit mehr Zeilen sichtbar sind.",

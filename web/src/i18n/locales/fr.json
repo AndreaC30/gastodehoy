@@ -353,7 +353,7 @@
     "description": "Revenus, catégories et objectifs sont dans le menu principal. Ici, vous gérez les préférences de l'app, la session et, si besoin, la fermeture du compte.",
     "prefsTitle": "Préférences",
     "dailyNotifyTitle": "Rappel quotidien",
-    "dailyNotifyDesc": "Une alerte par jour sur cet appareil, même si l'app est fermée.",
+    "dailyNotifyDesc": "Chaque jour vers 20:30, même si l'app est fermée. Si aucune dépense n'est notée, elle demande si vous avez dépensé aujourd'hui.",
     "notifyError": "Activez les notifications dans les réglages du navigateur ou du système pour recevoir le rappel quotidien.",
     "densityTitle": "Vue compacte",
     "densityDesc": "Dans les listes de dépenses fixes et variables, moins d'espace et un texte un peu plus petit pour voir plus de lignes.",

@@ -25,6 +25,19 @@ def today_in_app_timezone() -> date:
     return datetime.now(ZoneInfo(settings.timezone)).date()
 
 
+def has_variable_expense_on(session: Session, user_id: int, day: date) -> bool:
+    """True when the user already logged at least one variable expense that day."""
+    found = session.scalar(
+        select(VariableExpense.id)
+        .where(
+            VariableExpense.user_id == user_id,
+            VariableExpense.occurred_at == day,
+        )
+        .limit(1)
+    )
+    return found is not None
+
+
 def month_bounds(reference: date) -> tuple[date, date]:
     """Return (first_day, last_day) of the month containing ``reference``."""
     last_day = calendar.monthrange(reference.year, reference.month)[1]
