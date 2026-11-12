@@ -1,6 +1,15 @@
 import { api } from "@/api/client";
+import { getInstallHintPlatform, isStandaloneDisplay } from "@/lib/pwa-display";
 
 type PushConfig = { enabled: boolean; public_key: string | null };
+
+/** Result of trying to subscribe this device without prompting. */
+export type WebPushSync =
+  | "subscribed"
+  | "needs-install"
+  | "denied"
+  | "pending"
+  | "unsupported";
 
 function urlBase64ToUint8Array(base64: string): Uint8Array {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -21,7 +30,11 @@ export async function registerWebPush(): Promise<boolean> {
   if (!cfg.enabled || !cfg.public_key) {
     return false;
   }
-  const reg = await navigator.serviceWorker.ready;
+  const existing = await navigator.serviceWorker.getRegistration();
+  if (!existing) {
+    return false;
+  }
+  const reg = existing.active ? existing : await navigator.serviceWorker.ready;
   let sub = await reg.pushManager.getSubscription();
   if (!sub) {
     sub = await reg.pushManager.subscribe({
@@ -41,6 +54,39 @@ export async function registerWebPush(): Promise<boolean> {
     }),
   });
   return true;
+}
+
+/**
+ * Renew this device's push subscription when permission is already granted.
+ * Does not prompt. Safe to call every time the installed app opens.
+ */
+export async function syncWebPush(): Promise<WebPushSync> {
+  if (getInstallHintPlatform() === "ios" && !isStandaloneDisplay()) {
+    return "needs-install";
+  }
+  if (
+    !("serviceWorker" in navigator) ||
+    !("PushManager" in window) ||
+    !("Notification" in window)
+  ) {
+    return "unsupported";
+  }
+  if (Notification.permission === "denied") {
+    return "denied";
+  }
+  if (Notification.permission !== "granted") {
+    return "pending";
+  }
+  try {
+    return (await registerWebPush()) ? "subscribed" : "pending";
+  } catch {
+    return "pending";
+  }
+}
+
+/** Visible confirmation push. Call only after a successful subscribe. */
+export async function confirmWebPush(): Promise<void> {
+  await api("/api/push/confirm", { method: "POST" });
 }
 
 export async function unregisterWebPush(): Promise<void> {

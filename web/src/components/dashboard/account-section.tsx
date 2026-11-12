@@ -1,6 +1,6 @@
 /** Inline account section — same pattern as Ingresos / Metas (not a modal). */
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { IoLogOutOutline } from "react-icons/io5";
 import { DeleteAccountModal } from "@/components/delete-account-modal";
@@ -12,7 +12,13 @@ import {
   setDailyNotificationEnabled,
 } from "@/lib/daily-notification-preference";
 import { requestNotificationPermission } from "@/lib/daily-notification";
-import { registerWebPush, unregisterWebPush } from "@/lib/push-subscription";
+import {
+  confirmWebPush,
+  registerWebPush,
+  syncWebPush,
+  unregisterWebPush,
+  type WebPushSync,
+} from "@/lib/push-subscription";
 import {
   getDensity,
   setDensity,
@@ -38,8 +44,9 @@ export function AccountSection({ profileName }: Props) {
   const auth = useSyncExternalStore(subscribe, snapshot);
   const founder = auth.user?.lifetime_free !== false;
   const [dailyNotify, setDailyNotify] = useState(isDailyNotificationEnabled);
-  const [prefError, setPrefError] = useState<string | null>(null);
-  const [prefNotice, setPrefNotice] = useState<string | null>(null);
+  const [pushStatus, setPushStatus] = useState<WebPushSync | "idle">("idle");
+  const [testFailed, setTestFailed] = useState(false);
+  const pushLock = useRef(false);
   const [showInstallHint, setShowInstallHint] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const density = useSyncExternalStore(
@@ -49,13 +56,21 @@ export function AccountSection({ profileName }: Props) {
   );
 
   useEffect(() => {
-    setDailyNotify(isDailyNotificationEnabled());
-    setPrefError(null);
-    setPrefNotice(null);
+    const enabled = isDailyNotificationEnabled();
+    setDailyNotify(enabled);
+    setTestFailed(false);
     const dismissed =
       typeof localStorage !== "undefined" &&
       localStorage.getItem(INSTALL_HINT_DISMISS_KEY) === "1";
     setShowInstallHint(!isStandaloneDisplay() && !dismissed);
+    if (!enabled) return;
+    let cancelled = false;
+    void syncWebPush().then((status) => {
+      if (!cancelled) setPushStatus(status);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const installPlatform = getInstallHintPlatform();
@@ -65,6 +80,82 @@ export function AccountSection({ profileName }: Props) {
       : installPlatform === "android"
         ? "account.installBodyAndroid"
         : "account.installBodyDesktop";
+
+  async function enableDailyNotify() {
+    if (pushLock.current) return;
+    pushLock.current = true;
+    setTestFailed(false);
+    try {
+      if (installPlatform === "ios" && !isStandaloneDisplay()) {
+        setPushStatus("needs-install");
+        return;
+      }
+      if (!canUseOsNotifications()) {
+        setPushStatus("unsupported");
+        return;
+      }
+      const perm = await requestNotificationPermission();
+      if (perm === "denied") {
+        setPushStatus("denied");
+        return;
+      }
+      if (perm !== "granted") {
+        setPushStatus("pending");
+        return;
+      }
+      const subscribed = await registerWebPush();
+      if (!subscribed) {
+        setPushStatus("pending");
+        return;
+      }
+      setDailyNotificationEnabled(true);
+      setDailyNotify(true);
+      setPushStatus("subscribed");
+      try {
+        await confirmWebPush();
+      } catch {
+        setTestFailed(true);
+      }
+    } catch {
+      setPushStatus("pending");
+    } finally {
+      pushLock.current = false;
+    }
+  }
+
+  async function disableDailyNotify() {
+    if (pushLock.current) return;
+    pushLock.current = true;
+    setTestFailed(false);
+    try {
+      await unregisterWebPush();
+    } catch {
+      /* The local opt-out still stands if the server is unreachable. */
+    } finally {
+      setDailyNotificationEnabled(false);
+      setDailyNotify(false);
+      setPushStatus("idle");
+      pushLock.current = false;
+    }
+  }
+
+  const pushAlert =
+    pushStatus === "unsupported"
+      ? t("account.notifyUnsupported")
+      : pushStatus === "pending" && !dailyNotify
+        ? t("account.notifyPushFailed")
+        : null;
+  const pushNotice = testFailed
+    ? t("account.notifyTestFailed")
+    : pushStatus === "subscribed" && dailyNotify
+      ? t("account.notifySubscribed")
+      : pushStatus === "needs-install"
+        ? t("account.notifyNeedInstall")
+        : pushStatus === "denied"
+          ? t("account.notifyDenied")
+          : pushStatus === "pending" && dailyNotify
+            ? t("account.notifyPending")
+            : null;
 
   return (
     <>
@@ -110,17 +201,17 @@ export function AccountSection({ profileName }: Props) {
         <div>
           <p className={TYPE_EYEBROW}>{t("account.prefsTitle")}</p>
 
-          {prefError ? (
+          {pushAlert ? (
             <div className={`mt-3 px-3 py-2 ${ALERT_CRIT}`} role="alert">
-              {prefError}
+              {pushAlert}
             </div>
           ) : null}
-          {prefNotice ? (
+          {pushNotice ? (
             <div
               className="mt-3 rounded-lg border border-[var(--color-accent-border)] bg-[var(--color-accent-dim)] px-3 py-2 text-sm text-[var(--color-text-muted)]"
               role="status"
             >
-              {prefNotice}
+              {pushNotice}
             </div>
           ) : null}
 
@@ -130,56 +221,12 @@ export function AccountSection({ profileName }: Props) {
                 type="checkbox"
                 checked={dailyNotify}
                 className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
-                onChange={async (e) => {
-                  const on = e.target.checked;
-                  setPrefError(null);
-                  setPrefNotice(null);
-                  if (on) {
-                    let osGranted = false;
-                    try {
-                      if (canUseOsNotifications()) {
-                        const perm = await requestNotificationPermission();
-                        osGranted = perm === "granted";
-                        if (osGranted) {
-                          try {
-                            await registerWebPush();
-                          } catch {
-                            /* Push is optional; in-app aviso still works. */
-                          }
-                        }
-                      }
-                    } catch {
-                      osGranted = false;
-                    }
-
-                    setDailyNotificationEnabled(true);
-                    setDailyNotify(true);
-
-                    if (!osGranted) {
-                      if (
-                        installPlatform === "ios" &&
-                        !isStandaloneDisplay()
-                      ) {
-                        setPrefNotice(t("account.notifyNeedInstall"));
-                      } else if (
-                        "Notification" in window &&
-                        Notification.permission === "denied"
-                      ) {
-                        setPrefNotice(t("account.notifyDeniedInApp"));
-                      } else {
-                        setPrefNotice(t("account.notifyInAppOnly"));
-                      }
-                    }
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    void enableDailyNotify();
                     return;
                   }
-
-                  try {
-                    await unregisterWebPush();
-                  } catch {
-                    /* ignore */
-                  }
-                  setDailyNotificationEnabled(false);
-                  setDailyNotify(false);
+                  void disableDailyNotify();
                 }}
               />
               <span className="text-sm text-[var(--color-text-muted)]">

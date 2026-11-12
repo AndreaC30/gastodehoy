@@ -9,6 +9,8 @@ from app.config import settings
 from app.database import get_db
 from app.models import PushSubscription, User
 from app.schemas import PushConfigRead, PushSubscribeCreate
+from app.services.notification_message import push_enabled_notice
+from app.services.web_push import send_to_user
 
 router = APIRouter(prefix="/api/push", tags=["push"])
 
@@ -59,6 +61,31 @@ def subscribe_push(
         row.p256dh = payload.keys.p256dh
         row.auth = payload.keys.auth
     db.commit()
+
+
+@router.post(
+    "/confirm",
+    status_code=204,
+    dependencies=[Depends(limit_authenticated_writes)],
+)
+def confirm_push(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> None:
+    """One visible push so the person can see this device is subscribed."""
+    if not settings.web_push_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Web Push no configurado en el servidor (VAPID).",
+        )
+    lang = (user.settings.language if user.settings else None) or "es"
+    sent, _failed = send_to_user(db, user.id, push_enabled_notice(lang))
+    db.commit()
+    if sent < 1:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="No se pudo entregar el aviso de prueba.",
+        )
 
 
 @router.delete(
