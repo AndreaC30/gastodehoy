@@ -15,15 +15,24 @@ def pick_daily_notification(
     insights_payload: dict[str, Any],
     summary: dict[str, Any] | None,
     lang: str = "es",
+    *,
+    logged_today: bool = True,
 ) -> dict[str, str] | None:
-    """Pick one encouraging notification from insights and/or budget summary.
+    """Pick one notification for the evening push.
 
-    When the month is tight/overspent, returns a soft re-engagement nudge
-    instead of silence so push subscribers still hear from the app.
+    With nothing logged today, ask whether they spent and to record it.
+    Otherwise pick an encouraging line from insights or the budget summary.
     """
     from app.services.insight_i18n import get_insight_text
 
     _t = lambda key, **kw: get_insight_text(lang, "notif_" + key, **kw)
+
+    if not logged_today:
+        return {
+            "tag": "gdh-log-today",
+            "title": _t("log_today_title"),
+            "body": _t("log_today_body"),
+        }
 
     insights = insights_payload.get("insights") or []
 
@@ -83,19 +92,19 @@ def pick_daily_notification(
 _PUSH_ENABLED = {
     "es": (
         "Avisos activados",
-        "GastoDeHoy te avisará una vez al día, también con la app cerrada.",
+        "GastoDeHoy te avisará cada día sobre las 20:30, también con la app cerrada.",
     ),
     "en": (
         "Notifications on",
-        "GastoDeHoy will notify you once a day, even when the app is closed.",
+        "GastoDeHoy will notify you every day around 20:30, even when the app is closed.",
     ),
     "fr": (
         "Notifications activées",
-        "GastoDeHoy vous préviendra une fois par jour, même si l'app est fermée.",
+        "GastoDeHoy vous préviendra chaque jour vers 20:30, même si l'app est fermée.",
     ),
     "de": (
         "Hinweise aktiv",
-        "GastoDeHoy benachrichtigt dich einmal am Tag, auch bei geschlossener App.",
+        "GastoDeHoy benachrichtigt dich jeden Tag gegen 20:30, auch bei geschlossener App.",
     ),
 }
 

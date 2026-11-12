@@ -1,13 +1,16 @@
-"""Send daily positive Web Push notifications to subscribed users.
+"""Send the daily Web Push at 20:30 in the app timezone.
 
-Requires VAPID keys in the environment. Schedule with cron, e.g. 9:00:
+The server clock is UTC. Two cron lines cover winter and summer; this
+command sends only when the local hour is 20, so just one of them delivers:
 
-    0 9 * * * cd /app && python -m app.cli.send_daily_push
+    30 18 * * * cd /root/gastodehoy && docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T app python -m app.cli.send_daily_push
+    30 19 * * * cd /root/gastodehoy && docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T app python -m app.cli.send_daily_push
 
 Usage:
 
     python -m app.cli.send_daily_push
     python -m app.cli.send_daily_push --dry-run
+    python -m app.cli.send_daily_push --force
 """
 
 from __future__ import annotations
@@ -15,30 +18,59 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 
 from app.config import settings
 from app.database import SessionLocal
 from app.models import PushSubscription, User, UserSettings
-from app.services.budget import compute_summary, month_bounds, today_in_app_timezone
+from app.services.budget import (
+    compute_summary,
+    has_variable_expense_on,
+    month_bounds,
+    today_in_app_timezone,
+)
 from app.services.insights import compute_insights
 from app.services.notification_message import pick_daily_notification
 from app.services.web_push import send_to_user
 
 _log = logging.getLogger(__name__)
 
+# 20:00–20:59 in TIMEZONE (Europe/Madrid). Cron hits :30.
+EVENING_HOUR = 20
+
+
+def should_send_now(now: datetime) -> bool:
+    """True during the 20:xx hour in the app timezone."""
+    local = now.astimezone(ZoneInfo(settings.timezone))
+    return local.hour == EVENING_HOUR
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Envía notificación push diaria (mensaje positivo) a suscriptores."
+        description="Envía el aviso push de las 20:30 a quien está suscrito."
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Muestra mensajes sin enviar push.",
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Envía aunque no sean las 20:30 (hora de la app).",
+    )
     args = parser.parse_args()
+
+    if (
+        not args.force
+        and not args.dry_run
+        and not should_send_now(datetime.now(ZoneInfo("UTC")))
+    ):
+        print("Fuera de las 20:30 (hora de la app). No se envía.")
+        return
 
     if not settings.web_push_enabled():
         sys.exit(
@@ -68,7 +100,10 @@ def main() -> None:
                 select(UserSettings).where(UserSettings.user_id == user_id)
             )
             lang = (settings_row.language if settings_row else None) or "es"
-            msg = pick_daily_notification(insights_data, summary, lang=lang)
+            logged_today = has_variable_expense_on(db, user_id, today)
+            msg = pick_daily_notification(
+                insights_data, summary, lang=lang, logged_today=logged_today
+            )
             if msg is None:
                 skipped += 1
                 continue

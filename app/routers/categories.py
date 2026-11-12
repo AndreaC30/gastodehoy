@@ -17,7 +17,12 @@ from app.schemas import (
     DailyNotificationRead,
     InsightsRead,
 )
-from app.services.budget import compute_summary, month_bounds, today_in_app_timezone
+from app.services.budget import (
+    compute_summary,
+    has_variable_expense_on,
+    month_bounds,
+    today_in_app_timezone,
+)
 from app.services.categories import seed_default_categories
 from app.services.insights import compute_insights
 from app.services.notification_message import pick_daily_notification
@@ -177,7 +182,10 @@ def read_daily_notification(
     start, end = month_bounds(today)
     summary = compute_summary(db, user.id, today)
     insights_data = compute_insights(db, user.id, start, end, summary=summary, lang=language)
-    payload = pick_daily_notification(insights_data, summary, lang=language)
+    logged_today = has_variable_expense_on(db, user.id, today)
+    payload = pick_daily_notification(
+        insights_data, summary, lang=language, logged_today=logged_today
+    )
     if payload is None:
         return None
     return DailyNotificationRead(**payload)
