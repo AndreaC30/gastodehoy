@@ -102,7 +102,12 @@ def main() -> None:
             lang = (settings_row.language if settings_row else None) or "es"
             logged_today = has_variable_expense_on(db, user_id, today)
             msg = pick_daily_notification(
-                insights_data, summary, lang=lang, logged_today=logged_today
+                insights_data,
+                summary,
+                lang=lang,
+                logged_today=logged_today,
+                user_id=user_id,
+                on_date=today,
             )
             if msg is None:
                 skipped += 1

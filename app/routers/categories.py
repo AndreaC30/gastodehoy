@@ -184,7 +184,12 @@ def read_daily_notification(
     insights_data = compute_insights(db, user.id, start, end, summary=summary, lang=language)
     logged_today = has_variable_expense_on(db, user.id, today)
     payload = pick_daily_notification(
-        insights_data, summary, lang=language, logged_today=logged_today
+        insights_data,
+        summary,
+        lang=language,
+        logged_today=logged_today,
+        user_id=user.id,
+        on_date=today,
     )
     if payload is None:
         return None

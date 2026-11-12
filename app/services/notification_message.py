@@ -2,13 +2,60 @@
 
 from __future__ import annotations
 
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from app.services.insights import (
-    INSIGHT_TYPE_INFO,
-    INSIGHT_TYPE_SUCCESS,
+# Fixed evening bank: control / pace / soft debt relief (no coachy nagging).
+# Rotation uses user_id + calendar day so the same person sees variety without storage.
+_ROTATING_PHRASE_IDS = (
+    "control_1",
+    "control_2",
+    "control_3",
+    "pace_1",
+    "pace_2",
+    "pace_3",
+    "relief_1",
+    "relief_2",
+    "relief_3",
+    "relief_4",
+    "calm_1",
+    "calm_2",
 )
+
+
+def _rotation_seed(user_id: int, on_date: date) -> int:
+    return user_id + on_date.toordinal()
+
+
+def _budget_message(
+    summary: dict[str, Any],
+    _t,
+) -> dict[str, str] | None:
+    suggested = summary.get("suggested_spend_today")
+    if suggested is None or Decimal(suggested) <= 0:
+        return None
+    amount = Decimal(suggested).quantize(Decimal("0.01"))
+    remaining = summary.get("remaining_this_month")
+    if remaining is not None:
+        rem = Decimal(remaining).quantize(Decimal("0.01"))
+        body = _t("daily_budget_body_remaining", amount=amount, remaining=rem)
+    else:
+        body = _t("daily_budget_body", amount=amount)
+    return {
+        "tag": "gdh-daily-budget",
+        "title": _t("daily_budget_title"),
+        "body": body,
+    }
+
+
+def _rotating_phrase(lang: str, seed: int, _t) -> dict[str, str]:
+    phrase_id = _ROTATING_PHRASE_IDS[seed % len(_ROTATING_PHRASE_IDS)]
+    return {
+        "tag": f"gdh-phrase-{phrase_id}",
+        "title": _t(f"{phrase_id}_title"),
+        "body": _t(f"{phrase_id}_body"),
+    }
 
 
 def pick_daily_notification(
@@ -17,14 +64,18 @@ def pick_daily_notification(
     lang: str = "es",
     *,
     logged_today: bool = True,
+    user_id: int = 0,
+    on_date: date | None = None,
 ) -> dict[str, str] | None:
     """Pick one notification for the evening push.
 
-    With nothing logged today, ask whether they spent and to record it.
-    Otherwise pick an encouraging line from insights or the budget summary.
+    Priority: ask to log if the day is empty; otherwise alternate margin (when
+    available) with a short rotating phrase. ``insights_payload`` is kept for
+    callers; the evening push no longer depends on insight cards.
     """
     from app.services.insight_i18n import get_insight_text
 
+    _ = insights_payload  # reserved for future data-aware phrases
     _t = lambda key, **kw: get_insight_text(lang, "notif_" + key, **kw)
 
     if not logged_today:
@@ -34,59 +85,16 @@ def pick_daily_notification(
             "body": _t("log_today_body"),
         }
 
-    insights = insights_payload.get("insights") or []
+    day = on_date or date.today()
+    seed = _rotation_seed(user_id, day)
 
-    for item in insights:
-        if item.get("type") != INSIGHT_TYPE_SUCCESS:
-            continue
-        return {
-            "tag": "gdh-insight-success",
-            "title": item["title"],
-            "body": item["message"],
-        }
+    # Even seeds: prefer the real daily margin when we have one.
+    if seed % 2 == 0 and summary is not None:
+        budget = _budget_message(summary, _t)
+        if budget is not None:
+            return budget
 
-    if summary is not None:
-        suggested = summary.get("suggested_spend_today")
-        if suggested is not None and Decimal(suggested) > 0:
-            amount = Decimal(suggested).quantize(Decimal("0.01"))
-            remaining = summary.get("remaining_this_month")
-            if remaining is not None:
-                rem = Decimal(remaining).quantize(Decimal("0.01"))
-                body = _t("daily_budget_body_remaining", amount=amount, remaining=rem)
-            else:
-                body = _t("daily_budget_body", amount=amount)
-            return {
-                "tag": "gdh-daily-budget",
-                "title": _t("daily_budget_title"),
-                "body": body,
-            }
-
-    for item in insights:
-        if item.get("type") != INSIGHT_TYPE_INFO:
-            continue
-        title = item.get("title") or ""
-        if title == get_insight_text(lang, "daily_limit"):
-            return {
-                "tag": "gdh-insight-daily",
-                "title": _t("daily_limit_title"),
-                "body": item["message"],
-            }
-        if title == get_insight_text(lang, "similar_pace"):
-            return {
-                "tag": "gdh-insight-steady",
-                "title": title,
-                "body": item["message"],
-            }
-
-    # Soft re-engagement when the month is tight/overspent (no nagging copy).
-    if summary is not None:
-        return {
-            "tag": "gdh-daily-nudge",
-            "title": _t("nudge_title"),
-            "body": _t("nudge_body"),
-        }
-
-    return None
+    return _rotating_phrase(lang, seed, _t)
 
 
 _PUSH_ENABLED = {
