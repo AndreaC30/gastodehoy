@@ -12,6 +12,7 @@ import { IncomeSettingsSection } from "@/components/dashboard/income-settings-se
 import { CategoriesSection } from "@/components/dashboard/categories-section";
 import { SavingsGoalsSection } from "@/components/dashboard/savings-goals-section";
 import { AccountSection } from "@/components/dashboard/account-section";
+import { InstallNotifyPrompt } from "@/components/dashboard/install-notify-prompt";
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -452,6 +453,8 @@ export function Dashboard({ profileName }: Props) {
           data-density={density}
           className="relative z-10 mx-auto flex w-full min-w-0 max-w-lg flex-1 flex-col space-y-8 px-4 py-4 pb-4 sm:space-y-7 sm:px-4 sm:py-6 md:max-w-4xl md:space-y-6 md:pb-8 lg:max-w-6xl"
         >
+        <InstallNotifyPrompt paused={showTour} />
+
         {error && (
           <div
             className="rounded-xl border border-[var(--color-crit-border)] bg-[var(--color-crit-dim)] px-3 py-2.5 text-xs text-[var(--color-crit)] sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
