@@ -1,10 +1,6 @@
-/** Theme switcher: Within icon or Oscuro/Claro choice + View Transition. */
-import { useEffect, type Ref } from "react";
+/** Theme switcher: Within icon or Oscuro/Claro — shared provider owns animation + persistence. */
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ThemeAnimationType,
-  useModeAnimation,
-} from "react-theme-switch-animation";
 import { ThemeWithin } from "@/components/ui/theme-within";
 import { useThemeMode } from "@/components/theme-provider";
 import { FOCUS_RING } from "@/lib/ui-a11y";
@@ -22,26 +18,14 @@ export function ThemeToggle({
   variant = "icon",
 }: Props) {
   const { t } = useTranslation();
-  const { isDark, setIsDark } = useThemeMode();
-  const { ref, toggleSwitchTheme, isDarkMode } = useModeAnimation({
-    isDarkMode: isDark,
-    onDarkModeChange: setIsDark,
-    animationType: ThemeAnimationType.CIRCLE,
-    duration: 700,
-    globalClassName: "dark",
-  });
+  const { isDark, toggleTheme, setTheme } = useThemeMode();
 
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute("content", isDarkMode ? "#070A0D" : "#eef2f6");
+      meta.setAttribute("content", isDark ? "#070A0D" : "#eef2f6");
     }
-  }, [isDarkMode]);
-
-  const choose = (wantDark: boolean) => {
-    if (wantDark === isDarkMode) return;
-    void toggleSwitchTheme();
-  };
+  }, [isDark]);
 
   if (variant === "segmented") {
     const segmentBtn =
@@ -49,17 +33,18 @@ export function ThemeToggle({
       FOCUS_RING;
     return (
       <div
-        ref={ref as unknown as Ref<HTMLDivElement>}
         role="group"
         aria-label={t("account.themeTitle")}
         className={`inline-flex min-w-[11.5rem] shrink-0 gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] p-1 ${className}`}
       >
         <button
           type="button"
-          aria-pressed={isDarkMode}
-          onClick={() => choose(true)}
+          aria-pressed={isDark}
+          onClick={(e) => {
+            void setTheme(true, e.currentTarget);
+          }}
           className={`${segmentBtn} ${
-            isDarkMode
+            isDark
               ? "bg-[var(--color-panel-elevated)] text-[var(--color-text)] shadow-sm"
               : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           }`}
@@ -68,10 +53,12 @@ export function ThemeToggle({
         </button>
         <button
           type="button"
-          aria-pressed={!isDarkMode}
-          onClick={() => choose(false)}
+          aria-pressed={!isDark}
+          onClick={(e) => {
+            void setTheme(false, e.currentTarget);
+          }}
           className={`${segmentBtn} ${
-            !isDarkMode
+            !isDark
               ? "bg-[var(--color-panel-elevated)] text-[var(--color-text)] shadow-sm"
               : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           }`}
@@ -82,17 +69,16 @@ export function ThemeToggle({
     );
   }
 
-  const label = isDarkMode ? t("account.themeToLight") : t("account.themeToDark");
+  const label = isDark ? t("account.themeToLight") : t("account.themeToDark");
 
   return (
     <ThemeWithin
-      ref={ref as Ref<HTMLButtonElement>}
-      toggled={isDarkMode}
+      toggled={isDark}
       duration={500}
       title={label}
       aria-label={label}
-      onClick={() => {
-        void toggleSwitchTheme();
+      onClick={(e) => {
+        void toggleTheme(e.currentTarget);
       }}
       className={`inline-flex shrink-0 items-center justify-center rounded-lg text-[var(--color-text)] ${FOCUS_RING} ${
         size === "sm" ? "h-9 w-9 text-[1.35rem]" : "h-11 w-11 text-[1.6rem]"

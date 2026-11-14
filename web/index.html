@@ -6,6 +6,7 @@
       (function () {
         var bgDark = "#070A0D";
         var bgLight = "#eef2f6";
+        /* Brand default: dark. Only "light" opts out. */
         var theme = "dark";
         try {
           var stored = localStorage.getItem("theme");
@@ -13,7 +14,8 @@
             var legacy = localStorage.getItem("gdh-theme");
             if (legacy === "light" || legacy === "dark") stored = legacy;
           }
-          if (stored === "light" || stored === "dark") theme = stored;
+          if (stored === "light") theme = "light";
+          else theme = "dark";
           localStorage.setItem("theme", theme);
           localStorage.removeItem("gdh-theme");
         } catch (e) {}
