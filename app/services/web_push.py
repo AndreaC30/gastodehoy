@@ -23,6 +23,43 @@ PUSH_TTL_SECONDS = 86400
 PushSendResult = Literal["sent", "gone", "failed"]
 
 
+def push_provider(endpoint: str) -> str:
+    """Group endpoints by push service (Apple / FCM / Mozilla / other)."""
+    ep = (endpoint or "").lower()
+    if "web.push.apple.com" in ep:
+        return "apple"
+    if "fcm.googleapis.com" in ep or "android.googleapis.com" in ep:
+        return "fcm"
+    if "mozilla.com" in ep or "mozaws.net" in ep:
+        return "mozilla"
+    return "other"
+
+
+def drop_older_same_provider(
+    session: Session, user_id: int, keep: PushSubscription
+) -> int:
+    """Remove older endpoints for the same user and push service.
+
+    Reinstalling the PWA often leaves a second live endpoint. Android can
+    collapse two FCM deliveries with the same tag; iOS Safari usually cannot.
+    """
+    provider = push_provider(keep.endpoint)
+    rows = list(
+        session.scalars(
+            select(PushSubscription).where(PushSubscription.user_id == user_id)
+        ).all()
+    )
+    removed = 0
+    for row in rows:
+        if row.id == keep.id:
+            continue
+        if push_provider(row.endpoint) != provider:
+            continue
+        session.delete(row)
+        removed += 1
+    return removed
+
+
 def send_push_payload(subscription: PushSubscription, payload: dict[str, Any]) -> PushSendResult:
     """Send one push.
 
@@ -62,12 +99,25 @@ def send_to_user(session: Session, user_id: int, payload: dict[str, Any]) -> tup
 
     Returns (success_count, failed_count). Only a ``gone`` result removes
     the subscription. A network or server error keeps it for the next send.
+    Before sending, keep only the newest endpoint per push service so a
+    reinstall does not deliver the same evening alert twice.
     """
     rows = list(
         session.scalars(
-            select(PushSubscription).where(PushSubscription.user_id == user_id)
+            select(PushSubscription)
+            .where(PushSubscription.user_id == user_id)
+            .order_by(PushSubscription.id.desc())
         ).all()
     )
+    newest_by_provider: dict[str, PushSubscription] = {}
+    for row in rows:
+        provider = push_provider(row.endpoint)
+        keep = newest_by_provider.get(provider)
+        if keep is None:
+            newest_by_provider[provider] = row
+            continue
+        session.delete(row)
+    rows = list(newest_by_provider.values())
     sent = 0
     failed = 0
     for row in rows:
