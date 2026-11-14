@@ -87,6 +87,7 @@ DIST_ROOT_STATIC_FILES: dict[str, str] = {
     "gastodehoy-app-icon-maskable.png": "image/png",
     "gastodehoy-app-icon-maskable-192.png": "image/png",
     "gastodehoy-logo.png": "image/png",
+    "gastodehoy-logo-light.png": "image/png",
     "pwa-launch-512.png": "image/png",
     "pwa-launch-192.png": "image/png",
     "pwa-launch-1290x2796.png": "image/png",
@@ -344,6 +345,15 @@ def og_image() -> FileResponse | JSONResponse:
 def brand_logo_png() -> FileResponse | JSONResponse:
     """Wordmark for boot splash (also in ``web/public``)."""
     return _dist_root_file("gastodehoy-logo.png", DIST_ROOT_STATIC_FILES["gastodehoy-logo.png"])
+
+
+@app.get("/gastodehoy-logo-light.png", response_model=None)
+def brand_logo_light_png() -> FileResponse | JSONResponse:
+    """Light-theme wordmark for boot splash (no dark fringe between letters)."""
+    return _dist_root_file(
+        "gastodehoy-logo-light.png",
+        DIST_ROOT_STATIC_FILES["gastodehoy-logo-light.png"],
+    )
 
 
 @app.get("/pwa-launch-{asset}.png", response_model=None)
