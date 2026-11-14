@@ -22,5 +22,7 @@ PLIEGO.md
 *.key
 youtube_uploader.py
 
-# Cursor rules locales (no versionar)
-.cursor/
+# Cursor: ignore local state; version shared project rules
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
