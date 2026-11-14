@@ -182,15 +182,16 @@ def test_send_push_payload_marks_expired_subscriptions(monkeypatch) -> None:
 def test_send_to_user_drops_only_expired_subscriptions(
     db_session, user, monkeypatch
 ) -> None:
+    # Distinct push services so prune-by-provider keeps both rows.
     kept = PushSubscription(
         user_id=user.id,
-        endpoint="https://push.example/sub/keep",
+        endpoint="https://fcm.googleapis.com/fcm/send/keep",
         p256dh="p",
         auth="a",
     )
     dropped = PushSubscription(
         user_id=user.id,
-        endpoint="https://push.example/sub/drop",
+        endpoint="https://web.push.apple.com/drop",
         p256dh="p",
         auth="a",
     )
@@ -208,6 +209,56 @@ def test_send_to_user_drops_only_expired_subscriptions(
     assert (sent, failed) == (0, 2)
     assert db_session.get(PushSubscription, kept.id) is not None
     assert db_session.get(PushSubscription, dropped.id) is None
+
+
+def test_send_to_user_keeps_newest_endpoint_per_provider(
+    db_session, user, monkeypatch
+) -> None:
+    from app.services.web_push import push_provider
+
+    assert push_provider("https://web.push.apple.com/a") == "apple"
+    assert push_provider("https://fcm.googleapis.com/fcm/send/x") == "fcm"
+
+    older = PushSubscription(
+        user_id=user.id,
+        endpoint="https://fcm.googleapis.com/fcm/send/old",
+        p256dh="p",
+        auth="a",
+    )
+    newer = PushSubscription(
+        user_id=user.id,
+        endpoint="https://fcm.googleapis.com/fcm/send/new",
+        p256dh="p",
+        auth="a",
+    )
+    apple = PushSubscription(
+        user_id=user.id,
+        endpoint="https://web.push.apple.com/iphone",
+        p256dh="p",
+        auth="a",
+    )
+    db_session.add_all([older, newer, apple])
+    db_session.commit()
+
+    seen: list[str] = []
+
+    def fake_send(subscription, _payload):
+        seen.append(subscription.endpoint)
+        return "sent"
+
+    monkeypatch.setattr("app.services.web_push.send_push_payload", fake_send)
+    sent, failed = send_to_user(db_session, user.id, {"title": "t"})
+    db_session.commit()
+    assert (sent, failed) == (2, 0)
+    assert sorted(seen) == sorted(
+        [
+            "https://fcm.googleapis.com/fcm/send/new",
+            "https://web.push.apple.com/iphone",
+        ]
+    )
+    assert db_session.get(PushSubscription, older.id) is None
+    assert db_session.get(PushSubscription, newer.id) is not None
+    assert db_session.get(PushSubscription, apple.id) is not None
 
 
 def test_confirm_push_requires_auth(anon_client) -> None:

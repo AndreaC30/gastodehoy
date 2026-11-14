@@ -10,7 +10,7 @@ from app.database import get_db
 from app.models import PushSubscription, User
 from app.schemas import PushConfigRead, PushSubscribeCreate
 from app.services.notification_message import push_enabled_notice
-from app.services.web_push import send_to_user
+from app.services.web_push import drop_older_same_provider, send_to_user
 
 router = APIRouter(prefix="/api/push", tags=["push"])
 
@@ -57,9 +57,11 @@ def subscribe_push(
             auth=payload.keys.auth,
         )
         db.add(row)
+        db.flush()
     else:
         row.p256dh = payload.keys.p256dh
         row.auth = payload.keys.auth
+    drop_older_same_provider(db, user.id, row)
     db.commit()
 
 
