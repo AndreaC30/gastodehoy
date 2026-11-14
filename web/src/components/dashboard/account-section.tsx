@@ -267,16 +267,6 @@ export function AccountSection({ profileName }: Props) {
               </span>
             </label>
 
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] px-4 py-3.5">
-              <div className="min-w-0 text-sm text-[var(--color-text-muted)]">
-                <p className="font-medium text-[var(--color-text)]">
-                  {t("account.themeTitle")}
-                </p>
-                <p className="mt-1 leading-snug">{t("account.themeDesc")}</p>
-              </div>
-              <ThemeToggle variant="segmented" />
-            </div>
-
           </div>
         </div>
 
