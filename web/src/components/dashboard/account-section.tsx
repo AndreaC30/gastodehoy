@@ -162,10 +162,18 @@ export function AccountSection({ profileName }: Props) {
     <>
       <section className={`${SECTION_CARD} p-4 sm:p-6`}>
         <div className="mb-5">
-          <h2 className={TYPE_DISPLAY}>{t("account.title")}</h2>
-          <p className="mt-1 truncate text-sm font-medium text-[var(--color-accent)]">
-            {profileName}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h2 className={TYPE_DISPLAY}>{t("account.title")}</h2>
+              <p className="mt-1 truncate text-sm font-medium text-[var(--color-accent)]">
+                {profileName}
+              </p>
+            </div>
+            <ThemeToggle
+              size="md"
+              className="shrink-0 self-center border border-[var(--color-border)] bg-[var(--color-panel)] hover:bg-[var(--color-panel-elevated)]"
+            />
+          </div>
           <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
             {t("account.description")}
           </p>
@@ -266,7 +274,7 @@ export function AccountSection({ profileName }: Props) {
                 </p>
                 <p className="mt-1 leading-snug">{t("account.themeDesc")}</p>
               </div>
-              <ThemeToggle />
+              <ThemeToggle variant="segmented" />
             </div>
 
           </div>
