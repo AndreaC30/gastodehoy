@@ -1,8 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <!-- MUST be first — blocks paint and prevents white flash on any refresh -->
-    <script>document.documentElement.style.backgroundColor="#070A0D";window.__gdhSplashStart=Date.now();</script>
+    <!-- MUST be first — theme class + bg before paint (react-theme-switch-animation: localStorage.theme) -->
+    <script>
+      (function () {
+        var bgDark = "#070A0D";
+        var bgLight = "#f4f7fa";
+        var theme = "dark";
+        try {
+          var stored = localStorage.getItem("theme");
+          if (stored !== "light" && stored !== "dark") {
+            var legacy = localStorage.getItem("gdh-theme");
+            if (legacy === "light" || legacy === "dark") stored = legacy;
+          }
+          if (stored === "light" || stored === "dark") theme = stored;
+          localStorage.setItem("theme", theme);
+          localStorage.removeItem("gdh-theme");
+        } catch (e) {}
+        if (theme === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+        document.documentElement.style.backgroundColor =
+          theme === "light" ? bgLight : bgDark;
+        window.__gdhSplashStart = Date.now();
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description" content="App de presupuesto personal gratis. Calcula cuánto puedes gastar hoy, controla tus gastos diarios, organiza tus finanzas y ahorra más cada mes." />
@@ -48,12 +69,16 @@
     <style>
       /* Critical CSS: splash before JS/CSS bundle (PWA + hard refresh) */
       html, body, #root {
-        background: #070A0D !important;
         margin: 0;
         height: 100%;
         overflow: hidden;
-        color: #e2e8f0;
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: #f4f7fa !important;
+        color: #0f172a;
+      }
+      html.dark, html.dark body, html.dark #root {
+        background: #070A0D !important;
+        color: #e2e8f0;
       }
       html {
         height: 100dvh;
@@ -69,9 +94,10 @@
           max(1.25rem, env(safe-area-inset-right))
           max(1.25rem, env(safe-area-inset-bottom))
           max(1.25rem, env(safe-area-inset-left));
-        background: #070A0D;
         box-sizing: border-box;
+        background: #f4f7fa;
       }
+      html.dark #boot-splash { background: #070A0D; }
       #boot-splash .boot-splash__inner {
         display: flex;
         flex-direction: column;
@@ -94,8 +120,9 @@
         font-size: 1rem;
         line-height: 1.5;
         font-weight: 500;
-        color: #94a3b8;
+        color: #475569;
       }
+      html.dark #boot-splash .boot-splash__tagline { color: #94a3b8; }
     </style>
     <script type="application/ld+json">
     {
@@ -115,7 +142,7 @@
     }
     </script>
 </head>
-  <body class="antialiased" style="background:#070A0D;margin:0">
+  <body class="antialiased" style="margin:0">
     <div id="boot-splash" role="status" aria-live="polite" aria-busy="true">
       <div class="boot-splash__inner">
         <img
