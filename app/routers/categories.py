@@ -25,7 +25,10 @@ from app.services.budget import (
 )
 from app.services.categories import seed_default_categories
 from app.services.insights import compute_insights
-from app.services.notification_message import pick_daily_notification
+from app.services.notification_message import (
+    pick_daily_notification,
+    resolve_notification_language,
+)
 
 categories_router = APIRouter(prefix="/api/categories", tags=["categories"])
 insights_router = APIRouter(prefix="/api/insights", tags=["insights"])
@@ -167,17 +170,12 @@ def read_daily_notification(
     lang: str | None = Query(default=None),
 ) -> DailyNotificationRead | None:
     """Return one positive notification message for today, or null if none."""
-    language = "es"
-    if lang and lang in ("en", "es", "fr", "de"):
-        language = lang
-    elif request.headers.get("accept-language"):
-        al = request.headers["accept-language"].split(",")[0].split(";")[0].strip()
-        if al.startswith("en"):
-            language = "en"
-        elif al.startswith("fr"):
-            language = "fr"
-        elif al.startswith("de"):
-            language = "de"
+    settings_lang = user.settings.language if user.settings else None
+    language = resolve_notification_language(
+        explicit=lang,
+        settings_language=settings_lang,
+        accept_language=request.headers.get("accept-language"),
+    )
     today = today_in_app_timezone()
     start, end = month_bounds(today)
     summary = compute_summary(db, user.id, today)

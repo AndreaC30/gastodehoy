@@ -6,6 +6,36 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
+SUPPORTED_UI_LANGS = frozenset({"es", "en", "fr", "de"})
+
+
+def resolve_notification_language(
+    *,
+    explicit: str | None = None,
+    settings_language: str | None = None,
+    accept_language: str | None = None,
+) -> str:
+    """One language for push and in-app daily aviso (never mix).
+
+    Order: account setting → explicit query → Accept-Language → Spanish.
+    Account setting matches the evening cron so browser locale cannot inject EN.
+    """
+    if settings_language:
+        code = settings_language.strip().lower()[:2]
+        if code in SUPPORTED_UI_LANGS:
+            return code
+    if explicit:
+        code = explicit.strip().lower()[:2]
+        if code in SUPPORTED_UI_LANGS:
+            return code
+    if accept_language:
+        al = accept_language.split(",")[0].split(";")[0].strip().lower()
+        for code in SUPPORTED_UI_LANGS:
+            if al.startswith(code):
+                return code
+    return "es"
+
+
 # Fixed evening bank: control / pace / soft debt relief (no coachy nagging).
 # Rotation uses user_id + calendar day so the same person sees variety without storage.
 _ROTATING_PHRASE_IDS = (
