@@ -15,16 +15,16 @@
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  /* Claro (base cuando no hay .dark) */
-  --color-bg: #f4f7fa;
-  --color-bg-soft: #e8eef4;
+  /* Claro (base cuando no hay .dark) — página suave, tarjetas blancas con borde legible */
+  --color-bg: #eef2f6;
+  --color-bg-soft: #e4ebf2;
   --color-panel: #ffffff;
-  --color-panel-elevated: #f1f5f9;
-  --color-border: #d3dde8;
-  --color-border-subtle: #e2e8f0;
+  --color-panel-elevated: #f5f8fb;
+  --color-border: #c8d4e0;
+  --color-border-subtle: #d7e0ea;
   --color-accent: #0e7490;
-  --color-accent-dim: rgb(14 116 144 / 0.1);
-  --color-accent-border: rgb(14 116 144 / 0.32);
+  --color-accent-dim: rgb(14 116 144 / 0.12);
+  --color-accent-border: rgb(14 116 144 / 0.35);
   --color-accent-ink: #ecfeff;
   --color-ok: #059669;
   --color-ok-dim: #ecfdf5;
@@ -38,8 +38,8 @@
   --color-text: #0f172a;
   --color-text-muted: #475569;
   --color-text-dim: #64748b;
-  --shadow-surface: 0 1px 0 rgb(15 23 42 / 0.06);
-  --shadow-overlay: 0 16px 48px rgb(15 23 42 / 0.14);
+  --shadow-surface: 0 1px 2px rgb(15 23 42 / 0.05), 0 0 0 1px rgb(15 23 42 / 0.03);
+  --shadow-overlay: 0 16px 40px rgb(15 23 42 / 0.12);
 }
 
 html {
@@ -213,6 +213,14 @@ img {
   object-fit: contain;
 }
 
+html:not(.dark) .boot-splash__logo--dark {
+  display: none;
+}
+
+html.dark .boot-splash__logo--light {
+  display: none;
+}
+
 .boot-splash__logo--pulse {
   animation: boot-splash-pulse 1.6s ease-in-out infinite;
 }
@@ -327,14 +335,30 @@ svg.gdh-icon-nav {
 /* ---- Landing pública (antes de login) ---- */
 .gdh-landing-atmosphere {
   background:
-    radial-gradient(ellipse 75% 50% at 12% -8%, rgb(34 211 238 / 0.18), transparent 55%),
-    radial-gradient(ellipse 55% 40% at 92% 18%, rgb(52 211 153 / 0.08), transparent 50%),
-    radial-gradient(ellipse 45% 35% at 50% 100%, rgb(34 211 238 / 0.06), transparent 55%);
+    radial-gradient(
+      ellipse 75% 50% at 12% -8%,
+      color-mix(in srgb, var(--color-accent) 18%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 55% 40% at 92% 18%,
+      color-mix(in srgb, var(--color-ok) 10%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 45% 35% at 50% 100%,
+      color-mix(in srgb, var(--color-accent) 8%, transparent),
+      transparent 55%
+    );
 }
 
 .gdh-landing-cta {
   background:
-    linear-gradient(145deg, rgb(34 211 238 / 0.1), transparent 55%),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--color-accent) 12%, transparent),
+      transparent 55%
+    ),
     var(--color-panel);
   box-shadow: var(--shadow-surface);
 }

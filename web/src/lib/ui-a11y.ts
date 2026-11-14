@@ -32,9 +32,9 @@ export const BTN_GHOST = `inline-flex min-h-11 items-center justify-center round
 export const SECTION_CARD =
   "rounded-[10px] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-[var(--shadow-surface)]";
 
-/** Inner card / panel inside a section. */
+/** Inner card / panel inside a section (contrasta sobre SECTION_CARD en dark y light). */
 export const INNER_CARD =
-  "rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)]";
+  "rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)]";
 
 /** Inline error / destructive alert surface. */
 export const ALERT_CRIT =

@@ -225,7 +225,7 @@ export function AccountSection({ profileName }: Props) {
           ) : null}
 
           <div className="mt-3 space-y-3">
-            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-4 py-3.5">
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] px-4 py-3.5">
               <input
                 type="checkbox"
                 checked={dailyNotify}
@@ -248,7 +248,7 @@ export function AccountSection({ profileName }: Props) {
               </span>
             </label>
 
-            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-4 py-3.5">
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] px-4 py-3.5">
               <input
                 type="checkbox"
                 checked={density === "compact"}
@@ -267,7 +267,7 @@ export function AccountSection({ profileName }: Props) {
               </span>
             </label>
 
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] px-4 py-3.5">
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] px-4 py-3.5">
               <div className="min-w-0 text-sm text-[var(--color-text-muted)]">
                 <p className="font-medium text-[var(--color-text)]">
                   {t("account.themeTitle")}
@@ -280,7 +280,7 @@ export function AccountSection({ profileName }: Props) {
           </div>
         </div>
 
-        <div className="mt-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-soft)] p-4">
+        <div className="mt-6 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] p-4">
           <h3 className={TYPE_EYEBROW}>{t("account.planTitle")}</h3>
           <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
             {t(founder ? "account.planBodyFounder" : "account.planBody")}

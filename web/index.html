@@ -5,7 +5,7 @@
     <script>
       (function () {
         var bgDark = "#070A0D";
-        var bgLight = "#f4f7fa";
+        var bgLight = "#eef2f6";
         var theme = "dark";
         try {
           var stored = localStorage.getItem("theme");
@@ -50,6 +50,7 @@
     <link rel="apple-touch-startup-image" href="/pwa-launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
     <link rel="apple-touch-startup-image" href="/pwa-launch-1290x2796.png" media="(orientation: portrait)" />
     <link rel="preload" href="/gastodehoy-logo.png" as="image" type="image/png" />
+    <link rel="preload" href="/gastodehoy-logo-light.png" as="image" type="image/png" />
     <link rel="canonical" href="https://gastodehoy.es/" />
 
     <meta property="og:title" content="GastoDeHoy — App de Presupuesto Personal | Controla tus Gastos" />
@@ -73,7 +74,7 @@
         height: 100%;
         overflow: hidden;
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-        background: #f4f7fa !important;
+        background: #eef2f6 !important;
         color: #0f172a;
       }
       html.dark, html.dark body, html.dark #root {
@@ -95,7 +96,7 @@
           max(1.25rem, env(safe-area-inset-bottom))
           max(1.25rem, env(safe-area-inset-left));
         box-sizing: border-box;
-        background: #f4f7fa;
+        background: #eef2f6;
       }
       html.dark #boot-splash { background: #070A0D; }
       #boot-splash .boot-splash__inner {
@@ -115,6 +116,8 @@
         height: auto;
         object-fit: contain;
       }
+      html:not(.dark) #boot-splash .boot-splash__logo--dark { display: none; }
+      html.dark #boot-splash .boot-splash__logo--light { display: none; }
       #boot-splash .boot-splash__tagline {
         margin: 0;
         font-size: 1rem;
@@ -146,13 +149,22 @@
     <div id="boot-splash" role="status" aria-live="polite" aria-busy="true">
       <div class="boot-splash__inner">
         <img
-          class="boot-splash__logo"
+          class="boot-splash__logo boot-splash__logo--dark"
           src="/gastodehoy-logo.png"
           alt="GastoDeHoy"
           width="607"
           height="141"
           decoding="async"
           fetchpriority="high"
+        />
+        <img
+          class="boot-splash__logo boot-splash__logo--light"
+          src="/gastodehoy-logo-light.png"
+          alt=""
+          width="607"
+          height="141"
+          decoding="async"
+          aria-hidden="true"
         />
         <p class="boot-splash__tagline">
           Cada euro que controlas es un paso hacia tu libertad
