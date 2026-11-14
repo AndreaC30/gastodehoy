@@ -33,7 +33,10 @@ from app.services.budget import (
     today_in_app_timezone,
 )
 from app.services.insights import compute_insights
-from app.services.notification_message import pick_daily_notification
+from app.services.notification_message import (
+    pick_daily_notification,
+    resolve_notification_language,
+)
 from app.services.web_push import send_to_user
 
 _log = logging.getLogger(__name__)
@@ -99,7 +102,9 @@ def main() -> None:
             settings_row = db.scalar(
                 select(UserSettings).where(UserSettings.user_id == user_id)
             )
-            lang = (settings_row.language if settings_row else None) or "es"
+            lang = resolve_notification_language(
+                settings_language=settings_row.language if settings_row else None,
+            )
             logged_today = has_variable_expense_on(db, user_id, today)
             msg = pick_daily_notification(
                 insights_data,

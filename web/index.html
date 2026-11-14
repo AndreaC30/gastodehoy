@@ -1,8 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <!-- MUST be first — blocks paint and prevents white flash on any refresh -->
-    <script>document.documentElement.style.backgroundColor="#070A0D";window.__gdhSplashStart=Date.now();</script>
+    <!-- MUST be first — theme class + bg before paint (react-theme-switch-animation: localStorage.theme) -->
+    <script>
+      (function () {
+        var bgDark = "#070A0D";
+        var bgLight = "#eef2f6";
+        /* Brand default: dark. Only "light" opts out. */
+        var theme = "dark";
+        try {
+          var stored = localStorage.getItem("theme");
+          if (stored !== "light" && stored !== "dark") {
+            var legacy = localStorage.getItem("gdh-theme");
+            if (legacy === "light" || legacy === "dark") stored = legacy;
+          }
+          if (stored === "light") theme = "light";
+          else theme = "dark";
+          localStorage.setItem("theme", theme);
+          localStorage.removeItem("gdh-theme");
+        } catch (e) {}
+        if (theme === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+        document.documentElement.style.backgroundColor =
+          theme === "light" ? bgLight : bgDark;
+        window.__gdhSplashStart = Date.now();
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description" content="App de presupuesto personal gratis. Calcula cuánto puedes gastar hoy, controla tus gastos diarios, organiza tus finanzas y ahorra más cada mes." />
@@ -29,6 +52,7 @@
     <link rel="apple-touch-startup-image" href="/pwa-launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
     <link rel="apple-touch-startup-image" href="/pwa-launch-1290x2796.png" media="(orientation: portrait)" />
     <link rel="preload" href="/gastodehoy-logo.png" as="image" type="image/png" />
+    <link rel="preload" href="/gastodehoy-logo-light.png" as="image" type="image/png" />
     <link rel="canonical" href="https://gastodehoy.es/" />
 
     <meta property="og:title" content="GastoDeHoy — App de Presupuesto Personal | Controla tus Gastos" />
@@ -48,12 +72,16 @@
     <style>
       /* Critical CSS: splash before JS/CSS bundle (PWA + hard refresh) */
       html, body, #root {
-        background: #070A0D !important;
         margin: 0;
         height: 100%;
         overflow: hidden;
-        color: #e2e8f0;
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: #eef2f6 !important;
+        color: #0f172a;
+      }
+      html.dark, html.dark body, html.dark #root {
+        background: #070A0D !important;
+        color: #e2e8f0;
       }
       html {
         height: 100dvh;
@@ -69,9 +97,10 @@
           max(1.25rem, env(safe-area-inset-right))
           max(1.25rem, env(safe-area-inset-bottom))
           max(1.25rem, env(safe-area-inset-left));
-        background: #070A0D;
         box-sizing: border-box;
+        background: #eef2f6;
       }
+      html.dark #boot-splash { background: #070A0D; }
       #boot-splash .boot-splash__inner {
         display: flex;
         flex-direction: column;
@@ -89,13 +118,16 @@
         height: auto;
         object-fit: contain;
       }
+      html:not(.dark) #boot-splash .boot-splash__logo--dark { display: none; }
+      html.dark #boot-splash .boot-splash__logo--light { display: none; }
       #boot-splash .boot-splash__tagline {
         margin: 0;
         font-size: 1rem;
         line-height: 1.5;
         font-weight: 500;
-        color: #94a3b8;
+        color: #475569;
       }
+      html.dark #boot-splash .boot-splash__tagline { color: #94a3b8; }
     </style>
     <script type="application/ld+json">
     {
@@ -115,17 +147,26 @@
     }
     </script>
 </head>
-  <body class="antialiased" style="background:#070A0D;margin:0">
+  <body class="antialiased" style="margin:0">
     <div id="boot-splash" role="status" aria-live="polite" aria-busy="true">
       <div class="boot-splash__inner">
         <img
-          class="boot-splash__logo"
+          class="boot-splash__logo boot-splash__logo--dark"
           src="/gastodehoy-logo.png"
           alt="GastoDeHoy"
           width="607"
           height="141"
           decoding="async"
           fetchpriority="high"
+        />
+        <img
+          class="boot-splash__logo boot-splash__logo--light"
+          src="/gastodehoy-logo-light.png"
+          alt=""
+          width="607"
+          height="141"
+          decoding="async"
+          aria-hidden="true"
         />
         <p class="boot-splash__tagline">
           Cada euro que controlas es un paso hacia tu libertad
