@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <!-- MUST be first — theme class + bg before paint (matches next-themes storageKey) -->
+    <!-- MUST be first — theme class + bg before paint (react-theme-switch-animation: localStorage.theme) -->
     <script>
       (function () {
         var bgDark = "#070A0D";
         var bgLight = "#f4f7fa";
         var theme = "dark";
         try {
-          var stored = localStorage.getItem("gdh-theme");
+          var stored = localStorage.getItem("theme");
+          if (stored !== "light" && stored !== "dark") {
+            var legacy = localStorage.getItem("gdh-theme");
+            if (legacy === "light" || legacy === "dark") stored = legacy;
+          }
           if (stored === "light" || stored === "dark") theme = stored;
+          localStorage.setItem("theme", theme);
+          localStorage.removeItem("gdh-theme");
         } catch (e) {}
-        document.documentElement.classList.add(theme);
+        if (theme === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
         document.documentElement.style.backgroundColor =
           theme === "light" ? bgLight : bgDark;
         window.__gdhSplashStart = Date.now();
@@ -66,14 +73,12 @@
         height: 100%;
         overflow: hidden;
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: #f4f7fa !important;
+        color: #0f172a;
       }
       html.dark, html.dark body, html.dark #root {
         background: #070A0D !important;
         color: #e2e8f0;
-      }
-      html.light, html.light body, html.light #root {
-        background: #f4f7fa !important;
-        color: #0f172a;
       }
       html {
         height: 100dvh;
@@ -90,9 +95,9 @@
           max(1.25rem, env(safe-area-inset-bottom))
           max(1.25rem, env(safe-area-inset-left));
         box-sizing: border-box;
+        background: #f4f7fa;
       }
       html.dark #boot-splash { background: #070A0D; }
-      html.light #boot-splash { background: #f4f7fa; }
       #boot-splash .boot-splash__inner {
         display: flex;
         flex-direction: column;
@@ -115,9 +120,9 @@
         font-size: 1rem;
         line-height: 1.5;
         font-weight: 500;
+        color: #475569;
       }
       html.dark #boot-splash .boot-splash__tagline { color: #94a3b8; }
-      html.light #boot-splash .boot-splash__tagline { color: #475569; }
     </style>
     <script type="application/ld+json">
     {

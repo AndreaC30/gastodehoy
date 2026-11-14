@@ -1,49 +1,49 @@
-/** Theme switcher: Within (toggles.dev) + next-themes. */
-import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
+/** Theme switcher: Within icon + react-theme-switch-animation (View Transition). */
+import { useEffect, type Ref } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  ThemeAnimationType,
+  useModeAnimation,
+} from "react-theme-switch-animation";
 import { ThemeWithin } from "@/components/ui/theme-within";
+import { useThemeMode } from "@/components/theme-provider";
 import { FOCUS_RING } from "@/lib/ui-a11y";
 
 type Props = {
   className?: string;
-  /** Larger control for account prefs row. */
   size?: "sm" | "md";
 };
 
 export function ThemeToggle({ className = "", size = "md" }: Props) {
   const { t } = useTranslation();
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { isDark, setIsDark } = useThemeMode();
+  const { ref, toggleSwitchTheme, isDarkMode } = useModeAnimation({
+    isDarkMode: isDark,
+    onDarkModeChange: setIsDark,
+    animationType: ThemeAnimationType.CIRCLE,
+    duration: 700,
+    globalClassName: "dark",
+  });
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted || !resolvedTheme) return;
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute(
-        "content",
-        resolvedTheme === "light" ? "#f4f7fa" : "#070A0D",
-      );
+      meta.setAttribute("content", isDarkMode ? "#070A0D" : "#f4f7fa");
     }
-  }, [mounted, resolvedTheme]);
+  }, [isDarkMode]);
 
-  const isDark = mounted
-    ? resolvedTheme !== "light"
-    : typeof document !== "undefined" &&
-      document.documentElement.classList.contains("dark");
-  const label = isDark ? t("account.themeToLight") : t("account.themeToDark");
+  const label = isDarkMode ? t("account.themeToLight") : t("account.themeToDark");
 
   return (
     <ThemeWithin
-      toggled={isDark}
+      ref={ref as Ref<HTMLButtonElement>}
+      toggled={isDarkMode}
       duration={500}
       title={label}
       aria-label={label}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={() => {
+        void toggleSwitchTheme();
+      }}
       className={`inline-flex shrink-0 items-center justify-center rounded-lg text-[var(--color-text)] ${FOCUS_RING} ${
         size === "sm" ? "h-9 w-9 text-[1.35rem]" : "h-11 w-11 text-[1.6rem]"
       } ${className}`}

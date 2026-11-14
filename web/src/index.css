@@ -1,18 +1,13 @@
 @import "tailwindcss";
 
-/* Class-based dark (next-themes on <html>), not only prefers-color-scheme. */
+/* Class-based dark (react-theme-switch-animation on <html>). */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * GastoDeHoy Design Tokens — Observabilidad V11 (WOCU-dense)
  * ==========================================================
- * Paleta y tipografía alineadas al mockup observabilidad-mockup-v11.
- * La app sigue siendo presupuesto diario; solo cambia el lenguaje visual.
- *
- * --color-bg / panel / raised: superficies
- * --color-accent: cian (#22D3EE)
- * --color-ok / warn / crit: estados
- * --color-text / muted / dim: jerarquía tipográfica
+ * Sin clase .dark = claro. Con .dark = paleta densa actual.
+ * La librería de animación solo añade/quita `dark` en <html>.
  */
 
 @theme {
@@ -20,58 +15,7 @@
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  /* Superficies (dark densos, sin slate azul) — default = dark */
-  --color-bg: #070a0d;
-  --color-bg-soft: #0a0f14;
-  --color-panel: #0e141a;
-  --color-panel-elevated: #16202a;
-  --color-border: #182430;
-  --color-border-subtle: #223040;
-
-  /* Acento cian */
-  --color-accent: #22d3ee;
-  --color-accent-dim: rgb(34 211 238 / 0.12);
-  --color-accent-border: rgb(34 211 238 / 0.32);
-  --color-accent-ink: #04222a;
-
-  /* Estados */
-  --color-ok: #34d399;
-  --color-ok-dim: #0f2a22;
-  --color-ok-border: rgb(52 211 153 / 0.35);
-
-  --color-warn: #fbbf24;
-  --color-warn-dim: #2e2410;
-  --color-warn-border: rgb(251 191 36 / 0.3);
-
-  --color-crit: #fb7185;
-  --color-crit-dim: #301620;
-  --color-crit-border: rgb(251 113 133 / 0.32);
-
-  /* Textos */
-  --color-text: #eef4f9;
-  --color-text-muted: #b4c5d4;
-  --color-text-dim: #8fa3b3;
-
-  --shadow-surface: 0 1px 0 rgb(0 0 0 / 0.12);
-  --shadow-overlay: 0 16px 48px rgb(0 0 0 / 0.45);
-}
-
-html {
-  color-scheme: dark;
-  -webkit-text-size-adjust: 100%;
-  /* Cookie banner / overlays sit above mobile BottomNav when it is mounted. */
-  --gdh-bottom-chrome-offset: 0px;
-  height: var(--gdh-vvh, 100dvh);
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
-html.dark {
-  color-scheme: dark;
-}
-
-html.light {
-  color-scheme: light;
+  /* Claro (base cuando no hay .dark) */
   --color-bg: #f4f7fa;
   --color-bg-soft: #e8eef4;
   --color-panel: #ffffff;
@@ -96,6 +40,44 @@ html.light {
   --color-text-dim: #64748b;
   --shadow-surface: 0 1px 0 rgb(15 23 42 / 0.06);
   --shadow-overlay: 0 16px 48px rgb(15 23 42 / 0.14);
+}
+
+html {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+  /* Cookie banner / overlays sit above mobile BottomNav when it is mounted. */
+  --gdh-bottom-chrome-offset: 0px;
+  height: var(--gdh-vvh, 100dvh);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.dark {
+  color-scheme: dark;
+  --color-bg: #070a0d;
+  --color-bg-soft: #0a0f14;
+  --color-panel: #0e141a;
+  --color-panel-elevated: #16202a;
+  --color-border: #182430;
+  --color-border-subtle: #223040;
+  --color-accent: #22d3ee;
+  --color-accent-dim: rgb(34 211 238 / 0.12);
+  --color-accent-border: rgb(34 211 238 / 0.32);
+  --color-accent-ink: #04222a;
+  --color-ok: #34d399;
+  --color-ok-dim: #0f2a22;
+  --color-ok-border: rgb(52 211 153 / 0.35);
+  --color-warn: #fbbf24;
+  --color-warn-dim: #2e2410;
+  --color-warn-border: rgb(251 191 36 / 0.3);
+  --color-crit: #fb7185;
+  --color-crit-dim: #301620;
+  --color-crit-border: rgb(251 113 133 / 0.32);
+  --color-text: #eef4f9;
+  --color-text-muted: #b4c5d4;
+  --color-text-dim: #8fa3b3;
+  --shadow-surface: 0 1px 0 rgb(0 0 0 / 0.12);
+  --shadow-overlay: 0 16px 48px rgb(0 0 0 / 0.45);
 }
 
 /*
@@ -212,10 +194,6 @@ img {
   background-color: var(--color-bg);
 }
 
-html.light .boot-splash__tagline {
-  color: var(--color-text-muted);
-}
-
 .boot-splash__inner {
   display: flex;
   width: 100%;
@@ -254,7 +232,7 @@ html.light .boot-splash__tagline {
   font-size: 0.9375rem;
   line-height: 1.45;
   font-weight: 500;
-  color: var(--color-text-dim);
+  color: var(--color-text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
