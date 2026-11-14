@@ -5,7 +5,11 @@ from decimal import Decimal
 from zoneinfo import ZoneInfo
 
 from app.cli.send_daily_push import should_send_now
-from app.services.notification_message import pick_daily_notification, push_enabled_notice
+from app.services.notification_message import (
+    pick_daily_notification,
+    push_enabled_notice,
+    resolve_notification_language,
+)
 
 
 def test_asks_to_log_when_nothing_was_recorded_today() -> None:
@@ -112,3 +116,29 @@ def test_push_enabled_notice_falls_back_to_spanish() -> None:
     assert es["title"] == unknown["title"]
     assert es["title"] == "Listo"
     assert "Cuenta" in es["body"]
+
+
+def test_notification_language_prefers_account_over_browser() -> None:
+    assert (
+        resolve_notification_language(
+            settings_language="es",
+            explicit="en",
+            accept_language="en-US,en;q=0.9",
+        )
+        == "es"
+    )
+    assert (
+        resolve_notification_language(
+            settings_language=None,
+            explicit="en",
+            accept_language="es-ES",
+        )
+        == "en"
+    )
+    assert (
+        resolve_notification_language(
+            accept_language="en-GB,en;q=0.8",
+        )
+        == "en"
+    )
+    assert resolve_notification_language() == "es"

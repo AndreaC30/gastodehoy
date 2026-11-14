@@ -29,7 +29,9 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
  * Prefer a browser Notification when permission is granted; otherwise return
  * the payload for an in-app toast/banner.
  */
-export async function maybeShowDailyNotification(): Promise<DailyAviso | null> {
+export async function maybeShowDailyNotification(
+  lang = "es",
+): Promise<DailyAviso | null> {
   if (!isDailyNotificationEnabled()) {
     return null;
   }
@@ -37,8 +39,9 @@ export async function maybeShowDailyNotification(): Promise<DailyAviso | null> {
     return null;
   }
 
+  const uiLang = lang.slice(0, 2);
   const payload = await api<DailyNotification | null>(
-    "/api/insights/daily-notification",
+    `/api/insights/daily-notification?lang=${encodeURIComponent(uiLang)}`,
   );
   if (!payload) {
     return null;

@@ -195,12 +195,12 @@ export function Dashboard({ profileName }: Props) {
 
   useEffect(() => {
     if (!summaryQ.isSuccess) return;
-    void maybeShowDailyNotification().then((aviso) => {
+    void maybeShowDailyNotification(i18n.language || "es").then((aviso) => {
       if (aviso) {
         setToastMsg(`${aviso.title} — ${aviso.body}`);
       }
     });
-  }, [summaryQ.isSuccess]);
+  }, [summaryQ.isSuccess, i18n.language]);
 
   function finishTour() {
     void markDashboardTourCompleted();
