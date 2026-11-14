@@ -34,7 +34,7 @@ export function ThemeToggle({
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute("content", isDarkMode ? "#070A0D" : "#f4f7fa");
+      meta.setAttribute("content", isDarkMode ? "#070A0D" : "#eef2f6");
     }
   }, [isDarkMode]);
 

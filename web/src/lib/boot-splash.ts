@@ -1,5 +1,7 @@
 /** Logo URL at site root (from `web/public`, copied at build). */
 export const BOOT_SPLASH_LOGO_SRC = "/gastodehoy-logo.png";
+/** Light variant without dark fringe between letters. */
+export const BOOT_SPLASH_LOGO_LIGHT_SRC = "/gastodehoy-logo-light.png";
 
 /** Minimum time the branded splash stays visible (ms). */
 export const BOOT_SPLASH_MIN_MS = 2800;

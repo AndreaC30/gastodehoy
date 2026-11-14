@@ -1,8 +1,9 @@
 /**
- * Logo empaquetado por Vite → sirve bajo /assets/… (compatible con FastAPI
- * que solo expone /assets/*, no la raíz de /public).
+ * Logo empaquetado por Vite → /assets/… (FastAPI solo sirve /assets/*).
+ * Variante light sin el halo negro entre letras del PNG pensado para fondo oscuro.
  */
-import logoSrc from "@/assets/gastodehoy-logo.png";
+import logoDarkSrc from "@/assets/gastodehoy-logo.png";
+import logoLightSrc from "@/assets/gastodehoy-logo-light.png";
 
 type Props = {
   /** hero: landing/login centrado; header: barra del dashboard más compacto. */
@@ -22,17 +23,29 @@ export function BrandLogo({ variant = "hero", className = "" }: Props) {
 
   return (
     <span
+      role="img"
+      aria-label="GastoDeHoy"
       className={`inline-flex items-center leading-none ${variant === "hero" ? "w-full justify-center" : ""} ${className}`}
     >
       <img
-        src={logoSrc}
-        alt="GastoDeHoy"
+        src={logoDarkSrc}
+        alt=""
         width={607}
         height={141}
         loading={variant === "hero" ? "eager" : "lazy"}
         decoding="async"
         draggable={false}
-        className={sizing}
+        className={`${sizing} hidden dark:block`}
+      />
+      <img
+        src={logoLightSrc}
+        alt=""
+        width={607}
+        height={141}
+        loading={variant === "hero" ? "eager" : "lazy"}
+        decoding="async"
+        draggable={false}
+        className={`${sizing} dark:hidden`}
       />
     </span>
   );

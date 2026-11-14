@@ -12,7 +12,9 @@ export function Metric({ label, value, highlight }: Props) {
   return (
     <div
       className={`flex h-full flex-col justify-center rounded-lg px-3 py-2.5 ${
-        highlight ? "bg-[var(--color-ok-dim)]" : "bg-[var(--color-bg-soft)]/80"
+        highlight
+          ? "bg-[var(--color-ok-dim)]"
+          : "border border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)]"
       }`}
     >
       <p className={`${TYPE_EYEBROW} line-clamp-2 leading-tight`}>{label}</p>

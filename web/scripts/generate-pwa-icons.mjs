@@ -268,5 +268,8 @@ console.log("  og-image 512px   (content @ 88%)");
 const logoSource = path.join(webDir, "src/assets/gastodehoy-logo.png");
 copyFileSync(logoSource, path.join(webDir, "public", "gastodehoy-logo.png"));
 console.log("  gastodehoy-logo.png (boot splash)");
+const logoLightSource = path.join(webDir, "src/assets/gastodehoy-logo-light.png");
+copyFileSync(logoLightSource, path.join(webDir, "public", "gastodehoy-logo-light.png"));
+console.log("  gastodehoy-logo-light.png (boot splash light)");
 
 console.log("\nDone ✓");
