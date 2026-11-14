@@ -15,6 +15,7 @@ import { AccountSection } from "@/components/dashboard/account-section";
 import { InstallNotifyPrompt } from "@/components/dashboard/install-notify-prompt";
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { IoMenu } from "react-icons/io5";
 import { FOCUS_RING, ICON_BTN } from "@/lib/ui-a11y";
@@ -444,6 +445,7 @@ export function Dashboard({ profileName }: Props) {
                 {t("header.tagline")}
               </p>
             </div>
+            <ThemeToggle size="sm" className="shrink-0" />
           </div>
         </header>
 

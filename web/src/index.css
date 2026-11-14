@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Class-based dark (next-themes on <html>), not only prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
  * GastoDeHoy Design Tokens — Observabilidad V11 (WOCU-dense)
  * ==========================================================
@@ -17,7 +20,7 @@
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  /* Superficies (dark densos, sin slate azul) */
+  /* Superficies (dark densos, sin slate azul) — default = dark */
   --color-bg: #070a0d;
   --color-bg-soft: #0a0f14;
   --color-panel: #0e141a;
@@ -61,6 +64,38 @@ html {
   height: var(--gdh-vvh, 100dvh);
   overflow: hidden;
   overscroll-behavior: none;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
+  --color-bg: #f4f7fa;
+  --color-bg-soft: #e8eef4;
+  --color-panel: #ffffff;
+  --color-panel-elevated: #f1f5f9;
+  --color-border: #d3dde8;
+  --color-border-subtle: #e2e8f0;
+  --color-accent: #0e7490;
+  --color-accent-dim: rgb(14 116 144 / 0.1);
+  --color-accent-border: rgb(14 116 144 / 0.32);
+  --color-accent-ink: #ecfeff;
+  --color-ok: #059669;
+  --color-ok-dim: #ecfdf5;
+  --color-ok-border: rgb(5 150 105 / 0.35);
+  --color-warn: #d97706;
+  --color-warn-dim: #fffbeb;
+  --color-warn-border: rgb(217 119 6 / 0.35);
+  --color-crit: #e11d48;
+  --color-crit-dim: #fff1f2;
+  --color-crit-border: rgb(225 29 72 / 0.32);
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-text-dim: #64748b;
+  --shadow-surface: 0 1px 0 rgb(15 23 42 / 0.06);
+  --shadow-overlay: 0 16px 48px rgb(15 23 42 / 0.14);
 }
 
 /*
@@ -174,7 +209,11 @@ img {
     max(1.25rem, env(safe-area-inset-right))
     max(1.25rem, env(safe-area-inset-bottom))
     max(1.25rem, env(safe-area-inset-left));
-  background-color: #070a0d;
+  background-color: var(--color-bg);
+}
+
+html.light .boot-splash__tagline {
+  color: var(--color-text-muted);
 }
 
 .boot-splash__inner {
