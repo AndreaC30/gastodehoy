@@ -20,6 +20,9 @@ _log = logging.getLogger(__name__)
 # is connected at that exact moment.
 PUSH_TTL_SECONDS = 86400
 
+# Without a timeout a push service that hangs would block the whole evening run.
+PUSH_TIMEOUT_SECONDS = 15
+
 PushSendResult = Literal["sent", "gone", "failed"]
 
 
@@ -68,8 +71,9 @@ def send_push_payload(subscription: PushSubscription, payload: dict[str, Any]) -
     """
     if not settings.web_push_enabled():
         return "failed"
+    provider = push_provider(subscription.endpoint)
     try:
-        webpush(
+        response = webpush(
             subscription_info={
                 "endpoint": subscription.endpoint,
                 "keys": {"p256dh": subscription.p256dh, "auth": subscription.auth},
@@ -79,18 +83,41 @@ def send_push_payload(subscription: PushSubscription, payload: dict[str, Any]) -
             vapid_claims={"sub": settings.vapid_subject},
             ttl=PUSH_TTL_SECONDS,
             headers={"Urgency": "high"},
+            timeout=PUSH_TIMEOUT_SECONDS,
+        )
+        # One line per device: the daily run only prints totals, which cannot
+        # say which phone (Apple / Google) accepted or refused a push.
+        _log.info(
+            "push sent user=%s provider=%s status=%s tag=%s",
+            subscription.user_id,
+            provider,
+            getattr(response, "status_code", "?"),
+            payload.get("tag"),
         )
         return "sent"
     except WebPushException as exc:
         status = getattr(exc, "response", None)
         code = status.status_code if status is not None else None
         if code in (404, 410):
-            _log.info("push subscription gone endpoint=%s", subscription.endpoint[:48])
+            _log.info(
+                "push gone user=%s provider=%s status=%s",
+                subscription.user_id,
+                provider,
+                code,
+            )
             return "gone"
-        _log.warning("push failed endpoint=%s: %s", subscription.endpoint[:48], exc)
+        _log.warning(
+            "push failed user=%s provider=%s status=%s: %s",
+            subscription.user_id,
+            provider,
+            code,
+            exc,
+        )
         return "failed"
     except Exception as exc:
-        _log.warning("push error: %s", exc)
+        _log.warning(
+            "push error user=%s provider=%s: %s", subscription.user_id, provider, exc
+        )
         return "failed"
 
 

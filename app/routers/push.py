@@ -1,6 +1,6 @@
 """Web Push subscription API."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -96,13 +96,20 @@ def confirm_push(
     dependencies=[Depends(limit_authenticated_writes)],
 )
 def unsubscribe_push(
+    endpoint: str | None = Query(default=None, min_length=8, max_length=2048),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> None:
-    """Remove all push subscriptions for the current user."""
-    rows = db.scalars(
-        select(PushSubscription).where(PushSubscription.user_id == user.id)
-    ).all()
+    """Remove push subscriptions for the current user.
+
+    With ``endpoint`` only that device is removed, so turning notifications off
+    on the iPhone does not silence the Android phone. Without it every
+    subscription of the user goes (older app versions).
+    """
+    query = select(PushSubscription).where(PushSubscription.user_id == user.id)
+    if endpoint is not None:
+        query = query.where(PushSubscription.endpoint == endpoint)
+    rows = db.scalars(query).all()
     for row in rows:
         db.delete(row)
     db.commit()

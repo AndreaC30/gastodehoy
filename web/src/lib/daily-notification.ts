@@ -48,18 +48,23 @@ export async function maybeShowDailyNotification(
   }
 
   if ("Notification" in window && Notification.permission === "granted") {
-    const icon = "/gastodehoy-favicon-192.png";
-    const n = new Notification(payload.title, {
-      body: payload.body,
-      icon,
-      tag: payload.tag,
-    });
-    n.onclick = () => {
-      window.focus();
-      n.close();
-    };
-    markDailyNotificationShown();
-    return null;
+    try {
+      const n = new Notification(payload.title, {
+        body: payload.body,
+        icon: "/gastodehoy-favicon-192.png",
+        tag: payload.tag,
+      });
+      n.onclick = () => {
+        window.focus();
+        n.close();
+      };
+      markDailyNotificationShown();
+      return null;
+    } catch {
+      // En Android y en la PWA de iOS `new Notification()` lanza «Illegal
+      // constructor»: antes eso rompía el aviso y no salía nada. Se cae al aviso
+      // dentro de la app.
+    }
   }
 
   markDailyNotificationShown();
