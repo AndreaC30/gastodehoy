@@ -1,5 +1,4 @@
 /** Theme switcher (Within icon) — shared provider owns animation + persistence. */
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ThemeWithin } from "@/components/ui/theme-within";
 import { useThemeMode } from "@/components/theme-provider";
@@ -13,13 +12,6 @@ type Props = {
 export function ThemeToggle({ className = "", size = "md" }: Props) {
   const { t } = useTranslation();
   const { isDark, toggleTheme } = useThemeMode();
-
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) {
-      meta.setAttribute("content", isDark ? "#0B1727" : "#eef3f8");
-    }
-  }, [isDark]);
 
   const label = isDark ? t("account.themeToLight") : t("account.themeToDark");
 

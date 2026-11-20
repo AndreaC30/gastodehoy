@@ -30,7 +30,7 @@ import {
   getInstallHintPlatform,
   isStandaloneDisplay,
 } from "@/lib/pwa-display";
-import { TYPE_DISPLAY, TYPE_EYEBROW } from "@/lib/typography";
+import { TYPE_DISPLAY, TYPE_EYEBROW, TYPE_META } from "@/lib/typography";
 import { ALERT_CRIT, BTN_SECONDARY, FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
 
 const INSTALL_HINT_DISMISS_KEY = "gdh-install-hint-dismissed";
@@ -311,6 +311,10 @@ export function AccountSection({ profileName }: Props) {
             {t("account.deleteAccount")}
           </button>
         </div>
+
+        <p className={`mt-4 ${TYPE_META}`}>
+          {t("account.version", { version: __APP_VERSION__ })}
+        </p>
       </section>
 
       <DeleteAccountModal open={deleteOpen} onClose={() => setDeleteOpen(false)} />

@@ -50,6 +50,21 @@ export default defineConfig(({ mode }) => {
           scope: "/",
           start_url: "/",
           lang: "es",
+          shortcuts: [
+            {
+              name: "Añadir gasto",
+              short_name: "Añadir",
+              description: "Anota un gasto de hoy",
+              url: "/?accion=anadir",
+              icons: [
+                {
+                  src: "/gastodehoy-app-icon-maskable-192.png",
+                  sizes: "192x192",
+                  type: "image/png",
+                },
+              ],
+            },
+          ],
           icons: [
             /* Solo iconos opacos grandes: los favicon pequeños se ven mal al instalar. */
             {

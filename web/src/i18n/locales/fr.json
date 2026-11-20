@@ -393,7 +393,8 @@
     "planTitle": "Votre formule",
     "planBody": "Le compte est gratuit. Il n'y a pas de prélèvement, pas de renouvellement automatique et pas de connexion à votre banque. Une formule payante ne sera pas activée sans afficher d'abord, dans ce même compte, le prix taxes comprises, la période, le renouvellement et la façon de l'annuler.",
     "planEnd": "Pour mettre fin au service et effacer vos données, utilisez Supprimer mon compte. Exportez le CSV avant si vous voulez une copie.",
-    "planBodyFounder": "Ce compte est initial. Il reste gratuit et rien ne vous sera prélevé, même si une formule payante existe plus tard pour les nouveaux comptes."
+    "planBodyFounder": "Ce compte est initial. Il reste gratuit et rien ne vous sera prélevé, même si une formule payante existe plus tard pour les nouveaux comptes.",
+    "version": "Version {{version}}"
   },
   "deleteAccount": {
     "title": "Supprimer le compte",
