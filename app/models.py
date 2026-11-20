@@ -191,6 +191,10 @@ class VariableExpense(Base):
     created_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    # Key sent by the app so a retry (or an expense queued offline) never
+    # creates a second row. Unique per user; the index lives in the migration
+    # because the money-check table rebuild does not carry it.
+    client_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="variable_expenses")
     category: Mapped["ExpenseCategory | None"] = relationship(

@@ -156,6 +156,16 @@ def test_schema_migrations_run_once_and_reject_bad_money() -> None:
     assert "CHECK (current_amount >= 0)" in goal_sql
     assert "monthly_budget" in category_sql
     assert "CHECK" not in category_sql
+    # client_id survives the money-check rebuild because its step runs after it.
+    assert "client_id" in variable_sql
+    with engine.connect() as conn:
+        index_sql = conn.execute(
+            text(
+                "SELECT sql FROM sqlite_master "
+                "WHERE type = 'index' AND name = 'ux_variable_expenses_user_client'"
+            )
+        ).scalar()
+    assert index_sql and "UNIQUE" in index_sql and "client_id IS NOT NULL" in index_sql
 
     apply_sqlite_migrations(engine)
 
@@ -223,3 +233,52 @@ def test_schema_migrations_run_once_and_reject_bad_money() -> None:
         "INSERT INTO savings_goals (user_id, name, target_amount, current_amount) "
         "VALUES (:uid, 'Coche', 10, -1)"
     )
+
+
+def test_client_id_is_added_to_a_database_that_lacks_it() -> None:
+    engine = _memory_engine()
+    with engine.begin() as conn:
+        conn.execute(text("ALTER TABLE variable_expenses DROP COLUMN client_id"))
+        conn.execute(
+            text(
+                "INSERT INTO users (email, name, password_hash) "
+                "VALUES ('old@example.com', 'Old', 'x')"
+            )
+        )
+        uid = conn.execute(
+            text("SELECT id FROM users WHERE email = 'old@example.com'")
+        ).scalar()
+        conn.execute(
+            text(
+                "INSERT INTO variable_expenses (user_id, amount, occurred_at) "
+                "VALUES (:uid, 350, '2026-01-01')"
+            ),
+            {"uid": uid},
+        )
+
+    apply_sqlite_migrations(engine)
+    apply_sqlite_migrations(engine)  # a second startup changes nothing
+
+    with engine.connect() as conn:
+        cols = {r[1] for r in conn.execute(text("PRAGMA table_info(variable_expenses)"))}
+        assert "client_id" in cols
+        assert conn.execute(text("SELECT COUNT(*) FROM variable_expenses")).scalar() == 1
+        # The partial unique index: two NULL keys are fine, a repeated key is not.
+        conn.close()
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                "INSERT INTO variable_expenses (user_id, amount, occurred_at, client_id) "
+                "VALUES (:uid, 100, '2026-01-02', 'abcdefgh1')"
+            ),
+            {"uid": uid},
+        )
+    with pytest.raises(IntegrityError):
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO variable_expenses (user_id, amount, occurred_at, client_id) "
+                    "VALUES (:uid, 100, '2026-01-02', 'abcdefgh1')"
+                ),
+                {"uid": uid},
+            )
