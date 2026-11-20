@@ -25,6 +25,7 @@ function MiniDonut({
   segments: { color: string; pct: number }[];
   totalLabel: string;
 }) {
+  const { t } = useTranslation();
   const radius = 68;
   const stroke = 26;
   const size = 180;
@@ -58,7 +59,7 @@ function MiniDonut({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <p className="text-xs text-[var(--color-text-dim)]">Total</p>
+        <p className="text-xs text-[var(--color-text-dim)]">{t("common.total")}</p>
         <p className="text-base font-bold text-[var(--color-text)]">{totalLabel}</p>
       </div>
     </div>

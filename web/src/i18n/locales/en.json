@@ -72,9 +72,6 @@
     "uncategorized": "Other spending (uncategorized): {{amount}}",
     "error": "Could not load the 50/30/20 rule."
   },
-  "settings": {
-    "title": "Settings"
-  },
   "onboarding": {
     "greeting": "Hi, {{name}}!",
     "title": "Let's set up your month",
@@ -199,7 +196,8 @@
     "swipeHint": "Tap to edit · swipe left to delete",
     "saving": "Saving…",
     "update": "Update",
-    "mainNav": "Main navigation"
+    "mainNav": "Main navigation",
+    "total": "Total"
   },
   "header": {
     "tagline": "Your daily margin, clear and instant.",
@@ -309,7 +307,9 @@
     "targetPlaceholder": "Target (€)",
     "addGoal": "Add goal",
     "nameError": "Enter a name for the goal",
-    "amountError": "Enter a target greater than 0"
+    "amountError": "Enter a target greater than 0",
+    "nameLabel": "Goal name",
+    "targetLabel": "Target (€)"
   },
   "incomeSettings": {
     "title": "Set up your income",

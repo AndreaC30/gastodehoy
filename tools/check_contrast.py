@@ -90,14 +90,17 @@ PAIRS = [
     ("warn", "warn-dim", TEXT, "estado «justo» sobre su fondo"),
     ("crit", "panel", TEXT, "estado «mal» sobre tarjeta"),
     ("crit", "crit-dim", TEXT, "estado «mal» sobre su fondo"),
-]
-
-# Informativas: no bloquean (los bordes decorativos no exigen 3:1).
-INFO = [
-    ("border-subtle", "panel", UI, "borde de campos sobre tarjeta"),
+    # Componentes de interfaz (WCAG 1.4.11): borde de campos y botones secundarios.
+    # Los bordes decorativos de tarjeta (border, border-subtle) quedan fuera.
+    ("field-border", "panel", UI, "borde de campos sobre tarjeta"),
+    ("field-border", "bg", UI, "borde de campos sobre página"),
+    ("field-border", "panel-elevated", UI, "borde de campos sobre tarjeta elevada"),
+    ("field-border", "bg-soft", UI, "borde de campos sobre fondo suave"),
     ("accent", "panel", UI, "anillo de foco sobre tarjeta"),
 ]
 
+# Informativas: no bloquean.
+INFO: list[tuple[str, str, float, str]] = []
 
 def check(theme: str, tokens: dict[str, str], base_over: str) -> int:
     fails = 0
