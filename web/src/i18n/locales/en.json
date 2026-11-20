@@ -280,7 +280,8 @@
     "showMore": "View {{count}} more fixed expense",
     "showMore_other": "View {{count}} more fixed expenses",
     "empty": "No fixed expenses yet.",
-    "nameError": "Enter a name for the fixed expense"
+    "nameError": "Enter a name for the fixed expense",
+    "amountFormat": "Enter an amount using a comma or a dot and up to 2 decimals. E.g. 12.50"
   },
   "savingsGoals": {
     "title": "Savings goals",
@@ -508,7 +509,8 @@
     "amountPlaceholder": "Amount (€)",
     "note": "Note (optional)",
     "notePlaceholder": "Note (optional)",
-    "register": "Register"
+    "register": "Register",
+    "amountFormat": "Enter an amount above 0, using a comma or a dot and up to 2 decimals. E.g. 12.50"
   },
   "editVariableExpense": {
     "category": "Category",

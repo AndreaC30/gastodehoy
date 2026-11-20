@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SwipeableRow } from "@/components/ui/swipeable-row";
 import { FormError } from "@/components/ui/form-error";
 import { FormField } from "@/components/ui/form-field";
+import { AMOUNT_PATTERN } from "@/lib/amount";
 import { money } from "@/lib/format";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
@@ -75,16 +76,15 @@ export function FixedExpensesSection({
           {t("fixedExpenses.description")}
         </p>
         <form
-          className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-2"
+          className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-end lg:gap-2"
           onSubmit={onSubmit}
         >
-          <div className="flex w-full min-w-0 gap-2 lg:min-w-0 lg:flex-1">
+          <div className="flex w-full min-w-0 items-end gap-2 lg:min-w-0 lg:flex-1">
             <IconSelectDropdown value={formIcon} onChange={onFormIconChange} />
             <FormField
               id="fixed-expense-name"
               label={t("fixedExpenses.concept")}
               className="min-w-0 flex-1"
-              labelClassName="sr-only"
             >
               <input
                 name="name"
@@ -98,14 +98,14 @@ export function FixedExpensesSection({
             id="fixed-expense-amount"
             label={t("fixedExpenses.amount")}
             className="w-full lg:w-28"
-            labelClassName="sr-only"
           >
             <input
               name="amount"
-              type="number"
+              type="text"
               inputMode="decimal"
-              step="0.01"
-              min={0}
+              autoComplete="off"
+              pattern={AMOUNT_PATTERN}
+              title={t("fixedExpenses.amountFormat")}
               placeholder="€"
               required
               className={inputClass}

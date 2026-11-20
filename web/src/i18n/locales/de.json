@@ -280,7 +280,8 @@
     "showMore": "{{count}} weitere Fixkosten anzeigen",
     "showMore_other": "{{count}} weitere Fixkosten anzeigen",
     "empty": "Noch keine Fixkosten.",
-    "nameError": "Gib einen Namen für die Fixkosten ein"
+    "nameError": "Gib einen Namen für die Fixkosten ein",
+    "amountFormat": "Gib einen Betrag mit Komma oder Punkt und höchstens 2 Nachkommastellen ein. Z. B. 12,50"
   },
   "savingsGoals": {
     "title": "Sparziele",
@@ -510,7 +511,8 @@
     "amountPlaceholder": "Betrag (€)",
     "note": "Notiz (optional)",
     "notePlaceholder": "Notiz (optional)",
-    "register": "Eintragen"
+    "register": "Eintragen",
+    "amountFormat": "Gib einen Betrag über 0 ein, mit Komma oder Punkt und höchstens 2 Nachkommastellen. Z. B. 12,50"
   },
   "editVariableExpense": {
     "category": "Kategorie",

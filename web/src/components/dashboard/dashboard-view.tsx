@@ -38,6 +38,7 @@ import {
 import { maybeShowDailyNotification } from "@/lib/daily-notification";
 import { isDailyNotificationEnabled } from "@/lib/daily-notification-preference";
 import { syncWebPush } from "@/lib/push-subscription";
+import { normalizeAmount } from "@/lib/amount";
 import { hapticTick } from "@/lib/haptics";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
@@ -321,7 +322,7 @@ export function Dashboard({ profileName }: Props) {
     addFixed.mutate(
       {
         name: String(fd.get("name") ?? ""),
-        amount: String(fd.get("amount") ?? ""),
+        amount: normalizeAmount(String(fd.get("amount") ?? "")),
         icon: fixedFormIcon,
       },
       { onSuccess: () => form.reset() },
@@ -338,7 +339,7 @@ export function Dashboard({ profileName }: Props) {
     expenseSubmitLocked.current = true;
     addExpense.mutate(
       {
-        amount: String(fd.get("amount") ?? ""),
+        amount: normalizeAmount(String(fd.get("amount") ?? "")),
         note: note || null,
         category_id: catId ? Number(catId) : null,
       },

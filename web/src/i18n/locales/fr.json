@@ -280,7 +280,8 @@
     "showMore": "Voir {{count}} dépense fixe de plus",
     "showMore_other": "Voir {{count}} dépenses fixes de plus",
     "empty": "Aucune dépense fixe pour l'instant.",
-    "nameError": "Entrez un nom pour la dépense fixe"
+    "nameError": "Entrez un nom pour la dépense fixe",
+    "amountFormat": "Saisissez un montant avec virgule ou point et 2 décimales maximum. Ex. : 12,50"
   },
   "savingsGoals": {
     "title": "Objectifs d'épargne",
@@ -510,7 +511,8 @@
     "amountPlaceholder": "Montant (€)",
     "note": "Note (optionnelle)",
     "notePlaceholder": "Note (optionnelle)",
-    "register": "Enregistrer"
+    "register": "Enregistrer",
+    "amountFormat": "Saisissez un montant supérieur à 0, avec virgule ou point et 2 décimales maximum. Ex. : 12,50"
   },
   "editVariableExpense": {
     "category": "Catégorie",
