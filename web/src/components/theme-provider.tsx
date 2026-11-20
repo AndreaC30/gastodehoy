@@ -17,6 +17,8 @@ import {
 } from "react-theme-switch-animation";
 
 const STORAGE_KEY = "theme";
+/** Solo el botón del tema lo escribe: distingue «claro» elegido de un «claro» heredado. */
+const EXPLICIT_KEY = "theme-explicit";
 
 type ThemeModeContextValue = {
   isDark: boolean;
@@ -32,7 +34,8 @@ const ThemeModeContext = createContext<ThemeModeContextValue | null>(null);
 function readStoredIsDark(): boolean {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "light") return false;
+    const explicit = localStorage.getItem(EXPLICIT_KEY) === "1";
+    if (stored === "light" && explicit) return false;
     if (stored === "dark") return true;
   } catch {
     /* private mode, etc. */
@@ -86,6 +89,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const toggleTheme = useCallback(
     async (fromEl?: HTMLElement | null) => {
+      // Es una acción de la persona (no el arranque): su elección se respeta.
+      try {
+        localStorage.setItem(EXPLICIT_KEY, "1");
+      } catch {
+        /* sin almacenamiento no se puede recordar */
+      }
       if (fromEl && ref && "current" in ref) {
         (ref as { current: HTMLElement | null }).current = fromEl;
       }

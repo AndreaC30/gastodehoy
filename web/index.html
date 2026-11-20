@@ -6,16 +6,13 @@
       (function () {
         var bgDark = "#0B1727";
         var bgLight = "#eef3f8";
-        /* Brand default: dark. Only "light" opts out. */
+        /* Marca por defecto: oscuro. «Claro» solo se respeta si la persona lo eligió con
+           el botón del tema (theme-explicit = "1"); un «light» guardado sin esa marca
+           viene de versiones anteriores o de un cambio accidental y se vuelve a oscuro. */
         var theme = "dark";
         try {
-          var stored = localStorage.getItem("theme");
-          if (stored !== "light" && stored !== "dark") {
-            var legacy = localStorage.getItem("gdh-theme");
-            if (legacy === "light" || legacy === "dark") stored = legacy;
-          }
-          if (stored === "light") theme = "light";
-          else theme = "dark";
+          var explicit = localStorage.getItem("theme-explicit") === "1";
+          if (localStorage.getItem("theme") === "light" && explicit) theme = "light";
           localStorage.setItem("theme", theme);
           localStorage.removeItem("gdh-theme");
         } catch (e) {}
