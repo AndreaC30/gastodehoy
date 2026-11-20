@@ -696,6 +696,15 @@
       }
     ]
   },
+  "offline": {
+    "title": "Keine Verbindung",
+    "hint": "Du kannst weiter Ausgaben erfassen. Sie werden automatisch gesendet, sobald du wieder online bist.",
+    "pending_one": "{{count}} Ausgabe wartet auf das Senden",
+    "pending_other": "{{count}} Ausgaben warten auf das Senden",
+    "pendingHint": "Sie zählen noch nicht in der Heute-Zahl. Sie werden automatisch gesendet, sobald du online bist.",
+    "sendNow": "Jetzt senden",
+    "sending": "Wird gesendet…"
+  },
   "toasts": {
     "tourComplete": "Anleitung abgeschlossen. Du kannst sie jederzeit über das Menü erneut ansehen.",
     "fixedAdded": "Fixkosten hinzugefügt",
@@ -712,6 +721,11 @@
     "fixedRemoved": "Fixkosten entfernt",
     "expenseUpdated": "Ausgabe aktualisiert",
     "appUpdated": "App auf Version {{version}} aktualisiert",
+    "expenseQueued": "Offline: Ausgabe auf diesem Gerät gespeichert. Sie wird gesendet, sobald du wieder online bist",
+    "queuedSent_one": "{{count}} Ausgabe gesendet",
+    "queuedSent_other": "{{count}} Ausgaben gesendet",
+    "queuedDropped_one": "{{count}} Ausgabe konnte nicht gesendet werden und wurde verworfen",
+    "queuedDropped_other": "{{count}} Ausgaben konnten nicht gesendet werden und wurden verworfen",
     "csvDownloaded": "CSV heruntergeladen"
   },
   "errors": {

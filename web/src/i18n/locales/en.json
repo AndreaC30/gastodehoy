@@ -694,6 +694,15 @@
       }
     ]
   },
+  "offline": {
+    "title": "You are offline",
+    "hint": "You can keep adding expenses. They will be sent automatically when you are back online.",
+    "pending_one": "{{count}} expense waiting to be sent",
+    "pending_other": "{{count}} expenses waiting to be sent",
+    "pendingHint": "They don't count in today's figure yet. They will be sent automatically once you are online.",
+    "sendNow": "Send now",
+    "sending": "Sending…"
+  },
   "toasts": {
     "tourComplete": "Guide completed. You can view it again from the menu.",
     "fixedAdded": "Fixed expense added",
@@ -710,6 +719,11 @@
     "fixedUpdated": "Fixed expense updated",
     "expenseUpdated": "Expense updated",
     "appUpdated": "App updated to version {{version}}",
+    "expenseQueued": "Offline: expense saved on this device. It will be sent when you are back online",
+    "queuedSent_one": "{{count}} expense sent",
+    "queuedSent_other": "{{count}} expenses sent",
+    "queuedDropped_one": "{{count}} expense could not be sent and was discarded",
+    "queuedDropped_other": "{{count}} expenses could not be sent and were discarded",
     "csvDownloaded": "CSV downloaded"
   },
   "errors": {

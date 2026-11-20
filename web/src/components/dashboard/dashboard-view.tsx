@@ -46,6 +46,15 @@ import { useUndoableDelete } from "@/lib/use-undoable-delete";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import type { DashboardSection } from "@/lib/dashboard-state";
 import { getActiveSection, setActiveSection } from "@/lib/dashboard-state";
+import { subscribe as subscribeAuth, snapshot as snapshotAuth } from "@/auth";
+import { OfflineQueueNotice } from "@/components/dashboard/offline-queue-notice";
+import {
+  enqueueExpense,
+  isConnectionError,
+  localDateIso,
+  newClientId,
+} from "@/lib/offline-expense-queue";
+import { useOfflineExpenses } from "@/lib/use-offline-expenses";
 import { consumeAppUpdated } from "@/lib/app-update-flag";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { SiteFooter } from "@/components/site-footer";
@@ -119,6 +128,7 @@ const VARIABLE_LIST_PREVIEW = 2;
 
 export function Dashboard({ profileName }: Props) {
   const { t, i18n } = useTranslation();
+  const userId = useSyncExternalStore(subscribeAuth, snapshotAuth).user?.id ?? null;
   const qc = useQueryClient();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [toastUndo, setToastUndo] = useState<{
@@ -265,20 +275,47 @@ export function Dashboard({ profileName }: Props) {
   });
 
   const addExpense = useMutation({
-    mutationFn: (body: {
+    // Sin esto TanStack Query pausa la mutación mientras no hay red y la cola
+    // no llegaría a ejecutarse.
+    networkMode: "always",
+    mutationFn: async (body: {
       amount: string;
       note: string | null;
       category_id: number | null;
-    }) =>
-      api<VariableExpense>("/api/expenses", {
-        method: "POST",
-        body: JSON.stringify(body),
-      }),
-    onSuccess: () => {
+    }): Promise<VariableExpense | { queued: true }> => {
+      // La clave viaja siempre: si la respuesta se pierde, el reenvío no duplica.
+      const clientId = newClientId();
+      try {
+        return await api<VariableExpense>("/api/expenses", {
+          method: "POST",
+          body: JSON.stringify({ ...body, client_id: clientId }),
+        });
+      } catch (err) {
+        if (!isConnectionError(err) || userId == null) throw err;
+        const saved = enqueueExpense({
+          userId,
+          queuedAt: Date.now(),
+          body: { ...body, occurred_at: localDateIso(), client_id: clientId },
+        });
+        // Sin almacenamiento no hay dónde guardarlo: que el error sea visible.
+        if (!saved) throw err;
+        return { queued: true };
+      }
+    },
+    onSuccess: (result) => {
       hapticTick();
+      if ("queued" in result) {
+        setToastMsg(t("toasts.expenseQueued"));
+        return;
+      }
       setToastMsg(t("toasts.expenseRegistered"));
       void invalidateAll();
     },
+  });
+
+  const offline = useOfflineExpenses(userId ?? -1, ({ sent, dropped }) => {
+    if (dropped > 0) setToastMsg(t("toasts.queuedDropped", { count: dropped }));
+    else setToastMsg(t("toasts.queuedSent", { count: sent }));
   });
 
   const expenseUndo = useUndoableDelete<VariableExpense>({
@@ -499,6 +536,13 @@ export function Dashboard({ profileName }: Props) {
             {(error as Error).message}
           </div>
         )}
+
+        <OfflineQueueNotice
+          pending={offline.pending}
+          online={offline.online}
+          flushing={offline.flushing}
+          onFlush={() => void offline.flush()}
+        />
 
         <div
           key={activeSection}

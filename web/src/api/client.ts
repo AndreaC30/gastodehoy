@@ -16,6 +16,16 @@ export class UnauthorizedError extends Error {
   }
 }
 
+/** HTTP error from the API; `status` lets callers tell a rejection from a lost connection. */
+export class ApiError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 /** Clear stale session cookie when user no longer exists in DB. */
 async function clearStaleCookieIfNeeded(detail: string) {
   if (detail === "Cuenta no encontrada") {
@@ -89,11 +99,12 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     }
     const base = `HTTP ${res.status}: ${detail || res.statusText || "Error"}`;
     if (res.status === 404) {
-      throw new Error(
+      throw new ApiError(
         `${base}. ¿Otro servicio en el puerto del proxy? Ajusta VITE_API_PROXY_TARGET en .env (raíz del repo o web/) al puerto real de uvicorn (p. ej. 8001).`,
+        res.status,
       );
     }
-    throw new Error(base);
+    throw new ApiError(base, res.status);
   }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;

@@ -696,6 +696,15 @@
       }
     ]
   },
+  "offline": {
+    "title": "Hors connexion",
+    "hint": "Vous pouvez continuer à saisir des dépenses. Elles seront envoyées automatiquement au retour de la connexion.",
+    "pending_one": "{{count}} dépense en attente d’envoi",
+    "pending_other": "{{count}} dépenses en attente d’envoi",
+    "pendingHint": "Elles ne comptent pas encore dans le chiffre du jour. Elles seront envoyées automatiquement dès que vous serez connecté.",
+    "sendNow": "Envoyer maintenant",
+    "sending": "Envoi…"
+  },
   "toasts": {
     "tourComplete": "Guide terminé. Vous pouvez le revoir depuis le menu.",
     "fixedAdded": "Dépense fixe ajoutée",
@@ -712,6 +721,11 @@
     "fixedRemoved": "Dépense fixe retirée",
     "expenseUpdated": "Dépense mise à jour",
     "appUpdated": "Application mise à jour vers la version {{version}}",
+    "expenseQueued": "Hors connexion : dépense enregistrée sur cet appareil. Elle sera envoyée au retour de la connexion",
+    "queuedSent_one": "{{count}} dépense envoyée",
+    "queuedSent_other": "{{count}} dépenses envoyées",
+    "queuedDropped_one": "{{count}} dépense n’a pas pu être envoyée et a été abandonnée",
+    "queuedDropped_other": "{{count}} dépenses n’ont pas pu être envoyées et ont été abandonnées",
     "csvDownloaded": "CSV téléchargé"
   },
   "errors": {
