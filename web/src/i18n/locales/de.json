@@ -238,7 +238,10 @@
     "gastosFijos": "Fix",
     "fabAddExpense": "Ausgabe hinzufügen",
     "add": "Hinzufügen",
-    "more": "Mehr"
+    "more": "Mehr",
+    "groupDay": "Im Alltag",
+    "groupMonth": "Dein Monat",
+    "groupMore": "Mehr"
   },
   "emptyStates": {
     "noVariableExpenses": "Keine Ausgaben diesen Monat",
