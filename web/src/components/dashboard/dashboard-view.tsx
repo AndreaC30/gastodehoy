@@ -16,9 +16,10 @@ import { InstallNotifyPrompt } from "@/components/dashboard/install-notify-promp
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AddVariableExpenseForm } from "@/components/dashboard/add-variable-expense-form";
+import { AppSheet } from "@/components/ui/app-sheet";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { IoMenu } from "react-icons/io5";
-import { FOCUS_RING, ICON_BTN } from "@/lib/ui-a11y";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
 import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
 import { FixedExpensesSection } from "@/components/dashboard/fixed-expenses-section";
@@ -135,6 +136,7 @@ export function Dashboard({ profileName }: Props) {
   const [showTour, setShowTour] = useState(false);
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [gastosTab, setGastosTab] = useState<GastosTab>("variables");
   const [analisisTab, setAnalisisTab] = useState<AnalisisTab>("insights");
   const density = useSyncExternalStore(
@@ -329,7 +331,7 @@ export function Dashboard({ profileName }: Props) {
     );
   }
 
-  function onExpenseSubmit(e: FormEvent<HTMLFormElement>) {
+  function onExpenseSubmit(e: FormEvent<HTMLFormElement>, onSaved?: () => void) {
     e.preventDefault();
     if (expenseSubmitLocked.current || addExpense.isPending) return;
     const form = e.currentTarget;
@@ -345,7 +347,10 @@ export function Dashboard({ profileName }: Props) {
       },
       {
         // Vaciar solo tras el éxito: si falla, se conserva lo escrito.
-        onSuccess: () => form.reset(),
+        onSuccess: () => {
+          form.reset();
+          onSaved?.();
+        },
         onSettled: () => {
           expenseSubmitLocked.current = false;
         },
@@ -433,18 +438,7 @@ export function Dashboard({ profileName }: Props) {
 
         <header className="relative z-10 border-b border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 sm:px-4 sm:py-3.5">
           <div className="mx-auto flex max-w-lg items-center gap-2 sm:gap-3 md:max-w-4xl lg:max-w-6xl">
-            {/* Mobile: menu left + brand (section as subtitle, like desktop tagline) */}
-            <button
-              type="button"
-              data-tour="menu"
-              onClick={() => setMobileMenuOpen(true)}
-              className={`${ICON_BTN} shrink-0 md:hidden`}
-              aria-label={t("header.menu")}
-              aria-expanded={mobileMenuOpen}
-              aria-haspopup="dialog"
-            >
-              <IoMenu className="gdh-icon-lg" aria-hidden />
-            </button>
+            {/* Móvil: marca con la sección como subtítulo (el menú vive en «Más» de la barra inferior). */}
             <div className="min-w-0 flex-1 md:hidden">
               <h1 className="m-0 leading-none">
                 <BrandLogo variant="header" />
@@ -760,7 +754,25 @@ export function Dashboard({ profileName }: Props) {
       <BottomNav
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
+        onAdd={() => setAddSheetOpen(true)}
+        onMore={() => setMobileMenuOpen(true)}
+        moreOpen={mobileMenuOpen}
       />
+
+      <AppSheet
+        open={addSheetOpen}
+        onClose={() => setAddSheetOpen(false)}
+        title={t("hero.addExpense")}
+      >
+        <div className="px-5 py-4">
+          <AddVariableExpenseForm
+            categories={categories}
+            pending={addExpense.isPending}
+            error={addExpense.error?.message ?? null}
+            onSubmit={(e) => onExpenseSubmit(e, () => setAddSheetOpen(false))}
+          />
+        </div>
+      </AppSheet>
 
       {editingFixed && (
         <EditFixedExpenseModal
