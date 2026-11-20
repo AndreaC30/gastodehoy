@@ -90,16 +90,25 @@ export async function confirmWebPush(): Promise<void> {
 }
 
 export async function unregisterWebPush(): Promise<void> {
-  try {
-    await api("/api/push/subscribe", { method: "DELETE" });
-  } catch {
-    /* ignore */
-  }
+  // Solo este dispositivo: quitar todas las suscripciones silenciaba también
+  // el otro móvil de la misma cuenta.
+  let sub: PushSubscription | null = null;
   if ("serviceWorker" in navigator) {
-    const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.getSubscription();
-    if (sub) {
-      await sub.unsubscribe();
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      sub = await reg.pushManager.getSubscription();
+    } catch {
+      /* sin service worker no hay suscripción local */
     }
+  }
+  if (sub) {
+    try {
+      await api(`/api/push/subscribe?endpoint=${encodeURIComponent(sub.endpoint)}`, {
+        method: "DELETE",
+      });
+    } catch {
+      /* ignore */
+    }
+    await sub.unsubscribe();
   }
 }

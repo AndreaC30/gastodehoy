@@ -19,10 +19,11 @@ if (!self.__gdhPushHandlersBound) {
     const tag = payload.tag || "gdh-push";
     const now = Date.now();
     const last = self.__gdhRecentPushTags.get(tag) || 0;
-    /* iOS may deliver the same Web Push twice; Android collapses by tag, Safari does not. */
-    if (now - last < 8000) {
-      return;
-    }
+    /* iOS may deliver the same Web Push twice; Android collapses by tag, Safari does not.
+       Never return without showing: a push that shows nothing counts as a silent push
+       and iOS ends up cancelling the subscription. A repeat replaces the previous
+       notification (same tag) and just does not alert again. */
+    const repeated = now - last < 8000;
     self.__gdhRecentPushTags.set(tag, now);
 
     event.waitUntil(
@@ -40,7 +41,7 @@ if (!self.__gdhPushHandlersBound) {
           icon: "/gastodehoy-favicon-192.png",
           badge: "/gastodehoy-favicon-192.png",
           tag,
-          renotify: true,
+          renotify: !repeated,
           data: { url: "/" },
         });
         try {

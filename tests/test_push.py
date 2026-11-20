@@ -267,3 +267,85 @@ def test_confirm_push_requires_auth(anon_client) -> None:
 
 def test_confirm_push_without_vapid(client) -> None:
     assert client.post("/api/push/confirm").status_code == 503
+
+
+def test_send_push_payload_has_a_timeout_and_logs_the_provider(
+    monkeypatch, caplog
+) -> None:
+    import logging
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(settings, "vapid_public_key", "pub")
+    monkeypatch.setattr(settings, "vapid_private_key", "priv")
+    seen: dict = {}
+
+    def fake_webpush(**kwargs):
+        seen.update(kwargs)
+        return SimpleNamespace(status_code=201)
+
+    monkeypatch.setattr("app.services.web_push.webpush", fake_webpush)
+    sub = PushSubscription(
+        user_id=3,
+        endpoint="https://web.push.apple.com/abc",
+        p256dh="p",
+        auth="a",
+    )
+    with caplog.at_level(logging.INFO, logger="app.services.web_push"):
+        assert send_push_payload(sub, {"title": "t", "tag": "gdh-x"}) == "sent"
+    assert seen["timeout"] and seen["timeout"] > 0
+    line = next(r.getMessage() for r in caplog.records if "push sent" in r.getMessage())
+    assert "user=3" in line and "provider=apple" in line and "status=201" in line
+    assert "web.push.apple.com" not in line  # the endpoint is a secret
+
+
+def test_push_unsubscribe_with_endpoint_keeps_the_other_device(
+    client, db_session, user
+) -> None:
+    from sqlalchemy import select
+
+    for n in (1, 2):
+        db_session.add(
+            PushSubscription(
+                user_id=user.id,
+                endpoint=f"https://push.example/device/{n}",
+                p256dh="p",
+                auth="a",
+            )
+        )
+    db_session.commit()
+
+    r = client.delete(
+        "/api/push/subscribe", params={"endpoint": "https://push.example/device/1"}
+    )
+    assert r.status_code == 204
+    db_session.expire_all()
+    left = db_session.scalars(
+        select(PushSubscription.endpoint).where(PushSubscription.user_id == user.id)
+    ).all()
+    assert left == ["https://push.example/device/2"]
+
+
+def test_push_unsubscribe_with_endpoint_never_touches_another_user(
+    client, db_session, user
+) -> None:
+    from sqlalchemy import select
+
+    from tests.conftest import _make_user
+
+    other = _make_user(db_session, email="otro@example.com", name="Otro")
+    db_session.add(
+        PushSubscription(
+            user_id=other.id,
+            endpoint="https://push.example/device/other",
+            p256dh="p",
+            auth="a",
+        )
+    )
+    db_session.commit()
+    client.delete(
+        "/api/push/subscribe", params={"endpoint": "https://push.example/device/other"}
+    )
+    db_session.expire_all()
+    assert db_session.scalar(
+        select(PushSubscription.id).where(PushSubscription.user_id == other.id)
+    )

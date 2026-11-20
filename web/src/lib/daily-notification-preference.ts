@@ -19,8 +19,12 @@ export function dismissInstallNotify(): void {
   localStorage.setItem(INSTALL_PROMPT_KEY, "later");
 }
 
+/** Día local AAAA-MM-DD (con toISOString el «hoy» cambiaba a las 01:00 o 02:00 locales). */
 export function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
 }
 
 export function markDailyNotificationShown(): void {
