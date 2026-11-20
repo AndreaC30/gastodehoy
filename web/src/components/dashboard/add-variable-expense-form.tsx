@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { type FormEvent } from "react";
 import type { ExpenseCategory } from "@/api/types";
+import { FormError } from "@/components/ui/form-error";
 import { FormField } from "@/components/ui/form-field";
 import { BTN_PRIMARY, INPUT_CLASS } from "@/lib/ui-a11y";
 
@@ -9,10 +10,11 @@ const inputClass = INPUT_CLASS;
 type Props = {
   categories: ExpenseCategory[];
   pending: boolean;
+  error: string | null;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 };
 
-export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props) {
+export function AddVariableExpenseForm({ categories, pending, error, onSubmit }: Props) {
   const { t } = useTranslation();
   return (
     <form
@@ -71,6 +73,7 @@ export function AddVariableExpenseForm({ categories, pending, onSubmit }: Props)
       >
         {t("addVariableExpense.register")}
       </button>
+      <FormError message={error} />
     </form>
   );
 }
