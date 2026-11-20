@@ -467,6 +467,10 @@ class SummaryRead(BaseModel):
     monthly_budget_after_fixed_and_savings: Decimal
     remaining_this_month: Decimal
     suggested_spend_today: Decimal
+    # Ritmo del mes: % del mes recorrido, % gastado del presupuesto y estado.
+    month_elapsed_percent: Decimal
+    spent_percent: Decimal | None
+    pace_status: Literal["none", "ok", "tight", "over"]
 
 
 class MonthHistoryItem(BaseModel):
