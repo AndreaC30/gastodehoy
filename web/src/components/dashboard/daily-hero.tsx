@@ -28,7 +28,9 @@ export function DailyHero({
   return (
     <section
       data-tour="hero"
-      className={`${SECTION_CARD} flex max-h-[40rem] grow flex-col p-4 sm:p-5 lg:max-h-none lg:grow-0 lg:p-6`}
+      /* El tope de alto solo vale con el desglose plegado: abierto, la tarjeta debe crecer con su contenido
+         (con el tope fijo, el desglose se salía por debajo de la tarjeta en el móvil). */
+      className={`${SECTION_CARD} flex max-h-[40rem] grow flex-col p-4 has-[details[open]]:max-h-none sm:p-5 lg:max-h-none lg:grow-0 lg:p-6`}
       style={{ boxShadow: "inset 3px 0 0 var(--color-accent)" }}
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-start lg:gap-8">
