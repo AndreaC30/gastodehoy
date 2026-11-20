@@ -709,6 +709,7 @@
     "changesSaved": "Changes saved",
     "fixedUpdated": "Fixed expense updated",
     "expenseUpdated": "Expense updated",
+    "appUpdated": "App updated to version {{version}}",
     "csvDownloaded": "CSV downloaded"
   },
   "errors": {

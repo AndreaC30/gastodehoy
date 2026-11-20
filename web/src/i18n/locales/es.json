@@ -709,6 +709,7 @@
     "changesSaved": "Cambios guardados",
     "fixedUpdated": "Gasto fijo actualizado",
     "expenseUpdated": "Gasto actualizado",
+    "appUpdated": "Aplicación actualizada a la versión {{version}}",
     "csvDownloaded": "CSV descargado"
   },
   "errors": {

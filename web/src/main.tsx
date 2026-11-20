@@ -14,6 +14,7 @@ import "./fonts/fonts.css";
 import "./i18n/index.js";
 import "./index.css";
 import { installVisualViewport } from "./lib/install-visual-viewport";
+import { markAppUpdated } from "@/lib/app-update-flag";
 
 installVisualViewport();
 
@@ -56,6 +57,7 @@ if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
   const reloadForUpdate = () => {
     if (reloading) return;
     reloading = true;
+    markAppUpdated();
     window.location.reload();
   };
   navigator.serviceWorker.addEventListener("controllerchange", () => {

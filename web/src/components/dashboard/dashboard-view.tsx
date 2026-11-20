@@ -46,6 +46,7 @@ import { useUndoableDelete } from "@/lib/use-undoable-delete";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import type { DashboardSection } from "@/lib/dashboard-state";
 import { getActiveSection, setActiveSection } from "@/lib/dashboard-state";
+import { consumeAppUpdated } from "@/lib/app-update-flag";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { SiteFooter } from "@/components/site-footer";
 import { DASHBOARD_SCROLL_CLASS } from "@/lib/app-layout";
@@ -144,6 +145,13 @@ export function Dashboard({ profileName }: Props) {
     getDensity,
     () => "comfortable" as const,
   );
+
+  // Tras una actualización automática de la PWA, avisa una sola vez.
+  useEffect(() => {
+    if (consumeAppUpdated()) {
+      setToastMsg(t("toasts.appUpdated", { version: __APP_VERSION__ }));
+    }
+  }, [t]);
 
   useEffect(() => {
     if (!toastMsg) return;
