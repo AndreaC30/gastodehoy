@@ -236,7 +236,9 @@
     "tabsHint": "Heute, Ausgaben, Analyse und Verlauf sind in der unteren Leiste.",
     "gastosVariables": "Variabel",
     "gastosFijos": "Fix",
-    "fabAddExpense": "Ausgabe hinzufügen"
+    "fabAddExpense": "Ausgabe hinzufügen",
+    "add": "Hinzufügen",
+    "more": "Mehr"
   },
   "emptyStates": {
     "noVariableExpenses": "Keine Ausgaben diesen Monat",

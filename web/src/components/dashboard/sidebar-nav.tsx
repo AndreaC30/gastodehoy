@@ -295,7 +295,7 @@ export function Sidebar({
       <AppDrawer
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        title={t("header.menu")}
+        title={t("nav.more")}
         subtitle={profileName}
         labelledById="gdh-more-drawer-title"
       >

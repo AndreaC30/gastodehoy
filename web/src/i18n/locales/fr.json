@@ -236,7 +236,9 @@
     "tabsHint": "Aujourd'hui, Dépenses, Analyse et Historique sont dans la barre du bas.",
     "gastosVariables": "Variables",
     "gastosFijos": "Fixes",
-    "fabAddExpense": "Ajouter une dépense"
+    "fabAddExpense": "Ajouter une dépense",
+    "add": "Ajouter",
+    "more": "Plus"
   },
   "emptyStates": {
     "noVariableExpenses": "Aucune dépense ce mois",

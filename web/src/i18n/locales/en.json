@@ -236,7 +236,9 @@
     "tabsHint": "Today, Expenses, Insights and History are in the bottom bar.",
     "gastosVariables": "Variable",
     "gastosFijos": "Fixed",
-    "fabAddExpense": "Add expense"
+    "fabAddExpense": "Add expense",
+    "add": "Add",
+    "more": "More"
   },
   "emptyStates": {
     "noVariableExpenses": "No expenses this month",
