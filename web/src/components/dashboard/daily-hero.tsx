@@ -102,7 +102,6 @@ export function DailyHero({
       data-tour="hero"
       className={`${SECTION_CARD} flex max-h-[40rem] grow flex-col p-4 sm:p-5 lg:max-h-none lg:grow-0 lg:p-6`}
       style={{ boxShadow: "inset 3px 0 0 var(--color-accent)" }}
-      aria-live="polite"
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-stretch lg:gap-8">
         <div className="lg:flex lg:flex-col lg:justify-center">
@@ -114,16 +113,21 @@ export function DailyHero({
                 aria-hidden
               />
             ) : (
-              <p
-                className="font-display text-[clamp(2.35rem,6.5vh,3.15rem)] font-semibold tabular-nums tracking-tight text-[var(--color-accent)]"
-                aria-label={
-                  summary?.suggested_spend_today != null
-                    ? money(summary.suggested_spend_today)
-                    : undefined
-                }
-              >
-                {animatedSpend}
-              </p>
+              <>
+                {/* Cifra animada: solo visual, para que no se anuncie cada fotograma. */}
+                <p
+                  className="font-display text-[clamp(2.35rem,6.5vh,3.15rem)] font-semibold tabular-nums tracking-tight text-[var(--color-accent)]"
+                  aria-hidden
+                >
+                  {animatedSpend}
+                </p>
+                {/* Solo el importe final se anuncia al cambiar. */}
+                <p className="sr-only" role="status" aria-live="polite">
+                  {summary?.suggested_spend_today != null
+                    ? `${t("hero.dailyBudget")}: ${money(summary.suggested_spend_today)}`
+                    : ""}
+                </p>
+              </>
             )}
           </div>
 

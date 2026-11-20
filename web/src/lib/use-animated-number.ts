@@ -39,6 +39,15 @@ export function useAnimatedNumber(
       return;
     }
 
+    // Sin animación si la persona pide reducir el movimiento.
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setDisplayed(numericTarget);
+      return;
+    }
+
     // Start from the current displayed value (via ref to avoid stale closure)
     const start = displayedRef.current ?? 0;
     const startTime = performance.now();
