@@ -28,20 +28,31 @@ Guía rápida para orientarse sin releer toda la app. Para decisiones de diseño
 | Ruta | Qué hay |
 | --- | --- |
 | `src/App.tsx`, `main.tsx` | Arranque, proveedores y decisión landing / login / dashboard. |
-| `src/components/dashboard/` | Pantalla principal: `dashboard-view.tsx` (contenedor), `daily-hero.tsx` (cifra de hoy), `sidebar-nav.tsx`, formularios y modales de gastos, secciones de fijos, categorías, ingresos, metas, paneles de análisis. |
-| `src/components/ui/` | Piezas base: `bottom-nav`, `app-sheet`, `app-drawer`, `form-field`, `swipeable-row`, `empty-state`, `skeleton`. |
+| `src/components/dashboard/` | Pantalla principal: `dashboard-view.tsx` (contenedor), `daily-hero.tsx` (pantalla Hoy), `day-sheet.tsx` (hoja del día: sugerido, gastado hoy), `pace-meter.tsx` (ritmo del mes con icono y texto), `budget-waterfall.tsx` (del sueldo a la cifra de hoy, solo escritorio), `sidebar-nav.tsx` (lateral y menú Más, en grupos Día a día, Tu mes y Más), `month-history-strip.tsx` (histórico mensual, ahora dentro de Análisis), formularios y modales de gastos, secciones de fijos, categorías, ingresos, metas y paneles de análisis. |
+| `src/components/ui/` | Piezas base: `bottom-nav` (cinco botones: Hoy, Gastos, Añadir en el centro, Análisis y Más), `app-sheet`, `app-drawer`, `form-field` (etiqueta visible + ayuda/error enlazados), `form-error`, `swipeable-row`, `empty-state`, `skeleton`, `theme-within`. |
 | `src/components/` (raíz) | Landing, login, onboarding, ajustes, aviso legal, `site-footer.tsx` (muestra `v{__APP_VERSION__}`). |
 | `src/api/` | `client.ts` (llamadas a `/api/*`) y `types.ts`. |
 | `src/lib/` | Utilidades y estado: formato, preferencias, notificaciones, `use-undoable-delete.ts`, `use-dialog-a11y.ts`, `query-keys.ts`. |
 | `src/i18n/locales/` | Traducciones. Toda cadena nueva va en los cuatro idiomas. |
-| `src/index.css` | Variables de color y tipografía (base del rediseño visual). |
+| `src/index.css` | Tokens de color (claro en `@theme`, oscuro en `html.dark`) y tipografía. Paleta azul marino con cian. `--color-field-border` es el borde de campos y botones secundarios (3:1); `--color-border` y `--color-border-subtle` son para tarjetas decorativas. |
+| `src/lib/ui-a11y.ts` | Constantes de estilo compartidas: `FOCUS_RING`, `INPUT_CLASS`, `BTN_*`, `SECTION_CARD`, `ICON_BTN`. Los campos usan `field-border`. |
 | `vite.config.ts` | Inyecta `__APP_VERSION__` desde `package.json`. |
-| `scripts/` | Generan los iconos y las pantallas de lanzamiento de la PWA. |
+| `scripts/` | `generate-pwa-icons.mjs` y `generate-pwa-splash.mjs` generan iconos y pantallas de lanzamiento; `icons-stable.mjs` los ejecuta y restituye los bytes originales de los PNG cuyos píxeles no cambiaron. |
+
+## Herramientas (`tools/`)
+
+| Fichero | Qué hace |
+| --- | --- |
+| `check_contrast.py` | Mide los contrastes WCAG de los tokens de `index.css` en claro y oscuro (texto 4,5:1; bordes de campos y foco 3:1). Sale con 1 si algo falla. |
+| `check_i18n.py` | Compara `es`, `en`, `fr` y `de`: claves, marcadores `{{x}}` y plurales. Sale con 1 si algo falla. |
+| `strip_outer_black_bg.py`, `trim_logo_and_favicon.py` | Retoques puntuales de imágenes de marca. |
 
 ## Pruebas y CI
 
 - `pytest` ejecuta `tests/` (unitarias y de API). `tests/e2e/test_account_journey.py` recorre una cuenta completa.
-- GitHub Actions (`.github/workflows`) ejecuta `pytest` y el e2e en cada push y PR. **No ejecuta `npm run build`**, así que un error de tipos del frontend no rompe la comprobación automática.
+- GitHub Actions (`.github/workflows/tests.yml`) ejecuta en cada push y PR: `pytest`, el e2e, `web-checks` (`tools/check_contrast.py` y `tools/check_i18n.py`) y `web-build` (`npm ci` y `npm run build`).
+- `tests/test_openapi_unique_ids.py` vigila que los `operationId` del OpenAPI no se repitan.
+- Lo que no se automatiza (móvil real, PWA instalada, lector de pantalla) está en [pruebas-pendientes-en-movil.md](pruebas-pendientes-en-movil.md).
 
 ## Ejecutar en local
 
@@ -54,7 +65,7 @@ cd web && npm run build                     # tsc -b + vite build
 
 ## Cosas que sorprenden
 
-- `npm run build` ejecuta antes `npm run icons`, que **regenera los PNG** de `web/public/` y `web/src/assets/` (iconos y pantallas de lanzamiento). Tras compilar, `git status` los muestra modificados aunque no se haya tocado nada: no se commitean salvo que el cambio sea intencionado.
+- `npm run build` ejecuta antes `npm run icons` (ahora `scripts/icons-stable.mjs`), que regenera los PNG de `web/public/` y `web/src/assets/`. sharp/libvips puede escribir bytes distintos con los mismos píxeles según su versión; el envoltorio compara los píxeles y restituye el PNG original si no cambió el origen, para que `git status` no se ensucie. Si cambias un origen (`gastodehoy-calendar-icon-source.png`, el logo), el PNG nuevo sí se conserva y debes commitearlo.
 - El icono de la app aún muestra "$" y no hay fuente editable para regenerarlo con "€".
 - En desarrollo (`ENV=development`) no hay límite de tasa en login ni escrituras. En un servidor público, `ENV=production`.
 - El correo necesita SMTP; sin él, el registro funciona pero registra `SMTPNotConfiguredError` al enviar la bienvenida.
@@ -64,5 +75,4 @@ cd web && npm run build                     # tsc -b + vite build
 - `pytest`: 192 pruebas, todas en verde.
 - `npm run build`: compila sin errores (`tsc -b` y `vite build`; la PWA precachea 41 entradas).
 - `/health` devuelve `{"status":"ok","database":"ok","version":"1.0.0"}`.
-- Aviso conocido de FastAPI: operation ID duplicado en `sitemap_xml` y `og_image` (rutas `HEAD`).
-- Aviso de React en consola: `fetchPriority` en `BootSplashContent` (`boot-splash-content.tsx`); debe ser `fetchpriority` en React 18.
+- Avisos de la línea base, resueltos en la Fase 6: operation ID duplicado en `sitemap_xml` y `og_image` (`HEAD` ya no entra en el esquema) y aviso de React por `fetchPriority` en `BootSplashContent` (se escribe `fetchpriority`).

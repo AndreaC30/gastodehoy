@@ -199,7 +199,7 @@ export function IncomeSettingsContent({
   return (
     <div>
       {error && (
-        <div className={`mb-3 px-3 py-2 ${ALERT_CRIT}`} role="alert" aria-live="polite">
+        <div className={`mb-3 px-3 py-2 ${ALERT_CRIT}`} role="alert">
           {error}
         </div>
       )}

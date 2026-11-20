@@ -122,7 +122,6 @@ export function LoginScreen({
           <div
             className={`mt-4 ${ALERT_CRIT} px-4 py-3`}
             role="alert"
-            aria-live="polite"
           >
             {error}
           </div>
@@ -259,7 +258,7 @@ function LoginForm({
       <button
         type="button"
         onClick={onForgot}
-        className="mt-1 block w-full text-center text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
+        className="min-h-11 mt-1 block w-full text-center text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
       >
         {t("login.forgotPassword")}
       </button>
@@ -364,13 +363,13 @@ function RegisterForm({
           type="checkbox"
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
-          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-field-border)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
         />
         <span>
           {t("login.acceptTerms")}{" "}
-          <button type="button" onClick={() => showLegalPage("privacy")} className="text-[var(--color-accent)] underline hover:text-[var(--color-accent)]">{t("login.privacyPolicy")}</button>
+          <button type="button" onClick={() => showLegalPage("privacy")} className="text-[var(--color-accent)] underline">{t("login.privacyPolicy")}</button>
           {" "}{t("login.and")}{" "}
-          <button type="button" onClick={() => showLegalPage("legal")} className="text-[var(--color-accent)] underline hover:text-[var(--color-accent)]">{t("login.termsOfUse")}</button>
+          <button type="button" onClick={() => showLegalPage("legal")} className="text-[var(--color-accent)] underline">{t("login.termsOfUse")}</button>
         </span>
       </label>
       <label className="flex cursor-pointer items-start gap-2 text-xs text-[var(--color-text-muted)]">
@@ -378,7 +377,7 @@ function RegisterForm({
           type="checkbox"
           checked={confirmedAge}
           onChange={(e) => setConfirmedAge(e.target.checked)}
-          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-field-border)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
         />
         <span>{t("login.ageConfirm")}</span>
       </label>
@@ -440,7 +439,7 @@ function ForgotForm({
             setDoneMessage(null);
             onCancel();
           }}
-          className="w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110"
+          className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110"
         >
           {t("login.backToLogin")}
         </button>
@@ -473,7 +472,7 @@ function ForgotForm({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex w-full items-center justify-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] sm:w-auto sm:justify-start"
+          className="min-h-11 inline-flex w-full items-center justify-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] sm:w-auto sm:justify-start"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           {t("login.backToLogin")}
@@ -481,7 +480,7 @@ function ForgotForm({
         <button
           type="submit"
           disabled={busy || !email}
-          className="w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60 sm:w-auto"
+          className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60 sm:w-auto"
         >
           {busy ? t("login.sending") : t("login.sendEmail")}
         </button>

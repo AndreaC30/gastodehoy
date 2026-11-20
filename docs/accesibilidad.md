@@ -4,6 +4,23 @@ Fecha: 9 de noviembre de 2026.
 
 Esta nota dice lo que se comprobó en esta pasada. No es una auditoría WCAG ni un dictamen. No dice que la app cumpla la Ley 11/2023.
 
+## Actualización del rediseño (fases 2 a 6, noviembre de 2026)
+
+La revisión de abajo es del 9 de noviembre y se hizo con la paleta anterior (cian `#22d3ee` sobre casi negro): sus valores de contraste ya no son los vigentes. Lo que cambió después:
+
+- **Paleta y tokens.** Azul marino con cian. Los tokens están en `web/src/index.css`: tema claro en `@theme` y oscuro en `html.dark`. En claro, el turquesa, el verde y el ámbar se oscurecen para que el texto llegue a 4,5:1 sobre blanco.
+- **Bordes de campos.** `--color-field-border` (claro `#708298`, oscuro `#5f7fa1`) pinta el borde de campos, casillas y botones secundarios: llega a 3:1 (WCAG 1.4.11) sobre tarjeta, página, tarjeta elevada y fondo suave. `--color-border` y `--color-border-subtle` quedan para tarjetas y separadores decorativos, que no exigen 3:1.
+- **Medidor de contraste.** `python3 tools/check_contrast.py` lee los tokens y comprueba texto (4,5:1), estados bien, justo y mal sobre su fondo, el borde de campos y el anillo de foco (3:1). Sale con código 1 si algo baja del mínimo y corre en CI (`web-checks`).
+- **Idiomas.** `python3 tools/check_i18n.py` compara es, en, fr y de (claves, marcadores `{{x}}` y plurales) y también corre en CI. Es una comprobación estructural: no juzga la calidad de la traducción.
+- **Navegación.** En móvil, barra inferior de cinco botones (Hoy, Gastos, Añadir en el centro, Análisis, Más); Más abre las demás secciones. En escritorio, lateral en grupos Día a día, Tu mes y Más. El botón activo lleva `aria-current` y se distingue por icono relleno, no solo por color.
+- **Hoy.** La cifra del día anuncia solo el importe final; la hoja del día y el ritmo del mes muestran el estado con icono y texto («Vas bien», «Vas justo», «Te pasas»), nunca solo con color. La barra del ritmo es decorativa (`aria-hidden`) y las cifras están en texto.
+- **Histórico.** Ya no es una sección aparte: es una pestaña de Análisis, con calendario por días.
+- **Foco y objetivos táctiles.** Hay un anillo de foco de respaldo en `index.css` (`:where(...)`, especificidad cero) para cualquier control sin clase propia, y los botones de acceso, onboarding y pie miden al menos 44 px. Los enlaces dentro de una frase quedan exentos.
+- **Etiquetas.** Los campos de metas de ahorro y de gastos fijos del onboarding tienen etiqueta visible.
+- **Movimiento.** `prefers-reduced-motion` desactiva animaciones CSS (regla global), el número animado de Hoy y la animación circular del cambio de tema.
+
+Pendiente de comprobar en dispositivos reales: [pruebas-pendientes-en-movil.md](pruebas-pendientes-en-movil.md).
+
 ## Cómo se miró
 
 App local: Vite en `http://127.0.0.1:5174` contra la API en `127.0.0.1:8011`, con una SQLite temporal fuera del repo. No se usó gastodehoy.es ni dev.gastodehoy.es.

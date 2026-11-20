@@ -334,12 +334,14 @@ def robots_txt() -> FileResponse | JSONResponse:
     return _dist_root_file("robots.txt", DIST_ROOT_STATIC_FILES["robots.txt"])
 
 
-@app.api_route("/sitemap.xml", methods=["GET", "HEAD"], response_model=None)
+@app.head("/sitemap.xml", response_model=None, include_in_schema=False)
+@app.get("/sitemap.xml", response_model=None)
 def sitemap_xml() -> FileResponse | JSONResponse:
     return _dist_root_file("sitemap.xml", DIST_ROOT_STATIC_FILES["sitemap.xml"])
 
 
-@app.api_route("/og-image.png", methods=["GET", "HEAD"], response_model=None)
+@app.head("/og-image.png", response_model=None, include_in_schema=False)
+@app.get("/og-image.png", response_model=None)
 def og_image() -> FileResponse | JSONResponse:
     return _dist_root_file("og-image.png", DIST_ROOT_STATIC_FILES["og-image.png"])
 

@@ -19,7 +19,8 @@ import {
 } from "@/components/dashboard/category-icon";
 import { IconSelectDropdown } from "@/components/dashboard/icon-select-dropdown";
 import { money } from "@/lib/format";
-import { SECTION_CARD } from "@/lib/ui-a11y";
+import { FormField } from "@/components/ui/form-field";
+import { INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
 
 type Props = {
   userName: string;
@@ -223,21 +224,21 @@ function StepIncome({
           value={income}
           onChange={(e) => setIncome(e.target.value)}
           placeholder="2000.00"
-          className="mt-1.5 w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 text-[var(--color-text)] outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
+          className="mt-1.5 w-full rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg)] px-3 py-2.5 text-[var(--color-text)] outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
         />
       </label>
       <div className="flex items-center justify-between gap-3 pt-2">
         <button
           type="button"
           onClick={onSkip}
-          className="text-sm text-[var(--color-text-dim)] underline decoration-[var(--color-border-subtle)] underline-offset-4 hover:text-[var(--color-text-muted)]"
+          className="min-h-11 text-sm text-[var(--color-text-dim)] underline decoration-[var(--color-border-subtle)] underline-offset-4 hover:text-[var(--color-text-muted)]"
         >
           {t("onboarding.configureLater")}
         </button>
         <button
           type="submit"
           disabled={disabled}
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60"
+          className="min-h-11 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60"
         >
           {t("onboarding.next")}
           <IoArrowForward className="h-4 w-4 shrink-0" aria-hidden />
@@ -294,34 +295,42 @@ function StepFixed({
         </p>
       </div>
 
-      <form onSubmit={add} className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <div className="flex w-full min-w-0 gap-2 sm:min-w-[140px] sm:flex-1">
+      <form onSubmit={add} className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="flex w-full min-w-0 items-end gap-2 sm:min-w-[140px] sm:flex-1">
           <IconSelectDropdown value={icon} onChange={setIcon} />
-          <input
+          <FormField
             id="onboarding-fixed-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t("fixedExpenses.placeholder")}
-            aria-label={t("onboarding.fixedNameLabel")}
-            className="min-w-0 flex-1 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
-          />
+            label={t("onboarding.fixedNameLabel")}
+            className="min-w-0 flex-1"
+          >
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t("fixedExpenses.placeholder")}
+              className={INPUT_CLASS}
+            />
+          </FormField>
         </div>
-        <input
+        <FormField
           id="onboarding-fixed-amount"
-          type="number"
-          inputMode="decimal"
-          step="0.01"
-          min={0}
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder={t("onboarding.fixedAmountPlaceholder")}
-          aria-label={t("onboarding.fixedAmountLabel")}
-          className="w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)] sm:w-24"
-        />
+          label={t("onboarding.fixedAmountLabel")}
+          className="w-full sm:w-28"
+        >
+          <input
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min={0}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder={t("onboarding.fixedAmountPlaceholder")}
+            className={INPUT_CLASS}
+          />
+        </FormField>
         <button
           type="submit"
-          className="w-full rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 sm:w-auto"
+          className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 sm:w-auto"
         >
           {t("fixedExpenses.add")}
         </button>
@@ -346,7 +355,7 @@ function StepFixed({
               <button
                 type="button"
                 onClick={() => remove(i)}
-                className="shrink-0 rounded-lg border border-[var(--color-crit-border)] px-2.5 py-1 text-sm font-medium text-[var(--color-crit)] hover:bg-[var(--color-crit-dim)]"
+                className="min-h-11 shrink-0 rounded-lg border border-[var(--color-crit-border)] px-2.5 py-1 text-sm font-medium text-[var(--color-crit)] hover:bg-[var(--color-crit-dim)]"
               >
                 {t("common.remove")}
               </button>
@@ -370,7 +379,7 @@ function StepFixed({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+          className="min-h-11 inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           {t("common.back")}
@@ -378,7 +387,7 @@ function StepFixed({
         <button
           type="button"
           onClick={onNext}
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110"
+          className="min-h-11 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110"
         >
           {t("onboarding.next")}
           <IoArrowForward className="h-4 w-4 shrink-0" aria-hidden />
@@ -467,7 +476,7 @@ function StepSavings({
               value={percent}
               onChange={(e) => setPercent(e.target.value)}
               autoFocus
-              className="min-w-0 flex-1 max-w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
+              className="min-w-0 flex-1 max-w-full rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
             <span className="shrink-0 text-[var(--color-text-dim)]">%</span>
           </div>
@@ -486,7 +495,7 @@ function StepSavings({
               onChange={(e) => setAmount(e.target.value)}
               autoFocus
               placeholder="200.00"
-              className="min-w-0 flex-1 max-w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
+              className="min-w-0 flex-1 max-w-full rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
             <span className="shrink-0 text-[var(--color-text-dim)]">€</span>
           </div>
@@ -508,7 +517,7 @@ function StepSavings({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+          className="min-h-11 inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           {t("tour.back")}
@@ -516,7 +525,7 @@ function StepSavings({
         <button
           type="submit"
           disabled={disabled}
-          className="rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60"
+          className="min-h-11 rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60"
         >
           {busy ? t("incomeSettings.saving") : t("onboarding.start")}
         </button>

@@ -25,6 +25,8 @@
   --color-panel-elevated: #f4f8fb;
   --color-border: #c6d3e1;
   --color-border-subtle: #d5dfeb;
+  /* Borde de campos y botones secundarios: 3:1 mínimo (WCAG 1.4.11) sobre tarjeta, página y fondos suaves. */
+  --color-field-border: #708298;
   --color-accent: #0b7285;
   --color-accent-dim: rgb(11 114 133 / 0.12);
   --color-accent-border: rgb(11 114 133 / 0.35);
@@ -63,6 +65,7 @@ html.dark {
   --color-panel-elevated: #1a2e49;
   --color-border: #223853;
   --color-border-subtle: #2c4666;
+  --color-field-border: #5f7fa1;
   --color-accent: #29c5dc;
   --color-accent-dim: rgb(41 197 220 / 0.14);
   --color-accent-border: rgb(41 197 220 / 0.34);
@@ -437,4 +440,11 @@ svg.gdh-icon-nav {
   to {
     opacity: 1;
   }
+}
+
+/* Anillo de foco de respaldo para cualquier control sin clase propia.
+   :where() deja la especificidad a cero: las utilidades (FOCUS_RING) mandan. */
+:where(a, button, summary, [role="tab"], [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }

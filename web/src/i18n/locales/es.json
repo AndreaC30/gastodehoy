@@ -72,9 +72,6 @@
     "uncategorized": "Otros gastos (sin clasificar): {{amount}}",
     "error": "No se pudo cargar la regla 50/30/20."
   },
-  "settings": {
-    "title": "Ajustes"
-  },
   "onboarding": {
     "greeting": "¡Hola, {{name}}!",
     "title": "Vamos a configurar tu mes",
@@ -199,7 +196,8 @@
     "update": "Actualizar",
     "remove": "Quitar",
     "mainNav": "Navegación principal",
-    "swipeHint": "Toca para editar · desliza a la izquierda para borrar"
+    "swipeHint": "Toca para editar · desliza a la izquierda para borrar",
+    "total": "Total"
   },
   "header": {
     "tagline": "Tu margen para hoy, claro y al instante.",
@@ -309,7 +307,9 @@
     "targetPlaceholder": "Objetivo (€)",
     "addGoal": "Añadir meta",
     "nameError": "Escribe un nombre para la meta",
-    "amountError": "Indica un objetivo mayor que 0"
+    "amountError": "Indica un objetivo mayor que 0",
+    "nameLabel": "Nombre de la meta",
+    "targetLabel": "Objetivo (€)"
   },
   "incomeSettings": {
     "title": "Configura tus ingresos",

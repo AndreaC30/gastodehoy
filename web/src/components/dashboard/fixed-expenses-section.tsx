@@ -145,7 +145,7 @@ export function FixedExpensesSection({
                         <button
                           type="button"
                           onClick={() => onEdit(it)}
-                          className={`min-h-11 rounded-lg border border-[var(--color-border-subtle)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
+                          className={`min-h-11 rounded-lg border border-[var(--color-field-border)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
                           aria-label={t("fixedExpenses.editLabel", { name: it.name })}
                         >
                           {t("common.edit")}
@@ -178,7 +178,7 @@ export function FixedExpensesSection({
               <button
                 type="button"
                 onClick={onToggleExpand}
-                className={`mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-3 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+                className={`mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
                 aria-expanded={expanded}
               >
                 <ChevronInCircle expanded={expanded} />

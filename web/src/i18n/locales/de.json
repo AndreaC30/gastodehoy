@@ -72,9 +72,6 @@
     "uncategorized": "Sonstige Ausgaben (nicht kategorisiert): {{amount}}",
     "error": "50/30/20-Regel konnte nicht geladen werden."
   },
-  "settings": {
-    "title": "Einstellungen"
-  },
   "onboarding": {
     "greeting": "Hallo, {{name}}!",
     "title": "Richten wir deinen Monat ein",
@@ -163,7 +160,7 @@
     "passwordMinError": "Das Passwort muss mindestens 8 Zeichen haben",
     "passwordMismatch": "Die Passwörter stimmen nicht überein",
     "creating": "Erstelle…",
-    "acceptTerms": "Ich habe die",
+    "acceptTerms": "Ich habe gelesen und akzeptiere die",
     "privacyPolicy": "Datenschutzerklärung",
     "termsOfUse": "Nutzungsbedingungen",
     "and": "und",
@@ -199,7 +196,8 @@
     "swipeHint": "Tippen zum Bearbeiten · nach links wischen zum Löschen",
     "saving": "Speichere…",
     "update": "Aktualisieren",
-    "mainNav": "Hauptnavigation"
+    "mainNav": "Hauptnavigation",
+    "total": "Gesamt"
   },
   "header": {
     "tagline": "Deine tägliche Marge, klar und sofort.",
@@ -277,7 +275,7 @@
     "title": "Fixkosten",
     "subtitle": "Was du jeden Monat gleich bezahlst",
     "description": "Miete, Versicherungen, Abos… hier hinzufügen.",
-    "concept": "Konzept",
+    "concept": "Bezeichnung",
     "placeholder": "z.B. Miete",
     "amount": "Betrag (€)",
     "add": "Hinzufügen",
@@ -309,7 +307,9 @@
     "targetPlaceholder": "Ziel (€)",
     "addGoal": "Ziel hinzufügen",
     "nameError": "Gib einen Namen für das Ziel ein",
-    "amountError": "Gib ein Ziel größer als 0 ein"
+    "amountError": "Gib ein Ziel größer als 0 ein",
+    "nameLabel": "Name des Ziels",
+    "targetLabel": "Ziel (€)"
   },
   "incomeSettings": {
     "title": "Einkommen einrichten",
@@ -375,7 +375,6 @@
     "themeToLight": "Zum hellen Modus wechseln",
     "themeToDark": "Zum dunklen Modus wechseln",
     "logout": "Abmelden",
-    "language": "Sprache",
     "dangerZone": "Gefahrenzone",
     "dangerDesc": "Das Löschen des Kontos entfernt dauerhaft Ausgaben, Kategorien und Einstellungen. Wir fragen im zweiten Schritt nach deinem Passwort.",
     "deleteAccount": "Mein Konto löschen…",
@@ -393,7 +392,7 @@
     "notifyTestFailed": "Dieses Gerät ist abonniert, aber der Testhinweis ist nicht erschienen. Prüfe, ob das System Benachrichtigungen von GastoDeHoy erlaubt.",
     "planTitle": "Dein Plan",
     "planBody": "Das Konto ist kostenlos. Es gibt keine Abbuchung, keine automatische Verlängerung und keine Verbindung zu deiner Bank. Ein kostenpflichtiger Plan wird nicht aktiviert, ohne vorher in diesem Konto den Preis einschließlich Steuern, den Zeitraum, die Verlängerung und die Kündigung zu zeigen.",
-    "planEnd": "Um den Dienst zu beenden und deine Daten zu löschen, nutze Konto löschen. Exportiere vorher das CSV, wenn du eine Kopie behalten willst.",
+    "planEnd": "Um den Dienst zu beenden und deine Daten zu löschen, nutze Mein Konto löschen. Exportiere vorher das CSV, wenn du eine Kopie behalten willst.",
     "planBodyFounder": "Dies ist ein Anfangskonto. Es bleibt kostenlos und dir wird nichts berechnet, auch wenn es später einen kostenpflichtigen Plan für neue Konten gibt.",
     "version": "Version {{version}}"
   },
@@ -416,7 +415,6 @@
     "save": "Speichern und fortfahren",
     "saving": "Speichere…",
     "logout": "Abmelden",
-    "language": "Sprache",
     "passwordError": "Das neue Passwort muss mindestens 8 Zeichen haben",
     "mismatchError": "Die neuen Passwörter stimmen nicht überein"
   },
@@ -434,7 +432,7 @@
     "budgetPlaceholder": "z.B. 80",
     "budgetHint": "Wenn du diesen Betrag im Monat überschreitest, warnt dich die App.",
     "color": "Farbe",
-    "icon": "Symbol",
+    "icon": "Icon",
     "perMonth": "{{amount}}€/Monat",
     "empty": "Noch keine Kategorien. Erstelle die erste!",
     "add": "Kategorie hinzufügen",
@@ -766,7 +764,7 @@
   "waterfall": {
     "title": "Von deinem Gehalt zur Zahl von heute",
     "income": "Dein Einkommen im Monat",
-    "savings": "Zurückgelegtes Sparen",
+    "savings": "Reservierte Ersparnisse",
     "fixed": "Fixkosten",
     "extra": "Verfügbare Zusatzeinnahmen",
     "available": "Verfügbar",

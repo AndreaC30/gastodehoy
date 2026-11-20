@@ -23,7 +23,7 @@
     "variableSubtitle": "{{month}} uniquement. Le 1er, une nouvelle liste commence.",
     "fixedRepeats": "Ils se répètent chaque mois, mêmes montants.",
     "bannerNewMonthTitle": "Nouveau mois",
-    "bannerNewMonthBody": "Les dépenses variables repartent de zéro. Vos charges fixes restent les mêmes.",
+    "bannerNewMonthBody": "Les dépenses variables repartent de zéro. Vos dépenses fixes restent les mêmes.",
     "bannerEndMonthTitle": "Derniers jours de {{month}}",
     "bannerEndMonthBody_one": "Il reste {{count}} jour. Faites le point avant le mois prochain.",
     "bannerEndMonthBody_other": "Il reste {{count}} jours. Faites le point avant le mois prochain.",
@@ -72,9 +72,6 @@
     "uncategorized": "Autres dépenses (non classées) : {{amount}}",
     "error": "Impossible de charger la règle 50/30/20."
   },
-  "settings": {
-    "title": "Paramètres"
-  },
   "onboarding": {
     "greeting": "Bonjour, {{name}} !",
     "title": "Configurons votre mois",
@@ -85,13 +82,13 @@
     "incomeLabel": "Revenu mensuel (€)",
     "configureLater": "Configurer plus tard",
     "next": "Suivant",
-    "fixedQuestion": "Quelles sont vos charges fixes par mois ?",
+    "fixedQuestion": "Quelles sont vos dépenses fixes par mois ?",
     "fixedDescription": "Loyer, abonnements, assurances… Ce que vous payez chaque mois sans exception.",
     "fixedOptional": "Cette étape est facultative. Vous pourrez les ajouter plus tard dans Paramètres.",
-    "fixedNameLabel": "Nom de la charge fixe",
+    "fixedNameLabel": "Nom de la dépense fixe",
     "fixedAmountPlaceholder": "Ex. 800",
-    "fixedAmountLabel": "Montant de la charge fixe",
-    "fixedEmpty": "Aucune charge fixe pour le moment.",
+    "fixedAmountLabel": "Montant de la dépense fixe",
+    "fixedEmpty": "Aucune dépense fixe pour le moment.",
     "fixedTotal": "Total fixe : {{total}}",
     "savingsQuestion": "Combien voulez-vous épargner par mois ?",
     "savingsSubtitle": "Choisissez comment définir votre épargne.",
@@ -166,7 +163,7 @@
     "acceptTerms": "J'ai lu et j'accepte la",
     "privacyPolicy": "politique de confidentialité",
     "termsOfUse": "conditions d'utilisation",
-    "and": "et",
+    "and": "et les",
     "forgotTitle": "Réinitialiser le mot de passe",
     "forgotDesc": "Nous enverrons un lien pour choisir un nouveau mot de passe. Il expire dans 1 heure. Vérifiez les spams.",
     "checkEmail": "Vérifiez votre email",
@@ -199,7 +196,8 @@
     "swipeHint": "Touchez pour modifier · glissez à gauche pour supprimer",
     "saving": "Enregistrement…",
     "update": "Mettre à jour",
-    "mainNav": "Navigation principale"
+    "mainNav": "Navigation principale",
+    "total": "Total"
   },
   "header": {
     "tagline": "Votre marge quotidienne, claire et instantanée.",
@@ -277,7 +275,7 @@
     "title": "Dépenses fixes",
     "subtitle": "Ce que vous payez pareil chaque mois",
     "description": "Loyer, assurances, abonnements… ajoutez-les ici.",
-    "concept": "Concept",
+    "concept": "Libellé",
     "placeholder": "ex. Loyer",
     "amount": "Montant (€)",
     "add": "Ajouter",
@@ -309,7 +307,9 @@
     "targetPlaceholder": "Objectif (€)",
     "addGoal": "Ajouter un objectif",
     "nameError": "Entrez un nom pour l'objectif",
-    "amountError": "Entrez un objectif supérieur à 0"
+    "amountError": "Entrez un objectif supérieur à 0",
+    "nameLabel": "Nom de l'objectif",
+    "targetLabel": "Objectif (€)"
   },
   "incomeSettings": {
     "title": "Configurez vos revenus",
@@ -375,7 +375,6 @@
     "themeToLight": "Passer en mode clair",
     "themeToDark": "Passer en mode sombre",
     "logout": "Déconnexion",
-    "language": "Langue",
     "dangerZone": "Zone de danger",
     "dangerDesc": "Supprimer le compte efface définitivement les dépenses, catégories et paramètres. Nous vous demanderons votre mot de passe dans une deuxième étape.",
     "deleteAccount": "Supprimer mon compte…",
@@ -416,7 +415,6 @@
     "save": "Enregistrer et continuer",
     "saving": "Enregistrement…",
     "logout": "Déconnexion",
-    "language": "Langue",
     "passwordError": "Le nouveau mot de passe doit avoir au moins 8 caractères",
     "mismatchError": "Les nouveaux mots de passe ne correspondent pas"
   },
@@ -495,7 +493,7 @@
     },
     "step4": {
       "title": "Budget mensuel",
-      "body": "Le badge indique le mois actif. Les dépenses variables ne comptent que pour ce mois ; le 1er, elles repartent de zéro. Les charges fixes se répètent. Le 1er, nous vous demandons aussi si vos revenus ont changé."
+      "body": "Le badge indique le mois actif. Les dépenses variables ne comptent que pour ce mois ; le 1er, elles repartent de zéro. Les dépenses fixes se répètent. Le 1er, nous vous demandons aussi si vos revenus ont changé."
     },
     "step5": {
       "title": "Alertes",
