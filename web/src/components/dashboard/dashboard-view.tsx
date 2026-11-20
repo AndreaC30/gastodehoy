@@ -554,7 +554,7 @@ export function Dashboard({ profileName }: Props) {
                 onEdit={setEditingVariable}
                 onDelete={(id) => {
                   expenseUndo.perform(id);
-                  setToastMsg(t("toasts.undoDelete"));
+                  setToastMsg(t("toasts.expenseDeletedUndo"));
                   setToastUndo({
                     label: t("toasts.undoAction"),
                     action: () => expenseUndo.undo(),
@@ -585,7 +585,7 @@ export function Dashboard({ profileName }: Props) {
                 onEdit={setEditingFixed}
                 onDelete={(id) => {
                   fixedUndo.perform(id);
-                  setToastMsg(t("toasts.undoDelete"));
+                  setToastMsg(t("toasts.fixedRemovedUndo"));
                   setToastUndo({
                     label: t("toasts.undoAction"),
                     action: () => fixedUndo.undo(),
