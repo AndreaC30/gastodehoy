@@ -316,13 +316,18 @@ export function Dashboard({ profileName }: Props) {
 
   function onFixedSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    addFixed.mutate({
-      name: String(fd.get("name") ?? ""),
-      amount: String(fd.get("amount") ?? ""),
-      icon: fixedFormIcon,
-    });
-    e.currentTarget.reset();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    // El formulario se vacía solo si el servidor confirma el guardado; si falla,
+    // la persona conserva lo escrito para reintentar.
+    addFixed.mutate(
+      {
+        name: String(fd.get("name") ?? ""),
+        amount: String(fd.get("amount") ?? ""),
+        icon: fixedFormIcon,
+      },
+      { onSuccess: () => form.reset() },
+    );
   }
 
   function onExpenseSubmit(e: FormEvent<HTMLFormElement>) {
@@ -340,12 +345,13 @@ export function Dashboard({ profileName }: Props) {
         category_id: catId ? Number(catId) : null,
       },
       {
+        // Vaciar solo tras el éxito: si falla, se conserva lo escrito.
+        onSuccess: () => form.reset(),
         onSettled: () => {
           expenseSubmitLocked.current = false;
         },
       },
     );
-    form.reset();
   }
 
   async function handleExport() {
