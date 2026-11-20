@@ -13,9 +13,9 @@ const webDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const logoPath = path.join(webDir, "src/assets/gastodehoy-logo.png");
 const publicDir = path.join(webDir, "public");
 
-const BG = { r: 15, g: 23, b: 42, alpha: 1 };
+const BG = { r: 11, g: 23, b: 39, alpha: 1 };
 const TAGLINE = "Cada euro que controlas es un paso hacia tu libertad";
-const TAGLINE_COLOR = "#94a3b8";
+const TAGLINE_COLOR = "#93a8bd";
 
 function writePublic(name, buffer) {
   writeFileSync(path.join(publicDir, name), buffer);

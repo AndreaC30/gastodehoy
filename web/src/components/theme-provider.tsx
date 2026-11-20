@@ -54,8 +54,8 @@ function writeTheme(isDark: boolean) {
   }
   document.documentElement.classList.toggle("dark", isDark);
   document.documentElement.style.backgroundColor = isDark
-    ? "#070A0D"
-    : "#eef2f6";
+    ? "#0B1727"
+    : "#eef3f8";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

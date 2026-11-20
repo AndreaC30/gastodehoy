@@ -12,8 +12,8 @@
  *
  * Two deliberate variants (do not mix):
  *   - Favicons (browser tab): transparent, calendar only.
- *   - PWA / apple-touch (install + home screen): #0f172a fill + calendar (matches app theme).
- *   - og-image: solid #0f172a for social previews.
+ *   - PWA / apple-touch (install + home screen): #0b1727 fill + calendar (matches app theme).
+ *   - og-image: solid #0b1727 for social previews.
  */
 import { copyFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -23,8 +23,8 @@ import sharp from "sharp";
 const webDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourcePath = path.join(webDir, "src/assets/gastodehoy-calendar-icon-source.png");
 
-// App theme background (slate-900) — manifest background_color / Android splash only.
-const BG = { r: 15, g: 23, b: 42, alpha: 1 }; // #0f172a
+// App theme background (navy) — manifest background_color / Android splash only.
+const BG = { r: 11, g: 23, b: 39, alpha: 1 }; // #0b1727
 const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
 
 /** Tolerance when removing the baked-in export background from the calendar PNG. */

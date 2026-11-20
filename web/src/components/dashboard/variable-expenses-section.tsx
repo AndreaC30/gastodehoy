@@ -132,7 +132,7 @@ export function VariableExpensesSection({
                       <div className="flex min-w-0 items-center gap-2">
                         <CatIcon
                           className="gdh-icon shrink-0"
-                          style={{ color: it.category_color ?? "#8fa3b3" }}
+                          style={{ color: it.category_color ?? "#93a8bd" }}
                         />
                         <p className="truncate font-semibold tabular-nums text-[var(--color-accent)]/90">
                           {money(it.amount)}
