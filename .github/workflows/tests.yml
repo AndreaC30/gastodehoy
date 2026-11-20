@@ -24,3 +24,30 @@ jobs:
           python-version: "3.13"
       - run: pip install -r requirements.txt -r requirements-dev.txt
       - run: pytest tests/e2e/test_account_journey.py
+
+  web-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Contraste de colores (WCAG)
+        run: python3 tools/check_contrast.py
+      - name: Idiomas (claves, marcadores y plurales)
+        run: python3 tools/check_i18n.py
+
+  web-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build

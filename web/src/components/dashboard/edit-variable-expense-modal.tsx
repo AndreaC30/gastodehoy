@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "@/api/client";
 import type { ExpenseCategory, VariableExpense } from "@/api/types";
 import { AppSheet } from "@/components/ui/app-sheet";
+import { normalizeAmount, POSITIVE_AMOUNT_PATTERN } from "@/lib/amount";
 import { BTN_PRIMARY, BTN_SECONDARY, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
@@ -20,7 +21,7 @@ export function EditVariableExpenseModal({
   onSaved,
 }: Props) {
   const { t } = useTranslation();
-  const [amount, setAmount] = useState(String(expense.amount));
+  const [amount, setAmount] = useState(String(expense.amount).replace(".", ","));
   const [occurredAt, setOccurredAt] = useState(expense.occurred_at);
   const [categoryId, setCategoryId] = useState(
     expense.category_id != null ? String(expense.category_id) : "",
@@ -51,7 +52,7 @@ export function EditVariableExpenseModal({
     setError(null);
     const trimmedNote = note.trim();
     saveMut.mutate({
-      amount,
+      amount: normalizeAmount(amount),
       occurred_at: occurredAt,
       note: trimmedNote || null,
       category_id: categoryId ? Number(categoryId) : null,
@@ -82,10 +83,11 @@ export function EditVariableExpenseModal({
           </label>
           <input
             id="edit-var-amount"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="0.01"
-            min="0.01"
+            autoComplete="off"
+            pattern={POSITIVE_AMOUNT_PATTERN}
+            title={t("addVariableExpense.amountFormat")}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             required

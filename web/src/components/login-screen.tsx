@@ -6,7 +6,7 @@
 import { useTranslation } from "react-i18next";
 import { type FormEvent, useId, useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { IoArrowBack } from "react-icons/io5";
+import { IoArrowBack, IoCheckmarkCircle } from "react-icons/io5";
 import { api } from "@/api/client";
 import type {
   ForgotPasswordResponse,
@@ -17,6 +17,7 @@ import { setUser } from "@/auth";
 import { BrandLogo } from "@/components/brand-logo";
 import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 import { showLegalPage } from "@/lib/legal-pages-state";
+import { onTabListKeyDown } from "@/lib/tab-keys";
 import { ALERT_CRIT, BTN_PRIMARY, FOCUS_RING, INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
 import { translateBackendError } from "@/lib/backend-errors";
 
@@ -28,9 +29,12 @@ export type AuthEntryTab = "login" | "register";
 /** Public entry point: renders the right form. */
 export function LoginScreen({
   initialMode = "login",
+  notice,
   onBackToLanding,
 }: {
   initialMode?: AuthEntryTab;
+  /** Clave i18n de un aviso de éxito sobre el formulario (p. ej. contraseña cambiada). */
+  notice?: string;
   onBackToLanding?: () => void;
 } = {}) {
   const [mode, setMode] = useState<Mode>(() =>
@@ -77,8 +81,11 @@ export function LoginScreen({
             className="mt-6 flex rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/60 p-1 text-sm"
             role="tablist"
             aria-label={t("login.accessTabs")}
+            onKeyDown={onTabListKeyDown}
           >
               <TabButton
+                id="login-tab-login"
+                controls="login-panel"
                 active={mode === "login"}
                 onClick={() => {
                   setMode("login");
@@ -88,6 +95,8 @@ export function LoginScreen({
                 {t("login.tabLogin")}
               </TabButton>
               <TabButton
+                id="login-tab-register"
+                controls="login-panel"
                 active={mode === "register"}
                 onClick={() => {
                   setMode("register");
@@ -99,17 +108,37 @@ export function LoginScreen({
             </div>
         )}
 
+        {notice && mode === "login" && !error && (
+          <p
+            role="status"
+            className="mt-4 flex items-start gap-2 rounded-lg border border-[var(--color-ok-border)] bg-[var(--color-ok-dim)] px-4 py-3 text-sm"
+          >
+            <IoCheckmarkCircle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-ok)]" aria-hidden />
+            <span className="text-[var(--color-text)]">{t(notice)}</span>
+          </p>
+        )}
+
         {error && (
           <div
             className={`mt-4 ${ALERT_CRIT} px-4 py-3`}
             role="alert"
-            aria-live="polite"
           >
             {error}
           </div>
         )}
 
-        <div className={`mt-4 ${SECTION_CARD} p-5`}>
+        <div
+          id="login-panel"
+          role={mode === "forgot" ? undefined : "tabpanel"}
+          aria-labelledby={
+            mode === "login"
+              ? "login-tab-login"
+              : mode === "register"
+                ? "login-tab-register"
+                : undefined
+          }
+          className={`mt-4 ${SECTION_CARD} p-5`}
+        >
           {mode === "login" && (
             <LoginForm
               onError={setError}
@@ -137,10 +166,14 @@ export function LoginScreen({
 
 /** Pill-style tab button used to flip between Login and Register. */
 function TabButton({
+  id,
+  controls,
   active,
   children,
   onClick,
 }: {
+  id: string;
+  controls: string;
   active: boolean;
   children: React.ReactNode;
   onClick: () => void;
@@ -149,7 +182,10 @@ function TabButton({
     <button
       type="button"
       role="tab"
+      id={id}
       aria-selected={active}
+      aria-controls={controls}
+      tabIndex={active ? 0 : -1}
       onClick={onClick}
       className={`min-h-11 flex-1 rounded-lg px-3 py-2 font-medium transition ${FOCUS_RING} ${
         active
@@ -222,7 +258,7 @@ function LoginForm({
       <button
         type="button"
         onClick={onForgot}
-        className="mt-1 block w-full text-center text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
+        className="min-h-11 mt-1 block w-full text-center text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
       >
         {t("login.forgotPassword")}
       </button>
@@ -327,13 +363,13 @@ function RegisterForm({
           type="checkbox"
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
-          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-field-border)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
         />
         <span>
           {t("login.acceptTerms")}{" "}
-          <button type="button" onClick={() => showLegalPage("privacy")} className="text-[var(--color-accent)] underline hover:text-[var(--color-accent)]">{t("login.privacyPolicy")}</button>
+          <button type="button" onClick={() => showLegalPage("privacy")} className="text-[var(--color-accent)] underline">{t("login.privacyPolicy")}</button>
           {" "}{t("login.and")}{" "}
-          <button type="button" onClick={() => showLegalPage("legal")} className="text-[var(--color-accent)] underline hover:text-[var(--color-accent)]">{t("login.termsOfUse")}</button>
+          <button type="button" onClick={() => showLegalPage("legal")} className="text-[var(--color-accent)] underline">{t("login.termsOfUse")}</button>
         </span>
       </label>
       <label className="flex cursor-pointer items-start gap-2 text-xs text-[var(--color-text-muted)]">
@@ -341,7 +377,7 @@ function RegisterForm({
           type="checkbox"
           checked={confirmedAge}
           onChange={(e) => setConfirmedAge(e.target.checked)}
-          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-border-subtle)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
+          className="mt-0.5 h-5 w-5 shrink-0 rounded border-[var(--color-field-border)] bg-[var(--color-panel-elevated)] accent-[var(--color-accent)]"
         />
         <span>{t("login.ageConfirm")}</span>
       </label>
@@ -403,7 +439,7 @@ function ForgotForm({
             setDoneMessage(null);
             onCancel();
           }}
-          className="w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110"
+          className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110"
         >
           {t("login.backToLogin")}
         </button>
@@ -436,7 +472,7 @@ function ForgotForm({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex w-full items-center justify-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] sm:w-auto sm:justify-start"
+          className="min-h-11 inline-flex w-full items-center justify-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] sm:w-auto sm:justify-start"
         >
           <IoArrowBack className="h-4 w-4 shrink-0" aria-hidden />
           {t("login.backToLogin")}
@@ -444,7 +480,7 @@ function ForgotForm({
         <button
           type="submit"
           disabled={busy || !email}
-          className="w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60 sm:w-auto"
+          className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60 sm:w-auto"
         >
           {busy ? t("login.sending") : t("login.sendEmail")}
         </button>

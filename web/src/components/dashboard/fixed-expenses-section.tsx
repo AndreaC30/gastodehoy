@@ -7,7 +7,9 @@ import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SwipeableRow } from "@/components/ui/swipeable-row";
+import { FormError } from "@/components/ui/form-error";
 import { FormField } from "@/components/ui/form-field";
+import { AMOUNT_PATTERN } from "@/lib/amount";
 import { money } from "@/lib/format";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import { BTN_PRIMARY, FOCUS_RING, INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
@@ -25,6 +27,7 @@ type Props = {
   hiddenCount: number;
   formIcon: string;
   pending: boolean;
+  error: string | null;
   deletePending: boolean;
   onToggleExpand: () => void;
   onFormIconChange: (icon: string) => void;
@@ -42,6 +45,7 @@ export function FixedExpensesSection({
   hiddenCount,
   formIcon,
   pending,
+  error,
   deletePending,
   onToggleExpand,
   onFormIconChange,
@@ -72,16 +76,15 @@ export function FixedExpensesSection({
           {t("fixedExpenses.description")}
         </p>
         <form
-          className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-2"
+          className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-end lg:gap-2"
           onSubmit={onSubmit}
         >
-          <div className="flex w-full min-w-0 gap-2 lg:min-w-0 lg:flex-1">
+          <div className="flex w-full min-w-0 items-end gap-2 lg:min-w-0 lg:flex-1">
             <IconSelectDropdown value={formIcon} onChange={onFormIconChange} />
             <FormField
               id="fixed-expense-name"
               label={t("fixedExpenses.concept")}
               className="min-w-0 flex-1"
-              labelClassName="sr-only"
             >
               <input
                 name="name"
@@ -95,14 +98,14 @@ export function FixedExpensesSection({
             id="fixed-expense-amount"
             label={t("fixedExpenses.amount")}
             className="w-full lg:w-28"
-            labelClassName="sr-only"
           >
             <input
               name="amount"
-              type="number"
+              type="text"
               inputMode="decimal"
-              step="0.01"
-              min={0}
+              autoComplete="off"
+              pattern={AMOUNT_PATTERN}
+              title={t("fixedExpenses.amountFormat")}
               placeholder="€"
               required
               className={inputClass}
@@ -115,6 +118,7 @@ export function FixedExpensesSection({
           >
             {t("fixedExpenses.add")}
           </button>
+          <FormError message={error} />
         </form>
         {isLoading ? (
           <div className="mt-4 space-y-2" aria-label={t("common.loading")}>
@@ -141,7 +145,7 @@ export function FixedExpensesSection({
                         <button
                           type="button"
                           onClick={() => onEdit(it)}
-                          className={`min-h-11 rounded-lg border border-[var(--color-border-subtle)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
+                          className={`min-h-11 rounded-lg border border-[var(--color-field-border)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
                           aria-label={t("fixedExpenses.editLabel", { name: it.name })}
                         >
                           {t("common.edit")}
@@ -174,7 +178,7 @@ export function FixedExpensesSection({
               <button
                 type="button"
                 onClick={onToggleExpand}
-                className={`mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-3 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
+                className={`mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)] ${FOCUS_RING}`}
                 aria-expanded={expanded}
               >
                 <ChevronInCircle expanded={expanded} />

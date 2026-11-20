@@ -16,9 +16,10 @@ import { InstallNotifyPrompt } from "@/components/dashboard/install-notify-promp
 import { TourSection } from "@/components/dashboard/tour-section";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AddVariableExpenseForm } from "@/components/dashboard/add-variable-expense-form";
+import { AppSheet } from "@/components/ui/app-sheet";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { IoMenu } from "react-icons/io5";
-import { FOCUS_RING, ICON_BTN } from "@/lib/ui-a11y";
+import { FOCUS_RING } from "@/lib/ui-a11y";
 import { EditFixedExpenseModal } from "@/components/dashboard/edit-fixed-expense-modal";
 import { EditVariableExpenseModal } from "@/components/dashboard/edit-variable-expense-modal";
 import { FixedExpensesSection } from "@/components/dashboard/fixed-expenses-section";
@@ -38,11 +39,23 @@ import {
 import { maybeShowDailyNotification } from "@/lib/daily-notification";
 import { isDailyNotificationEnabled } from "@/lib/daily-notification-preference";
 import { syncWebPush } from "@/lib/push-subscription";
+import { normalizeAmount } from "@/lib/amount";
+import { onTabListKeyDown } from "@/lib/tab-keys";
 import { hapticTick } from "@/lib/haptics";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
 import type { DashboardSection } from "@/lib/dashboard-state";
 import { getActiveSection, setActiveSection } from "@/lib/dashboard-state";
+import { subscribe as subscribeAuth, snapshot as snapshotAuth } from "@/auth";
+import { OfflineQueueNotice } from "@/components/dashboard/offline-queue-notice";
+import {
+  enqueueExpense,
+  isConnectionError,
+  localDateIso,
+  newClientId,
+} from "@/lib/offline-expense-queue";
+import { useOfflineExpenses } from "@/lib/use-offline-expenses";
+import { consumeAppUpdated } from "@/lib/app-update-flag";
 import { invalidateBudgetQueries } from "@/lib/query-keys";
 import { SiteFooter } from "@/components/site-footer";
 import { DASHBOARD_SCROLL_CLASS } from "@/lib/app-layout";
@@ -60,13 +73,12 @@ import type {
 } from "@/api/types";
 
 type GastosTab = "variables" | "fijos";
-type AnalisisTab = "insights" | "categorias" | "regla";
+type AnalisisTab = "insights" | "categorias" | "regla" | "historico";
 
 const SECTION_TITLE_KEY: Record<DashboardSection, string> = {
   hoy: "header.sectionHoy",
   gastos: "header.sectionGastos",
   analisis: "header.sectionAnalisis",
-  historico: "header.sectionHistorico",
   ingresos: "header.sectionIngresos",
   categorias: "header.sectionCategorias",
   metas: "header.sectionMetas",
@@ -116,6 +128,7 @@ const VARIABLE_LIST_PREVIEW = 2;
 
 export function Dashboard({ profileName }: Props) {
   const { t, i18n } = useTranslation();
+  const userId = useSyncExternalStore(subscribeAuth, snapshotAuth).user?.id ?? null;
   const qc = useQueryClient();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [toastUndo, setToastUndo] = useState<{
@@ -134,6 +147,7 @@ export function Dashboard({ profileName }: Props) {
   const [showTour, setShowTour] = useState(false);
   const [tourClosedSignal, setTourClosedSignal] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [gastosTab, setGastosTab] = useState<GastosTab>("variables");
   const [analisisTab, setAnalisisTab] = useState<AnalisisTab>("insights");
   const density = useSyncExternalStore(
@@ -141,6 +155,13 @@ export function Dashboard({ profileName }: Props) {
     getDensity,
     () => "comfortable" as const,
   );
+
+  // Tras una actualización automática de la PWA, avisa una sola vez.
+  useEffect(() => {
+    if (consumeAppUpdated()) {
+      setToastMsg(t("toasts.appUpdated", { version: __APP_VERSION__ }));
+    }
+  }, [t]);
 
   useEffect(() => {
     if (!toastMsg) return;
@@ -168,6 +189,20 @@ export function Dashboard({ profileName }: Props) {
     queryKey: ["insights", i18n.language],
     queryFn: () => loadInsights(i18n.language),
   });
+
+  // Atajo de la PWA («Añadir gasto»): abre la hoja de añadir y limpia la dirección.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("accion") !== "anadir") return;
+    setAddSheetOpen(true);
+    params.delete("accion");
+    const rest = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + (rest ? `?${rest}` : "") + window.location.hash,
+    );
+  }, []);
 
   useEffect(() => {
     // Wait until settings are loaded AND the dashboard has rendered
@@ -237,25 +272,50 @@ export function Dashboard({ profileName }: Props) {
       setToastMsg(t("toasts.fixedAdded"));
       void invalidateAll();
     },
-    onError: (e: Error) => setToastMsg(e.message),
   });
 
   const addExpense = useMutation({
-    mutationFn: (body: {
+    // Sin esto TanStack Query pausa la mutación mientras no hay red y la cola
+    // no llegaría a ejecutarse.
+    networkMode: "always",
+    mutationFn: async (body: {
       amount: string;
       note: string | null;
       category_id: number | null;
-    }) =>
-      api<VariableExpense>("/api/expenses", {
-        method: "POST",
-        body: JSON.stringify(body),
-      }),
-    onSuccess: () => {
+    }): Promise<VariableExpense | { queued: true }> => {
+      // La clave viaja siempre: si la respuesta se pierde, el reenvío no duplica.
+      const clientId = newClientId();
+      try {
+        return await api<VariableExpense>("/api/expenses", {
+          method: "POST",
+          body: JSON.stringify({ ...body, client_id: clientId }),
+        });
+      } catch (err) {
+        if (!isConnectionError(err) || userId == null) throw err;
+        const saved = enqueueExpense({
+          userId,
+          queuedAt: Date.now(),
+          body: { ...body, occurred_at: localDateIso(), client_id: clientId },
+        });
+        // Sin almacenamiento no hay dónde guardarlo: que el error sea visible.
+        if (!saved) throw err;
+        return { queued: true };
+      }
+    },
+    onSuccess: (result) => {
       hapticTick();
+      if ("queued" in result) {
+        setToastMsg(t("toasts.expenseQueued"));
+        return;
+      }
       setToastMsg(t("toasts.expenseRegistered"));
       void invalidateAll();
     },
-    onError: (e: Error) => setToastMsg(e.message),
+  });
+
+  const offline = useOfflineExpenses(userId ?? -1, ({ sent, dropped }) => {
+    if (dropped > 0) setToastMsg(t("toasts.queuedDropped", { count: dropped }));
+    else setToastMsg(t("toasts.queuedSent", { count: sent }));
   });
 
   const expenseUndo = useUndoableDelete<VariableExpense>({
@@ -316,16 +376,21 @@ export function Dashboard({ profileName }: Props) {
 
   function onFixedSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    addFixed.mutate({
-      name: String(fd.get("name") ?? ""),
-      amount: String(fd.get("amount") ?? ""),
-      icon: fixedFormIcon,
-    });
-    e.currentTarget.reset();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    // El formulario se vacía solo si el servidor confirma el guardado; si falla,
+    // la persona conserva lo escrito para reintentar.
+    addFixed.mutate(
+      {
+        name: String(fd.get("name") ?? ""),
+        amount: normalizeAmount(String(fd.get("amount") ?? "")),
+        icon: fixedFormIcon,
+      },
+      { onSuccess: () => form.reset() },
+    );
   }
 
-  function onExpenseSubmit(e: FormEvent<HTMLFormElement>) {
+  function onExpenseSubmit(e: FormEvent<HTMLFormElement>, onSaved?: () => void) {
     e.preventDefault();
     if (expenseSubmitLocked.current || addExpense.isPending) return;
     const form = e.currentTarget;
@@ -335,17 +400,21 @@ export function Dashboard({ profileName }: Props) {
     expenseSubmitLocked.current = true;
     addExpense.mutate(
       {
-        amount: String(fd.get("amount") ?? ""),
+        amount: normalizeAmount(String(fd.get("amount") ?? "")),
         note: note || null,
         category_id: catId ? Number(catId) : null,
       },
       {
+        // Vaciar solo tras el éxito: si falla, se conserva lo escrito.
+        onSuccess: () => {
+          form.reset();
+          onSaved?.();
+        },
         onSettled: () => {
           expenseSubmitLocked.current = false;
         },
       },
     );
-    form.reset();
   }
 
   async function handleExport() {
@@ -391,6 +460,19 @@ export function Dashboard({ profileName }: Props) {
     [handleSectionChange],
   );
 
+  /** Acciones de las recomendaciones: «historico» ahora es una pestaña de Análisis. */
+  const navigateFromInsight = useCallback(
+    (kind: "hoy" | "gastos" | "ingresos" | "categorias" | "historico") => {
+      if (kind === "historico") {
+        setAnalisisTab("historico");
+        handleSectionChange("analisis");
+        return;
+      }
+      handleSectionChange(kind);
+    },
+    [handleSectionChange],
+  );
+
   function startGuidedTour() {
     handleSectionChange("hoy");
     // Let the «hoy» section mount before the overlay measures targets.
@@ -415,18 +497,7 @@ export function Dashboard({ profileName }: Props) {
 
         <header className="relative z-10 border-b border-[var(--color-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 sm:px-4 sm:py-3.5">
           <div className="mx-auto flex max-w-lg items-center gap-2 sm:gap-3 md:max-w-4xl lg:max-w-6xl">
-            {/* Mobile: menu left + brand (section as subtitle, like desktop tagline) */}
-            <button
-              type="button"
-              data-tour="menu"
-              onClick={() => setMobileMenuOpen(true)}
-              className={`${ICON_BTN} shrink-0 md:hidden`}
-              aria-label={t("header.menu")}
-              aria-expanded={mobileMenuOpen}
-              aria-haspopup="dialog"
-            >
-              <IoMenu className="gdh-icon-lg" aria-hidden />
-            </button>
+            {/* Móvil: marca con la sección como subtítulo (el menú vive en «Más» de la barra inferior). */}
             <div className="min-w-0 flex-1 md:hidden">
               <h1 className="m-0 leading-none">
                 <BrandLogo variant="header" />
@@ -466,6 +537,13 @@ export function Dashboard({ profileName }: Props) {
           </div>
         )}
 
+        <OfflineQueueNotice
+          pending={offline.pending}
+          online={offline.online}
+          flushing={offline.flushing}
+          onFlush={() => void offline.flush()}
+        />
+
         <div
           key={activeSection}
           className="flex grow flex-col"
@@ -479,6 +557,9 @@ export function Dashboard({ profileName }: Props) {
             <DailyHero
               summary={summaryQ.data}
               summaryPending={summaryQ.isPending}
+              spentToday={variableExpenseItems
+                .filter((e) => e.occurred_at === summaryQ.data?.reference_date)
+                .reduce((sum, e) => sum + Number(e.amount), 0)}
               onAddExpense={goToAddExpense}
             />
           </div>
@@ -491,6 +572,7 @@ export function Dashboard({ profileName }: Props) {
               className="flex border-b border-[var(--color-border)] lg:hidden"
               role="tablist"
               aria-label={t("header.sectionGastos")}
+              onKeyDown={onTabListKeyDown}
             >
               {([
                 { id: "variables" as const, label: t("nav.gastosVariables") },
@@ -502,7 +584,10 @@ export function Dashboard({ profileName }: Props) {
                     key={tab.id}
                     type="button"
                     role="tab"
+                    id={`gastos-tab-${tab.id}`}
                     aria-selected={selected}
+                    aria-controls={tab.id === "variables" ? "add-expense" : "gastos-panel-fijos"}
+                    tabIndex={selected ? 0 : -1}
                     onClick={() => {
                       hapticTick();
                       setGastosTab(tab.id);
@@ -522,8 +607,11 @@ export function Dashboard({ profileName }: Props) {
             <div className="grid min-w-0 grid-cols-1 gap-6 sm:gap-5 max-lg:[&_section]:rounded-none max-lg:[&_section]:border-0 max-lg:[&_section]:bg-transparent max-lg:[&_section]:shadow-none lg:grid-cols-2 lg:items-start lg:gap-6">
               <div
                 id="add-expense"
+                role="tabpanel"
+                aria-labelledby="gastos-tab-variables"
                 className={`min-w-0 ${gastosTab === "variables" ? "block" : "hidden"} lg:block`}
               >
+
               <VariableExpensesSection
                 referenceDate={summaryQ.data?.reference_date}
                 categories={categories}
@@ -534,13 +622,14 @@ export function Dashboard({ profileName }: Props) {
                 expanded={expandVariableList}
                 hiddenCount={variableHiddenCount}
                 addPending={addExpense.isPending}
+                addError={addExpense.error?.message ?? null}
                 deletePending={expenseUndo.isPending}
                 onSubmit={onExpenseSubmit}
                 onToggleExpand={() => setExpandVariableList((v) => !v)}
                 onEdit={setEditingVariable}
                 onDelete={(id) => {
                   expenseUndo.perform(id);
-                  setToastMsg(t("toasts.undoDelete"));
+                  setToastMsg(t("toasts.expenseDeletedUndo"));
                   setToastUndo({
                     label: t("toasts.undoAction"),
                     action: () => expenseUndo.undo(),
@@ -549,6 +638,9 @@ export function Dashboard({ profileName }: Props) {
               />
               </div>
               <div
+                id="gastos-panel-fijos"
+                role="tabpanel"
+                aria-labelledby="gastos-tab-fijos"
                 className={`min-w-0 ${gastosTab === "fijos" ? "block" : "hidden"} lg:block`}
               >
               <FixedExpensesSection
@@ -560,6 +652,7 @@ export function Dashboard({ profileName }: Props) {
                 hiddenCount={fixedHiddenCount}
                 formIcon={fixedFormIcon}
                 pending={addFixed.isPending}
+                error={addFixed.error?.message ?? null}
                 deletePending={fixedUndo.isPending}
                 onToggleExpand={() => setExpandFixedList((v) => !v)}
                 onFormIconChange={setFixedFormIcon}
@@ -567,7 +660,7 @@ export function Dashboard({ profileName }: Props) {
                 onEdit={setEditingFixed}
                 onDelete={(id) => {
                   fixedUndo.perform(id);
-                  setToastMsg(t("toasts.undoDelete"));
+                  setToastMsg(t("toasts.fixedRemovedUndo"));
                   setToastUndo({
                     label: t("toasts.undoAction"),
                     action: () => fixedUndo.undo(),
@@ -586,11 +679,13 @@ export function Dashboard({ profileName }: Props) {
               className="flex border-b border-[var(--color-border)]"
               role="tablist"
               aria-label={t("header.sectionAnalisis")}
+              onKeyDown={onTabListKeyDown}
             >
               {([
                 { id: "insights" as const, label: t("insights.title") },
                 { id: "categorias" as const, label: t("spendingChart.title") },
                 { id: "regla" as const, label: t("rule503020.title") },
+                { id: "historico" as const, label: t("header.sectionHistorico") },
               ]).map((tab) => {
                 const selected = analisisTab === tab.id;
                 return (
@@ -598,7 +693,10 @@ export function Dashboard({ profileName }: Props) {
                     key={tab.id}
                     type="button"
                     role="tab"
+                    id={`analisis-tab-${tab.id}`}
                     aria-selected={selected}
+                    aria-controls={`analisis-panel-${tab.id}`}
+                    tabIndex={selected ? 0 : -1}
                     onClick={() => {
                       hapticTick();
                       setAnalisisTab(tab.id);
@@ -615,16 +713,26 @@ export function Dashboard({ profileName }: Props) {
               })}
             </div>
             <div className="[&>div>*]:rounded-none [&>div>*]:border-0 [&>div>*]:bg-transparent [&>div>*]:shadow-none">
-              <div className={analisisTab === "insights" ? "block" : "hidden"} role="tabpanel">
+              <div
+                id="analisis-panel-insights"
+                className={analisisTab === "insights" ? "block" : "hidden"}
+                role="tabpanel"
+                aria-labelledby="analisis-tab-insights"
+              >
                 <InsightsPanel
                   embedded
                   data={insightsQ.data}
                   isLoading={insightsQ.isPending}
                   error={insightsQ.error as Error | null}
-                  onNavigate={handleSectionChange}
+                  onNavigate={navigateFromInsight}
                 />
               </div>
-              <div className={analisisTab === "categorias" ? "block" : "hidden"} role="tabpanel">
+              <div
+                id="analisis-panel-categorias"
+                className={analisisTab === "categorias" ? "block" : "hidden"}
+                role="tabpanel"
+                aria-labelledby="analisis-tab-categorias"
+              >
                 <SpendingChart
                   embedded
                   breakdown={insightsQ.data?.category_breakdown ?? []}
@@ -632,17 +740,26 @@ export function Dashboard({ profileName }: Props) {
                   onAddExpense={goToAddExpense}
                 />
               </div>
-              <div className={analisisTab === "regla" ? "block" : "hidden"} role="tabpanel">
+              <div
+                id="analisis-panel-regla"
+                className={analisisTab === "regla" ? "block" : "hidden"}
+                role="tabpanel"
+                aria-labelledby="analisis-tab-regla"
+              >
                 <Rule503020Panel embedded />
+              </div>
+              <div
+                id="analisis-panel-historico"
+                className={analisisTab === "historico" ? "block" : "hidden"}
+                role="tabpanel"
+                aria-labelledby="analisis-tab-historico"
+              >
+                {analisisTab === "historico" ? <MonthHistoryStrip onEdit={setEditingVariable} /> : null}
               </div>
             </div>
           </div>
         )}
 
-        {/* Section: HISTORICO */}
-        {activeSection === 'historico' && (
-          <MonthHistoryStrip />
-        )}
 
         {/* Section: INGRESOS */}
         {activeSection === 'ingresos' && settings && (
@@ -706,7 +823,25 @@ export function Dashboard({ profileName }: Props) {
       <BottomNav
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
+        onAdd={() => setAddSheetOpen(true)}
+        onMore={() => setMobileMenuOpen(true)}
+        moreOpen={mobileMenuOpen}
       />
+
+      <AppSheet
+        open={addSheetOpen}
+        onClose={() => setAddSheetOpen(false)}
+        title={t("hero.addExpense")}
+      >
+        <div className="px-5 py-4">
+          <AddVariableExpenseForm
+            categories={categories}
+            pending={addExpense.isPending}
+            error={addExpense.error?.message ?? null}
+            onSubmit={(e) => onExpenseSubmit(e, () => setAddSheetOpen(false))}
+          />
+        </div>
+      </AppSheet>
 
       {editingFixed && (
         <EditFixedExpenseModal

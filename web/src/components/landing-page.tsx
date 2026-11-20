@@ -143,7 +143,7 @@ export function LandingPage({ onEnter }: Props) {
                 <button
                   type="button"
                   onClick={() => onEnter("login")}
-                  className="min-h-11 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-5 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-panel-elevated)] sm:min-w-[11rem]"
+                  className="min-h-11 rounded-xl border border-[var(--color-field-border)] bg-[var(--color-panel)] px-5 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-panel-elevated)] sm:min-w-[11rem]"
                 >
                   {t("landing.ctaLogin")}
                 </button>
@@ -243,7 +243,7 @@ export function LandingPage({ onEnter }: Props) {
                 <button
                   type="button"
                   onClick={() => onEnter("login")}
-                  className="min-h-11 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)] px-5 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-panel-elevated)] sm:min-w-[12rem]"
+                  className="min-h-11 rounded-xl border border-[var(--color-field-border)] bg-[var(--color-panel)] px-5 py-3 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-panel-elevated)] sm:min-w-[12rem]"
                 >
                   {t("landing.ctaLogin")}
                 </button>

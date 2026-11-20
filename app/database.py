@@ -98,6 +98,8 @@ SCHEMA_MIGRATION_IDS: tuple[str, ...] = (
     "variable_expenses.amount_nonneg",
     "extra_incomes.nonneg_and_savings_mode",
     "savings_goals.amounts_nonneg",
+    "variable_expenses.client_id",
+    "variable_expenses.client_id_index",
 )
 
 
@@ -420,6 +422,24 @@ def _apply_historical_steps(conn) -> None:
         "ix_revoked_sessions_revoked_at",
         "CREATE INDEX IF NOT EXISTS ix_revoked_sessions_revoked_at "
         "ON revoked_sessions(revoked_at)",
+    )
+
+
+def _apply_client_id_steps(conn) -> None:
+    """Idempotency key for expenses queued offline (``client_id``)."""
+    _add_column(
+        conn,
+        "variable_expenses.client_id",
+        "variable_expenses",
+        "client_id",
+        "ALTER TABLE variable_expenses ADD COLUMN client_id VARCHAR(64)",
+    )
+    _ensure_index(
+        conn,
+        "variable_expenses.client_id_index",
+        "ux_variable_expenses_user_client",
+        "CREATE UNIQUE INDEX IF NOT EXISTS ux_variable_expenses_user_client "
+        "ON variable_expenses(user_id, client_id) WHERE client_id IS NOT NULL",
     )
 
 
@@ -1061,6 +1081,10 @@ def apply_sqlite_migrations(engine: Engine) -> None:
     # treat a cent amount as euros and multiply it by 100 again.
     _migrate_money_to_integer_cents(engine)
     _apply_money_checks(engine)
+    # After the money checks: their table rebuild copies a fixed column list
+    # and would drop (or fail on) a column added before it.
+    with engine.begin() as conn:
+        _apply_client_id_steps(conn)
 
 
 def get_db() -> Generator[Session, None, None]:

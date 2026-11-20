@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,6 +11,9 @@ import { siteOriginPlugin } from "./vite-plugin-site-origin";
 
 const webDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(webDir, "..");
+const pkg = JSON.parse(
+  readFileSync(path.join(webDir, "package.json"), "utf-8"),
+) as { version: string };
 
 export default defineConfig(({ mode }) => {
   const envRoot = loadEnv(mode, repoRoot, "");
@@ -20,6 +24,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     envDir: repoRoot,
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version),
+    },
     resolve: {
       alias: {
         "@": path.resolve(webDir, "src"),
@@ -36,13 +43,28 @@ export default defineConfig(({ mode }) => {
           short_name: "GastoDeHoy",
           description:
             "Descubre cuánto puedes gastar hoy y controla tus gastos diarios con tu presupuesto personal.",
-          theme_color: "#070A0D",
-          background_color: "#070A0D",
+          theme_color: "#0B1727",
+          background_color: "#0B1727",
           display: "standalone",
           id: "/",
           scope: "/",
           start_url: "/",
           lang: "es",
+          shortcuts: [
+            {
+              name: "Añadir gasto",
+              short_name: "Añadir",
+              description: "Anota un gasto de hoy",
+              url: "/?accion=anadir",
+              icons: [
+                {
+                  src: "/gastodehoy-app-icon-maskable-192.png",
+                  sizes: "192x192",
+                  type: "image/png",
+                },
+              ],
+            },
+          ],
           icons: [
             /* Solo iconos opacos grandes: los favicon pequeños se ven mal al instalar. */
             {

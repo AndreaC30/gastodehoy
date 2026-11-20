@@ -12,14 +12,18 @@
     "explanation": "Votre marge quotidienne : ce qu'il reste ce mois ÷ jours restants.",
     "addExpense": "Ajouter une dépense",
     "showMetrics": "Voir le détail du mois",
-    "hideMetrics": "Masquer le détail"
+    "hideMetrics": "Masquer le détail",
+    "nothingToday": "Vous n'avez encore rien noté aujourd'hui.",
+    "spentToday": "Vous avez dépensé {{amount}} aujourd'hui.",
+    "firstExpense": "Notez votre première dépense du jour",
+    "showBreakdown": "Voir le détail du mois"
   },
   "monthContext": {
     "badgeSubtitle": "Budget de ce mois",
     "variableSubtitle": "{{month}} uniquement. Le 1er, une nouvelle liste commence.",
     "fixedRepeats": "Ils se répètent chaque mois, mêmes montants.",
     "bannerNewMonthTitle": "Nouveau mois",
-    "bannerNewMonthBody": "Les dépenses variables repartent de zéro. Vos charges fixes restent les mêmes.",
+    "bannerNewMonthBody": "Les dépenses variables repartent de zéro. Vos dépenses fixes restent les mêmes.",
     "bannerEndMonthTitle": "Derniers jours de {{month}}",
     "bannerEndMonthBody_one": "Il reste {{count}} jour. Faites le point avant le mois prochain.",
     "bannerEndMonthBody_other": "Il reste {{count}} jours. Faites le point avant le mois prochain.",
@@ -68,9 +72,6 @@
     "uncategorized": "Autres dépenses (non classées) : {{amount}}",
     "error": "Impossible de charger la règle 50/30/20."
   },
-  "settings": {
-    "title": "Paramètres"
-  },
   "onboarding": {
     "greeting": "Bonjour, {{name}} !",
     "title": "Configurons votre mois",
@@ -81,13 +82,13 @@
     "incomeLabel": "Revenu mensuel (€)",
     "configureLater": "Configurer plus tard",
     "next": "Suivant",
-    "fixedQuestion": "Quelles sont vos charges fixes par mois ?",
+    "fixedQuestion": "Quelles sont vos dépenses fixes par mois ?",
     "fixedDescription": "Loyer, abonnements, assurances… Ce que vous payez chaque mois sans exception.",
     "fixedOptional": "Cette étape est facultative. Vous pourrez les ajouter plus tard dans Paramètres.",
-    "fixedNameLabel": "Nom de la charge fixe",
+    "fixedNameLabel": "Nom de la dépense fixe",
     "fixedAmountPlaceholder": "Ex. 800",
-    "fixedAmountLabel": "Montant de la charge fixe",
-    "fixedEmpty": "Aucune charge fixe pour le moment.",
+    "fixedAmountLabel": "Montant de la dépense fixe",
+    "fixedEmpty": "Aucune dépense fixe pour le moment.",
     "fixedTotal": "Total fixe : {{total}}",
     "savingsQuestion": "Combien voulez-vous épargner par mois ?",
     "savingsSubtitle": "Choisissez comment définir votre épargne.",
@@ -162,7 +163,7 @@
     "acceptTerms": "J'ai lu et j'accepte la",
     "privacyPolicy": "politique de confidentialité",
     "termsOfUse": "conditions d'utilisation",
-    "and": "et",
+    "and": "et les",
     "forgotTitle": "Réinitialiser le mot de passe",
     "forgotDesc": "Nous enverrons un lien pour choisir un nouveau mot de passe. Il expire dans 1 heure. Vérifiez les spams.",
     "checkEmail": "Vérifiez votre email",
@@ -175,6 +176,7 @@
     "resetDesc": "Choisissez un nouveau mot de passe. Ce lien ne peut servir qu'une fois.",
     "resetSubmit": "Enregistrer le mot de passe",
     "resetSaving": "Enregistrement…",
+    "resetDone": "Mot de passe mis à jour. Connectez-vous avec le nouveau.",
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
     "accessTabs": "Accès au compte",
@@ -194,7 +196,8 @@
     "swipeHint": "Touchez pour modifier · glissez à gauche pour supprimer",
     "saving": "Enregistrement…",
     "update": "Mettre à jour",
-    "mainNav": "Navigation principale"
+    "mainNav": "Navigation principale",
+    "total": "Total"
   },
   "header": {
     "tagline": "Votre marge quotidienne, claire et instantanée.",
@@ -236,7 +239,12 @@
     "tabsHint": "Aujourd'hui, Dépenses, Analyse et Historique sont dans la barre du bas.",
     "gastosVariables": "Variables",
     "gastosFijos": "Fixes",
-    "fabAddExpense": "Ajouter une dépense"
+    "fabAddExpense": "Ajouter une dépense",
+    "add": "Ajouter",
+    "more": "Plus",
+    "groupDay": "Au quotidien",
+    "groupMonth": "Votre mois",
+    "groupMore": "Plus"
   },
   "emptyStates": {
     "noVariableExpenses": "Aucune dépense ce mois",
@@ -267,7 +275,7 @@
     "title": "Dépenses fixes",
     "subtitle": "Ce que vous payez pareil chaque mois",
     "description": "Loyer, assurances, abonnements… ajoutez-les ici.",
-    "concept": "Concept",
+    "concept": "Libellé",
     "placeholder": "ex. Loyer",
     "amount": "Montant (€)",
     "add": "Ajouter",
@@ -280,7 +288,8 @@
     "showMore": "Voir {{count}} dépense fixe de plus",
     "showMore_other": "Voir {{count}} dépenses fixes de plus",
     "empty": "Aucune dépense fixe pour l'instant.",
-    "nameError": "Entrez un nom pour la dépense fixe"
+    "nameError": "Entrez un nom pour la dépense fixe",
+    "amountFormat": "Saisissez un montant avec virgule ou point et 2 décimales maximum. Ex. : 12,50"
   },
   "savingsGoals": {
     "title": "Objectifs d'épargne",
@@ -298,7 +307,9 @@
     "targetPlaceholder": "Objectif (€)",
     "addGoal": "Ajouter un objectif",
     "nameError": "Entrez un nom pour l'objectif",
-    "amountError": "Entrez un objectif supérieur à 0"
+    "amountError": "Entrez un objectif supérieur à 0",
+    "nameLabel": "Nom de l'objectif",
+    "targetLabel": "Objectif (€)"
   },
   "incomeSettings": {
     "title": "Configurez vos revenus",
@@ -364,7 +375,6 @@
     "themeToLight": "Passer en mode clair",
     "themeToDark": "Passer en mode sombre",
     "logout": "Déconnexion",
-    "language": "Langue",
     "dangerZone": "Zone de danger",
     "dangerDesc": "Supprimer le compte efface définitivement les dépenses, catégories et paramètres. Nous vous demanderons votre mot de passe dans une deuxième étape.",
     "deleteAccount": "Supprimer mon compte…",
@@ -383,7 +393,8 @@
     "planTitle": "Votre formule",
     "planBody": "Le compte est gratuit. Il n'y a pas de prélèvement, pas de renouvellement automatique et pas de connexion à votre banque. Une formule payante ne sera pas activée sans afficher d'abord, dans ce même compte, le prix taxes comprises, la période, le renouvellement et la façon de l'annuler.",
     "planEnd": "Pour mettre fin au service et effacer vos données, utilisez Supprimer mon compte. Exportez le CSV avant si vous voulez une copie.",
-    "planBodyFounder": "Ce compte est initial. Il reste gratuit et rien ne vous sera prélevé, même si une formule payante existe plus tard pour les nouveaux comptes."
+    "planBodyFounder": "Ce compte est initial. Il reste gratuit et rien ne vous sera prélevé, même si une formule payante existe plus tard pour les nouveaux comptes.",
+    "version": "Version {{version}}"
   },
   "deleteAccount": {
     "title": "Supprimer le compte",
@@ -404,7 +415,6 @@
     "save": "Enregistrer et continuer",
     "saving": "Enregistrement…",
     "logout": "Déconnexion",
-    "language": "Langue",
     "passwordError": "Le nouveau mot de passe doit avoir au moins 8 caractères",
     "mismatchError": "Les nouveaux mots de passe ne correspondent pas"
   },
@@ -483,7 +493,7 @@
     },
     "step4": {
       "title": "Budget mensuel",
-      "body": "Le badge indique le mois actif. Les dépenses variables ne comptent que pour ce mois ; le 1er, elles repartent de zéro. Les charges fixes se répètent. Le 1er, nous vous demandons aussi si vos revenus ont changé."
+      "body": "Le badge indique le mois actif. Les dépenses variables ne comptent que pour ce mois ; le 1er, elles repartent de zéro. Les dépenses fixes se répètent. Le 1er, nous vous demandons aussi si vos revenus ont changé."
     },
     "step5": {
       "title": "Alertes",
@@ -510,7 +520,8 @@
     "amountPlaceholder": "Montant (€)",
     "note": "Note (optionnelle)",
     "notePlaceholder": "Note (optionnelle)",
-    "register": "Enregistrer"
+    "register": "Enregistrer",
+    "amountFormat": "Saisissez un montant supérieur à 0, avec virgule ou point et 2 décimales maximum. Ex. : 12,50"
   },
   "editVariableExpense": {
     "category": "Catégorie",
@@ -683,22 +694,36 @@
       }
     ]
   },
+  "offline": {
+    "title": "Hors connexion",
+    "hint": "Vous pouvez continuer à saisir des dépenses. Elles seront envoyées automatiquement au retour de la connexion.",
+    "pending_one": "{{count}} dépense en attente d’envoi",
+    "pending_other": "{{count}} dépenses en attente d’envoi",
+    "pendingHint": "Elles ne comptent pas encore dans le chiffre du jour. Elles seront envoyées automatiquement dès que vous serez connecté.",
+    "sendNow": "Envoyer maintenant",
+    "sending": "Envoi…"
+  },
   "toasts": {
     "tourComplete": "Guide terminé. Vous pouvez le revoir depuis le menu.",
     "fixedAdded": "Dépense fixe ajoutée",
     "categoriesUpdated": "Catégories mises à jour",
     "expenseRegistered": "Dépense enregistrée",
     "expenseDeleted": "Dépense supprimée",
-    "undoDelete": "Dépense supprimée",
     "undoAction": "Annuler",
     "expenseDeletedUndo": "Dépense supprimée",
-    "fixedRemovedUndo": "Dépense fixe retirée",
+    "fixedRemovedUndo": "Dépense fixe supprimée",
     "done": "Terminé",
     "extraIncomeUpdated": "Revenus extra mis à jour",
     "changesSaved": "Modifications enregistrées",
     "fixedUpdated": "Dépense fixe mise à jour",
     "fixedRemoved": "Dépense fixe retirée",
     "expenseUpdated": "Dépense mise à jour",
+    "appUpdated": "Application mise à jour vers la version {{version}}",
+    "expenseQueued": "Hors connexion : dépense enregistrée sur cet appareil. Elle sera envoyée au retour de la connexion",
+    "queuedSent_one": "{{count}} dépense envoyée",
+    "queuedSent_other": "{{count}} dépenses envoyées",
+    "queuedDropped_one": "{{count}} dépense n’a pas pu être envoyée et a été abandonnée",
+    "queuedDropped_other": "{{count}} dépenses n’ont pas pu être envoyées et ont été abandonnées",
     "csvDownloaded": "CSV téléchargé"
   },
   "errors": {
@@ -719,5 +744,34 @@
     "acceptTerms": "J'ai lu et j'accepte les conditions et la politique de confidentialité en vigueur.",
     "accept": "Accepter et continuer",
     "saving": "Enregistrement…"
+  },
+  "pace": {
+    "title": "Rythme du mois",
+    "spent": "Dépensé",
+    "elapsed": "Mois écoulé",
+    "status": {
+      "ok": "Ça va",
+      "tight": "Juste",
+      "over": "Vous dépassez"
+    },
+    "hint": {
+      "ok": "vous dépensez sous le rythme du mois.",
+      "tight": "vous dépensez un peu au-dessus du rythme du mois.",
+      "over": "vous dépensez au-dessus du rythme du mois."
+    },
+    "noBudget": "Pas de budget ce mois-ci"
+  },
+  "waterfall": {
+    "title": "De votre revenu au chiffre du jour",
+    "income": "Votre revenu du mois",
+    "savings": "Épargne mise de côté",
+    "fixed": "Dépenses fixes",
+    "extra": "Revenus extra disponibles",
+    "available": "Disponible",
+    "spent": "Dépensé au quotidien",
+    "remaining": "Il vous reste ce mois-ci",
+    "days_one": "Divisé par le jour restant",
+    "days_other": "Divisé par les {{count}} jours restants",
+    "today": "Vous pouvez dépenser aujourd'hui"
   }
 }

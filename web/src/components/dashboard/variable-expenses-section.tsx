@@ -23,6 +23,7 @@ type Props = {
   expanded: boolean;
   hiddenCount: number;
   addPending: boolean;
+  addError: string | null;
   deletePending: boolean;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   onToggleExpand: () => void;
@@ -41,6 +42,7 @@ export function VariableExpensesSection({
   expanded,
   hiddenCount,
   addPending,
+  addError,
   deletePending,
   onSubmit,
   onToggleExpand,
@@ -78,6 +80,7 @@ export function VariableExpensesSection({
         <AddVariableExpenseForm
           categories={categories}
           pending={addPending}
+          error={addError}
           onSubmit={onSubmit}
         />
         <h3 className={`mb-2 mt-6 ${TYPE_EYEBROW}`}>
@@ -108,7 +111,7 @@ export function VariableExpensesSection({
                         <button
                           type="button"
                           onClick={() => onEdit(it)}
-                          className={`min-h-11 rounded-lg border border-[var(--color-border-subtle)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
+                          className={`min-h-11 rounded-lg border border-[var(--color-field-border)] px-2.5 py-1.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
                           aria-label={t("variableExpenses.editLabel", { amount: `${money(it.amount)}${it.note ? `, ${it.note}` : ""}` })}
                         >
                           {t("common.edit")}
@@ -129,7 +132,7 @@ export function VariableExpensesSection({
                       <div className="flex min-w-0 items-center gap-2">
                         <CatIcon
                           className="gdh-icon shrink-0"
-                          style={{ color: it.category_color ?? "#8fa3b3" }}
+                          style={{ color: it.category_color ?? "#93a8bd" }}
                         />
                         <p className="truncate font-semibold tabular-nums text-[var(--color-accent)]/90">
                           {money(it.amount)}
@@ -152,7 +155,7 @@ export function VariableExpensesSection({
               <button
                 type="button"
                 onClick={onToggleExpand}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-3 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)]"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg-soft)] px-3 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-text)]"
                 aria-expanded={expanded}
               >
                 <ChevronInCircle expanded={expanded} />

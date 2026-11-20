@@ -4,6 +4,12 @@ import {
   BOOT_SPLASH_LOGO_SRC,
 } from "@/lib/boot-splash";
 
+/**
+ * React 18 no conoce `fetchPriority` y avisa en consola; el atributo DOM es
+ * `fetchpriority` en minúsculas, que React 18 escribe tal cual sin aviso.
+ */
+const HIGH_PRIORITY_ATTR = { fetchpriority: "high" } as Record<string, string>;
+
 type Props = {
   /** When true, shows a subtle pulse on the logo (React loading state). */
   showSpinner?: boolean;
@@ -22,7 +28,7 @@ export function BootSplashContent({ showSpinner = false }: Props) {
         width={607}
         height={141}
         decoding="async"
-        fetchPriority="high"
+        {...HIGH_PRIORITY_ATTR}
         draggable={false}
       />
       <img

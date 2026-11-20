@@ -12,7 +12,11 @@
     "explanation": "Tu margen diario: lo que queda del mes ÷ los días que faltan.",
     "addExpense": "Añadir gasto",
     "showMetrics": "Ver desglose del mes",
-    "hideMetrics": "Ocultar desglose"
+    "hideMetrics": "Ocultar desglose",
+    "nothingToday": "Hoy aún no has anotado nada.",
+    "spentToday": "Llevas hoy {{amount}}.",
+    "firstExpense": "Anota tu primer gasto de hoy",
+    "showBreakdown": "Ver el desglose del mes"
   },
   "monthContext": {
     "badgeSubtitle": "Presupuesto de este mes",
@@ -67,9 +71,6 @@
     "of": "de",
     "uncategorized": "Otros gastos (sin clasificar): {{amount}}",
     "error": "No se pudo cargar la regla 50/30/20."
-  },
-  "settings": {
-    "title": "Ajustes"
   },
   "onboarding": {
     "greeting": "¡Hola, {{name}}!",
@@ -175,6 +176,7 @@
     "resetDesc": "Elige una contraseña nueva. Este enlace solo se puede usar una vez.",
     "resetSubmit": "Guardar contraseña",
     "resetSaving": "Guardando…",
+    "resetDone": "Contraseña actualizada. Entra con la nueva.",
     "showPassword": "Mostrar contraseña",
     "hidePassword": "Ocultar contraseña",
     "accessTabs": "Acceso a la cuenta",
@@ -194,7 +196,8 @@
     "update": "Actualizar",
     "remove": "Quitar",
     "mainNav": "Navegación principal",
-    "swipeHint": "Toca para editar · desliza a la izquierda para borrar"
+    "swipeHint": "Toca para editar · desliza a la izquierda para borrar",
+    "total": "Total"
   },
   "header": {
     "tagline": "Tu margen para hoy, claro y al instante.",
@@ -236,7 +239,12 @@
     "tabsHint": "Hoy, Gastos, Análisis e Histórico están en la barra inferior.",
     "gastosVariables": "Variables",
     "gastosFijos": "Fijos",
-    "fabAddExpense": "Añadir gasto"
+    "fabAddExpense": "Añadir gasto",
+    "add": "Añadir",
+    "more": "Más",
+    "groupDay": "Día a día",
+    "groupMonth": "Tu mes",
+    "groupMore": "Más"
   },
   "emptyStates": {
     "noVariableExpenses": "Sin gastos este mes",
@@ -280,7 +288,8 @@
     "showMore": "Ver {{count}} gasto fijo más",
     "showMore_other": "Ver {{count}} gastos fijos más",
     "empty": "Ningún gasto fijo aún.",
-    "nameError": "Escribe un nombre para el gasto fijo"
+    "nameError": "Escribe un nombre para el gasto fijo",
+    "amountFormat": "Escribe un importe con coma o punto y hasta 2 decimales. Ej.: 12,50"
   },
   "savingsGoals": {
     "title": "Metas de ahorro",
@@ -298,7 +307,9 @@
     "targetPlaceholder": "Objetivo (€)",
     "addGoal": "Añadir meta",
     "nameError": "Escribe un nombre para la meta",
-    "amountError": "Indica un objetivo mayor que 0"
+    "amountError": "Indica un objetivo mayor que 0",
+    "nameLabel": "Nombre de la meta",
+    "targetLabel": "Objetivo (€)"
   },
   "incomeSettings": {
     "title": "Configura tus ingresos",
@@ -382,7 +393,8 @@
     "planTitle": "Tu plan",
     "planBody": "La cuenta es gratuita. No hay cobro, ni renovación automática, ni conexión con tu banco. Un plan de pago no se activará sin mostrar antes, en esta misma cuenta, el precio con impuestos, el periodo, la renovación y la forma de cancelarlo.",
     "planEnd": "Para terminar el servicio y borrar tus datos, usa Eliminar mi cuenta. Exporta el CSV antes si quieres quedarte una copia.",
-    "planBodyFounder": "Esta cuenta es inicial. Seguirá siendo gratuita y no se te cobrará nada, aunque más adelante exista un plan de pago para cuentas nuevas."
+    "planBodyFounder": "Esta cuenta es inicial. Seguirá siendo gratuita y no se te cobrará nada, aunque más adelante exista un plan de pago para cuentas nuevas.",
+    "version": "Versión {{version}}"
   },
   "deleteAccount": {
     "title": "Eliminar cuenta",
@@ -508,7 +520,8 @@
     "amountPlaceholder": "Cantidad (€)",
     "note": "Nota (opcional)",
     "notePlaceholder": "Nota (opcional)",
-    "register": "Registrar"
+    "register": "Registrar",
+    "amountFormat": "Escribe un importe mayor que 0, con coma o punto y hasta 2 decimales. Ej.: 12,50"
   },
   "editVariableExpense": {
     "category": "Categoría",
@@ -681,6 +694,15 @@
       }
     ]
   },
+  "offline": {
+    "title": "Sin conexión",
+    "hint": "Puedes seguir anotando gastos. Se enviarán solos cuando vuelva la conexión.",
+    "pending_one": "{{count}} gasto pendiente de enviar",
+    "pending_other": "{{count}} gastos pendientes de enviar",
+    "pendingHint": "Todavía no cuentan en tu cifra de hoy. Se enviarán solos al tener conexión.",
+    "sendNow": "Enviar ahora",
+    "sending": "Enviando…"
+  },
   "toasts": {
     "tourComplete": "Guía completada. Puedes volver a verla desde el menú.",
     "fixedAdded": "Gasto fijo añadido",
@@ -688,15 +710,20 @@
     "expenseRegistered": "Gasto registrado",
     "fixedRemoved": "Gasto fijo quitado",
     "expenseDeleted": "Gasto borrado",
-    "undoDelete": "Gasto eliminado",
     "undoAction": "Deshacer",
     "expenseDeletedUndo": "Gasto borrado",
-    "fixedRemovedUndo": "Gasto fijo quitado",
+    "fixedRemovedUndo": "Gasto fijo borrado",
     "done": "Listo",
     "extraIncomeUpdated": "Ingresos extra actualizados",
     "changesSaved": "Cambios guardados",
     "fixedUpdated": "Gasto fijo actualizado",
     "expenseUpdated": "Gasto actualizado",
+    "appUpdated": "Aplicación actualizada a la versión {{version}}",
+    "expenseQueued": "Sin conexión: gasto guardado en este dispositivo. Se enviará al volver la conexión",
+    "queuedSent_one": "{{count}} gasto enviado",
+    "queuedSent_other": "{{count}} gastos enviados",
+    "queuedDropped_one": "{{count}} gasto no se pudo enviar y se descartó",
+    "queuedDropped_other": "{{count}} gastos no se pudieron enviar y se descartaron",
     "csvDownloaded": "CSV descargado"
   },
   "errors": {
@@ -717,5 +744,34 @@
     "acceptTerms": "He leído y acepto las condiciones y la política de privacidad vigentes.",
     "accept": "Aceptar y continuar",
     "saving": "Guardando…"
+  },
+  "pace": {
+    "title": "Ritmo del mes",
+    "spent": "Gastado",
+    "elapsed": "Mes recorrido",
+    "status": {
+      "ok": "Vas bien",
+      "tight": "Vas justo",
+      "over": "Te pasas"
+    },
+    "hint": {
+      "ok": "gastas por debajo del ritmo del mes.",
+      "tight": "gastas algo por encima del ritmo del mes.",
+      "over": "gastas por encima del ritmo del mes."
+    },
+    "noBudget": "Sin presupuesto este mes"
+  },
+  "waterfall": {
+    "title": "De tu sueldo a la cifra de hoy",
+    "income": "Tu ingreso del mes",
+    "savings": "Ahorro reservado",
+    "fixed": "Gastos fijos",
+    "extra": "Ingresos extra disponibles",
+    "available": "Disponible",
+    "spent": "Gastado en el día a día",
+    "remaining": "Te queda este mes",
+    "days_one": "Entre el día que queda",
+    "days_other": "Entre los {{count}} días que quedan",
+    "today": "Hoy puedes gastar"
   }
 }

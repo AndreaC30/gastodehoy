@@ -11,6 +11,7 @@ from typing import TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, func, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user, limit_authenticated_writes
@@ -76,6 +77,18 @@ def _utcnow() -> datetime:
 def _note_is_blank(note: str | None) -> bool:
     """Same empty treatment as ``VariableExpenseUpdate``: null and whitespace are absent."""
     return note is None or note.strip() == ""
+
+
+def _find_expense_by_client_id(
+    db: Session, user_id: int, client_id: str
+) -> VariableExpense | None:
+    """The user's expense created with this idempotency key, if any."""
+    return db.scalar(
+        select(VariableExpense).where(
+            VariableExpense.user_id == user_id,
+            VariableExpense.client_id == client_id,
+        )
+    )
 
 
 def _find_recent_variable_expense(
@@ -401,6 +414,10 @@ def create_expense(
                 status_code=400,
                 detail="Categoría inválida o no pertenece a tu cuenta",
             )
+    if payload.client_id is not None:
+        replay = _find_expense_by_client_id(db, user.id, payload.client_id)
+        if replay is not None:
+            return replay
     day = payload.occurred_at or today_in_app_timezone()
     now = _utcnow()
     existing = _find_recent_variable_expense(
@@ -421,9 +438,22 @@ def create_expense(
         note=payload.note,
         category_id=payload.category_id,
         created_at=now,
+        client_id=payload.client_id,
     )
     db.add(row)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Two requests with the same client_id raced: keep the first one.
+        db.rollback()
+        replay = (
+            _find_expense_by_client_id(db, user.id, payload.client_id)
+            if payload.client_id is not None
+            else None
+        )
+        if replay is None:
+            raise
+        return replay
     db.refresh(row)
     return row
 

@@ -12,7 +12,11 @@
     "explanation": "Your daily margin: what's left this month ÷ days remaining.",
     "addExpense": "Add expense",
     "showMetrics": "Show month breakdown",
-    "hideMetrics": "Hide breakdown"
+    "hideMetrics": "Hide breakdown",
+    "nothingToday": "You haven't logged anything today.",
+    "spentToday": "You've spent {{amount}} today.",
+    "firstExpense": "Log your first expense today",
+    "showBreakdown": "See the month breakdown"
   },
   "monthContext": {
     "badgeSubtitle": "This month's budget",
@@ -67,9 +71,6 @@
     "of": "of",
     "uncategorized": "Other spending (uncategorized): {{amount}}",
     "error": "Could not load the 50/30/20 rule."
-  },
-  "settings": {
-    "title": "Settings"
   },
   "onboarding": {
     "greeting": "Hi, {{name}}!",
@@ -175,6 +176,7 @@
     "resetDesc": "Choose a new password. This link can only be used once.",
     "resetSubmit": "Save password",
     "resetSaving": "Saving…",
+    "resetDone": "Password updated. Sign in with your new one.",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "accessTabs": "Account access",
@@ -194,7 +196,8 @@
     "swipeHint": "Tap to edit · swipe left to delete",
     "saving": "Saving…",
     "update": "Update",
-    "mainNav": "Main navigation"
+    "mainNav": "Main navigation",
+    "total": "Total"
   },
   "header": {
     "tagline": "Your daily margin, clear and instant.",
@@ -236,7 +239,12 @@
     "tabsHint": "Today, Expenses, Insights and History are in the bottom bar.",
     "gastosVariables": "Variable",
     "gastosFijos": "Fixed",
-    "fabAddExpense": "Add expense"
+    "fabAddExpense": "Add expense",
+    "add": "Add",
+    "more": "More",
+    "groupDay": "Day to day",
+    "groupMonth": "Your month",
+    "groupMore": "More"
   },
   "emptyStates": {
     "noVariableExpenses": "No expenses this month",
@@ -280,7 +288,8 @@
     "showMore": "View {{count}} more fixed expense",
     "showMore_other": "View {{count}} more fixed expenses",
     "empty": "No fixed expenses yet.",
-    "nameError": "Enter a name for the fixed expense"
+    "nameError": "Enter a name for the fixed expense",
+    "amountFormat": "Enter an amount using a comma or a dot and up to 2 decimals. E.g. 12.50"
   },
   "savingsGoals": {
     "title": "Savings goals",
@@ -298,7 +307,9 @@
     "targetPlaceholder": "Target (€)",
     "addGoal": "Add goal",
     "nameError": "Enter a name for the goal",
-    "amountError": "Enter a target greater than 0"
+    "amountError": "Enter a target greater than 0",
+    "nameLabel": "Goal name",
+    "targetLabel": "Target (€)"
   },
   "incomeSettings": {
     "title": "Set up your income",
@@ -382,7 +393,8 @@
     "planTitle": "Your plan",
     "planBody": "The account is free. There is no charge, no automatic renewal and no connection to your bank. A paid plan will not be switched on without first showing, in this same account, the price including tax, the period, the renewal and how to cancel it.",
     "planEnd": "To end the service and delete your data, use Delete my account. Export the CSV first if you want a copy.",
-    "planBodyFounder": "This is an initial account. It stays free and you will not be charged, even if a paid plan later exists for new accounts."
+    "planBodyFounder": "This is an initial account. It stays free and you will not be charged, even if a paid plan later exists for new accounts.",
+    "version": "Version {{version}}"
   },
   "deleteAccount": {
     "title": "Delete account",
@@ -508,7 +520,8 @@
     "amountPlaceholder": "Amount (€)",
     "note": "Note (optional)",
     "notePlaceholder": "Note (optional)",
-    "register": "Register"
+    "register": "Register",
+    "amountFormat": "Enter an amount above 0, using a comma or a dot and up to 2 decimals. E.g. 12.50"
   },
   "editVariableExpense": {
     "category": "Category",
@@ -681,6 +694,15 @@
       }
     ]
   },
+  "offline": {
+    "title": "You are offline",
+    "hint": "You can keep adding expenses. They will be sent automatically when you are back online.",
+    "pending_one": "{{count}} expense waiting to be sent",
+    "pending_other": "{{count}} expenses waiting to be sent",
+    "pendingHint": "They don't count in today's figure yet. They will be sent automatically once you are online.",
+    "sendNow": "Send now",
+    "sending": "Sending…"
+  },
   "toasts": {
     "tourComplete": "Guide completed. You can view it again from the menu.",
     "fixedAdded": "Fixed expense added",
@@ -688,15 +710,20 @@
     "expenseRegistered": "Expense recorded",
     "fixedRemoved": "Fixed expense removed",
     "expenseDeleted": "Expense deleted",
-    "undoDelete": "Expense deleted",
     "undoAction": "Undo",
     "expenseDeletedUndo": "Expense deleted",
-    "fixedRemovedUndo": "Fixed expense removed",
+    "fixedRemovedUndo": "Fixed expense deleted",
     "done": "Done",
     "extraIncomeUpdated": "Extra income updated",
     "changesSaved": "Changes saved",
     "fixedUpdated": "Fixed expense updated",
     "expenseUpdated": "Expense updated",
+    "appUpdated": "App updated to version {{version}}",
+    "expenseQueued": "Offline: expense saved on this device. It will be sent when you are back online",
+    "queuedSent_one": "{{count}} expense sent",
+    "queuedSent_other": "{{count}} expenses sent",
+    "queuedDropped_one": "{{count}} expense could not be sent and was discarded",
+    "queuedDropped_other": "{{count}} expenses could not be sent and were discarded",
     "csvDownloaded": "CSV downloaded"
   },
   "errors": {
@@ -717,5 +744,34 @@
     "acceptTerms": "I have read and accept the current terms and privacy policy.",
     "accept": "Accept and continue",
     "saving": "Saving…"
+  },
+  "pace": {
+    "title": "Month pace",
+    "spent": "Spent",
+    "elapsed": "Month elapsed",
+    "status": {
+      "ok": "On track",
+      "tight": "Tight",
+      "over": "Overspending"
+    },
+    "hint": {
+      "ok": "you're spending below the month's pace.",
+      "tight": "you're spending slightly above the month's pace.",
+      "over": "you're spending above the month's pace."
+    },
+    "noBudget": "No budget this month"
+  },
+  "waterfall": {
+    "title": "From your pay to today's number",
+    "income": "Your income this month",
+    "savings": "Savings set aside",
+    "fixed": "Fixed expenses",
+    "extra": "Extra income available",
+    "available": "Available",
+    "spent": "Spent day to day",
+    "remaining": "Left this month",
+    "days_one": "Divided by the day left",
+    "days_other": "Divided by the {{count}} days left",
+    "today": "You can spend today"
   }
 }

@@ -48,7 +48,7 @@ export function IconSelectDropdown({ value, onChange, className }: Props) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex h-11 min-w-11 items-center justify-center gap-0.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-1.5 hover:border-[var(--color-border-subtle)] ${FOCUS_RING}`}
+        className={`flex h-11 min-w-11 items-center justify-center gap-0.5 rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg)] px-1.5 hover:border-[var(--color-field-border)] ${FOCUS_RING}`}
         aria-label={t("categoryManager.chooseIcon")}
         aria-expanded={open}
         aria-haspopup="listbox"

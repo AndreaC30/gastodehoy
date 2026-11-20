@@ -53,10 +53,22 @@ export function tourScrollLockDisable(): void {
   blockHandler = null;
 }
 
+/**
+ * Primer elemento con `data-tour` que se ve en pantalla. Un mismo paso puede
+ * tener un destino distinto en móvil y en escritorio (p. ej. el botón del menú
+ * y la barra lateral); el oculto mide 0 y no debe ganar solo por ir antes.
+ */
+function findTourTarget(selector: string): HTMLElement | null {
+  const all = document.querySelectorAll<HTMLElement>(`[data-tour="${selector}"]`);
+  for (const el of all) {
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) return el;
+  }
+  return null;
+}
+
 export async function tourScrollToTarget(selector: string): Promise<void> {
-  const el = document.querySelector(
-    `[data-tour="${selector}"]`,
-  ) as HTMLElement | null;
+  const el = findTourTarget(selector);
   if (!el || !active) return;
 
   const beforeY = window.scrollY;
@@ -81,7 +93,7 @@ export async function tourScrollToTarget(selector: string): Promise<void> {
 export function tourMeasureTarget(
   selector: string,
 ): { top: number; left: number; width: number; height: number } | null {
-  const el = document.querySelector(`[data-tour="${selector}"]`);
+  const el = findTourTarget(selector);
   if (!el) return null;
   const r = el.getBoundingClientRect();
   const pad = 8;

@@ -13,10 +13,12 @@ import type {
 } from "@/api/types";
 import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
+import { onTabListKeyDown } from "@/lib/tab-keys";
 import {
   ALERT_CRIT,
   BTN_PRIMARY,
   BTN_SECONDARY,
+  FOCUS_RING,
   INPUT_CLASS,
   INPUT_FLEX_CLASS,
 } from "@/lib/ui-a11y";
@@ -197,7 +199,7 @@ export function IncomeSettingsContent({
   return (
     <div>
       {error && (
-        <div className={`mb-3 px-3 py-2 ${ALERT_CRIT}`} role="alert" aria-live="polite">
+        <div className={`mb-3 px-3 py-2 ${ALERT_CRIT}`} role="alert">
           {error}
         </div>
       )}
@@ -207,6 +209,7 @@ export function IncomeSettingsContent({
           className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]/60 p-1 text-sm"
           role="tablist"
           aria-label={t("incomeSettings.tabsLabel")}
+          onKeyDown={onTabListKeyDown}
         >
           <TabBtn
             active={tab === "monthly"}
@@ -528,8 +531,9 @@ function TabBtn({
       id={id}
       aria-selected={active}
       aria-controls={controls}
+      tabIndex={active ? 0 : -1}
       onClick={onClick}
-      className={`min-h-11 rounded-lg px-3 py-2 font-medium transition ${
+      className={`min-h-11 rounded-lg px-3 py-2 font-medium transition ${FOCUS_RING} ${
         active
           ? "bg-[var(--color-panel)] text-[var(--color-text)] shadow-inner"
           : "text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"

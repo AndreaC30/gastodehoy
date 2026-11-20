@@ -53,9 +53,20 @@ function writeTheme(isDark: boolean) {
     /* ignore */
   }
   document.documentElement.classList.toggle("dark", isDark);
-  document.documentElement.style.backgroundColor = isDark
-    ? "#070A0D"
-    : "#eef2f6";
+  const bg = isDark ? "#0B1727" : "#eef3f8";
+  document.documentElement.style.backgroundColor = bg;
+  // La barra del navegador y la de estado de la PWA siguen el tema elegido,
+  // aunque el botón de tema no esté montado.
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", bg);
+}
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true
+  );
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -64,7 +75,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     isDarkMode: isDark,
     onDarkModeChange: setIsDark,
     animationType: ThemeAnimationType.CIRCLE,
-    duration: 700,
+    duration: prefersReducedMotion() ? 0 : 700,
     globalClassName: "dark",
   });
 

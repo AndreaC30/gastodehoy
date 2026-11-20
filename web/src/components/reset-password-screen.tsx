@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "@/api/client";
 import { BrandLogo } from "@/components/brand-logo";
 import { LoadingSplash } from "@/components/loading-splash";
+import { PASSWORD_RESET_DONE_PARAM } from "@/lib/password-reset-flag";
 import { translateBackendError } from "@/lib/backend-errors";
 import { useBootSplashGate } from "@/lib/use-boot-splash-gate";
 import { ALERT_CRIT, BTN_PRIMARY, INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
@@ -40,7 +41,7 @@ export function ResetPasswordScreen({ token }: { token: string }) {
         method: "POST",
         body: JSON.stringify({ token, new_password: password }),
       });
-      window.location.assign("/");
+      window.location.assign(`/?${PASSWORD_RESET_DONE_PARAM}=1`);
     } catch (err) {
       setError(translateBackendError((err as Error).message, t));
       setBusy(false);

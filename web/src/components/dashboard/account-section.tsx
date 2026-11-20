@@ -30,7 +30,7 @@ import {
   getInstallHintPlatform,
   isStandaloneDisplay,
 } from "@/lib/pwa-display";
-import { TYPE_DISPLAY, TYPE_EYEBROW } from "@/lib/typography";
+import { TYPE_DISPLAY, TYPE_EYEBROW, TYPE_META } from "@/lib/typography";
 import { ALERT_CRIT, BTN_SECONDARY, FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
 
 const INSTALL_HINT_DISMISS_KEY = "gdh-install-hint-dismissed";
@@ -220,7 +220,7 @@ export function AccountSection({ profileName }: Props) {
               <input
                 type="checkbox"
                 checked={dailyNotify}
-                className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
+                className="mt-1 h-4 w-4 rounded border-[var(--color-field-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
                 onChange={(e) => {
                   if (e.target.checked) {
                     void enableDailyNotify();
@@ -243,7 +243,7 @@ export function AccountSection({ profileName }: Props) {
               <input
                 type="checkbox"
                 checked={density === "compact"}
-                className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
+                className="mt-1 h-4 w-4 rounded border-[var(--color-field-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
                 onChange={(e) => {
                   setDensity(e.target.checked ? "compact" : "comfortable");
                 }}
@@ -311,6 +311,10 @@ export function AccountSection({ profileName }: Props) {
             {t("account.deleteAccount")}
           </button>
         </div>
+
+        <p className={`mt-4 ${TYPE_META}`}>
+          {t("account.version", { version: __APP_VERSION__ })}
+        </p>
       </section>
 
       <DeleteAccountModal open={deleteOpen} onClose={() => setDeleteOpen(false)} />

@@ -12,7 +12,11 @@
     "explanation": "Deine tägliche Marge: was diesen Monat übrig bleibt ÷ verbleibende Tage.",
     "addExpense": "Ausgabe hinzufügen",
     "showMetrics": "Monatsübersicht anzeigen",
-    "hideMetrics": "Übersicht ausblenden"
+    "hideMetrics": "Übersicht ausblenden",
+    "nothingToday": "Heute hast du noch nichts eingetragen.",
+    "spentToday": "Heute hast du {{amount}} ausgegeben.",
+    "firstExpense": "Trag deine erste Ausgabe von heute ein",
+    "showBreakdown": "Monatsübersicht anzeigen"
   },
   "monthContext": {
     "badgeSubtitle": "Budget dieses Monats",
@@ -67,9 +71,6 @@
     "of": "von",
     "uncategorized": "Sonstige Ausgaben (nicht kategorisiert): {{amount}}",
     "error": "50/30/20-Regel konnte nicht geladen werden."
-  },
-  "settings": {
-    "title": "Einstellungen"
   },
   "onboarding": {
     "greeting": "Hallo, {{name}}!",
@@ -159,7 +160,7 @@
     "passwordMinError": "Das Passwort muss mindestens 8 Zeichen haben",
     "passwordMismatch": "Die Passwörter stimmen nicht überein",
     "creating": "Erstelle…",
-    "acceptTerms": "Ich habe die",
+    "acceptTerms": "Ich habe gelesen und akzeptiere die",
     "privacyPolicy": "Datenschutzerklärung",
     "termsOfUse": "Nutzungsbedingungen",
     "and": "und",
@@ -175,6 +176,7 @@
     "resetDesc": "Wähle ein neues Passwort. Dieser Link gilt nur einmal.",
     "resetSubmit": "Passwort speichern",
     "resetSaving": "Speichern…",
+    "resetDone": "Passwort aktualisiert. Melde dich mit dem neuen an.",
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort ausblenden",
     "accessTabs": "Kontozugang",
@@ -194,7 +196,8 @@
     "swipeHint": "Tippen zum Bearbeiten · nach links wischen zum Löschen",
     "saving": "Speichere…",
     "update": "Aktualisieren",
-    "mainNav": "Hauptnavigation"
+    "mainNav": "Hauptnavigation",
+    "total": "Gesamt"
   },
   "header": {
     "tagline": "Deine tägliche Marge, klar und sofort.",
@@ -236,7 +239,12 @@
     "tabsHint": "Heute, Ausgaben, Analyse und Verlauf sind in der unteren Leiste.",
     "gastosVariables": "Variabel",
     "gastosFijos": "Fix",
-    "fabAddExpense": "Ausgabe hinzufügen"
+    "fabAddExpense": "Ausgabe hinzufügen",
+    "add": "Hinzufügen",
+    "more": "Mehr",
+    "groupDay": "Im Alltag",
+    "groupMonth": "Dein Monat",
+    "groupMore": "Mehr"
   },
   "emptyStates": {
     "noVariableExpenses": "Keine Ausgaben diesen Monat",
@@ -267,7 +275,7 @@
     "title": "Fixkosten",
     "subtitle": "Was du jeden Monat gleich bezahlst",
     "description": "Miete, Versicherungen, Abos… hier hinzufügen.",
-    "concept": "Konzept",
+    "concept": "Bezeichnung",
     "placeholder": "z.B. Miete",
     "amount": "Betrag (€)",
     "add": "Hinzufügen",
@@ -280,7 +288,8 @@
     "showMore": "{{count}} weitere Fixkosten anzeigen",
     "showMore_other": "{{count}} weitere Fixkosten anzeigen",
     "empty": "Noch keine Fixkosten.",
-    "nameError": "Gib einen Namen für die Fixkosten ein"
+    "nameError": "Gib einen Namen für die Fixkosten ein",
+    "amountFormat": "Gib einen Betrag mit Komma oder Punkt und höchstens 2 Nachkommastellen ein. Z. B. 12,50"
   },
   "savingsGoals": {
     "title": "Sparziele",
@@ -298,7 +307,9 @@
     "targetPlaceholder": "Ziel (€)",
     "addGoal": "Ziel hinzufügen",
     "nameError": "Gib einen Namen für das Ziel ein",
-    "amountError": "Gib ein Ziel größer als 0 ein"
+    "amountError": "Gib ein Ziel größer als 0 ein",
+    "nameLabel": "Name des Ziels",
+    "targetLabel": "Ziel (€)"
   },
   "incomeSettings": {
     "title": "Einkommen einrichten",
@@ -364,7 +375,6 @@
     "themeToLight": "Zum hellen Modus wechseln",
     "themeToDark": "Zum dunklen Modus wechseln",
     "logout": "Abmelden",
-    "language": "Sprache",
     "dangerZone": "Gefahrenzone",
     "dangerDesc": "Das Löschen des Kontos entfernt dauerhaft Ausgaben, Kategorien und Einstellungen. Wir fragen im zweiten Schritt nach deinem Passwort.",
     "deleteAccount": "Mein Konto löschen…",
@@ -382,8 +392,9 @@
     "notifyTestFailed": "Dieses Gerät ist abonniert, aber der Testhinweis ist nicht erschienen. Prüfe, ob das System Benachrichtigungen von GastoDeHoy erlaubt.",
     "planTitle": "Dein Plan",
     "planBody": "Das Konto ist kostenlos. Es gibt keine Abbuchung, keine automatische Verlängerung und keine Verbindung zu deiner Bank. Ein kostenpflichtiger Plan wird nicht aktiviert, ohne vorher in diesem Konto den Preis einschließlich Steuern, den Zeitraum, die Verlängerung und die Kündigung zu zeigen.",
-    "planEnd": "Um den Dienst zu beenden und deine Daten zu löschen, nutze Konto löschen. Exportiere vorher das CSV, wenn du eine Kopie behalten willst.",
-    "planBodyFounder": "Dies ist ein Anfangskonto. Es bleibt kostenlos und dir wird nichts berechnet, auch wenn es später einen kostenpflichtigen Plan für neue Konten gibt."
+    "planEnd": "Um den Dienst zu beenden und deine Daten zu löschen, nutze Mein Konto löschen. Exportiere vorher das CSV, wenn du eine Kopie behalten willst.",
+    "planBodyFounder": "Dies ist ein Anfangskonto. Es bleibt kostenlos und dir wird nichts berechnet, auch wenn es später einen kostenpflichtigen Plan für neue Konten gibt.",
+    "version": "Version {{version}}"
   },
   "deleteAccount": {
     "title": "Konto löschen",
@@ -404,7 +415,6 @@
     "save": "Speichern und fortfahren",
     "saving": "Speichere…",
     "logout": "Abmelden",
-    "language": "Sprache",
     "passwordError": "Das neue Passwort muss mindestens 8 Zeichen haben",
     "mismatchError": "Die neuen Passwörter stimmen nicht überein"
   },
@@ -422,7 +432,7 @@
     "budgetPlaceholder": "z.B. 80",
     "budgetHint": "Wenn du diesen Betrag im Monat überschreitest, warnt dich die App.",
     "color": "Farbe",
-    "icon": "Symbol",
+    "icon": "Icon",
     "perMonth": "{{amount}}€/Monat",
     "empty": "Noch keine Kategorien. Erstelle die erste!",
     "add": "Kategorie hinzufügen",
@@ -510,7 +520,8 @@
     "amountPlaceholder": "Betrag (€)",
     "note": "Notiz (optional)",
     "notePlaceholder": "Notiz (optional)",
-    "register": "Eintragen"
+    "register": "Eintragen",
+    "amountFormat": "Gib einen Betrag über 0 ein, mit Komma oder Punkt und höchstens 2 Nachkommastellen. Z. B. 12,50"
   },
   "editVariableExpense": {
     "category": "Kategorie",
@@ -683,22 +694,36 @@
       }
     ]
   },
+  "offline": {
+    "title": "Keine Verbindung",
+    "hint": "Du kannst weiter Ausgaben erfassen. Sie werden automatisch gesendet, sobald du wieder online bist.",
+    "pending_one": "{{count}} Ausgabe wartet auf das Senden",
+    "pending_other": "{{count}} Ausgaben warten auf das Senden",
+    "pendingHint": "Sie zählen noch nicht in der Heute-Zahl. Sie werden automatisch gesendet, sobald du online bist.",
+    "sendNow": "Jetzt senden",
+    "sending": "Wird gesendet…"
+  },
   "toasts": {
     "tourComplete": "Anleitung abgeschlossen. Du kannst sie jederzeit über das Menü erneut ansehen.",
     "fixedAdded": "Fixkosten hinzugefügt",
     "categoriesUpdated": "Kategorien aktualisiert",
     "expenseRegistered": "Ausgabe registriert",
     "expenseDeleted": "Ausgabe gelöscht",
-    "undoDelete": "Ausgabe gelöscht",
     "undoAction": "Rückgängig",
     "expenseDeletedUndo": "Ausgabe gelöscht",
-    "fixedRemovedUndo": "Fixkosten entfernt",
+    "fixedRemovedUndo": "Fixkosten gelöscht",
     "done": "Fertig",
     "extraIncomeUpdated": "Zusatzeinkommen aktualisiert",
     "changesSaved": "Änderungen gespeichert",
     "fixedUpdated": "Fixkosten aktualisiert",
     "fixedRemoved": "Fixkosten entfernt",
     "expenseUpdated": "Ausgabe aktualisiert",
+    "appUpdated": "App auf Version {{version}} aktualisiert",
+    "expenseQueued": "Offline: Ausgabe auf diesem Gerät gespeichert. Sie wird gesendet, sobald du wieder online bist",
+    "queuedSent_one": "{{count}} Ausgabe gesendet",
+    "queuedSent_other": "{{count}} Ausgaben gesendet",
+    "queuedDropped_one": "{{count}} Ausgabe konnte nicht gesendet werden und wurde verworfen",
+    "queuedDropped_other": "{{count}} Ausgaben konnten nicht gesendet werden und wurden verworfen",
     "csvDownloaded": "CSV heruntergeladen"
   },
   "errors": {
@@ -719,5 +744,34 @@
     "acceptTerms": "Ich habe die geltenden Bedingungen und die Datenschutzerklärung gelesen und akzeptiere sie.",
     "accept": "Akzeptieren und fortfahren",
     "saving": "Speichern…"
+  },
+  "pace": {
+    "title": "Monatstempo",
+    "spent": "Ausgegeben",
+    "elapsed": "Monat vergangen",
+    "status": {
+      "ok": "Läuft gut",
+      "tight": "Knapp",
+      "over": "Zu viel"
+    },
+    "hint": {
+      "ok": "du gibst weniger aus als das Monatstempo vorgibt.",
+      "tight": "du gibst etwas mehr aus als das Monatstempo vorgibt.",
+      "over": "du gibst mehr aus als das Monatstempo vorgibt."
+    },
+    "noBudget": "Kein Budget diesen Monat"
+  },
+  "waterfall": {
+    "title": "Von deinem Gehalt zur Zahl von heute",
+    "income": "Dein Einkommen im Monat",
+    "savings": "Reservierte Ersparnisse",
+    "fixed": "Fixkosten",
+    "extra": "Verfügbare Zusatzeinnahmen",
+    "available": "Verfügbar",
+    "spent": "Im Alltag ausgegeben",
+    "remaining": "Dir bleibt diesen Monat",
+    "days_one": "Geteilt durch den verbleibenden Tag",
+    "days_other": "Geteilt durch die {{count}} verbleibenden Tage",
+    "today": "Heute kannst du ausgeben"
   }
 }

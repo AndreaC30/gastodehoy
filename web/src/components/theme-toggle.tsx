@@ -1,5 +1,4 @@
 /** Theme switcher (Within icon) — shared provider owns animation + persistence. */
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ThemeWithin } from "@/components/ui/theme-within";
 import { useThemeMode } from "@/components/theme-provider";
@@ -14,13 +13,6 @@ export function ThemeToggle({ className = "", size = "md" }: Props) {
   const { t } = useTranslation();
   const { isDark, toggleTheme } = useThemeMode();
 
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) {
-      meta.setAttribute("content", isDark ? "#070A0D" : "#eef2f6");
-    }
-  }, [isDark]);
-
   const label = isDark ? t("account.themeToLight") : t("account.themeToDark");
 
   return (
@@ -33,7 +25,7 @@ export function ThemeToggle({ className = "", size = "md" }: Props) {
         void toggleTheme(e.currentTarget);
       }}
       className={`inline-flex shrink-0 items-center justify-center rounded-lg text-[var(--color-text)] ${FOCUS_RING} ${
-        size === "sm" ? "h-9 w-9 text-[1.35rem]" : "h-11 w-11 text-[1.6rem]"
+        size === "sm" ? "h-11 w-11 text-[1.35rem]" : "h-11 w-11 text-[1.6rem]"
       } ${className}`}
     />
   );
