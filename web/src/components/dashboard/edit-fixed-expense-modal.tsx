@@ -6,6 +6,7 @@ import type { FixedExpense } from "@/api/types";
 import { DEFAULT_FIXED_EXPENSE_ICON } from "@/components/dashboard/category-icon";
 import { IconSelectDropdown } from "@/components/dashboard/icon-select-dropdown";
 import { AppSheet } from "@/components/ui/app-sheet";
+import { AMOUNT_PATTERN, normalizeAmount } from "@/lib/amount";
 import { BTN_PRIMARY, BTN_SECONDARY, INPUT_CLASS } from "@/lib/ui-a11y";
 
 type Props = {
@@ -17,7 +18,7 @@ type Props = {
 export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
   const { t } = useTranslation();
   const [name, setName] = useState(expense.name);
-  const [amount, setAmount] = useState(String(expense.amount));
+  const [amount, setAmount] = useState(String(expense.amount).replace(".", ","));
   const [icon, setIcon] = useState(expense.icon ?? DEFAULT_FIXED_EXPENSE_ICON);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +45,7 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
     }
     saveMut.mutate({
       name: trimmed,
-      amount: amount || "0",
+      amount: normalizeAmount(amount) || "0",
       icon,
     });
   }
@@ -89,10 +90,11 @@ export function EditFixedExpenseModal({ expense, onClose, onSaved }: Props) {
           </label>
           <input
             id="edit-fixed-amount"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="0.01"
-            min={0}
+            autoComplete="off"
+            pattern={AMOUNT_PATTERN}
+            title={t("fixedExpenses.amountFormat")}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             required
