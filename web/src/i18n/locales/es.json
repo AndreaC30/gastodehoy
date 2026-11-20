@@ -238,7 +238,10 @@
     "gastosFijos": "Fijos",
     "fabAddExpense": "Añadir gasto",
     "add": "Añadir",
-    "more": "Más"
+    "more": "Más",
+    "groupDay": "Día a día",
+    "groupMonth": "Tu mes",
+    "groupMore": "Más"
   },
   "emptyStates": {
     "noVariableExpenses": "Sin gastos este mes",

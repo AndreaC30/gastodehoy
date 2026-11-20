@@ -41,8 +41,6 @@ type NavItem = {
   Icon: IconType;
 };
 
-const PRIMARY_IDS: DashboardSection[] = ["hoy", "gastos", "analisis"];
-
 const ALL_NAV: NavItem[] = [
   { id: "hoy", labelKey: "header.sectionHoy", Icon: IoHome },
   { id: "gastos", labelKey: "header.sectionGastos", Icon: IoWallet },
@@ -54,7 +52,31 @@ const ALL_NAV: NavItem[] = [
   { id: "cuenta", labelKey: "header.sectionCuenta", Icon: IoPersonOutline },
 ];
 
-const SECONDARY_NAV = ALL_NAV.filter((item) => !PRIMARY_IDS.includes(item.id));
+const byId = (ids: DashboardSection[]) =>
+  ids.map((id) => ALL_NAV.find((item) => item.id === id)!);
+
+type NavGroup = { id: string; labelKey: string; items: NavItem[] };
+
+const GROUP_DAY: NavGroup = {
+  id: "day",
+  labelKey: "nav.groupDay",
+  items: byId(["hoy", "gastos", "analisis"]),
+};
+const GROUP_MONTH: NavGroup = {
+  id: "month",
+  labelKey: "nav.groupMonth",
+  items: byId(["ingresos", "categorias", "metas"]),
+};
+const GROUP_MORE: NavGroup = {
+  id: "more",
+  labelKey: "nav.groupMore",
+  items: byId(["tour", "cuenta"]),
+};
+
+/** Barra lateral de escritorio: todo, en tres grupos. */
+const DESKTOP_GROUPS: NavGroup[] = [GROUP_DAY, GROUP_MONTH, GROUP_MORE];
+/** Menú Más del móvil: lo que no está en la barra inferior. */
+const MORE_GROUPS: NavGroup[] = [GROUP_MONTH, GROUP_MORE];
 
 type LanguageRowProps = {
   disabled: boolean;
@@ -130,7 +152,7 @@ function NavButton({
 }
 
 type NavChromeProps = {
-  items: NavItem[];
+  groups: NavGroup[];
   activeSection: DashboardSection;
   onSelectSection: (section: DashboardSection) => void;
   exportBusy: boolean;
@@ -140,7 +162,7 @@ type NavChromeProps = {
 };
 
 function NavChrome({
-  items,
+  groups,
   activeSection,
   onSelectSection,
   exportBusy,
@@ -151,21 +173,31 @@ function NavChrome({
   const { t } = useTranslation();
   return (
     <>
-      <div className="border-b border-[var(--color-border)] px-0.5 py-1">
-        <p className={`mb-1.5 px-2 ${TYPE_EYEBROW}`}>{t("nav.accountMenu")}</p>
-        <ul className="space-y-0.5">
-          {items.map((item) => (
-            <li key={item.id}>
-              <NavButton
-                {...item}
-                dense
-                active={activeSection === item.id}
-                onSelect={onSelectSection}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
+      {groups.map((group) => (
+        <div
+          key={group.id}
+          className="border-b border-[var(--color-border)] px-0.5 py-1"
+        >
+          <p id={`gdh-nav-group-${group.id}`} className={`mb-1.5 px-2 ${TYPE_EYEBROW}`}>
+            {t(group.labelKey)}
+          </p>
+          <ul
+            className="space-y-0.5"
+            aria-labelledby={`gdh-nav-group-${group.id}`}
+          >
+            {group.items.map((item) => (
+              <li key={item.id}>
+                <NavButton
+                  {...item}
+                  dense
+                  active={activeSection === item.id}
+                  onSelect={onSelectSection}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
 
       <div className="border-t border-[var(--color-border)] px-0.5 py-2">
         <button
@@ -266,7 +298,7 @@ export function Sidebar({
     >
       <div className="min-h-0 flex-1 overflow-y-auto px-1.5 py-2">
         <NavChrome
-          items={ALL_NAV}
+          groups={DESKTOP_GROUPS}
           activeSection={activeSection}
           onSelectSection={handleSectionChange}
           exportBusy={isExportBusy}
@@ -302,7 +334,7 @@ export function Sidebar({
         <div className="flex h-full min-h-0 flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto px-0.5">
             <NavChrome
-              items={SECONDARY_NAV}
+              groups={MORE_GROUPS}
               activeSection={activeSection}
               onSelectSection={handleSectionChange}
               exportBusy={isExportBusy}
