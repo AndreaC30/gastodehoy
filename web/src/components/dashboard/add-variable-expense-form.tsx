@@ -3,6 +3,7 @@ import { type FormEvent } from "react";
 import type { ExpenseCategory } from "@/api/types";
 import { FormError } from "@/components/ui/form-error";
 import { FormField } from "@/components/ui/form-field";
+import { POSITIVE_AMOUNT_PATTERN } from "@/lib/amount";
 import { BTN_PRIMARY, INPUT_CLASS } from "@/lib/ui-a11y";
 
 const inputClass = INPUT_CLASS;
@@ -18,21 +19,21 @@ export function AddVariableExpenseForm({ categories, pending, error, onSubmit }:
   const { t } = useTranslation();
   return (
     <form
-      className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-2"
+      className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-end lg:gap-2"
       onSubmit={onSubmit}
     >
       <FormField
         id="var-expense-amount"
         label={t("addVariableExpense.amount")}
         className="w-full min-w-0 lg:flex-1"
-        labelClassName="sr-only"
       >
         <input
           name="amount"
-          type="number"
+          type="text"
           inputMode="decimal"
-          step="0.01"
-          min="0.01"
+          autoComplete="off"
+          pattern={POSITIVE_AMOUNT_PATTERN}
+          title={t("addVariableExpense.amountFormat")}
           placeholder={t("addVariableExpense.amountPlaceholder")}
           required
           className={inputClass}
@@ -42,7 +43,6 @@ export function AddVariableExpenseForm({ categories, pending, error, onSubmit }:
         id="var-expense-category"
         label={t("addVariableExpense.category")}
         className="w-full min-w-0 lg:flex-1"
-        labelClassName="sr-only"
       >
         <select name="category_id" defaultValue="" className={inputClass}>
           <option value="">{t("addVariableExpense.uncategorized")}</option>
@@ -57,7 +57,6 @@ export function AddVariableExpenseForm({ categories, pending, error, onSubmit }:
         id="var-expense-note"
         label={t("addVariableExpense.note")}
         className="w-full min-w-0 lg:flex-1"
-        labelClassName="sr-only"
       >
         <input
           name="note"

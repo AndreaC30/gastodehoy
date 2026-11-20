@@ -280,7 +280,8 @@
     "showMore": "Ver {{count}} gasto fijo más",
     "showMore_other": "Ver {{count}} gastos fijos más",
     "empty": "Ningún gasto fijo aún.",
-    "nameError": "Escribe un nombre para el gasto fijo"
+    "nameError": "Escribe un nombre para el gasto fijo",
+    "amountFormat": "Escribe un importe con coma o punto y hasta 2 decimales. Ej.: 12,50"
   },
   "savingsGoals": {
     "title": "Metas de ahorro",
@@ -508,7 +509,8 @@
     "amountPlaceholder": "Cantidad (€)",
     "note": "Nota (opcional)",
     "notePlaceholder": "Nota (opcional)",
-    "register": "Registrar"
+    "register": "Registrar",
+    "amountFormat": "Escribe un importe mayor que 0, con coma o punto y hasta 2 decimales. Ej.: 12,50"
   },
   "editVariableExpense": {
     "category": "Categoría",
