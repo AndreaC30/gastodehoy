@@ -694,6 +694,15 @@
       }
     ]
   },
+  "offline": {
+    "title": "Sin conexión",
+    "hint": "Puedes seguir anotando gastos. Se enviarán solos cuando vuelva la conexión.",
+    "pending_one": "{{count}} gasto pendiente de enviar",
+    "pending_other": "{{count}} gastos pendientes de enviar",
+    "pendingHint": "Todavía no cuentan en tu cifra de hoy. Se enviarán solos al tener conexión.",
+    "sendNow": "Enviar ahora",
+    "sending": "Enviando…"
+  },
   "toasts": {
     "tourComplete": "Guía completada. Puedes volver a verla desde el menú.",
     "fixedAdded": "Gasto fijo añadido",
@@ -710,6 +719,11 @@
     "fixedUpdated": "Gasto fijo actualizado",
     "expenseUpdated": "Gasto actualizado",
     "appUpdated": "Aplicación actualizada a la versión {{version}}",
+    "expenseQueued": "Sin conexión: gasto guardado en este dispositivo. Se enviará al volver la conexión",
+    "queuedSent_one": "{{count}} gasto enviado",
+    "queuedSent_other": "{{count}} gastos enviados",
+    "queuedDropped_one": "{{count}} gasto no se pudo enviar y se descartó",
+    "queuedDropped_other": "{{count}} gastos no se pudieron enviar y se descartaron",
     "csvDownloaded": "CSV descargado"
   },
   "errors": {
