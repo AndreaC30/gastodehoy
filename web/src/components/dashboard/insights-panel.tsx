@@ -14,8 +14,7 @@ import {
   IoTrendingUpOutline,
   IoWarningOutline,
 } from "react-icons/io5";
-import type { InsightItem, Insights } from "@/api/types";
-import type { DashboardSection } from "@/lib/dashboard-state";
+import type { InsightAction, InsightItem, Insights } from "@/api/types";
 import { money } from "@/lib/format";
 import { TYPE_CAPTION, TYPE_DISPLAY } from "@/lib/typography";
 import { BTN_SECONDARY, SECTION_CARD } from "@/lib/ui-a11y";
@@ -24,7 +23,8 @@ type Props = {
   data: Insights | undefined;
   isLoading: boolean;
   error: Error | null;
-  onNavigate?: (section: DashboardSection) => void;
+  /** Destino de la acción de una recomendación (viene del backend). */
+  onNavigate?: (kind: InsightAction["kind"]) => void;
   /** El título ya está en la pestaña del bloque de análisis. */
   embedded?: boolean;
 };

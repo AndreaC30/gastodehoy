@@ -12,8 +12,6 @@ import {
   IoWalletOutline,
   IoPieChart,
   IoPieChartOutline,
-  IoCalendar,
-  IoCalendarOutline,
 } from 'react-icons/io5';
 
 type Props = {
@@ -25,14 +23,12 @@ const MAIN_SECTIONS: { id: DashboardSection; labelKey: string }[] = [
   { id: 'hoy', labelKey: 'header.sectionHoy' },
   { id: 'gastos', labelKey: 'header.sectionGastos' },
   { id: 'analisis', labelKey: 'header.sectionAnalisis' },
-  { id: 'historico', labelKey: 'header.sectionHistorico' },
 ];
 
 function getIcon(section: DashboardSection, active: boolean) {
   if (section === 'hoy') return active ? IoHome : IoHomeOutline;
   if (section === 'gastos') return active ? IoWallet : IoWalletOutline;
   if (section === 'analisis') return active ? IoPieChart : IoPieChartOutline;
-  if (section === 'historico') return active ? IoCalendar : IoCalendarOutline;
   return IoHomeOutline;
 }
 
