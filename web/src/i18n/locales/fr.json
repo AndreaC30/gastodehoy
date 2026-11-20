@@ -711,6 +711,7 @@
     "fixedUpdated": "Dépense fixe mise à jour",
     "fixedRemoved": "Dépense fixe retirée",
     "expenseUpdated": "Dépense mise à jour",
+    "appUpdated": "Application mise à jour vers la version {{version}}",
     "csvDownloaded": "CSV téléchargé"
   },
   "errors": {

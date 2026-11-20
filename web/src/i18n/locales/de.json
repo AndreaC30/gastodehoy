@@ -711,6 +711,7 @@
     "fixedUpdated": "Fixkosten aktualisiert",
     "fixedRemoved": "Fixkosten entfernt",
     "expenseUpdated": "Ausgabe aktualisiert",
+    "appUpdated": "App auf Version {{version}} aktualisiert",
     "csvDownloaded": "CSV heruntergeladen"
   },
   "errors": {
