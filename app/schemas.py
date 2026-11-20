@@ -206,6 +206,11 @@ class VariableExpenseCreate(BaseModel):
     occurred_at: date | None = None
     note: str | None = Field(default=None, max_length=2000)
     category_id: int | None = None
+    # Optional idempotency key (a UUID from the app). Same key, same user:
+    # the first expense is returned instead of creating another one.
+    client_id: str | None = Field(
+        default=None, min_length=8, max_length=64, pattern=r"^[A-Za-z0-9_-]+$"
+    )
 
 
 class VariableExpenseUpdate(BaseModel):
