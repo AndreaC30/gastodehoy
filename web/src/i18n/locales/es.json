@@ -12,7 +12,11 @@
     "explanation": "Tu margen diario: lo que queda del mes ÷ los días que faltan.",
     "addExpense": "Añadir gasto",
     "showMetrics": "Ver desglose del mes",
-    "hideMetrics": "Ocultar desglose"
+    "hideMetrics": "Ocultar desglose",
+    "nothingToday": "Hoy aún no has anotado nada.",
+    "spentToday": "Llevas hoy {{amount}}.",
+    "firstExpense": "Anota tu primer gasto de hoy",
+    "showBreakdown": "Ver el desglose del mes"
   },
   "monthContext": {
     "badgeSubtitle": "Presupuesto de este mes",
@@ -723,5 +727,34 @@
     "acceptTerms": "He leído y acepto las condiciones y la política de privacidad vigentes.",
     "accept": "Aceptar y continuar",
     "saving": "Guardando…"
+  },
+  "pace": {
+    "title": "Ritmo del mes",
+    "spent": "Gastado",
+    "elapsed": "Mes recorrido",
+    "status": {
+      "ok": "Vas bien",
+      "tight": "Vas justo",
+      "over": "Te pasas"
+    },
+    "hint": {
+      "ok": "gastas por debajo del ritmo del mes.",
+      "tight": "gastas algo por encima del ritmo del mes.",
+      "over": "gastas por encima del ritmo del mes."
+    },
+    "noBudget": "Sin presupuesto este mes"
+  },
+  "waterfall": {
+    "title": "De tu sueldo a la cifra de hoy",
+    "income": "Tu ingreso del mes",
+    "savings": "Ahorro reservado",
+    "fixed": "Gastos fijos",
+    "extra": "Ingresos extra disponibles",
+    "available": "Disponible",
+    "spent": "Gastado en el día a día",
+    "remaining": "Te queda este mes",
+    "days_one": "Entre el día que queda",
+    "days_other": "Entre los {{count}} días que quedan",
+    "today": "Hoy puedes gastar"
   }
 }

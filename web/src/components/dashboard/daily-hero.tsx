@@ -1,101 +1,29 @@
 import { useTranslation } from "react-i18next";
 import type { Summary } from "@/api/types";
+import { BudgetWaterfall } from "@/components/dashboard/budget-waterfall";
+import { DaySheet } from "@/components/dashboard/day-sheet";
 import { Metric } from "@/components/dashboard/metric";
-import { money, savingsLabel } from "@/lib/format";
-import { useAnimatedNumber } from "@/lib/use-animated-number";
+import { PaceMeter } from "@/components/dashboard/pace-meter";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BTN_PRIMARY, SECTION_CARD } from "@/lib/ui-a11y";
-import { TYPE_BODY, TYPE_EYEBROW } from "@/lib/typography";
+import { money } from "@/lib/format";
+import { FOCUS_RING, SECTION_CARD } from "@/lib/ui-a11y";
 
 type Props = {
   summary: Summary | undefined;
   summaryPending: boolean;
+  /** Suma de lo anotado hoy. */
+  spentToday: number;
   onAddExpense?: () => void;
 };
 
 export function DailyHero({
   summary,
   summaryPending,
+  spentToday,
   onAddExpense,
 }: Props) {
   const { t } = useTranslation();
-  const animatedSpend = useAnimatedNumber(
-    summary?.suggested_spend_today != null ? Number(summary.suggested_spend_today) : undefined,
-  );
-
-  const metrics = (
-    <div className="grid content-start grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
-      <Metric
-        label={t("metrics.savings")}
-        value={
-          summaryPending ? (
-            <Skeleton className="h-5 w-20" />
-          ) : summary ? (
-            savingsLabel(
-              summary.savings_amount,
-              summary.savings_percent,
-              summary.savings_mode,
-            )
-          ) : (
-            "—"
-          )
-        }
-      />
-      <Metric
-        label={t("metrics.fixedExpenses")}
-        value={
-          summaryPending ? (
-            <Skeleton className="h-5 w-16" />
-          ) : (
-            money(summary?.fixed_expenses_total)
-          )
-        }
-      />
-      <Metric
-        label={t("metrics.variableExpenses")}
-        value={
-          summaryPending ? (
-            <Skeleton className="h-5 w-16" />
-          ) : (
-            money(summary?.variable_spent_month)
-          )
-        }
-      />
-      <Metric
-        label={t("metrics.extraIncome")}
-        value={
-          summaryPending ? (
-            <Skeleton className="h-5 w-16" />
-          ) : (
-            money(summary?.extra_income_month)
-          )
-        }
-      />
-      <Metric
-        label={t("metrics.remaining")}
-        value={
-          summaryPending ? (
-            <Skeleton className="h-5 w-16" />
-          ) : (
-            money(summary?.remaining_this_month)
-          )
-        }
-        highlight
-      />
-      <Metric
-        label={t("metrics.daysLeft")}
-        value={
-          summaryPending ? (
-            <Skeleton className="h-5 w-8" />
-          ) : summary?.days_remaining_in_month != null ? (
-            String(summary.days_remaining_in_month)
-          ) : (
-            "—"
-          )
-        }
-      />
-    </div>
-  );
+  const remaining = summary ? Number(summary.remaining_this_month) : undefined;
 
   return (
     <section
@@ -103,53 +31,79 @@ export function DailyHero({
       className={`${SECTION_CARD} flex max-h-[40rem] grow flex-col p-4 sm:p-5 lg:max-h-none lg:grow-0 lg:p-6`}
       style={{ boxShadow: "inset 3px 0 0 var(--color-accent)" }}
     >
-      <div className="lg:grid lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-stretch lg:gap-8">
-        <div className="lg:flex lg:flex-col lg:justify-center">
-          <p className={TYPE_EYEBROW}>{t("hero.dailyBudget")}</p>
-          <div className="mt-1.5 lg:mt-3">
-            {summaryPending ? (
-              <div
-                className="h-12 w-44 animate-pulse rounded-lg bg-[var(--color-panel-elevated)]"
-                aria-hidden
+      <div className="lg:grid lg:grid-cols-[minmax(0,0.95fr)_1.35fr] lg:items-start lg:gap-8">
+        <div className="space-y-4">
+          {summaryPending || !summary ? (
+            <div
+              className="h-48 w-full animate-pulse rounded-xl bg-[var(--color-panel-elevated)]"
+              aria-hidden
+            />
+          ) : (
+            <>
+              <DaySheet
+                referenceDate={summary.reference_date}
+                suggested={Number(summary.suggested_spend_today)}
+                spentToday={spentToday}
+                onAddExpense={onAddExpense}
               />
-            ) : (
-              <>
-                {/* Cifra animada: solo visual, para que no se anuncie cada fotograma. */}
-                <p
-                  className="font-display text-[clamp(2.35rem,6.5vh,3.15rem)] font-semibold tabular-nums tracking-tight text-[var(--color-accent)]"
-                  aria-hidden
+              <PaceMeter
+                status={summary.pace_status}
+                spentPercent={
+                  summary.spent_percent == null ? null : Number(summary.spent_percent)
+                }
+                elapsedPercent={Number(summary.month_elapsed_percent)}
+              />
+            </>
+          )}
+
+          {/* Móvil: dos datos del mes y el desglose plegado. */}
+          <div className="lg:hidden">
+            <div className="grid grid-cols-2 gap-2.5">
+              <Metric
+                label={t("metrics.remaining")}
+                value={
+                  summaryPending ? (
+                    <Skeleton className="h-5 w-16" />
+                  ) : (
+                    money(summary?.remaining_this_month)
+                  )
+                }
+                highlight={remaining != null && remaining >= 0}
+                danger={remaining != null && remaining < 0}
+              />
+              <Metric
+                label={t("metrics.daysLeft")}
+                value={
+                  summaryPending ? (
+                    <Skeleton className="h-5 w-8" />
+                  ) : summary ? (
+                    String(summary.days_remaining_in_month)
+                  ) : (
+                    "—"
+                  )
+                }
+              />
+            </div>
+            {summary ? (
+              <details className="mt-3 rounded-lg border border-[var(--color-border-subtle)] px-3 py-1">
+                <summary
+                  className={`flex min-h-11 cursor-pointer items-center text-sm font-medium text-[var(--color-text-muted)] ${FOCUS_RING}`}
                 >
-                  {animatedSpend}
-                </p>
-                {/* Solo el importe final se anuncia al cambiar. */}
-                <p className="sr-only" role="status" aria-live="polite">
-                  {summary?.suggested_spend_today != null
-                    ? `${t("hero.dailyBudget")}: ${money(summary.suggested_spend_today)}`
-                    : ""}
-                </p>
-              </>
-            )}
+                  {t("hero.showBreakdown")}
+                </summary>
+                <div className="pb-2">
+                  <BudgetWaterfall summary={summary} />
+                </div>
+              </details>
+            ) : null}
           </div>
-
-          {onAddExpense ? (
-            <button
-              type="button"
-              onClick={onAddExpense}
-              className={`mt-3 lg:mt-6 ${BTN_PRIMARY}`}
-            >
-              {t("hero.addExpense")}
-            </button>
-          ) : null}
-
-          <div className="mt-4 lg:hidden">{metrics}</div>
         </div>
 
-        <div className="hidden lg:block">{metrics}</div>
+        {/* Escritorio: la cascada, siempre visible. */}
+        <div className="hidden lg:block">
+          {summary ? <BudgetWaterfall summary={summary} /> : null}
+        </div>
       </div>
-
-      <p className={`mt-auto border-t border-[var(--color-border)] pt-3 lg:mt-6 lg:pt-4 ${TYPE_BODY}`}>
-        {t("hero.explanation")}
-      </p>
     </section>
   );
 }

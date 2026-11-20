@@ -12,7 +12,11 @@
     "explanation": "Votre marge quotidienne : ce qu'il reste ce mois ÷ jours restants.",
     "addExpense": "Ajouter une dépense",
     "showMetrics": "Voir le détail du mois",
-    "hideMetrics": "Masquer le détail"
+    "hideMetrics": "Masquer le détail",
+    "nothingToday": "Vous n'avez encore rien noté aujourd'hui.",
+    "spentToday": "Vous avez dépensé {{amount}} aujourd'hui.",
+    "firstExpense": "Notez votre première dépense du jour",
+    "showBreakdown": "Voir le détail du mois"
   },
   "monthContext": {
     "badgeSubtitle": "Budget de ce mois",
@@ -725,5 +729,34 @@
     "acceptTerms": "J'ai lu et j'accepte les conditions et la politique de confidentialité en vigueur.",
     "accept": "Accepter et continuer",
     "saving": "Enregistrement…"
+  },
+  "pace": {
+    "title": "Rythme du mois",
+    "spent": "Dépensé",
+    "elapsed": "Mois écoulé",
+    "status": {
+      "ok": "Ça va",
+      "tight": "Juste",
+      "over": "Vous dépassez"
+    },
+    "hint": {
+      "ok": "vous dépensez sous le rythme du mois.",
+      "tight": "vous dépensez un peu au-dessus du rythme du mois.",
+      "over": "vous dépensez au-dessus du rythme du mois."
+    },
+    "noBudget": "Pas de budget ce mois-ci"
+  },
+  "waterfall": {
+    "title": "De votre revenu au chiffre du jour",
+    "income": "Votre revenu du mois",
+    "savings": "Épargne mise de côté",
+    "fixed": "Dépenses fixes",
+    "extra": "Revenus extra disponibles",
+    "available": "Disponible",
+    "spent": "Dépensé au quotidien",
+    "remaining": "Il vous reste ce mois-ci",
+    "days_one": "Divisé par le jour restant",
+    "days_other": "Divisé par les {{count}} jours restants",
+    "today": "Vous pouvez dépenser aujourd'hui"
   }
 }
