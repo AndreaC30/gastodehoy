@@ -155,7 +155,7 @@ function NavChrome({
     <>
       <div className="border-b border-[var(--color-border)] px-0.5 py-1">
         <p className={`mb-1.5 px-2 ${TYPE_EYEBROW}`}>{t("nav.accountMenu")}</p>
-        <ul className="space-y-0.5" data-tour="menu">
+        <ul className="space-y-0.5">
           {items.map((item) => (
             <li key={item.id}>
               <NavButton
