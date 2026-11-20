@@ -12,7 +12,6 @@ import {
   IoHome,
   IoWallet,
   IoPieChart,
-  IoCalendar,
 } from "react-icons/io5";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -42,13 +41,12 @@ type NavItem = {
   Icon: IconType;
 };
 
-const PRIMARY_IDS: DashboardSection[] = ["hoy", "gastos", "analisis", "historico"];
+const PRIMARY_IDS: DashboardSection[] = ["hoy", "gastos", "analisis"];
 
 const ALL_NAV: NavItem[] = [
   { id: "hoy", labelKey: "header.sectionHoy", Icon: IoHome },
   { id: "gastos", labelKey: "header.sectionGastos", Icon: IoWallet },
   { id: "analisis", labelKey: "header.sectionAnalisis", Icon: IoPieChart },
-  { id: "historico", labelKey: "header.sectionHistorico", Icon: IoCalendar },
   { id: "ingresos", labelKey: "header.sectionIngresos", Icon: IoWalletOutline },
   { id: "categorias", labelKey: "header.sectionCategorias", Icon: IoPricetagsOutline },
   { id: "metas", labelKey: "header.sectionMetas", Icon: IoFlagOutline },

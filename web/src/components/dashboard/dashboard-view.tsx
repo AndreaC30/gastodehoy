@@ -62,13 +62,12 @@ import type {
 } from "@/api/types";
 
 type GastosTab = "variables" | "fijos";
-type AnalisisTab = "insights" | "categorias" | "regla";
+type AnalisisTab = "insights" | "categorias" | "regla" | "historico";
 
 const SECTION_TITLE_KEY: Record<DashboardSection, string> = {
   hoy: "header.sectionHoy",
   gastos: "header.sectionGastos",
   analisis: "header.sectionAnalisis",
-  historico: "header.sectionHistorico",
   ingresos: "header.sectionIngresos",
   categorias: "header.sectionCategorias",
   metas: "header.sectionMetas",
@@ -397,6 +396,19 @@ export function Dashboard({ profileName }: Props) {
     [handleSectionChange],
   );
 
+  /** Acciones de las recomendaciones: «historico» ahora es una pestaña de Análisis. */
+  const navigateFromInsight = useCallback(
+    (kind: "hoy" | "gastos" | "ingresos" | "categorias" | "historico") => {
+      if (kind === "historico") {
+        setAnalisisTab("historico");
+        handleSectionChange("analisis");
+        return;
+      }
+      handleSectionChange(kind);
+    },
+    [handleSectionChange],
+  );
+
   function startGuidedTour() {
     handleSectionChange("hoy");
     // Let the «hoy» section mount before the overlay measures targets.
@@ -610,6 +622,7 @@ export function Dashboard({ profileName }: Props) {
                 { id: "insights" as const, label: t("insights.title") },
                 { id: "categorias" as const, label: t("spendingChart.title") },
                 { id: "regla" as const, label: t("rule503020.title") },
+                { id: "historico" as const, label: t("header.sectionHistorico") },
               ]).map((tab) => {
                 const selected = analisisTab === tab.id;
                 return (
@@ -648,7 +661,7 @@ export function Dashboard({ profileName }: Props) {
                   data={insightsQ.data}
                   isLoading={insightsQ.isPending}
                   error={insightsQ.error as Error | null}
-                  onNavigate={handleSectionChange}
+                  onNavigate={navigateFromInsight}
                 />
               </div>
               <div
@@ -672,14 +685,18 @@ export function Dashboard({ profileName }: Props) {
               >
                 <Rule503020Panel embedded />
               </div>
+              <div
+                id="analisis-panel-historico"
+                className={analisisTab === "historico" ? "block" : "hidden"}
+                role="tabpanel"
+                aria-labelledby="analisis-tab-historico"
+              >
+                {analisisTab === "historico" ? <MonthHistoryStrip /> : null}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Section: HISTORICO */}
-        {activeSection === 'historico' && (
-          <MonthHistoryStrip />
-        )}
 
         {/* Section: INGRESOS */}
         {activeSection === 'ingresos' && settings && (

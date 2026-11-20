@@ -4,7 +4,6 @@ export type DashboardSection =
   | "hoy"
   | "gastos"
   | "analisis"
-  | "historico"
   | "ingresos"
   | "categorias"
   | "metas"
@@ -16,12 +15,13 @@ const SECTION_KEY = "gastodehoy_active_section";
 export function getActiveSection(): DashboardSection {
   try {
     const stored = localStorage.getItem(SECTION_KEY);
+    // Histórico ya no es una pantalla propia: vive dentro de Análisis.
+    if (stored === "historico") return "analisis";
     const allowed: DashboardSection[] = [
       "hoy",
       "gastos",
       "analisis",
       "ingresos",
-      "historico",
       "categorias",
       "metas",
       "tour",
@@ -49,7 +49,6 @@ export const SECTIONS: { id: DashboardSection; label: string }[] = [
   { id: "gastos", label: "Gastos" },
   { id: "analisis", label: "Análisis" },
   { id: "ingresos", label: "Ingresos" },
-  { id: "historico", label: "Histórico" },
   { id: "categorias", label: "Categorías" },
   { id: "metas", label: "Metas" },
   { id: "tour", label: "Tour" },

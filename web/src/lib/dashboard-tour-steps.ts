@@ -5,7 +5,7 @@ export type TourStep = {
   title: string;
   body: string;
   /** Dashboard section that must be visible for ``target`` to exist in the DOM. */
-  section?: "hoy" | "gastos" | "analisis" | "historico";
+  section?: "hoy" | "gastos" | "analisis";
   /** Mobile Gastos segment tab (variables/fijos are mutually hidden below md). */
   gastosTab?: TourGastosTab;
 };
