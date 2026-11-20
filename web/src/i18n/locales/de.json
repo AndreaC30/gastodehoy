@@ -179,6 +179,7 @@
     "resetDesc": "Wähle ein neues Passwort. Dieser Link gilt nur einmal.",
     "resetSubmit": "Passwort speichern",
     "resetSaving": "Speichern…",
+    "resetDone": "Passwort aktualisiert. Melde dich mit dem neuen an.",
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort ausblenden",
     "accessTabs": "Kontozugang",

@@ -179,6 +179,7 @@
     "resetDesc": "Choose a new password. This link can only be used once.",
     "resetSubmit": "Save password",
     "resetSaving": "Saving…",
+    "resetDone": "Password updated. Sign in with your new one.",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "accessTabs": "Account access",

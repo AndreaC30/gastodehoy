@@ -179,6 +179,7 @@
     "resetDesc": "Elige una contraseña nueva. Este enlace solo se puede usar una vez.",
     "resetSubmit": "Guardar contraseña",
     "resetSaving": "Guardando…",
+    "resetDone": "Contraseña actualizada. Entra con la nueva.",
     "showPassword": "Mostrar contraseña",
     "hidePassword": "Ocultar contraseña",
     "accessTabs": "Acceso a la cuenta",
