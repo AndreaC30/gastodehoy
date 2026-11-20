@@ -17,6 +17,7 @@ import { setUser } from "@/auth";
 import { BrandLogo } from "@/components/brand-logo";
 import { LEGAL_TERMS_VERSION } from "@/lib/legal";
 import { showLegalPage } from "@/lib/legal-pages-state";
+import { onTabListKeyDown } from "@/lib/tab-keys";
 import { ALERT_CRIT, BTN_PRIMARY, FOCUS_RING, INPUT_CLASS, SECTION_CARD } from "@/lib/ui-a11y";
 import { translateBackendError } from "@/lib/backend-errors";
 
@@ -77,8 +78,11 @@ export function LoginScreen({
             className="mt-6 flex rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-panel)]/60 p-1 text-sm"
             role="tablist"
             aria-label={t("login.accessTabs")}
+            onKeyDown={onTabListKeyDown}
           >
               <TabButton
+                id="login-tab-login"
+                controls="login-panel"
                 active={mode === "login"}
                 onClick={() => {
                   setMode("login");
@@ -88,6 +92,8 @@ export function LoginScreen({
                 {t("login.tabLogin")}
               </TabButton>
               <TabButton
+                id="login-tab-register"
+                controls="login-panel"
                 active={mode === "register"}
                 onClick={() => {
                   setMode("register");
@@ -109,7 +115,18 @@ export function LoginScreen({
           </div>
         )}
 
-        <div className={`mt-4 ${SECTION_CARD} p-5`}>
+        <div
+          id="login-panel"
+          role={mode === "forgot" ? undefined : "tabpanel"}
+          aria-labelledby={
+            mode === "login"
+              ? "login-tab-login"
+              : mode === "register"
+                ? "login-tab-register"
+                : undefined
+          }
+          className={`mt-4 ${SECTION_CARD} p-5`}
+        >
           {mode === "login" && (
             <LoginForm
               onError={setError}
@@ -137,10 +154,14 @@ export function LoginScreen({
 
 /** Pill-style tab button used to flip between Login and Register. */
 function TabButton({
+  id,
+  controls,
   active,
   children,
   onClick,
 }: {
+  id: string;
+  controls: string;
   active: boolean;
   children: React.ReactNode;
   onClick: () => void;
@@ -149,7 +170,10 @@ function TabButton({
     <button
       type="button"
       role="tab"
+      id={id}
       aria-selected={active}
+      aria-controls={controls}
+      tabIndex={active ? 0 : -1}
       onClick={onClick}
       className={`min-h-11 flex-1 rounded-lg px-3 py-2 font-medium transition ${FOCUS_RING} ${
         active
