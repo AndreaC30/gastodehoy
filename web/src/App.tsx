@@ -31,6 +31,7 @@ import {
 import { AppBackdrop } from "@/components/app-backdrop";
 import { PrivacyPolicy } from "@/components/privacy-policy";
 import { LegalNotice } from "@/components/legal-notice";
+import { consumePasswordResetDone } from "@/lib/password-reset-flag";
 import { ResetPasswordScreen } from "@/components/reset-password-screen";
 import {
   setLoading,
@@ -53,6 +54,9 @@ import {
   showLegalPage,
   type LegalPage,
 } from "@/lib/legal-pages-state";
+
+/** Se lee una sola vez al cargar la web (quita el parámetro de la dirección). */
+const PASSWORD_RESET_DONE = consumePasswordResetDone();
 
 function readResetToken(): string | null {
   if (window.location.pathname !== "/reset-password") return null;
@@ -301,8 +305,9 @@ function BootstrapErrorSplash({
  * En el navegador, F5 conserva portada o login de esta pestaña.
  */
 function AnonFlow() {
+  const resetDone = PASSWORD_RESET_DONE;
   const [phase, setPhase] = useState<"landing" | "auth">(() => {
-    if (isStandaloneDisplay()) return "auth";
+    if (resetDone || isStandaloneDisplay()) return "auth";
     return getStoredAnonPhase() ?? "landing";
   });
   const [entryTab, setEntryTab] = useState<AuthEntryTab>("login");
@@ -331,6 +336,7 @@ function AnonFlow() {
       <LoginScreen
         key={entryTab}
         initialMode={entryTab}
+        notice={resetDone ? "login.resetDone" : undefined}
         onBackToLanding={() => setPhase("landing")}
       />
     </>

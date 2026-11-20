@@ -179,6 +179,7 @@
     "resetDesc": "Choisissez un nouveau mot de passe. Ce lien ne peut servir qu'une fois.",
     "resetSubmit": "Enregistrer le mot de passe",
     "resetSaving": "Enregistrement…",
+    "resetDone": "Mot de passe mis à jour. Connectez-vous avec le nouveau.",
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
     "accessTabs": "Accès au compte",

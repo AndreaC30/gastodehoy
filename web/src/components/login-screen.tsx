@@ -6,7 +6,7 @@
 import { useTranslation } from "react-i18next";
 import { type FormEvent, useId, useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { IoArrowBack } from "react-icons/io5";
+import { IoArrowBack, IoCheckmarkCircle } from "react-icons/io5";
 import { api } from "@/api/client";
 import type {
   ForgotPasswordResponse,
@@ -29,9 +29,12 @@ export type AuthEntryTab = "login" | "register";
 /** Public entry point: renders the right form. */
 export function LoginScreen({
   initialMode = "login",
+  notice,
   onBackToLanding,
 }: {
   initialMode?: AuthEntryTab;
+  /** Clave i18n de un aviso de éxito sobre el formulario (p. ej. contraseña cambiada). */
+  notice?: string;
   onBackToLanding?: () => void;
 } = {}) {
   const [mode, setMode] = useState<Mode>(() =>
@@ -103,6 +106,16 @@ export function LoginScreen({
                 {t("login.tabRegister")}
               </TabButton>
             </div>
+        )}
+
+        {notice && mode === "login" && !error && (
+          <p
+            role="status"
+            className="mt-4 flex items-start gap-2 rounded-lg border border-[var(--color-ok-border)] bg-[var(--color-ok-dim)] px-4 py-3 text-sm"
+          >
+            <IoCheckmarkCircle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-ok)]" aria-hidden />
+            <span className="text-[var(--color-text)]">{t(notice)}</span>
+          </p>
         )}
 
         {error && (
