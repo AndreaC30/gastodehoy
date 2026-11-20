@@ -393,7 +393,8 @@
     "planTitle": "Dein Plan",
     "planBody": "Das Konto ist kostenlos. Es gibt keine Abbuchung, keine automatische Verlängerung und keine Verbindung zu deiner Bank. Ein kostenpflichtiger Plan wird nicht aktiviert, ohne vorher in diesem Konto den Preis einschließlich Steuern, den Zeitraum, die Verlängerung und die Kündigung zu zeigen.",
     "planEnd": "Um den Dienst zu beenden und deine Daten zu löschen, nutze Konto löschen. Exportiere vorher das CSV, wenn du eine Kopie behalten willst.",
-    "planBodyFounder": "Dies ist ein Anfangskonto. Es bleibt kostenlos und dir wird nichts berechnet, auch wenn es später einen kostenpflichtigen Plan für neue Konten gibt."
+    "planBodyFounder": "Dies ist ein Anfangskonto. Es bleibt kostenlos und dir wird nichts berechnet, auch wenn es später einen kostenpflichtigen Plan für neue Konten gibt.",
+    "version": "Version {{version}}"
   },
   "deleteAccount": {
     "title": "Konto löschen",

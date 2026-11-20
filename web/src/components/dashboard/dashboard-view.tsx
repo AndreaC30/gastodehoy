@@ -172,6 +172,20 @@ export function Dashboard({ profileName }: Props) {
     queryFn: () => loadInsights(i18n.language),
   });
 
+  // Atajo de la PWA («Añadir gasto»): abre la hoja de añadir y limpia la dirección.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("accion") !== "anadir") return;
+    setAddSheetOpen(true);
+    params.delete("accion");
+    const rest = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + (rest ? `?${rest}` : "") + window.location.hash,
+    );
+  }, []);
+
   useEffect(() => {
     // Wait until settings are loaded AND the dashboard has rendered
     // its key elements (summary, expenses, etc.) before starting the tour.

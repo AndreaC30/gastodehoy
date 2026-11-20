@@ -53,9 +53,13 @@ function writeTheme(isDark: boolean) {
     /* ignore */
   }
   document.documentElement.classList.toggle("dark", isDark);
-  document.documentElement.style.backgroundColor = isDark
-    ? "#0B1727"
-    : "#eef3f8";
+  const bg = isDark ? "#0B1727" : "#eef3f8";
+  document.documentElement.style.backgroundColor = bg;
+  // La barra del navegador y la de estado de la PWA siguen el tema elegido,
+  // aunque el botón de tema no esté montado.
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", bg);
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

@@ -392,7 +392,8 @@
     "planTitle": "Your plan",
     "planBody": "The account is free. There is no charge, no automatic renewal and no connection to your bank. A paid plan will not be switched on without first showing, in this same account, the price including tax, the period, the renewal and how to cancel it.",
     "planEnd": "To end the service and delete your data, use Delete my account. Export the CSV first if you want a copy.",
-    "planBodyFounder": "This is an initial account. It stays free and you will not be charged, even if a paid plan later exists for new accounts."
+    "planBodyFounder": "This is an initial account. It stays free and you will not be charged, even if a paid plan later exists for new accounts.",
+    "version": "Version {{version}}"
   },
   "deleteAccount": {
     "title": "Delete account",
