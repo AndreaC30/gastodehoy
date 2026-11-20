@@ -702,7 +702,7 @@ export function Dashboard({ profileName }: Props) {
                 role="tabpanel"
                 aria-labelledby="analisis-tab-historico"
               >
-                {analisisTab === "historico" ? <MonthHistoryStrip /> : null}
+                {analisisTab === "historico" ? <MonthHistoryStrip onEdit={setEditingVariable} /> : null}
               </div>
             </div>
           </div>

@@ -79,7 +79,12 @@ function formatSelectedDay(year: number, month: number, day: number, locale: str
 
 const MAX_CELL_EVENTS = 2;
 
-export function MonthHistoryStrip() {
+type Props = {
+  /** Abre la edición de un gasto (el mismo modal que en Gastos). */
+  onEdit?: (expense: VariableExpense) => void;
+};
+
+export function MonthHistoryStrip({ onEdit }: Props) {
   const { t, i18n } = useTranslation();
   const now = todayDate();
   const [year, setYear] = useState(now.getFullYear());
@@ -381,36 +386,48 @@ export function MonthHistoryStrip() {
                 {selectedItems.map((it) => {
                   const CatIcon = getCategoryIcon(it.category_icon);
                   return (
-                    <li
-                      key={it.id}
-                      className="flex items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-2.5"
-                    >
-                      <span
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                        style={{
-                          backgroundColor: `${it.category_color ?? "#2c4666"}22`,
-                          color: it.category_color ?? "var(--color-accent)",
-                        }}
-                        aria-hidden
+                    <li key={it.id}>
+                      <button
+                        type="button"
+                        onClick={() => onEdit?.(it)}
+                        disabled={!onEdit}
+                        aria-label={t("variableExpenses.editLabel", {
+                          amount: `${money(it.amount)}${it.note ? `, ${it.note}` : ""}`,
+                        })}
+                        className={`flex min-h-11 w-full items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-2.5 text-left enabled:hover:bg-[var(--color-panel-elevated)] ${FOCUS_RING}`}
                       >
-                        <CatIcon className="gdh-icon-lg" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold tabular-nums text-[var(--color-text)]">
-                          {money(it.amount)}
-                          {it.category_name ? (
-                            <span className="font-medium text-[var(--color-text-muted)]">
-                              {" "}
-                              · {it.category_name}
-                            </span>
-                          ) : null}
-                        </p>
-                        {it.note ? (
-                          <p className="truncate text-xs text-[var(--color-text-dim)]">
-                            {it.note}
-                          </p>
+                          <span
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                            style={{
+                              backgroundColor: `${it.category_color ?? "#2c4666"}22`,
+                              color: it.category_color ?? "var(--color-accent)",
+                            }}
+                            aria-hidden
+                          >
+                            <CatIcon className="gdh-icon-lg" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold tabular-nums text-[var(--color-text)]">
+                              {money(it.amount)}
+                              {it.category_name ? (
+                                <span className="font-medium text-[var(--color-text-muted)]">
+                                  {" "}
+                                  · {it.category_name}
+                                </span>
+                              ) : null}
+                            </p>
+                            {it.note ? (
+                              <p className="truncate text-xs text-[var(--color-text-dim)]">
+                                {it.note}
+                              </p>
+                            ) : null}
+                          </div>
+                        {onEdit ? (
+                          <span className="shrink-0 text-sm font-semibold text-[var(--color-accent)]">
+                            {t("common.edit")}
+                          </span>
                         ) : null}
-                      </div>
+                      </button>
                     </li>
                   );
                 })}
