@@ -14,9 +14,11 @@ import "./fonts/fonts.css";
 import "./i18n/index.js";
 import "./index.css";
 import { installVisualViewport } from "./lib/install-visual-viewport";
+import { maybeShowLayoutDebug } from "@/lib/layout-debug";
 import { markAppUpdated } from "@/lib/app-update-flag";
 
 installVisualViewport();
+window.addEventListener("load", maybeShowLayoutDebug);
 
 if (typeof localStorage !== "undefined") {
   localStorage.removeItem("gdh_cookie_consent");
