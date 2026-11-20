@@ -39,6 +39,7 @@ import { maybeShowDailyNotification } from "@/lib/daily-notification";
 import { isDailyNotificationEnabled } from "@/lib/daily-notification-preference";
 import { syncWebPush } from "@/lib/push-subscription";
 import { normalizeAmount } from "@/lib/amount";
+import { onTabListKeyDown } from "@/lib/tab-keys";
 import { hapticTick } from "@/lib/haptics";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
@@ -496,6 +497,7 @@ export function Dashboard({ profileName }: Props) {
               className="flex border-b border-[var(--color-border)] lg:hidden"
               role="tablist"
               aria-label={t("header.sectionGastos")}
+              onKeyDown={onTabListKeyDown}
             >
               {([
                 { id: "variables" as const, label: t("nav.gastosVariables") },
@@ -507,7 +509,10 @@ export function Dashboard({ profileName }: Props) {
                     key={tab.id}
                     type="button"
                     role="tab"
+                    id={`gastos-tab-${tab.id}`}
                     aria-selected={selected}
+                    aria-controls={tab.id === "variables" ? "add-expense" : "gastos-panel-fijos"}
+                    tabIndex={selected ? 0 : -1}
                     onClick={() => {
                       hapticTick();
                       setGastosTab(tab.id);
@@ -527,8 +532,11 @@ export function Dashboard({ profileName }: Props) {
             <div className="grid min-w-0 grid-cols-1 gap-6 sm:gap-5 max-lg:[&_section]:rounded-none max-lg:[&_section]:border-0 max-lg:[&_section]:bg-transparent max-lg:[&_section]:shadow-none lg:grid-cols-2 lg:items-start lg:gap-6">
               <div
                 id="add-expense"
+                role="tabpanel"
+                aria-labelledby="gastos-tab-variables"
                 className={`min-w-0 ${gastosTab === "variables" ? "block" : "hidden"} lg:block`}
               >
+
               <VariableExpensesSection
                 referenceDate={summaryQ.data?.reference_date}
                 categories={categories}
@@ -555,6 +563,9 @@ export function Dashboard({ profileName }: Props) {
               />
               </div>
               <div
+                id="gastos-panel-fijos"
+                role="tabpanel"
+                aria-labelledby="gastos-tab-fijos"
                 className={`min-w-0 ${gastosTab === "fijos" ? "block" : "hidden"} lg:block`}
               >
               <FixedExpensesSection
@@ -593,6 +604,7 @@ export function Dashboard({ profileName }: Props) {
               className="flex border-b border-[var(--color-border)]"
               role="tablist"
               aria-label={t("header.sectionAnalisis")}
+              onKeyDown={onTabListKeyDown}
             >
               {([
                 { id: "insights" as const, label: t("insights.title") },
@@ -605,7 +617,10 @@ export function Dashboard({ profileName }: Props) {
                     key={tab.id}
                     type="button"
                     role="tab"
+                    id={`analisis-tab-${tab.id}`}
                     aria-selected={selected}
+                    aria-controls={`analisis-panel-${tab.id}`}
+                    tabIndex={selected ? 0 : -1}
                     onClick={() => {
                       hapticTick();
                       setAnalisisTab(tab.id);
@@ -622,7 +637,12 @@ export function Dashboard({ profileName }: Props) {
               })}
             </div>
             <div className="[&>div>*]:rounded-none [&>div>*]:border-0 [&>div>*]:bg-transparent [&>div>*]:shadow-none">
-              <div className={analisisTab === "insights" ? "block" : "hidden"} role="tabpanel">
+              <div
+                id="analisis-panel-insights"
+                className={analisisTab === "insights" ? "block" : "hidden"}
+                role="tabpanel"
+                aria-labelledby="analisis-tab-insights"
+              >
                 <InsightsPanel
                   embedded
                   data={insightsQ.data}
@@ -631,7 +651,12 @@ export function Dashboard({ profileName }: Props) {
                   onNavigate={handleSectionChange}
                 />
               </div>
-              <div className={analisisTab === "categorias" ? "block" : "hidden"} role="tabpanel">
+              <div
+                id="analisis-panel-categorias"
+                className={analisisTab === "categorias" ? "block" : "hidden"}
+                role="tabpanel"
+                aria-labelledby="analisis-tab-categorias"
+              >
                 <SpendingChart
                   embedded
                   breakdown={insightsQ.data?.category_breakdown ?? []}
@@ -639,7 +664,12 @@ export function Dashboard({ profileName }: Props) {
                   onAddExpense={goToAddExpense}
                 />
               </div>
-              <div className={analisisTab === "regla" ? "block" : "hidden"} role="tabpanel">
+              <div
+                id="analisis-panel-regla"
+                className={analisisTab === "regla" ? "block" : "hidden"}
+                role="tabpanel"
+                aria-labelledby="analisis-tab-regla"
+              >
                 <Rule503020Panel embedded />
               </div>
             </div>
