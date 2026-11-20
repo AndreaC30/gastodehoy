@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,6 +11,9 @@ import { siteOriginPlugin } from "./vite-plugin-site-origin";
 
 const webDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(webDir, "..");
+const pkg = JSON.parse(
+  readFileSync(path.join(webDir, "package.json"), "utf-8"),
+) as { version: string };
 
 export default defineConfig(({ mode }) => {
   const envRoot = loadEnv(mode, repoRoot, "");
@@ -20,6 +24,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     envDir: repoRoot,
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version),
+    },
     resolve: {
       alias: {
         "@": path.resolve(webDir, "src"),

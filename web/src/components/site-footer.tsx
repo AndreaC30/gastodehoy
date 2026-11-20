@@ -15,6 +15,7 @@ export function SiteFooter() {
       <p className="text-[var(--color-text-muted)]">
         {t("footer.copyright", { year })}
       </p>
+      <p className="mt-1 tabular-nums">v{__APP_VERSION__}</p>
       <p className="mt-2">
         {t("footer.legal")}
       </p>
