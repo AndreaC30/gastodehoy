@@ -12,7 +12,11 @@
     "explanation": "Your daily margin: what's left this month ÷ days remaining.",
     "addExpense": "Add expense",
     "showMetrics": "Show month breakdown",
-    "hideMetrics": "Hide breakdown"
+    "hideMetrics": "Hide breakdown",
+    "nothingToday": "You haven't logged anything today.",
+    "spentToday": "You've spent {{amount}} today.",
+    "firstExpense": "Log your first expense today",
+    "showBreakdown": "See the month breakdown"
   },
   "monthContext": {
     "badgeSubtitle": "This month's budget",
@@ -723,5 +727,34 @@
     "acceptTerms": "I have read and accept the current terms and privacy policy.",
     "accept": "Accept and continue",
     "saving": "Saving…"
+  },
+  "pace": {
+    "title": "Month pace",
+    "spent": "Spent",
+    "elapsed": "Month elapsed",
+    "status": {
+      "ok": "On track",
+      "tight": "Tight",
+      "over": "Overspending"
+    },
+    "hint": {
+      "ok": "you're spending below the month's pace.",
+      "tight": "you're spending slightly above the month's pace.",
+      "over": "you're spending above the month's pace."
+    },
+    "noBudget": "No budget this month"
+  },
+  "waterfall": {
+    "title": "From your pay to today's number",
+    "income": "Your income this month",
+    "savings": "Savings set aside",
+    "fixed": "Fixed expenses",
+    "extra": "Extra income available",
+    "available": "Available",
+    "spent": "Spent day to day",
+    "remaining": "Left this month",
+    "days_one": "Divided by the day left",
+    "days_other": "Divided by the {{count}} days left",
+    "today": "You can spend today"
   }
 }

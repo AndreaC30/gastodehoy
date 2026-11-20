@@ -12,7 +12,11 @@
     "explanation": "Deine tägliche Marge: was diesen Monat übrig bleibt ÷ verbleibende Tage.",
     "addExpense": "Ausgabe hinzufügen",
     "showMetrics": "Monatsübersicht anzeigen",
-    "hideMetrics": "Übersicht ausblenden"
+    "hideMetrics": "Übersicht ausblenden",
+    "nothingToday": "Heute hast du noch nichts eingetragen.",
+    "spentToday": "Heute hast du {{amount}} ausgegeben.",
+    "firstExpense": "Trag deine erste Ausgabe von heute ein",
+    "showBreakdown": "Monatsübersicht anzeigen"
   },
   "monthContext": {
     "badgeSubtitle": "Budget dieses Monats",
@@ -725,5 +729,34 @@
     "acceptTerms": "Ich habe die geltenden Bedingungen und die Datenschutzerklärung gelesen und akzeptiere sie.",
     "accept": "Akzeptieren und fortfahren",
     "saving": "Speichern…"
+  },
+  "pace": {
+    "title": "Monatstempo",
+    "spent": "Ausgegeben",
+    "elapsed": "Monat vergangen",
+    "status": {
+      "ok": "Läuft gut",
+      "tight": "Knapp",
+      "over": "Zu viel"
+    },
+    "hint": {
+      "ok": "du gibst weniger aus als das Monatstempo vorgibt.",
+      "tight": "du gibst etwas mehr aus als das Monatstempo vorgibt.",
+      "over": "du gibst mehr aus als das Monatstempo vorgibt."
+    },
+    "noBudget": "Kein Budget diesen Monat"
+  },
+  "waterfall": {
+    "title": "Von deinem Gehalt zur Zahl von heute",
+    "income": "Dein Einkommen im Monat",
+    "savings": "Zurückgelegtes Sparen",
+    "fixed": "Fixkosten",
+    "extra": "Verfügbare Zusatzeinnahmen",
+    "available": "Verfügbar",
+    "spent": "Im Alltag ausgegeben",
+    "remaining": "Dir bleibt diesen Monat",
+    "days_one": "Geteilt durch den verbleibenden Tag",
+    "days_other": "Geteilt durch die {{count}} verbleibenden Tage",
+    "today": "Heute kannst du ausgeben"
   }
 }

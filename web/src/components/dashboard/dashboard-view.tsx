@@ -491,6 +491,9 @@ export function Dashboard({ profileName }: Props) {
             <DailyHero
               summary={summaryQ.data}
               summaryPending={summaryQ.isPending}
+              spentToday={variableExpenseItems
+                .filter((e) => e.occurred_at === summaryQ.data?.reference_date)
+                .reduce((sum, e) => sum + Number(e.amount), 0)}
               onAddExpense={goToAddExpense}
             />
           </div>
