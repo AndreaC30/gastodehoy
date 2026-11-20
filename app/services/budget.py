@@ -52,6 +52,55 @@ def days_remaining_in_month(reference: date) -> int:
     return (end - reference).days + 1
 
 
+# Cuántos puntos de margen se toleran sobre el mes recorrido antes de «te pasas».
+PACE_TIGHT_MARGIN = Decimal("10")
+
+
+def compute_pace(
+    budget_cents: int, variable_cents: int, reference: date
+) -> dict:
+    """Ritmo del mes: lo gastado frente a lo disponible, comparado con el mes recorrido.
+
+    ``budget_cents`` es lo disponible tras ahorro y fijos; ``variable_cents``
+    lo gastado en el día a día. El mes recorrido cuenta el día de ``reference``
+    como ya transcurrido.
+
+    Estado:
+    - ``none``: no hay presupuesto ni gasto, no hay nada que valorar.
+    - ``ok`` («vas bien»): el porcentaje gastado no supera el mes recorrido.
+    - ``tight`` («vas justo»): lo supera hasta ``PACE_TIGHT_MARGIN`` puntos.
+    - ``over`` («te pasas»): lo supera por más, o ya no queda presupuesto.
+    """
+    _, month_end = month_bounds(reference)
+    elapsed = (Decimal(reference.day) / Decimal(month_end.day) * 100).quantize(
+        Decimal("0.1")
+    )
+
+    if budget_cents <= 0:
+        return {
+            "month_elapsed_percent": elapsed,
+            "spent_percent": None,
+            "pace_status": "over" if variable_cents > 0 else "none",
+        }
+
+    spent = (Decimal(variable_cents) / Decimal(budget_cents) * 100).quantize(
+        Decimal("0.1")
+    )
+    if variable_cents > budget_cents:
+        status = "over"
+    elif spent <= elapsed:
+        status = "ok"
+    elif spent <= elapsed + PACE_TIGHT_MARGIN:
+        status = "tight"
+    else:
+        status = "over"
+    return {
+        "month_elapsed_percent": elapsed,
+        "spent_percent": spent,
+        "pace_status": status,
+    }
+
+
 def compute_summary(session: Session, user_id: int, reference: date) -> dict:
     """Return today's budget snapshot for ``user_id``.
 
@@ -142,4 +191,5 @@ def compute_summary(session: Session, user_id: int, reference: date) -> dict:
         "monthly_budget_after_fixed_and_savings": cents_to_euros(budget_cents),
         "remaining_this_month": cents_to_euros(remaining_cents),
         "suggested_spend_today": suggested,
+        **compute_pace(budget_cents, variable_cents, reference),
     }

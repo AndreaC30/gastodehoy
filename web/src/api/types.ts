@@ -24,6 +24,9 @@ export type MonthHistoryRead = {
   months: MonthHistoryItem[];
 };
 
+/** «none» sin datos, «ok» vas bien, «tight» vas justo, «over» te pasas. */
+export type PaceStatus = "none" | "ok" | "tight" | "over";
+
 export type Summary = {
   reference_date: string;
   days_remaining_in_month: number;
@@ -38,6 +41,11 @@ export type Summary = {
   monthly_budget_after_fixed_and_savings: string | number;
   remaining_this_month: string | number;
   suggested_spend_today: string | number;
+  /** Porcentaje del mes ya recorrido (el día actual cuenta como recorrido). */
+  month_elapsed_percent: string | number;
+  /** Porcentaje gastado del presupuesto disponible; null si no hay presupuesto. */
+  spent_percent: string | number | null;
+  pace_status: PaceStatus;
 };
 
 export type Settings = {
