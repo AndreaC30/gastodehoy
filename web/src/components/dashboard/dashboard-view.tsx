@@ -237,7 +237,6 @@ export function Dashboard({ profileName }: Props) {
       setToastMsg(t("toasts.fixedAdded"));
       void invalidateAll();
     },
-    onError: (e: Error) => setToastMsg(e.message),
   });
 
   const addExpense = useMutation({
@@ -255,7 +254,6 @@ export function Dashboard({ profileName }: Props) {
       setToastMsg(t("toasts.expenseRegistered"));
       void invalidateAll();
     },
-    onError: (e: Error) => setToastMsg(e.message),
   });
 
   const expenseUndo = useUndoableDelete<VariableExpense>({
@@ -540,6 +538,7 @@ export function Dashboard({ profileName }: Props) {
                 expanded={expandVariableList}
                 hiddenCount={variableHiddenCount}
                 addPending={addExpense.isPending}
+                addError={addExpense.error?.message ?? null}
                 deletePending={expenseUndo.isPending}
                 onSubmit={onExpenseSubmit}
                 onToggleExpand={() => setExpandVariableList((v) => !v)}
@@ -566,6 +565,7 @@ export function Dashboard({ profileName }: Props) {
                 hiddenCount={fixedHiddenCount}
                 formIcon={fixedFormIcon}
                 pending={addFixed.isPending}
+                error={addFixed.error?.message ?? null}
                 deletePending={fixedUndo.isPending}
                 onToggleExpand={() => setExpandFixedList((v) => !v)}
                 onFormIconChange={setFixedFormIcon}

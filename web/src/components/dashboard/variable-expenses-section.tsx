@@ -23,6 +23,7 @@ type Props = {
   expanded: boolean;
   hiddenCount: number;
   addPending: boolean;
+  addError: string | null;
   deletePending: boolean;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   onToggleExpand: () => void;
@@ -41,6 +42,7 @@ export function VariableExpensesSection({
   expanded,
   hiddenCount,
   addPending,
+  addError,
   deletePending,
   onSubmit,
   onToggleExpand,
@@ -78,6 +80,7 @@ export function VariableExpensesSection({
         <AddVariableExpenseForm
           categories={categories}
           pending={addPending}
+          error={addError}
           onSubmit={onSubmit}
         />
         <h3 className={`mb-2 mt-6 ${TYPE_EYEBROW}`}>

@@ -7,6 +7,7 @@ import { getCategoryIcon } from "@/components/dashboard/category-icon";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SwipeableRow } from "@/components/ui/swipeable-row";
+import { FormError } from "@/components/ui/form-error";
 import { FormField } from "@/components/ui/form-field";
 import { money } from "@/lib/format";
 import { getDensity, subscribeDensity } from "@/lib/density-preference";
@@ -25,6 +26,7 @@ type Props = {
   hiddenCount: number;
   formIcon: string;
   pending: boolean;
+  error: string | null;
   deletePending: boolean;
   onToggleExpand: () => void;
   onFormIconChange: (icon: string) => void;
@@ -42,6 +44,7 @@ export function FixedExpensesSection({
   hiddenCount,
   formIcon,
   pending,
+  error,
   deletePending,
   onToggleExpand,
   onFormIconChange,
@@ -115,6 +118,7 @@ export function FixedExpensesSection({
           >
             {t("fixedExpenses.add")}
           </button>
+          <FormError message={error} />
         </form>
         {isLoading ? (
           <div className="mt-4 space-y-2" aria-label={t("common.loading")}>
