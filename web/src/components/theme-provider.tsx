@@ -62,13 +62,20 @@ function writeTheme(isDark: boolean) {
     ?.setAttribute("content", bg);
 }
 
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true
+  );
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isDark, setIsDark] = useState(readStoredIsDark);
   const { ref, toggleSwitchTheme, isDarkMode } = useModeAnimation({
     isDarkMode: isDark,
     onDarkModeChange: setIsDark,
     animationType: ThemeAnimationType.CIRCLE,
-    duration: 700,
+    duration: prefersReducedMotion() ? 0 : 700,
     globalClassName: "dark",
   });
 

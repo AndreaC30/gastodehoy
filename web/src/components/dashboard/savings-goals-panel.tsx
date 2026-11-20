@@ -7,7 +7,8 @@ import { api } from "@/api/client";
 import type { SavingsGoal } from "@/api/types";
 import { money } from "@/lib/format";
 import { hapticSuccess } from "@/lib/haptics";
-import { FOCUS_RING, BTN_PRIMARY, ICON_BTN } from "@/lib/ui-a11y";
+import { FormField } from "@/components/ui/form-field";
+import { FOCUS_RING, BTN_PRIMARY, ICON_BTN, INPUT_CLASS } from "@/lib/ui-a11y";
 
 async function loadGoals() {
   return api<SavingsGoal[]>("/api/savings-goals");
@@ -121,18 +122,24 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-[var(--color-text-dim)]">{t("savingsGoals.saved")}</span>
+        <label
+          htmlFor={`goal-saved-${goal.id}`}
+          className="text-xs text-[var(--color-text-dim)]"
+        >
+          {t("savingsGoals.saved")}
+        </label>
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => adjust(-10)}
             disabled={patchMut.isPending}
-            className={`${ICON_BTN} border border-[var(--color-border-subtle)] bg-[var(--color-panel)] hover:border-[var(--color-border)] disabled:opacity-40`}
+            className={`${ICON_BTN} border border-[var(--color-field-border)] bg-[var(--color-panel)] hover:border-[var(--color-border)] disabled:opacity-40`}
             aria-label={t("savingsGoals.subtract10")}
           >
             <IoRemove className="h-4 w-4" aria-hidden />
           </button>
           <input
+            id={`goal-saved-${goal.id}`}
             type="number"
             inputMode="decimal"
             step="0.01"
@@ -141,14 +148,14 @@ function GoalRow({ goal, onDelete, deleting }: GoalRowProps) {
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commitDraft}
             disabled={patchMut.isPending}
-            className={`w-24 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-2 py-1.5 text-right text-sm ${FOCUS_RING}`}
+            className={`min-h-11 w-24 rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg-soft)] px-2 py-1.5 text-right text-sm ${FOCUS_RING}`}
             aria-label={t("savingsGoals.savedAmount", { name: goal.name })}
           />
           <button
             type="button"
             onClick={() => adjust(10)}
             disabled={patchMut.isPending}
-            className={`${ICON_BTN} border border-[var(--color-border-subtle)] bg-[var(--color-panel)] hover:border-[var(--color-border)] disabled:opacity-40`}
+            className={`${ICON_BTN} border border-[var(--color-field-border)] bg-[var(--color-panel)] hover:border-[var(--color-border)] disabled:opacity-40`}
             aria-label={t("savingsGoals.add10")}
           >
             <IoAdd className="h-4 w-4" aria-hidden />
@@ -258,24 +265,35 @@ export function SavingsGoalsContent({ reservedSavings }: PanelProps) {
           onSubmit={onSubmit}
           className="flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 sm:flex-row sm:flex-wrap sm:items-end"
         >
-          <input
-            type="text"
-            maxLength={80}
-            placeholder={t("savingsGoals.namePlaceholder")}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className={`w-full min-w-0 max-w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-3 py-2 text-sm sm:min-w-0 sm:flex-1 ${FOCUS_RING}`}
-          />
-          <input
-            type="number"
-            inputMode="decimal"
-            step="0.01"
-            min="0.01"
-            placeholder={t("savingsGoals.targetPlaceholder")}
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            className={`w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] px-3 py-2 text-sm sm:w-32 ${FOCUS_RING}`}
-          />
+          <FormField
+            id="savings-goal-name"
+            label={t("savingsGoals.nameLabel")}
+            className="w-full sm:min-w-0 sm:flex-1"
+          >
+            <input
+              type="text"
+              maxLength={80}
+              placeholder={t("savingsGoals.namePlaceholder")}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={INPUT_CLASS}
+            />
+          </FormField>
+          <FormField
+            id="savings-goal-target"
+            label={t("savingsGoals.targetLabel")}
+            className="w-full sm:w-32"
+          >
+            <input
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder={t("savingsGoals.targetPlaceholder")}
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              className={INPUT_CLASS}
+            />
+          </FormField>
           <button
             type="submit"
             disabled={createMut.isPending}

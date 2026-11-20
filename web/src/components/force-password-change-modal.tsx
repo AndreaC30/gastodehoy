@@ -73,7 +73,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
               autoComplete="current-password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
+              className="mt-1.5 w-full rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
           </label>
           <label className="block text-sm font-medium text-[var(--color-text-muted)]">
@@ -83,7 +83,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
+              className="mt-1.5 w-full rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
           </label>
           <label className="block text-sm font-medium text-[var(--color-text-muted)]">
@@ -93,7 +93,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
               autoComplete="new-password"
               value={newPassword2}
               onChange={(e) => setNewPassword2(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
+              className="mt-1.5 w-full rounded-lg border border-[var(--color-field-border)] bg-[var(--color-bg)] px-3 py-2.5 outline-none focus:border-[var(--color-accent-border)] focus:ring-2 focus:ring-[var(--color-accent-dim)]"
             />
           </label>
 
@@ -105,7 +105,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
               !newPassword ||
               !newPassword2
             }
-            className="mt-2 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60"
+            className="min-h-11 mt-2 w-full rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] hover:brightness-110 disabled:opacity-60"
           >
             {busy ? t("forcePassword.saving") : t("forcePassword.save")}
           </button>
@@ -114,7 +114,7 @@ export function ForcePasswordChangeModal({ onDone }: Props) {
         <button
           type="button"
           onClick={() => void logout()}
-          className="mt-4 w-full text-center text-xs text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
+          className="mt-4 min-h-11 w-full text-center text-xs text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
         >
           {t("forcePassword.logout")}
         </button>

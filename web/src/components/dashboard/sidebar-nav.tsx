@@ -104,6 +104,7 @@ function LanguageRow({ disabled, onPick }: LanguageRowProps) {
                 : "border border-[var(--color-border)] text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]"
             }`}
             title={t(`nav.lang_${lang}`)}
+            aria-label={t(`nav.lang_${lang}`)}
           >
             {lang}
           </button>

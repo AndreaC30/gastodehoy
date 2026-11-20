@@ -23,7 +23,7 @@ export function SiteFooter() {
         <button
           type="button"
           onClick={() => showLegalPage("privacy")}
-          className="text-[var(--color-accent)]/80 underline decoration-[var(--color-accent-border)] underline-offset-2 hover:text-[var(--color-accent)]"
+          className="inline-flex min-h-11 items-center text-[var(--color-accent)] underline decoration-[var(--color-accent-border)] underline-offset-2 hover:text-[var(--color-accent)]"
         >
           {t("footer.privacy")}
         </button>
@@ -31,7 +31,7 @@ export function SiteFooter() {
         <button
           type="button"
           onClick={() => showLegalPage("legal")}
-          className="text-[var(--color-accent)]/80 underline decoration-[var(--color-accent-border)] underline-offset-2 hover:text-[var(--color-accent)]"
+          className="inline-flex min-h-11 items-center text-[var(--color-accent)] underline decoration-[var(--color-accent-border)] underline-offset-2 hover:text-[var(--color-accent)]"
         >
           {t("footer.legalLink")}
         </button>

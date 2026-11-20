@@ -290,7 +290,7 @@ function BootstrapErrorSplash({
         <p className="max-w-md text-sm text-[var(--color-crit)]">{message}</p>
         <button
           type="button"
-          className="rounded-lg border border-[var(--color-border-subtle)] px-4 py-2 text-sm text-[var(--color-accent)] hover:bg-[var(--color-panel-elevated)]"
+          className="rounded-lg border border-[var(--color-field-border)] px-4 py-2 text-sm text-[var(--color-accent)] hover:bg-[var(--color-panel-elevated)]"
           onClick={onRetry}
         >
           Reintentar

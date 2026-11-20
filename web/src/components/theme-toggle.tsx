@@ -25,7 +25,7 @@ export function ThemeToggle({ className = "", size = "md" }: Props) {
         void toggleTheme(e.currentTarget);
       }}
       className={`inline-flex shrink-0 items-center justify-center rounded-lg text-[var(--color-text)] ${FOCUS_RING} ${
-        size === "sm" ? "h-9 w-9 text-[1.35rem]" : "h-11 w-11 text-[1.6rem]"
+        size === "sm" ? "h-11 w-11 text-[1.35rem]" : "h-11 w-11 text-[1.6rem]"
       } ${className}`}
     />
   );

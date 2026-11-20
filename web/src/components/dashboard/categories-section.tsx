@@ -259,7 +259,8 @@ export function CategoriesSection({ categories, onChanged, onNavigate: _onNaviga
                         deleteMut.mutate(cat.id);
                       }
                     }}
-                    className={`${ICON_BTN} hover:text-[var(--color-crit)]`}
+                    disabled={deleteMut.isPending}
+                    className={`${ICON_BTN} hover:text-[var(--color-crit)] disabled:opacity-40`}
                     aria-label={t("categoryManager.deleteCategory", { name: cat.name })}
                   >
                     <IoTrash className="h-4 w-4" />

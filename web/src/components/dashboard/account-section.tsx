@@ -220,7 +220,7 @@ export function AccountSection({ profileName }: Props) {
               <input
                 type="checkbox"
                 checked={dailyNotify}
-                className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
+                className="mt-1 h-4 w-4 rounded border-[var(--color-field-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
                 onChange={(e) => {
                   if (e.target.checked) {
                     void enableDailyNotify();
@@ -243,7 +243,7 @@ export function AccountSection({ profileName }: Props) {
               <input
                 type="checkbox"
                 checked={density === "compact"}
-                className="mt-1 h-4 w-4 rounded border-[var(--color-border-subtle)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
+                className="mt-1 h-4 w-4 rounded border-[var(--color-field-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
                 onChange={(e) => {
                   setDensity(e.target.checked ? "compact" : "comfortable");
                 }}
