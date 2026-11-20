@@ -17,7 +17,7 @@ export function ThemeToggle({ className = "", size = "md" }: Props) {
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute("content", isDark ? "#070A0D" : "#eef2f6");
+      meta.setAttribute("content", isDark ? "#0B1727" : "#eef3f8");
     }
   }, [isDark]);
 

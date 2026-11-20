@@ -328,7 +328,7 @@ export function MonthHistoryStrip() {
                                 key={it.id}
                                 className="truncate rounded px-1 py-px text-[10px] font-medium leading-tight text-[var(--color-text)]"
                                 style={{
-                                  backgroundColor: `${it.category_color ?? "#22d3ee"}33`,
+                                  backgroundColor: `${it.category_color ?? "#29c5dc"}33`,
                                   color: it.category_color ?? "var(--color-accent)",
                                 }}
                               >
@@ -388,7 +388,7 @@ export function MonthHistoryStrip() {
                       <span
                         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
                         style={{
-                          backgroundColor: `${it.category_color ?? "#223040"}22`,
+                          backgroundColor: `${it.category_color ?? "#2c4666"}22`,
                           color: it.category_color ?? "var(--color-accent)",
                         }}
                         aria-hidden
